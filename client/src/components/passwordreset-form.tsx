@@ -15,7 +15,7 @@ import {
 } from "./ui/field"
 import { Input } from "./ui/input"
 
-export function LoginForm({
+export function PasswordResetForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
@@ -23,9 +23,9 @@ export function LoginForm({
     <div className={cn("w-100 flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
+          <CardTitle>Recover your account</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Enter your email below to change your password
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -39,18 +39,6 @@ export function LoginForm({
                   placeholder="m@example.com"
                   required
                 />
-              </Field>
-              <Field>
-                <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <a
-                    href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
-                </div>
-                <Input id="password" type="password" required />
               </Field>
               <Field>
                 <Button type="submit">Login</Button>
