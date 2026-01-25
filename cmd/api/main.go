@@ -9,16 +9,15 @@ import (
 	"smaash-web/internal/services"
 )
 
-// TODO: refactor controllers so that the server depends on them, solvind coupling issue
-
 func main() {
 	appContext := context.Background()
-	userStatsService := services.NewUserStatsService(
-		repository.NewGormUserRepo(),
-	)
+	userRepo := repository.NewGormUserRepo()
+	userStatsService := services.NewUserStatsService(userRepo)
+	authnService := services.NewAuthenticationService(userRepo)
 
 	srv := server.NewServer(
 		*controllers.NewUserController(userStatsService),
+		*controllers.NewAuthnController(authnService),
 	).MountRoutes()
 
 	if err := srv.Run(appContext); err != nil {

@@ -1,0 +1,64 @@
+package services
+
+import (
+	"context"
+	"errors"
+	"os"
+	"smaash-web/internal/models"
+	"smaash-web/internal/repository"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/crypto/bcrypt"
+)
+
+type Authentication interface {
+	SignUp(context.Context, *models.User) (*models.User, error)
+	Login(context.Context, *models.User) (*string, error)
+}
+
+type AuthenticationService struct {
+	usersRepo repository.UserRepository
+}
+
+func NewAuthenticationService(ur repository.UserRepository) Authentication {
+	return AuthenticationService{usersRepo: ur}
+}
+
+var (
+	ErrPasswordComparisonFailed = errors.New("Password incorrect")
+)
+
+func (a AuthenticationService) SignUp(c context.Context, u *models.User) (*models.User, error) {
+	hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), 10)
+	if err != nil {
+		return nil, err
+	}
+	u.Password = string(hash)
+	err = a.usersRepo.Create(c, u)
+	return u, err
+}
+
+func (a AuthenticationService) Login(c context.Context, u *models.User) (*string, error) {
+	user, err := a.usersRepo.ReadByUsername(c, u.Username)
+	if err != nil {
+		return nil, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(u.Password))
+	if err != nil {
+		return nil, ErrPasswordComparisonFailed
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": user.ID,
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
+	})
+
+	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET_KEY")))
+	if err != nil {
+		return nil, err
+	}
+
+	return &tokenString, nil
+}

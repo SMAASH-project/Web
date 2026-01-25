@@ -10,6 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// A phony controller for testing purposes
 type UsersController struct {
 	statsService services.UserStats
 }
