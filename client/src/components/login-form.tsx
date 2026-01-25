@@ -53,7 +53,7 @@ export function LoginForm({
                 <Input id="password" type="password" required />
               </Field>
               <Field>
-                <Button type="submit">Login</Button>
+                <Button type="submit" className="text-white">Login</Button>
                 <FieldDescription className="text-center">
                   Don&apos;t have an account? <a href="#signup-form">Sign up</a>
                 </FieldDescription>

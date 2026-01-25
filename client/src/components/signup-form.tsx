@@ -59,7 +59,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
             </Field>
             <FieldGroup>
               <Field>
-                <Button type="submit">Create Account</Button>
+                <Button type="submit" className="text-white">Create Account</Button>
                 <FieldDescription className="px-6 text-center">
                   Already have an account? <a href="#login-form">Sign in</a>
                 </FieldDescription>

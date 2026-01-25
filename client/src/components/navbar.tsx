@@ -3,7 +3,7 @@ import AccountMenu from "./AccountMenu";
 const Navbar = () => {
 
     return (
-        <nav className="bg-gray-700 absolute top-0 left-0 right-0 flex justify-between items-center p-4 max-w-full w-full border-b-[0.5px] border-green-400">
+        <nav className="bg-linear-to-b from-gray-700 to-gray-500 absolute top-0 left-0 right-0 flex justify-between items-center p-4 max-w-full w-full border-b-2 [border-image:linear-gradient(to_right,var(--color-green-400),var(--color-green-600))_1]">
             <div className="navbar-left">
             </div>
             <div className="navbar-center">
