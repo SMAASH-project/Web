@@ -1,4 +1,5 @@
 import AccountMenu from "./AccountMenu";
+import { Label } from "@radix-ui/react-dropdown-menu";
 
 const Navbar = () => {
 
@@ -7,37 +8,26 @@ const Navbar = () => {
             <div className="navbar-left">
             </div>
             <div className="navbar-center">
-                <ul className="nav-links list-none flex m-0 p-0">
+                <ul className="nav-links list-none flex m-0 p-0 gap-20">
                     <li className="m-4">
-                        <a href="/">Test1</a>
+                        <Label>About Us</Label>
                     </li>
                     <li className="m-4">
-                        <a href="/">Test2</a>
+                        <Label>Gallery</Label>
                     </li>
                     <li className="m-4">
-                        <a href="/">Test3</a>
+                        <Label>Releases</Label>
                     </li>
                     <li className="m-4">
-                        <a href="/">Test1</a>
+                        <Label>Webstore</Label>
                     </li>
                     <li className="m-4">
-                        <a href="/">Test2</a>
-                    </li>
-                    <li className="m-4">
-                        <a href="/">Test3</a>
-                    </li>
-                    <li className="m-4">
-                        <a href="/">Test1</a>
-                    </li>
-                    <li className="m-4">
-                        <a href="/">Test2</a>
-                    </li>
-                    <li className="m-4">
-                        <a href="/">Test3</a>
+                        <Label>News</Label>
                     </li>
                 </ul>
             </div>
             <div className="flex items-center gap-4">
+                <Label>Logged in as {}</Label>
                 <AccountMenu />
             </div>
         </nav>
