@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"mime"
 	"smaash-web/internal/controllers"
 	"smaash-web/internal/repository"
 	"smaash-web/internal/server"
@@ -10,6 +11,8 @@ import (
 )
 
 func main() {
+	mime.AddExtensionType(".js", "application/javascript")
+	mime.AddExtensionType(".css", "text/css")
 	appContext := context.Background()
 	userRepo := repository.NewGormUserRepo()
 	userStatsService := services.NewUserStatsService(userRepo)

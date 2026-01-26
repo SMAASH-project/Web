@@ -44,7 +44,7 @@ export function PasswordResetForm({
               <Field>
                 <Button type="submit" className="text-white">Reset Password</Button>
                 <FieldDescription className="text-center">
-                  Don&apos;t have an account? <Link to="/signup">Sign up</Link>
+                  Don&apos;t have an account? <Link to="/app/signup">Sign up</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>
