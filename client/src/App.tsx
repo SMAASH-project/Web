@@ -5,18 +5,18 @@ import { Navigate } from 'react-router-dom';
 
 
 function App() {
-    const IsLoggedIn = true; // Replace with actual authentication logic
-    return (
+  const IsLoggedIn = false; // Replace with actual authentication logic
+  return (
+    <>
+      {IsLoggedIn ? (
         <>
-            {IsLoggedIn ? (
-                <>
-                   <Navbar/>
-                </>
-            ) : (
-                <Navigate to="/login" />
-            )}
+          <Navbar />
         </>
-    )
+      ) : (
+        <Navigate to="/app/login" />
+      )}
+    </>
+  )
 }
 
 export default App
