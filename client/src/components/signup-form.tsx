@@ -17,7 +17,7 @@ import { Link } from "react-router-dom"
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   return (
-    <Card {...props}>
+    <Card {...props} className="w-100">
       <CardHeader>
         <CardTitle>Create an account</CardTitle>
         <CardDescription>
@@ -28,8 +28,8 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
         <form>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="name">Full Name</FieldLabel>
-              <Input id="name" type="text" placeholder="John Doe" required />
+              <FieldLabel htmlFor="username">Username</FieldLabel>
+              <Input id="username" type="text" placeholder="JohnDoe" required />
             </Field>
             <Field>
               <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -39,10 +39,6 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                 placeholder="m@example.com"
                 required
               />
-              <FieldDescription>
-                We&apos;ll use this to contact you. We will not share your email
-                with anyone else.
-              </FieldDescription>
             </Field>
             <Field>
               <FieldLabel htmlFor="password">Password</FieldLabel>

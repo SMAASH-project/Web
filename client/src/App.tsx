@@ -1,18 +1,21 @@
 import './App.css'
 import './index.css'
 import Navbar from './components/navbar.tsx'
-// import { SignupForm } from './components/signup-form'
-// import { LoginForm } from './components/login-form'
-// import { PasswordResetForm } from './components/passwordreset-form'
+import { Navigate } from 'react-router-dom';
+
 
 function App() {
-    // const hasAccount = true;
+    const IsLoggedIn = true; // Replace with actual authentication logic
     return (
         <>
-            {/* {hasAccount ? <LoginForm className="w-100" /> : <SignupForm className="w-100" />} */}
-            <Navbar/>
+            {IsLoggedIn ? (
+                <>
+                   <Navbar/>
+                </>
+            ) : (
+                <Navigate to="/login" />
+            )}
         </>
-       // <PasswordResetForm className="w-100" />
     )
 }
 
