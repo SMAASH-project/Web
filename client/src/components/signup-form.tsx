@@ -30,7 +30,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: email, password: password, username: username }),
+        body: JSON.stringify({ email: email, password: password, username: username, role: "USER" }),
       });
       if (response.ok) {
         console.log("Signup successful");
