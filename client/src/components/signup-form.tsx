@@ -17,45 +17,45 @@ import { Link } from "react-router-dom"
 import React from "react";
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
-    const [password, setPassword] = React.useState("");
-    const [confirmPassword, setConfirmPassword] = React.useState("");
-    const [username, setUsername] = React.useState("");
-    const [email, setEmail] = React.useState("");
-    const [error, setError] = React.useState("");
-  
-    const signup = async () => {
-      try {
-        const response = await fetch("http://localhost:8080/api/signup", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email: email, password: password, username: username }),
-        });
-        if (response.ok) {
-          console.log("Signup successful");
-        } else {
-          setError("Signup failed");
-        }
-      } catch (err) {
-        console.error(err);
-        setError("An error occurred");
+  const [password, setPassword] = React.useState("");
+  const [confirmPassword, setConfirmPassword] = React.useState("");
+  const [username, setUsername] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [error, setError] = React.useState("");
+
+  const signup = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/api/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: email, password: password, username: username }),
+      });
+      if (response.ok) {
+        console.log("Signup successful");
+      } else {
+        setError("Signup failed");
       }
-    };
-  
-    const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (password !== confirmPassword) {
-        setError("Passwords do not match");
-        return;
-      }
-      if (password.length < 8) {
-        setError("Password must be at least 8 characters long");
-        return;
-      }
-      setError("");
-      await signup();
-    };
+    } catch (err) {
+      console.error(err);
+      setError("An error occurred");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long");
+      return;
+    }
+    setError("");
+    await signup();
+  };
   return (
     <Card {...props} className="w-100">
       <CardHeader>
@@ -69,13 +69,13 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="username">Username</FieldLabel>
-              <Input 
-                id="username" 
-                type="text" 
-                placeholder="JohnDoe" 
+              <Input
+                id="username"
+                type="text"
+                placeholder="JohnDoe"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                required 
+                required
               />
             </Field>
             <Field>
@@ -91,12 +91,12 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
             </Field>
             <Field>
               <FieldLabel htmlFor="password">Password</FieldLabel>
-              <Input 
-                id="password" 
-                type="password" 
+              <Input
+                id="password"
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required 
+                required
               />
               <FieldDescription>
                 Must be at least 8 characters long.
@@ -106,18 +106,21 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
               <FieldLabel htmlFor="confirm-password">
                 Confirm Password
               </FieldLabel>
-              <Input 
-                id="confirm-password" 
-                type="password" 
+              <Input
+                id="confirm-password"
+                type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                required 
+                required
               />
               <FieldDescription>Please confirm your password.</FieldDescription>
             </Field>
             {error && (
               <Field>
-                <FieldDescription className="text-red-500">{error}</FieldDescription>
+                <Button type="submit" className="text-white">Create Account</Button>
+                <FieldDescription className="px-6 text-center">
+                  Already have an account? <Link to="/app/login">Sign in</Link>
+                </FieldDescription>
               </Field>
             )}
             <Button type="submit" className="text-white w-full">Create Account</Button>

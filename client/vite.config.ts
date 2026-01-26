@@ -6,11 +6,16 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [
-    react({babel: {plugins: [['babel-plugin-react-compiler']],  }}),
+    react({ babel: { plugins: [['babel-plugin-react-compiler']], } }),
     tailwindcss()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-  }, 
+  },
+  build: {
+    outDir: '../build/client',
+    emptyOutDir: true
+  },
+  base: '/app/'
 })
