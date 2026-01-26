@@ -35,7 +35,7 @@ func (a AuthnController) SignUp(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, newUser)
+	c.Redirect(http.StatusFound, "http://localhost:8080/login")
 }
 
 func (a AuthnController) Login(c *gin.Context) {
@@ -70,5 +70,5 @@ func (a AuthnController) Login(c *gin.Context) {
 		true,            // httpOnly
 	)
 
-	c.JSON(http.StatusOK, nil)
+	c.Redirect(http.StatusFound, "http://localhost:8080/releases")
 }

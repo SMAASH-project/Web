@@ -6,11 +6,11 @@ import (
 
 func (s *Server) MountRoutes() *Server {
 	r := gin.Default()
-	r.GET("/users", s.userController.ReadAllUsers)
-	r.GET("/users/:id", s.userController.ReadUserByID)
+	r.GET("/api/users", s.userController.ReadAllUsers)
+	r.GET("/api/users/:id", s.userController.ReadUserByID)
 
-	r.GET("/signup", s.authnController.SignUp)
-	r.GET("/login", s.authnController.Login)
+	r.POST("/api/signup", s.authnController.SignUp)
+	r.POST("/api/login", s.authnController.Login)
 
 	s.srv.Handler = r
 	return s
