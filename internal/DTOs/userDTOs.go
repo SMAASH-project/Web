@@ -25,7 +25,7 @@ type UserUpdateDTO struct {
 }
 
 type UserLoginDTO struct {
-	Username string `json:"username" binding:"required"`
+	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
 }
 
@@ -48,7 +48,7 @@ func CreateDTOToUser(dto *UserCreateDTO) *models.User {
 
 func LoginDTOToUser(dto *UserLoginDTO) *models.User {
 	return &models.User{
-		Username: dto.Username,
+		Email:    dto.Email,
 		Password: dto.Password,
 	}
 }

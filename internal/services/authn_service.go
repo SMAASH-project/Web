@@ -40,7 +40,7 @@ func (a AuthenticationService) SignUp(c context.Context, u *models.User) (*model
 }
 
 func (a AuthenticationService) Login(c context.Context, u *models.User) (*string, error) {
-	user, err := a.usersRepo.ReadByUsername(c, u.Username)
+	user, err := a.usersRepo.ReadByEmail(c, u.Email)
 	if err != nil {
 		return nil, err
 	}

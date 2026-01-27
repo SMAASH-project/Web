@@ -12,6 +12,7 @@ type UserRepository interface {
 	ReadAll(context.Context) ([]models.User, error)
 	ReadByID(c context.Context, id uint) (*models.User, error)
 	ReadByUsername(c context.Context, username string) (*models.User, error)
+	ReadByEmail(c context.Context, email string) (*models.User, error)
 	Update(c context.Context, user models.User) error
 	Delete(c context.Context, id uint) error
 }
@@ -47,6 +48,14 @@ func (u GormUserRepo) ReadByID(c context.Context, id uint) (*models.User, error)
 
 func (u GormUserRepo) ReadByUsername(c context.Context, username string) (*models.User, error) {
 	user, err := gorm.G[models.User](u.DB).Where("username = ?", username).First(c)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (u GormUserRepo) ReadByEmail(c context.Context, email string) (*models.User, error) {
+	user, err := gorm.G[models.User](u.DB).Where("email = ?", email).First(c)
 	if err != nil {
 		return nil, err
 	}

@@ -25,7 +25,7 @@ func (a AuthnController) SignUp(c *gin.Context) {
 		return
 	}
 
-	_, err := a.authService.SignUp(c.Request.Context(), dtos.CreateDTOToUser(&body))
+	newUser, err := a.authService.SignUp(c.Request.Context(), dtos.CreateDTOToUser(&body))
 	if err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) { // gorm returns this error when a unique constraint is violated
 			c.JSON(http.StatusBadRequest, dtos.NewErrResp("User already exists", c.Request.URL.Path))
@@ -35,7 +35,7 @@ func (a AuthnController) SignUp(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(http.StatusFound, "http://localhost:8080/app/login")
+	c.JSON(http.StatusOK, dtos.UserToDTO(newUser))
 }
 
 func (a AuthnController) Login(c *gin.Context) {
@@ -70,5 +70,5 @@ func (a AuthnController) Login(c *gin.Context) {
 		true,            // httpOnly
 	)
 
-	c.Redirect(http.StatusFound, "http://localhost:8080/app/releases")
+	c.JSON(http.StatusOK, nil)
 }
