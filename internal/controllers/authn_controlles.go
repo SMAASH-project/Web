@@ -72,3 +72,17 @@ func (a AuthnController) Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, nil)
 }
+
+func (a AuthnController) Logout(c *gin.Context) {
+	c.SetCookie(
+		"Authorization", // name
+		"",              // value
+		-1,              // maxAge (1 day)
+		"/",             // path
+		"",              // domain
+		false,           // secure (false for HTTP, true for HTTPS)
+		true,            // httpOnly
+	)
+
+	c.JSON(http.StatusNoContent, nil)
+}
