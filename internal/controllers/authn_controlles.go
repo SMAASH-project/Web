@@ -74,15 +74,16 @@ func (a AuthnController) Login(c *gin.Context) {
 }
 
 func (a AuthnController) Logout(c *gin.Context) {
+	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(
 		"Authorization", // name
 		"",              // value
-		-1,              // maxAge (1 day)
+		-1,              // maxAge
 		"/",             // path
 		"",              // domain
 		false,           // secure (false for HTTP, true for HTTPS)
 		true,            // httpOnly
 	)
 
-	c.JSON(http.StatusNoContent, nil)
+	c.Status(http.StatusNoContent)
 }
