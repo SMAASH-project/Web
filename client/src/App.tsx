@@ -1,6 +1,6 @@
 import './App.css'
 import './index.css'
-import { Outlet } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import React from 'react';
 import { AuthContext } from './context/AuthContext';
 
@@ -9,6 +9,9 @@ function App() {
   
   if (isLoggedIn === undefined) {
     return <div>Loading...</div>;
+  }
+  if (!isLoggedIn) {
+    return <Navigate to="app/login" />;
   }
   
   return <Outlet />;
