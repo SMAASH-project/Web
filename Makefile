@@ -5,9 +5,13 @@ all: build test
 
 build:
 	@echo "Building..."
-
-
 	@go build -o build/main cmd/api/main.go
+
+build-fullstack:
+	@echo "Building full application"
+	@cd ./client && npm run build
+	@go build -o build/main cmd/api/main.go
+	@GOOS=windows GOARCH=amd64 go build -o build/main.exe cmd/api/main.go
 
 # Run the application
 run:
@@ -21,7 +25,7 @@ test:
 # Clean the binary
 clean:
 	@echo "Cleaning..."
-	@rm -f main
+	@rm -f build/main
 
 # Live Reload
 watch:
