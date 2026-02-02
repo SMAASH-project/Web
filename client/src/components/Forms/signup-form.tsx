@@ -13,9 +13,8 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
+import { Link, redirect } from "react-router-dom";
 import React from "react";
-import { Navigate } from "react-router-dom";
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const [password, setPassword] = React.useState("");
@@ -40,7 +39,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
       });
       if (response.ok) {
         console.log("Signup successful");
-        <Navigate to="/app/login" />;
+        throw redirect("/app/login");
       } else {
         setError("Signup failed");
       }
