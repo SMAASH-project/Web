@@ -4,18 +4,29 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func (s *Server) MountRoutes() *Server {
 	r := gin.Default()
+
+	// NOTE: this is for develompent only, the built project is running on one server
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
+		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type"},
+		AllowCredentials: true,
+	}))
+
+	// damned gin can't serve files from root path >:(
 	r.Static("/app", "./build/client")
 
 	api := r.Group("/api")
 	{
-		api.POST("/api/signup", s.authnController.SignUp)
-		api.POST("/api/login", s.authnController.Login)
-		api.POST("/api/logout", s.authnController.Logout)
+		api.POST("/signup", s.authnController.SignUp)
+		api.POST("/login", s.authnController.Login)
+		api.POST("/logout", s.authnController.Logout)
 	}
 
 	r.NoRoute(func(c *gin.Context) {
