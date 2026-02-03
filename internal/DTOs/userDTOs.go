@@ -1,27 +1,27 @@
 package dtos
 
-import "smaash-web/internal/models"
+import (
+	"smaash-web/internal/models"
+)
 
 type UserReadDTO struct {
-	ID       uint   `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Role     string `json:"role"`
+	ID        uint   `json:"id"`
+	Email     string `json:"email"`
+	IsBanned  bool   `json:"is_banned"`
+	LastLogin string `json:"last_login"`
 }
 
 type UserCreateDTO struct {
-	Username string `json:"username" binding:"required,max=20"`
 	Email    string `json:"email" binding:"required,max=30,email"`
 	Password string `json:"password" binding:"required,min=8,max=50"`
-	Role     string `json:"role" binding:"required,oneof=USER ADMIN"`
+	RoleID   uint   `json:"role_id" binding:"required"`
 }
 
 type UserUpdateDTO struct {
 	ID       uint   `json:"id" binding:"required"`
-	Username string `json:"username" binding:"required,max=20"`
 	Email    string `json:"email" binding:"required,max=30,email"`
 	Password string `json:"password" binding:"required,min=8,max=50"`
-	Role     string `json:"role" binding:"oneof=USER ADMIN"`
+	RoleID   uint   `json:"role_id"`
 }
 
 type UserLoginDTO struct {
@@ -31,24 +31,25 @@ type UserLoginDTO struct {
 
 func UserToDTO(user *models.User) UserReadDTO {
 	return UserReadDTO{
-		ID:       user.ID,
-		Username: user.Username,
-		Email:    user.Email,
-		Role:     string(user.Role),
+		ID:        user.ID,
+		Email:     user.Email,
+		IsBanned:  user.IsBanned,
+		LastLogin: user.LastLogin.Format("2006-01-02"),
 	}
 }
 
 func CreateDTOToUser(dto *UserCreateDTO) *models.User {
 	return &models.User{
-		Username: dto.Username,
-		Email:    dto.Email,
-		Password: dto.Password,
+		Email:        dto.Email,
+		PasswordHash: dto.Password,
+		RoleID:       dto.RoleID,
+		IsBanned:     false,
 	}
 }
 
 func LoginDTOToUser(dto *UserLoginDTO) *models.User {
 	return &models.User{
-		Email:    dto.Email,
-		Password: dto.Password,
+		Email:        dto.Email,
+		PasswordHash: dto.Password,
 	}
 }

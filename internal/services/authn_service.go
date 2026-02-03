@@ -30,11 +30,11 @@ var (
 )
 
 func (a AuthenticationService) SignUp(c context.Context, u *models.User) (*models.User, error) {
-	hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), 10)
+	hash, err := bcrypt.GenerateFromPassword([]byte(u.PasswordHash), 10)
 	if err != nil {
 		return nil, err
 	}
-	u.Password = string(hash)
+	u.PasswordHash = string(hash)
 	err = a.usersRepo.Create(c, u)
 	return u, err
 }
@@ -45,7 +45,7 @@ func (a AuthenticationService) Login(c context.Context, u *models.User) (*string
 		return nil, err
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(u.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(u.PasswordHash))
 	if err != nil {
 		return nil, ErrPasswordComparisonFailed
 	}
