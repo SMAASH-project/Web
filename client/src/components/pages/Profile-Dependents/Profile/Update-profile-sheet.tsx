@@ -12,12 +12,16 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-export function SheetDemo() {
+const Username = "placeholder";
+const Email = "lorem@ipsum.com";
+const Password = "password";
+
+export function UpdateSheet() {
   return (
     <div className="z-101">
       <Sheet>
         <SheetTrigger asChild>
-          <Button>Open</Button>
+          <Button className="text-white">Edit</Button>
         </SheetTrigger>
         <SheetContent>
           <SheetHeader>
@@ -29,18 +33,24 @@ export function SheetDemo() {
           </SheetHeader>
           <div className="grid flex-1 auto-rows-min gap-6 px-4">
             <div className="grid gap-3">
-              <Label htmlFor="sheet-demo-name">Name</Label>
-              <Input id="sheet-demo-name" defaultValue="Pedro Duarte" />
+              <Label htmlFor="sheet-name">Username</Label>
+              <Input id="sheet-name" defaultValue={Username} />
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="sheet-demo-username">Username</Label>
-              <Input id="sheet-demo-username" defaultValue="@peduarte" />
+              <Label htmlFor="sheet-email">Email Adress</Label>
+              <Input id="sheet-email" defaultValue={Email} />
+            </div>
+            <div className="grid gap-3">
+              <Label htmlFor="sheet-username">Password</Label>
+              <Input id="sheet-username" defaultValue={Password} />
             </div>
           </div>
           <SheetFooter>
-            <Button type="submit">Save changes</Button>
+            <Button type="submit" className="text-white">
+              Save changes
+            </Button>
             <SheetClose asChild>
-              <Button>Close</Button>
+              <Button className="text-white">Close</Button>
             </SheetClose>
           </SheetFooter>
         </SheetContent>

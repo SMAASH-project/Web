@@ -20,6 +20,7 @@
     "@tailwindcss/vite": "^4.1.18",
     "@vscode/codicons": "^0.0.44",
     "add": "^2.0.6",
+    "alert": "^6.0.2",
     "avatar": "^0.1.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -30,7 +31,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.13.0",
-    "shadcn": "^3.8.2",
+    "shadcn": "^3.8.4",
     "sheet": "^0.2.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18"

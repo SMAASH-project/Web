@@ -43,12 +43,12 @@ export default function AccountMenu() {
       <DropdownMenuContent className="w-40 z-100" align="start">
         <DropdownMenuGroup>
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
-          <DropdownMenuItem>
-            <Link to="/app/profile">Profile</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Link to="/app/settings">Settings </Link>
-          </DropdownMenuItem>
+          <Link to="/app/profile">
+            <DropdownMenuItem>Profile</DropdownMenuItem>
+          </Link>
+          <Link to="/app/settings">
+            <DropdownMenuItem>Settings</DropdownMenuItem>
+          </Link>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
