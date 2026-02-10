@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { UpdateSheet } from "./Update-profile-sheet";
 import { Label } from "@/components/ui/label";
 import { useRef, useState, useEffect } from "react";
+import CardAnimation from "@/lib/OnloadAnimationCard";
 // import {
 //   Alert,
 //   AlertAction,
@@ -48,36 +49,37 @@ export function ProfilePage() {
       }
 
       <AnimatedNavbar />
-      <Card className="z-0 flex mt-20 flex-row w-350 h-150 p-10 max-w-full max-h-lg bg-gray-600 border-2 border-green-400">
-        {/* Left Section */}
-        <div className="flex-1 flex items-center justify-center flex-col gap-30">
-          <div>
-            {" "}
-            {/*top area */}
-            <input
-              type="file"
-              ref={pfpinputRef}
-              hidden
-              accept="image/*"
-              onChange={onFileChange}
-            />
-            <div onClick={() => pfpinputRef.current?.click()}>
-              <Avatar size="lg">
-                <AvatarImage src={avatarSrc} alt={username} />
-                <AvatarFallback>CN</AvatarFallback>
-              </Avatar>
+      <CardAnimation className="z-0 mt-20">
+        <Card className="z-0 flex flex-row w-350 h-150 p-10 max-w-full max-h-lg bg-gray-600 border-2 border-green-400">
+          {/* Left Section */}
+          <div className="flex-1 flex items-center justify-center flex-col gap-30">
+            <div>
+              {" "}
+              {/*top area */}
+              <input
+                type="file"
+                ref={pfpinputRef}
+                hidden
+                accept="image/*"
+                onChange={onFileChange}
+              />
+              <div onClick={() => pfpinputRef.current?.click()}>
+                <Avatar size="lg">
+                  <AvatarImage src={avatarSrc} alt={username} />
+                  <AvatarFallback>CN</AvatarFallback>
+                </Avatar>
+              </div>
             </div>
-          </div>
-          <div>
-            {" "}
-            {/*middle area */}
-            <Label>{username}</Label>
-          </div>
-          <div>
-            {" "}
-            {/*bottom area */}
-            <UpdateSheet />
-            {/* <Alert>
+            <div>
+              {" "}
+              {/*middle area */}
+              <Label>{username}</Label>
+            </div>
+            <div>
+              {" "}
+              {/*bottom area */}
+              <UpdateSheet />
+              {/* <Alert>
               <InfoIcon />
               <AlertTitle>Heads up!</AlertTitle>
               <AlertDescription>
@@ -88,23 +90,24 @@ export function ProfilePage() {
                 <Button>Enable</Button>
               </AlertAction>
             </Alert> */}
+            </div>
           </div>
-        </div>
 
-        {/* Middle Section */}
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-xl font-bold">Stats</h2>
+          {/* Middle Section */}
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <h2 className="text-xl font-bold">Stats</h2>
+            </div>
           </div>
-        </div>
 
-        {/* Right Section */}
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-sm">Match History</p>
+          {/* Right Section */}
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-sm">Match History</p>
+            </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      </CardAnimation>
     </div>
   );
 }

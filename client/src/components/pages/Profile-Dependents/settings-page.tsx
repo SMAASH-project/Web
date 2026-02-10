@@ -1,7 +1,7 @@
 import Navbar from "@/components/navbar";
 import { WithOnloadAnimation } from "@/lib/OnloadAnimationNavbar";
 import { Card } from "@/components/ui/card";
-import * as motion from "motion/react-client";
+import { CardAnimation } from "@/lib/OnloadAnimationCard";
 export function SettingsPage() {
   const AnimatedNavbar = WithOnloadAnimation(Navbar);
 
@@ -12,15 +12,7 @@ export function SettingsPage() {
       }
 
       <AnimatedNavbar />
-      <motion.div
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{
-          duration: 0.4,
-          scale: { type: "spring", visualDuration: 1.5, bounce: 0.2 },
-        }}
-        className="z-0 mt-20"
-      >
+      <CardAnimation className="z-0 mt-20">
         <Card className="flex flex-row w-350 h-150 p-10 max-w-full max-h-lg bg-gray-600 border-2 border-green-400">
           {/* Left Section */}
           <div className="flex-1 flex items-center justify-center flex-col gap-30">
@@ -35,7 +27,7 @@ export function SettingsPage() {
           {/* Right Section */}
           <div className="flex-1 flex items-center justify-center"></div>
         </Card>
-      </motion.div>
+      </CardAnimation>
     </div>
   );
 }
