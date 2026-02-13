@@ -20,18 +20,6 @@ func NewLevelsController(levelRepo repository.LevelRepository) *LevelsController
 	return &LevelsController{levelRepo: levelRepo}
 }
 
-/*
-type LevelCreateDTO struct {
-	Name   string `json:"name" binding:"required,max=20"`
-	ImgUri string `json:"img_uri" binding:"required"`
-}
-
-type LevelUpdateDTO struct {
-	Name   string `json:"name" binding:"required,max=20"`
-	ImgUri string `json:"img_uri" binding:"required"`
-}
-*/
-
 func (lc *LevelsController) CreateLevel(c *gin.Context) {
 	var body dtos.LevelDTO
 	if err := c.ShouldBindJSON(&body); err != nil {

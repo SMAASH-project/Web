@@ -29,11 +29,11 @@ func (s *Server) MountRoutes() *Server {
 		api.POST("/logout", s.authnController.Logout)
 
 		// Levels routes
-		api.GET("/getLevels", s.levelsController.ReadAllLevels)
-		api.GET("/getLevel/:id", s.levelsController.ReadLevelByID)
-		api.POST("/createLevel", s.levelsController.CreateLevel)
-		api.PUT("/updateLevel/:id", s.levelsController.UpdateLevel)
-		api.DELETE("/deleteLevel/:id", s.levelsController.DeleteLevel)
+		api.GET("/levels", s.levelsController.ReadAllLevels)
+		api.GET("/levels/:id", s.levelsController.ReadLevelByID)
+		api.POST("/levels", s.levelsController.CreateLevel)
+		api.PUT("/levels/:id", s.levelsController.UpdateLevel)
+		api.DELETE("/levels/:id", s.levelsController.DeleteLevel)
 	}
 
 	r.NoRoute(func(c *gin.Context) {
