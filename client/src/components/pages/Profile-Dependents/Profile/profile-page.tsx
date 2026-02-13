@@ -21,7 +21,7 @@ export function ProfilePage() {
   const AnimatedNavbar = WithOnloadAnimation(Navbar);
   const pfpinputRef = useRef<HTMLInputElement>(null);
   const [avatarSrc, setAvatarSrc] = useState<string>(
-    "https://github.com/shadcn.png",
+    "./src/assets/SlimeArt.png",
   );
 
   useEffect(() => {
@@ -54,7 +54,6 @@ export function ProfilePage() {
           {/* Left Section */}
           <div className="flex-1 flex items-center justify-center flex-col gap-30">
             <div>
-              {" "}
               {/*top area */}
               <input
                 type="file"
@@ -64,19 +63,20 @@ export function ProfilePage() {
                 onChange={onFileChange}
               />
               <div onClick={() => pfpinputRef.current?.click()}>
-                <Avatar size="lg">
+                <Avatar
+                  size="lg"
+                  className="border-green-500 border-2 bg-amber-200"
+                >
                   <AvatarImage src={avatarSrc} alt={username} />
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
               </div>
             </div>
             <div>
-              {" "}
               {/*middle area */}
               <Label>{username}</Label>
             </div>
             <div>
-              {" "}
               {/*bottom area */}
               <UpdateSheet />
               {/* <Alert>
