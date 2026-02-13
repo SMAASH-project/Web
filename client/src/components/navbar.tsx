@@ -14,7 +14,7 @@ const Navbar = () => {
 
       try {
         const response = await fetch(
-          `http://localhost:8080/app/user/${userId}`, //edit to actual endpoint
+          `http://localhost:8080/api/users/${userId}`,
           {
             method: "GET",
             headers: {
@@ -29,14 +29,14 @@ const Navbar = () => {
         }
 
         const data = await response.json();
-        setUsername(data.username);
+        setUsername(data.email);
       } catch (err) {
         console.error(err);
       }
     };
 
     fetchUsername();
-  }, [userId]);
+  });
   return (
     <nav className="bg-linear-to-b from-gray-700 to-gray-500 absolute top-0 left-0 right-0 flex justify-between items-center p-4 max-w-full w-full border-b-2 [border-image:linear-gradient(to_right,var(--color-green-400),var(--color-green-600))_1]">
       <div className="navbar-left"></div>

@@ -41,8 +41,8 @@ export function LoginForm({
       if (response.ok) {
         console.log("Login successful");
 
-        if (data.user_id !== undefined && data.user_id !== null) {
-          setUserId(BigInt(data.user_id));
+        if (data.id !== undefined && data.id !== null) {
+          setUserId(BigInt(data.id));
         }
 
         setIsLoggedIn(true);
