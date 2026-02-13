@@ -16,12 +16,11 @@ func main() {
 	authnService := services.NewAuthenticationService(userRepo)
 
 	levelRepo := repository.NewGormLevelRepo()
-	levelService := services.NewLevelService(levelRepo)
 
 	srv := server.NewServer(
 		controllers.NewUserController(userStatsService),
 		controllers.NewAuthnController(authnService),
-		controllers.NewLevelsController(levelService),
+		controllers.NewLevelsController(levelRepo),
 	).MountRoutes()
 
 	if err := srv.Run(appContext); err != nil {
