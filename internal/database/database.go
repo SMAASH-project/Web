@@ -1,7 +1,7 @@
 package database
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"smaash-web/internal/models"
 
@@ -18,7 +18,7 @@ type GormDBConn struct {
 func NewGormDBConn() *GormDBConn {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_URL")), &gorm.Config{TranslateError: true})
 	if err != nil {
-		panic(fmt.Sprintf("Failed to connect to database: %v", err))
+		log.Panicf("Failed to connect to database: %v", err)
 	}
 
 	return &GormDBConn{db: db}
@@ -27,11 +27,11 @@ func NewGormDBConn() *GormDBConn {
 func (g *GormDBConn) Init() *gorm.DB {
 	err := g.db.SetupJoinTable(&models.Match{}, "Players", &models.MatchParticipation{})
 	if err != nil {
-		panic(fmt.Sprintf("Failed to create many to many connection in database: %v", err))
+		log.Panicf("Failed to create many to many connection in database: %v", err)
 	}
 	err = g.db.SetupJoinTable(&models.PlayerProfile{}, "Matches", &models.MatchParticipation{})
 	if err != nil {
-		panic(fmt.Sprintf("Failed to create many to many connection in database: %v", err))
+		log.Panicf("Failed to create many to many connection in database: %v", err)
 	}
 
 	g.db.AutoMigrate(
