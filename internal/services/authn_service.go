@@ -14,7 +14,7 @@ import (
 
 type Authentication interface {
 	SignUp(context.Context, *models.User) (*models.User, error)
-	Login(context.Context, *models.User) (*string, error)
+	Login(context.Context, *models.User) (*string, uint, error)
 }
 
 type AuthenticationService struct {
@@ -39,15 +39,15 @@ func (a AuthenticationService) SignUp(c context.Context, u *models.User) (*model
 	return u, err
 }
 
-func (a AuthenticationService) Login(c context.Context, u *models.User) (*string, error) {
+func (a AuthenticationService) Login(c context.Context, u *models.User) (*string, uint, error) {
 	user, err := a.usersRepo.ReadByEmail(c, u.Email)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(u.PasswordHash))
 	if err != nil {
-		return nil, ErrPasswordComparisonFailed
+		return nil, 0, ErrPasswordComparisonFailed
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -57,8 +57,8 @@ func (a AuthenticationService) Login(c context.Context, u *models.User) (*string
 
 	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return &tokenString, nil
+	return &tokenString, user.ID, nil
 }

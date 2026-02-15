@@ -20,11 +20,13 @@ export function LoginForm({
   const [password, setPassword] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [error, setError] = React.useState("");
-  const { isLoggedIn, setIsLoggedIn } = React.useContext(AuthContext);
-  const navigate = useNavigate()
+  const { isLoggedIn, setIsLoggedIn, setUserId } =
+    React.useContext(AuthContext);
+
+  const navigate = useNavigate();
 
   const Login = async () => {
-    setError("")
+    setError("");
     try {
       const response = await fetch("http://localhost:8080/api/login", {
         method: "POST",
@@ -33,8 +35,16 @@ export function LoginForm({
         },
         body: JSON.stringify({ email: email, password: password }),
       });
+
+      const data = await response.json();
+
       if (response.ok) {
         console.log("Login successful");
+
+        if (data.id !== undefined && data.id !== null) {
+          setUserId(BigInt(data.id));
+        }
+
         setIsLoggedIn(true);
       } else {
         setError("Login failed");
@@ -54,9 +64,9 @@ export function LoginForm({
 
   useEffect(() => {
     if (isLoggedIn) {
-      navigate("/app/releases")
+      navigate("/app/releases");
     }
-  }, [navigate, isLoggedIn])
+  }, [navigate, isLoggedIn]);
 
   return (
     <div className={cn("w-100 flex flex-col gap-6", className)} {...props}>

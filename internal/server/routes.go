@@ -36,6 +36,11 @@ func (s *Server) MountRoutes() *Server {
 		api.PUT("/levels/:id", s.levelsController.UpdateLevel)
 		api.DELETE("/levels/:id", s.levelsController.DeleteLevel)
 	}
+	users := api.Group("/users") 
+	{
+		users.GET("", s.userController.ReadAllUsers)
+		users.GET("/:id", s.userController.ReadUserByID)
+	}
 
 	r.NoRoute(func(c *gin.Context) {
 		if !strings.HasPrefix(c.Request.RequestURI, "/api") {
