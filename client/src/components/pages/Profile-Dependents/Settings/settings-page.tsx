@@ -3,6 +3,7 @@ import { WithOnloadAnimation } from "@/lib/OnloadAnimationNavbar";
 import { Card } from "@/components/ui/card";
 import { CardAnimation } from "@/lib/OnloadAnimationCard";
 import { Label } from "@/components/ui/label";
+import { SettingToggle } from "./settings-componenets/setting-toggle";
 export function SettingsPage() {
   const AnimatedNavbar = WithOnloadAnimation(Navbar);
 
@@ -20,7 +21,9 @@ export function SettingsPage() {
             <div>
               <Label>Visual</Label>
             </div>
-            <div></div>
+            <div>
+              <SettingToggle />
+            </div>
             <div></div>
           </div>
 

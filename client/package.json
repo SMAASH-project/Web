@@ -20,7 +20,6 @@
     "@tailwindcss/vite": "^4.1.18",
     "@vscode/codicons": "^0.0.44",
     "add": "^2.0.6",
-    "alert": "^6.0.2",
     "avatar": "^0.1.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
