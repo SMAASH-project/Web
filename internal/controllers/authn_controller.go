@@ -72,7 +72,9 @@ func (a AuthnController) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := a.authService.Login(c.Request.Context(), dtos.LoginDTOToUser(&body))
+	token, userID, err := a.authService.Login(c.Request.Context(), dtos.LoginDTOToUser(&body))
+	_ = userID
+
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusUnauthorized, dtos.NewErrResp("User doesn't exist", c.Request.URL.Path))
