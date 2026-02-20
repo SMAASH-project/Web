@@ -9,7 +9,7 @@ export function SettingsPage() {
   const { settings } = useSettings();
 
   return (
-    <div className="max-w-full w-full h-full relative flex flex-col items-center justify-start pt-10 bg-linear-to-r from-gray-700 via-black to-gray-700 text-white">
+    <div className="max-w-full w-full h-full relative flex flex-col items-center justify-start pt-10 text-white">
       {settings.useAnimations ? <AnimatedNavbar /> : <Navbar />}
       {settings.useAnimations ? (
         <CardAnimation className="z-0 mt-20">

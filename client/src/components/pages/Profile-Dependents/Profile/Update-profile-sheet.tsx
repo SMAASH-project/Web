@@ -25,7 +25,7 @@ export function UpdateSheet() {
     <div className="z-101">
       <Sheet>
         <SheetTrigger asChild>
-          <Button className="text-white">Edit</Button>
+          <Button className="text-white cursor-pointer">Edit</Button>
         </SheetTrigger>
         <SheetContent>
           <SheetHeader>
@@ -54,6 +54,7 @@ export function UpdateSheet() {
                     {/* Container to align checkbox and label horizontally */}
                     <div className="flex items-center gap-2">
                       <Checkbox
+                        className="cursor-pointer"
                         id="show-password-check" // Add an ID
                         checked={showPassword}
                         onCheckedChange={(checked) => {
@@ -81,11 +82,11 @@ export function UpdateSheet() {
             </div>
           </div>
           <SheetFooter>
-            <Button type="submit" className="text-white">
+            <Button type="submit" className="text-white cursor-pointer">
               Save changes
             </Button>
             <SheetClose asChild>
-              <Button className="text-white">Close</Button>
+              <Button className="text-white cursor-pointer">Close</Button>
             </SheetClose>
           </SheetFooter>
         </SheetContent>

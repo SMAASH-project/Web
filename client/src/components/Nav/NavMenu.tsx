@@ -100,8 +100,12 @@ export function NavMenu({ useLiquidGlass }: NavMenuProps) {
       {navItems.map((item) => (
         <li
           key={item.path}
-          className={`m-4 p-0.5  relative z-10 ${
+          className={`m-4 p-0.5 relative z-10 ${
             useLiquidGlass ? "cursor-pointer" : "hover:text-green-400"
+          } ${
+            !useLiquidGlass && item.path === location.pathname
+              ? "text-green-600 font-bold"
+              : ""
           } transition-colors duration-300`}
           onMouseEnter={handleMouseEnter}
         >

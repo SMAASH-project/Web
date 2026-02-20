@@ -26,7 +26,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 
   const signup = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/signup", {
+      const response = await fetch("http://localhost:8080/api/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
