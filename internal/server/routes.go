@@ -28,6 +28,14 @@ func (s *Server) MountRoutes() *Server {
 		api.POST("/signup", s.authnController.SignUp)
 		api.POST("/login", s.authnController.Login)
 		api.POST("/logout", s.authnController.Logout)
+
+		api.POST("/auth/game-login", s.gameAuthController.GameLogin)
+
+		api.GET("/levels", s.levelsController.ReadAllLevels)
+		api.GET("/levels/:id", s.levelsController.ReadLevelByID)
+		api.POST("/levels", s.levelsController.CreateLevel)
+		api.PUT("/levels/:id", s.levelsController.UpdateLevel)
+		api.DELETE("/levels/:id", s.levelsController.DeleteLevel)
 	}
 	users := api.Group("/users")
 	{

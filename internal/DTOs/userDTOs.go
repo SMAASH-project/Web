@@ -14,6 +14,7 @@ type UserReadDTO struct {
 type UserCreateDTO struct {
 	Email    string `json:"email" binding:"required,max=30,email"`
 	Password string `json:"password" binding:"required,min=8,max=50"`
+	Username string `json:"username" binding:"required,min=3,max=20"`
 	RoleID   uint   `json:"role_id" binding:"required"`
 }
 

@@ -9,7 +9,7 @@ import (
 type PlayerProfile struct {
 	gorm.Model
 	DisplayName string `gorm:"unique;not null;type:varchar(20)"`
-	UserID      uint   `gorm:"not null"`
+	UserID      uint   `gorm:"not null;unique"`
 	User        User
 	Coins       int64     `gorm:"not null"`
 	LastLogin   time.Time `gorm:"not null"`

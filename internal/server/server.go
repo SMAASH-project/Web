@@ -16,13 +16,15 @@ import (
 )
 
 type Server struct {
-	srv             *http.Server
-	gracePeriod     time.Duration
-	userController  *controllers.UsersController
-	authnController *controllers.AuthnController
+	srv                *http.Server
+	gracePeriod        time.Duration
+	userController     *controllers.UsersController
+	authnController    *controllers.AuthnController
+	gameAuthController *controllers.GameAuthController
+	levelsController   *controllers.LevelsController
 }
 
-func NewServer(uc *controllers.UsersController, ac *controllers.AuthnController) *Server {
+func NewServer(uc *controllers.UsersController, ac *controllers.AuthnController, gc *controllers.GameAuthController, lc *controllers.LevelsController) *Server {
 	return &Server{
 		gracePeriod: 10 * time.Second,
 		srv: &http.Server{
@@ -31,8 +33,10 @@ func NewServer(uc *controllers.UsersController, ac *controllers.AuthnController)
 			ReadHeaderTimeout: 10 * time.Second,
 			WriteTimeout:      30 * time.Second,
 		},
-		userController:  uc,
-		authnController: ac,
+		userController:     uc,
+		authnController:    ac,
+		levelsController:   lc,
+		gameAuthController: gc,
 	}
 }
 
