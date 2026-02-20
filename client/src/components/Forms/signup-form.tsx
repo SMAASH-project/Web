@@ -13,7 +13,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Link, redirect } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import React from "react";
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
@@ -22,6 +22,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const [username, setUsername] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [error, setError] = React.useState("");
+  const navigate = useNavigate();
 
   const signup = async () => {
     try {
@@ -39,7 +40,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
       });
       if (response.ok) {
         console.log("Signup successful");
-        throw redirect("/app/login");
+        navigate("/app/login");
       } else {
         setError("Signup failed");
       }

@@ -4,37 +4,40 @@ import (
 	"errors"
 	"net/http"
 	dtos "smaash-web/internal/DTOs"
-	"smaash-web/internal/services"
+	"smaash-web/internal/repository"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-// A phony controller for testing purposes
 type UsersController struct {
-	statsService services.UserStats
+	userRepo repository.UserRepository
 }
 
-func NewUserController(statsService services.UserStats) *UsersController {
-	return &UsersController{statsService: statsService}
+func NewUserController(userRepo repository.UserRepository) *UsersController {
+	return &UsersController{userRepo: userRepo}
 }
 
 func (uc *UsersController) ReadAllUsers(c *gin.Context) {
-	users, err := uc.statsService.ReadAllUsers(c.Request.Context())
+	users, err := uc.userRepo.ReadAll(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+		return
 	}
 	c.JSON(http.StatusOK, users)
 }
 
 func (uc *UsersController) ReadUserByID(c *gin.Context) {
-	id := c.GetUint("id")
-	user, err := uc.statsService.ReadUserByID(c.Request.Context(), id)
+	// id, _ := strconv.Atoi(c.Param("id"))
+	id, _ := c.Get("id")
+	user, err := uc.userRepo.ReadByID(c.Request.Context(), id.(uint))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+			return
 		}
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+		return
 	}
 	c.JSON(http.StatusOK, user)
 }

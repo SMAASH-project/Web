@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"smaash-web/internal/middlewares"
 	"strings"
 
 	"github.com/gin-contrib/cors"
@@ -36,10 +37,10 @@ func (s *Server) MountRoutes() *Server {
 		api.PUT("/levels/:id", s.levelsController.UpdateLevel)
 		api.DELETE("/levels/:id", s.levelsController.DeleteLevel)
 	}
-	users := api.Group("/users") 
+	users := api.Group("/users")
 	{
 		users.GET("", s.userController.ReadAllUsers)
-		users.GET("/:id", s.userController.ReadUserByID)
+		users.GET("/:id", middlewares.ValidateUrl ,s.userController.ReadUserByID)
 	}
 
 	r.NoRoute(func(c *gin.Context) {
