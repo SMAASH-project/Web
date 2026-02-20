@@ -4,22 +4,18 @@ import (
 	"errors"
 	"net/http"
 	dtos "smaash-web/internal/DTOs"
-	"smaash-web/internal/models"
-	"smaash-web/internal/repository"
 	"smaash-web/internal/services"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 type AuthnController struct {
-	authService       services.Authentication
-	playerProfileRepo repository.PlayerProfileRepository
+	authService services.Authentication
 }
 
-func NewAuthnController(authService services.Authentication, playerProfileRepo repository.PlayerProfileRepository) *AuthnController {
-	return &AuthnController{authService: authService, playerProfileRepo: playerProfileRepo}
+func NewAuthnController(authService services.Authentication) *AuthnController {
+	return &AuthnController{authService: authService}
 }
 
 func (a AuthnController) SignUp(c *gin.Context) {
@@ -39,30 +35,7 @@ func (a AuthnController) SignUp(c *gin.Context) {
 		return
 	}
 
-	playerProfile := &models.PlayerProfile{
-		UserID:      newUser.ID,
-		DisplayName: body.Username,
-		Coins:       1000,
-		LastLogin:   time.Now(),
-	}
-
-	err = a.playerProfileRepo.Create(c.Request.Context(), playerProfile)
-	if err != nil {
-		if errors.Is(err, gorm.ErrDuplicatedKey) {
-			c.JSON(http.StatusBadRequest, dtos.NewErrResp(
-				"Username already taken",
-				c.Request.URL.Path,
-			))
-			return
-		}
-		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"user":    dtos.UserToDTO(newUser),
-		"profile": dtos.PlayerProfileToDTO(*playerProfile),
-	})
+	c.JSON(http.StatusOK, dtos.UserToDTO(newUser))
 }
 
 func (a AuthnController) Login(c *gin.Context) {
@@ -72,8 +45,7 @@ func (a AuthnController) Login(c *gin.Context) {
 		return
 	}
 
-	token, userID, err := a.authService.Login(c.Request.Context(), dtos.LoginDTOToUser(&body))
-	_ = userID
+	token, id, err := a.authService.Login(c.Request.Context(), dtos.LoginDTOToUser(&body))
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -99,7 +71,9 @@ func (a AuthnController) Login(c *gin.Context) {
 		true,            // httpOnly
 	)
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, gin.H{
+		"id": id,
+	})
 }
 
 func (a AuthnController) Logout(c *gin.Context) {
@@ -115,4 +89,24 @@ func (a AuthnController) Logout(c *gin.Context) {
 	)
 
 	c.Status(http.StatusNoContent)
+}
+
+func (a AuthnController) CreateProfileForUser(c *gin.Context) {
+	var body dtos.PlayerProfileCreateDto
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+		return
+	}
+
+	newProfile, err := a.authService.CreateProfile(c.Request.Context(), body.UserID, body.DisplayName)
+	if err != nil {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			c.JSON(http.StatusBadRequest, dtos.NewErrResp("Display name already taken", c.Request.URL.Path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+		return
+	}
+
+	c.JSON(http.StatusCreated, dtos.PlayerProfileToReadDTO(*newProfile))
 }

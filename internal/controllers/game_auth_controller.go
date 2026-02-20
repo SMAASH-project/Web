@@ -96,6 +96,6 @@ func (g GameAuthController) GameLogin(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"token":   tokenString,
-		"profile": dtos.PlayerProfileToDTO(*profile),
+		"profile": dtos.PlayerProfileToReadDTO(*profile),
 	})
 }

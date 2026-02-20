@@ -15,14 +15,16 @@ import (
 type Authentication interface {
 	SignUp(context.Context, *models.User) (*models.User, error)
 	Login(context.Context, *models.User) (*string, uint, error)
+	CreateProfile(context.Context, uint, string) (*models.PlayerProfile, error)
 }
 
 type AuthenticationService struct {
 	usersRepo repository.UserRepository
+	profilesRepo repository.PlayerProfileRepository
 }
 
-func NewAuthenticationService(ur repository.UserRepository) Authentication {
-	return AuthenticationService{usersRepo: ur}
+func NewAuthenticationService(ur repository.UserRepository, pr repository.PlayerProfileRepository) Authentication {
+	return AuthenticationService{usersRepo: ur, profilesRepo: pr}
 }
 
 var (
@@ -61,4 +63,20 @@ func (a AuthenticationService) Login(c context.Context, u *models.User) (*string
 	}
 
 	return &tokenString, user.ID, nil
+}
+
+// This endpoint should be authorized, so no authentication logic required here
+func (a AuthenticationService) CreateProfile(c context.Context, userID uint, displayName string) (*models.PlayerProfile, error) {
+	newProfile := &models.PlayerProfile{
+		DisplayName: displayName,
+		UserID: userID,
+		Coins: 1000,
+		LastLogin: time.Now(),
+	}
+
+	if err := a.profilesRepo.Create(c, newProfile); err != nil {
+		return nil, err
+	}
+
+	return newProfile, nil
 }

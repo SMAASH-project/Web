@@ -35,7 +35,7 @@ func Authorize(c *gin.Context) {
 			return
 		}
 
-		c.Set("id", claims["sub"])
+		c.Set("id", uint(claims["sub"].(float64))) // ugghh go type system
 		c.Next()
 	} else {
 		c.JSON(http.StatusUnauthorized, dtos.NewErrResp("Invalid token claims", c.Request.URL.Path))

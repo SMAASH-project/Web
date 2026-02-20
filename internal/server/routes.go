@@ -25,22 +25,31 @@ func (s *Server) MountRoutes() *Server {
 
 	api := r.Group("/api")
 	{
-		api.POST("/signup", s.authnController.SignUp)
-		api.POST("/login", s.authnController.Login)
-		api.POST("/logout", s.authnController.Logout)
+		auth := api.Group("/auth")
+		{
+			auth.POST("/signup", s.authnController.SignUp)
+			auth.POST("/login", s.authnController.Login)
+			auth.POST("/logout", s.authnController.Logout)
+			auth.POST("/profiles", middlewares.Authorize, s.authnController.CreateProfileForUser)
 
-		api.POST("/auth/game-login", s.gameAuthController.GameLogin)
+			api.POST("/game-login", s.gameAuthController.GameLogin)
+		}
 
-		api.GET("/levels", s.levelsController.ReadAllLevels)
-		api.GET("/levels/:id", s.levelsController.ReadLevelByID)
-		api.POST("/levels", s.levelsController.CreateLevel)
-		api.PUT("/levels/:id", s.levelsController.UpdateLevel)
-		api.DELETE("/levels/:id", s.levelsController.DeleteLevel)
-	}
-	users := api.Group("/users")
-	{
-		users.GET("", s.userController.ReadAllUsers)
-		users.GET("/:id", middlewares.ValidateUrl ,s.userController.ReadUserByID)
+		users := api.Group("/users")
+		{
+			users.GET("", s.userController.ReadAllUsers)
+			users.GET("/:id", middlewares.ValidateUrl, s.userController.ReadUserByID)
+		}
+
+		levels := api.Group("/levels")
+		{
+			levels.GET("/levels", s.levelsController.ReadAllLevels)
+			levels.GET("/levels/:id", s.levelsController.ReadLevelByID)
+			levels.POST("/levels", s.levelsController.CreateLevel)
+			levels.PUT("/levels/:id", s.levelsController.UpdateLevel)
+			levels.DELETE("/levels/:id", s.levelsController.DeleteLevel)
+		}
+
 	}
 
 	r.NoRoute(func(c *gin.Context) {
