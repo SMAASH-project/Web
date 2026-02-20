@@ -19,7 +19,7 @@ export function SettingsPage() {
           {/* Left Section */}
           <div className="flex-1 flex items-center justify-center flex-col">
             <div className="mb-4 z-1">
-              <Label>Visual</Label>
+              <Label className="text-white">Visual</Label>
             </div>
             <div className="z-1">
               <SettingToggle />

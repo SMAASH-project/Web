@@ -36,7 +36,7 @@ export default function AccountMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size="icon" className="text-white rounded-full">
+        <Button size="icon" className="text-white">
           <User size={16} />
         </Button>
       </DropdownMenuTrigger>

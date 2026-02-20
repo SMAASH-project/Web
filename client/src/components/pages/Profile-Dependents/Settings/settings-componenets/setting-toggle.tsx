@@ -10,28 +10,30 @@ import { Switch } from "@/components/ui/switch";
 
 export function SettingToggle() {
   return (
-    <FieldGroup className="w-full max-w-sm">
-      <FieldLabel htmlFor="switch-share">
+    <FieldGroup className="w-100 max-w-full text-white">
+      <FieldLabel>
         <Field orientation="horizontal">
           <FieldContent>
-            <FieldTitle>Share across devices</FieldTitle>
-            <FieldDescription>
-              Focus is shared across devices, and turns off when you leave the
-              app.
+            <FieldTitle>Use animations</FieldTitle>
+            <FieldDescription className="text-neutral-400">
+              Choose to enable or disable animations in the app. Disabling
+              animations may improve performance on older devices.
             </FieldDescription>
           </FieldContent>
-          <Switch id="switch-share" />
+          <Switch id="switch-animations" defaultChecked />
         </Field>
       </FieldLabel>
-      <FieldLabel htmlFor="switch-notifications">
+      <FieldLabel>
         <Field orientation="horizontal">
           <FieldContent>
-            <FieldTitle>Enable notifications</FieldTitle>
-            <FieldDescription>
-              Receive notifications when focus mode is enabled or disabled.
+            <FieldTitle>Enable "Liquid Glass"</FieldTitle>
+            <FieldDescription className="text-neutral-400">
+              Toggle the "Liquid Glass" effect, which adds a glossy, translucent
+              layer to the interface for a sleek, modern look. This may impact
+              performance on some devices.
             </FieldDescription>
           </FieldContent>
-          <Switch id="switch-notifications" defaultChecked />
+          <Switch id="switch-liquid-glass" defaultChecked />
         </Field>
       </FieldLabel>
     </FieldGroup>
