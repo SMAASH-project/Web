@@ -5,6 +5,7 @@ import App from "./App.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { AuthProvider } from "./context/AuthProvider";
 import { SettingsProvider } from "./components/pages/Profile-Dependents/Settings/settings-logic/SettingsContext";
+import { NavbarProvider } from "./context/NavbarContext";
 import { PasswordResetForm } from "./components/Forms/Password-reset-form.tsx";
 import { ReleasesPage } from "./components/pages/main-pages/releases-page.tsx";
 import { AboutPage } from "./components/pages/main-pages/about-page.tsx";
@@ -14,9 +15,9 @@ import { NewsPage } from "./components/pages/main-pages/news-page.tsx";
 import { NotFoundPage } from "./components/pages/main-pages/notfound-page.tsx";
 import { ProfilePage } from "./components/pages/Profile-Dependents/Profile/profile-page.tsx";
 import { SettingsPage } from "./components/pages/Profile-Dependents/Settings/settings-page.tsx";
-import { LoginForm } from "./components/Forms/login-form.tsx";
-import { SignupForm } from "./components/Forms/signup-form.tsx";
 import { Wrapper } from "./Wrapper.tsx";
+import { LoginForm } from "./components/Forms/Login-form.tsx";
+import { SignupForm } from "./components/Forms/Signup-form.tsx";
 
 const router = createBrowserRouter([
   { path: "/app", element: <App /> },
@@ -40,9 +41,11 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AuthProvider>
       <SettingsProvider>
-        <Wrapper>
-          <RouterProvider router={router} />
-        </Wrapper>
+        <NavbarProvider>
+          <Wrapper>
+            <RouterProvider router={router} />
+          </Wrapper>
+        </NavbarProvider>
       </SettingsProvider>
     </AuthProvider>
   </StrictMode>,

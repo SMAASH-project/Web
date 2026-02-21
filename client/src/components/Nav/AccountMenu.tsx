@@ -10,11 +10,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User } from "lucide-react";
 import { Link } from "react-router";
+import { useNavbarContext } from "@/context/NavbarContextUtils";
 
 export default function AccountMenu() {
+  const { setIsDropdownHovering } = useNavbarContext();
+
   const logout = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/logout", {
+      const response = await fetch("http://localhost:8080/api/auth/logout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -40,14 +43,23 @@ export default function AccountMenu() {
           <User size={16} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-40 z-100" align="start">
+      <DropdownMenuContent
+        className="w-40 z-100"
+        align="start"
+        onMouseEnter={() => setIsDropdownHovering(true)}
+        onMouseLeave={() => setIsDropdownHovering(false)}
+      >
         <DropdownMenuGroup>
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
           <Link to="/app/profile">
-            <DropdownMenuItem>Profile</DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer">
+              Profile
+            </DropdownMenuItem>
           </Link>
           <Link to="/app/settings">
-            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer">
+              Settings
+            </DropdownMenuItem>
           </Link>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
@@ -56,7 +68,9 @@ export default function AccountMenu() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
+            Log out
+          </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
