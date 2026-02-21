@@ -3,24 +3,27 @@ package seeder
 import (
 	"context"
 	"errors"
+	"log"
 	"sync"
 )
 
 type Seeder interface {
-	Seed(seed_data_root string, ctx context.Context) error
+	Seed(ctx context.Context, seed_data_root string, db_url string) error
 }
 
 type SeederManager struct {
 	ctx            context.Context
 	seed_data_root string
+	db_url         string
 	seeders        []Seeder
 }
 
 type SeederOpt func(*SeederManager)
 
-func NewSeedManager(seed_data_root string, opts ...SeederOpt) *SeederManager {
+func NewSeedManager(seed_data_root string, dbUrl string, opts ...SeederOpt) *SeederManager {
 	seederManager := &SeederManager{
 		seed_data_root: seed_data_root,
+		db_url:         dbUrl,
 	}
 
 	for _, opt := range opts {
@@ -49,7 +52,7 @@ func (sm *SeederManager) Seed() error {
 
 	for _, seeder := range sm.seeders {
 		wg.Go(func() {
-			if err := seeder.Seed(sm.seed_data_root, sm.ctx); err != nil {
+			if err := seeder.Seed(sm.ctx, sm.seed_data_root, sm.db_url); err != nil {
 				errStream <- err
 			}
 		})
@@ -62,9 +65,13 @@ func (sm *SeederManager) Seed() error {
 		errList = append(errList, err)
 	}
 
-	if len(errList) < 1 {
+	if len(errList) > 1 {
 		return errors.Join(errList...)
 	}
+	if len(errList) == 1 {
+		return errList[0]
+	}
 
+	log.Println("Seeding finished successfully")
 	return nil
 }

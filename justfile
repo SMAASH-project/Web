@@ -9,7 +9,7 @@ alias c:=clean
 
 # much nicer to have it as private, so it doesn't show up in the recipe list
 [private]
-@default: 
+@default:
     just --list
 
 all: build test
@@ -55,3 +55,7 @@ all: build test
             exit 1
         fi;
     fi
+
+@seed:
+    echo "starting database seeding..."
+    go run cmd/seeder/main.go
