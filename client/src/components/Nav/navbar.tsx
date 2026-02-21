@@ -52,7 +52,11 @@ const Navbar = () => {
         <NavMenu useLiquidGlass={settings.useLiquidGlass} />
       </div>
       <div className="flex items-center gap-4">
-        <Label>Logged in as {username}</Label>
+        <Label
+          className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
+        >
+          Logged in as {username}
+        </Label>
         <AccountMenu />
       </div>
     </nav>

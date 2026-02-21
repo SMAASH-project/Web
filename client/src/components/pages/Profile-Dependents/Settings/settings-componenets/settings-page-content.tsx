@@ -12,7 +12,11 @@ export function SettingsPageContent() {
       {/* Left Section */}
       <div className="flex-1 flex items-center justify-center flex-col">
         <div className="mb-4 z-1">
-          <Label className="text-white">Visual</Label>
+          <Label
+            className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
+          >
+            Visual
+          </Label>
         </div>
         <div className="z-1">
           <SettingToggle />

@@ -11,9 +11,11 @@ import {
 import { User } from "lucide-react";
 import { Link } from "react-router";
 import { useNavbarContext } from "@/context/NavbarContextUtils";
+import { useSettings } from "../pages/Profile-Dependents/Settings/settings-logic/SettingsContext";
 
 export default function AccountMenu() {
   const { setIsDropdownHovering } = useNavbarContext();
+  const { settings } = useSettings();
 
   const logout = async () => {
     try {
@@ -39,7 +41,10 @@ export default function AccountMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size="icon" className="text-white cursor-pointer">
+        <Button
+          size="icon"
+          className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30" : ""} cursor-pointer`}
+        >
           <User size={16} />
         </Button>
       </DropdownMenuTrigger>

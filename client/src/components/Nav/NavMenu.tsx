@@ -105,7 +105,7 @@ export function NavMenu({ useLiquidGlass }: NavMenuProps) {
           } ${
             !useLiquidGlass && item.path === location.pathname
               ? "text-green-600 font-bold"
-              : ""
+              : "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
           } transition-colors duration-300`}
           onMouseEnter={handleMouseEnter}
         >
