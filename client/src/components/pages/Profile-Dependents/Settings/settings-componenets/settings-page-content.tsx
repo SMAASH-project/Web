@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { SettingToggle } from "./setting-toggle";
 import { useSettings } from "../settings-logic/SettingsContext";
+import { ThemePicker } from "./Theme-picker";
 
 export function SettingsPageContent() {
   const { settings } = useSettings();
@@ -34,7 +35,9 @@ export function SettingsPageContent() {
           </Label>
         </div>
         <div></div>
-        <div></div>
+        <div>
+          <ThemePicker />
+        </div>
       </div>
 
       {/* Right Section */}

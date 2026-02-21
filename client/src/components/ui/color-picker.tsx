@@ -2,7 +2,7 @@ import { forwardRef, useMemo, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import { cn } from "@/lib/utils";
 import { useForwardedRef } from "@/lib/use-forwarded-ref";
-import { Button, ButtonProps } from "@/components/ui/button";
+import { Button, type ButtonProps } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
@@ -18,9 +18,7 @@ interface ColorPickerProps {
 
 const ColorPicker = forwardRef<
   HTMLInputElement,
-  Omit<ButtonProps, "value" | "onChange" | "onBlur"> &
-    ColorPickerProps &
-    ButtonProps
+  Omit<ButtonProps, "value" | "onChange" | "onBlur"> & ColorPickerProps
 >(
   (
     { disabled, value, onChange, onBlur, name, className, size, ...props },

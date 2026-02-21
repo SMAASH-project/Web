@@ -5,6 +5,13 @@ import { Slot } from "radix-ui";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "./button-variants";
 
+export interface ButtonProps
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+}
+
 function Button({
   className,
   variant = "default",
