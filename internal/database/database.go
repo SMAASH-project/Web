@@ -34,18 +34,6 @@ func (g *GormDBConn) Init() *gorm.DB {
 		log.Panicf("Failed to create many to many connection in database: %v", err)
 	}
 
-	g.db.AutoMigrate(
-		&models.User{},
-		&models.PlayerProfile{},
-		&models.Role{},
-		&models.Character{},
-		&models.Level{},
-		&models.Match{},
-		&models.MatchParticipation{},
-		&models.Purchase{},
-		&models.Item{},
-		&models.Category{},
-		&models.Rarity{},
-	)
+	AutoMigrate(g.db)
 	return g.db
 }

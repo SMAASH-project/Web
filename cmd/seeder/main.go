@@ -2,21 +2,31 @@ package main
 
 import (
 	"context"
-	"log"
 	"os"
 	"smaash-web/internal/seeder"
+	"time"
 
 	_ "github.com/joho/godotenv/autoload"
 )
 
 func main() {
-	if err := seeder.NewSeedManager(
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
+	defer cancel()
+
+	errStream := make(chan error, 1)
+
+	sm := seeder.NewSeedManager(
 		os.Getenv("SEED_DATA_URI"),
 		os.Getenv("DB_URL"),
-		seeder.WithContext(context.Background()),
+		errStream,
+		seeder.WithContext(ctx),
 		seeder.WithSeeder(seeder.NewRoleSeeder()),
 		seeder.WithSeeder(seeder.NewUserSeeder()),
-	).Seed(); err != nil {
-		log.Print(err)
-	}
+	)
+
+	go func() {
+		sm.ListenForErrors()
+	}()
+
+	sm.Seed()
 }

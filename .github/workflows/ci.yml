@@ -18,9 +18,9 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: '1.25'
-        
+
     - uses: extractions/setup-just@v3
-    - name: Build    
+    - name: Build
       run: just build
 
   build-client:
@@ -32,9 +32,9 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: '1.25'
-        
+
     - uses: extractions/setup-just@v3
-    - name: Build    
+    - name: Build Client
       run: just build-client
 
   test:
@@ -46,13 +46,16 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: '1.25'
-        
+
     - uses: extractions/setup-just@v3
-    - name: Build    
+    - name: Test
       run: just test
 
-  build-all:
+
+  seed:
     runs-on: ubuntu-latest
+    env:
+      SEED_DATA_URI: ./internal/seeder/test_sources
     steps:
     - uses: actions/checkout@v4
 
@@ -60,7 +63,7 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: '1.25'
-        
+
     - uses: extractions/setup-just@v3
-    - name: Build    
-      run: just build-fullstack
+    - name: Seed
+      run: just seed

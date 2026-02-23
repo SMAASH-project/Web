@@ -2,13 +2,19 @@ package seeder
 
 import (
 	"context"
-	"errors"
 	"log"
+	"os"
+	"smaash-web/internal/database"
 	"sync"
+	"time"
+
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type Seeder interface {
-	Seed(ctx context.Context, seed_data_root string, db_url string) error
+	Seed(ctx context.Context, seed_data_root string, db_url string, errStream chan error, logger logger.Interface)
 }
 
 type SeederManager struct {
@@ -16,14 +22,23 @@ type SeederManager struct {
 	seed_data_root string
 	db_url         string
 	seeders        []Seeder
+	errStream      chan error
+	logger         logger.Interface
 }
 
 type SeederOpt func(*SeederManager)
 
-func NewSeedManager(seed_data_root string, dbUrl string, opts ...SeederOpt) *SeederManager {
+func NewSeedManager(seed_data_root string, dbUrl string, errStream chan error, opts ...SeederOpt) *SeederManager {
+	logger := logger.New(log.New(os.Stdout, "/r/n", log.LstdFlags), logger.Config{
+		SlowThreshold: time.Second,
+		LogLevel:      logger.Silent, //needs to be silent so it doesn't scream for duplicate values
+	})
+
 	seederManager := &SeederManager{
 		seed_data_root: seed_data_root,
 		db_url:         dbUrl,
+		errStream:      errStream,
+		logger:         logger,
 	}
 
 	for _, opt := range opts {
@@ -45,33 +60,31 @@ func WithContext(ctx context.Context) SeederOpt {
 	}
 }
 
-func (sm *SeederManager) Seed() error {
-	errStream := make(chan error, 1)
-	var errList []error
+func (sm *SeederManager) Seed() {
+	conn, err := gorm.Open(sqlite.Open(sm.db_url))
+	if err != nil {
+		log.Panicf("Could not connect to db. Error: %v", err)
+	}
+
+	if err := database.AutoMigrate(conn); err != nil {
+		log.Panicf("Could not migrate models. Error: %v", err)
+	}
+
 	var wg sync.WaitGroup
 
 	for _, seeder := range sm.seeders {
 		wg.Go(func() {
-			if err := seeder.Seed(sm.ctx, sm.seed_data_root, sm.db_url); err != nil {
-				errStream <- err
-			}
+			seeder.Seed(sm.ctx, sm.seed_data_root, sm.db_url, sm.errStream, sm.logger)
 		})
 	}
 
 	wg.Wait()
-	close(errStream)
+	close(sm.errStream)
+	log.Println("Seeding finished")
+}
 
-	for err := range errStream {
-		errList = append(errList, err)
+func (sm SeederManager) ListenForErrors() {
+	for err := range sm.errStream {
+		log.Println(err)
 	}
-
-	if len(errList) > 1 {
-		return errors.Join(errList...)
-	}
-	if len(errList) == 1 {
-		return errList[0]
-	}
-
-	log.Println("Seeding finished successfully")
-	return nil
 }
