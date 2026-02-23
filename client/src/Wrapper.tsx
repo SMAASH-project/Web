@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { ColorContext } from "./components/pages/Profile-Dependents/Settings/settings-logic/color/ColorContext";
+import { ColorContext } from "./components/pages/profile-dependents/settings/settings-logic/color/ColorContext";
 
 interface WrapperProps {
   children: React.ReactNode;

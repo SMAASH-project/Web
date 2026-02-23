@@ -4,21 +4,22 @@ import "./index.css";
 import App from "./App.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { AuthProvider } from "./context/AuthProvider";
-import { SettingsProvider } from "./components/pages/Profile-Dependents/Settings/settings-logic/SettingsContext";
+import { SettingsProvider } from "./components/pages/profile-dependents/settings/settings-logic/SettingsContext.tsx";
 import { NavbarProvider } from "./context/NavbarContext";
-import { ColorProvider } from "./components/pages/Profile-Dependents/Settings/settings-logic/color/ColorProvider";
-import { PasswordResetForm } from "./components/Forms/Password-reset-form.tsx";
-import { ReleasesPage } from "./components/pages/main-pages/releases-page.tsx";
-import { AboutPage } from "./components/pages/main-pages/about-page.tsx";
-import { GalleryPage } from "./components/pages/main-pages/gallery-page.tsx";
-import { WebstorePage } from "./components/pages/main-pages/webstore-page.tsx";
-import { NewsPage } from "./components/pages/main-pages/news-page.tsx";
-import { NotFoundPage } from "./components/pages/main-pages/notfound-page.tsx";
-import { ProfilePage } from "./components/pages/Profile-Dependents/Profile/profile-page.tsx";
-import { SettingsPage } from "./components/pages/Profile-Dependents/Settings/settings-page.tsx";
+import { ColorProvider } from "./components/pages/profile-dependents/settings/settings-logic/color/ColorProvider.tsx";
+import { PasswordResetForm } from "./components/forms/Password-reset-form.tsx";
+import { ReleasesPage } from "./components/pages/main-pages/Releases-page.tsx";
+import { AboutPage } from "./components/pages/main-pages/About-page.tsx";
+import { GalleryPage } from "./components/pages/main-pages/Gallery-page.tsx";
+import { WebstorePage } from "./components/pages/main-pages/Webstore-page.tsx";
+import { NewsPage } from "./components/pages/main-pages/News-page.tsx";
+import { NotFoundPage } from "./components/pages/main-pages/Notfound-page.tsx";
+import { ProfilePage } from "./components/pages/profile-dependents/profile/Profile-page.tsx";
+
 import { Wrapper } from "./Wrapper.tsx";
-import { LoginForm } from "./components/Forms/login-form.tsx";
-import { SignupForm } from "./components/Forms/signup-form.tsx";
+import { LoginForm } from "./components/forms/Login-form.tsx";
+import { SignupForm } from "./components/forms/Signup-form.tsx";
+import { SettingsPage } from "./components/pages/profile-dependents/settings/settings-page.tsx";
 
 const router = createBrowserRouter([
   { path: "/app", element: <App /> },

@@ -1,4 +1,4 @@
-import Navbar from "../../Nav/navbar";
+import Navbar from "../../nav/Navbar";
 
 export function ReleasesPage() {
   return (

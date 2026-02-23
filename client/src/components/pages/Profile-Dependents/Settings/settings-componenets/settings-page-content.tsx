@@ -1,12 +1,13 @@
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { SettingToggle } from "./setting-toggle";
-import { useSettings } from "../settings-logic/SettingsContext";
-import { ThemePicker } from "./Theme-picker";
+
 import { Button } from "@/components/ui/button";
 import { useContext } from "react";
 import { ColorContext } from "../settings-logic/color/ColorContext";
+import { useSettings } from "../settings-logic/SettingsContext";
 import { THEMES, applyTheme } from "../settings-logic/themes";
+import { SettingToggle } from "./setting-toggle";
+import { ThemePicker } from "./Theme-picker";
 
 export function SettingsPageContent() {
   const { settings } = useSettings();

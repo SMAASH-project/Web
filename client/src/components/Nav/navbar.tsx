@@ -1,9 +1,9 @@
-import AccountMenu from "./AccountMenu";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { AuthContext } from "../../context/AuthContext";
 import React, { useEffect, useState } from "react";
-import { useSettings } from "../pages/Profile-Dependents/Settings/settings-logic/SettingsContext";
+import { useSettings } from "../pages/profile-dependents/settings/settings-logic/SettingsContext";
 import { NavMenu } from "./NavMenu";
+import AccountMenu from "./AccountMenu";
 
 const Navbar = () => {
   const { userId } = React.useContext(AuthContext);

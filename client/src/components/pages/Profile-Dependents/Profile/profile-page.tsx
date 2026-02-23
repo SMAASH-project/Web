@@ -1,8 +1,8 @@
-import Navbar from "@/components/Nav/navbar";
+import Navbar from "@/components/nav/Navbar";
 import { WithOnloadAnimation } from "@/lib/OnloadAnimationNavbar";
 import CardAnimation from "@/lib/OnloadAnimationCard";
-import { useSettings } from "../Settings/settings-logic/SettingsContext";
-import { ProfilePageContent } from "./profie-page-content";
+import { useSettings } from "../settings/settings-logic/SettingsContext";
+import { ProfilePageContent } from "./Profie-page-content";
 
 export function ProfilePage() {
   const AnimatedNavbar = WithOnloadAnimation(Navbar);

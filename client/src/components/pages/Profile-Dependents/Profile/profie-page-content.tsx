@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 
 import { Label } from "@/components/ui/label";
-import { useSettings } from "../Settings/settings-logic/SettingsContext";
+import { useSettings } from "../settings/settings-logic/SettingsContext";
 import { UpdateSheet } from "./Update-profile-sheet";
 
 const username = "PlaceholderUserName";
