@@ -7,7 +7,7 @@ import {
   FieldTitle,
 } from "@/components/ui/field";
 import { Switch } from "@/components/ui/switch";
-import { useSettings } from "@/components/pages/profile-dependents/settings/settings-logic/SettingsContext";
+import { useSettings } from "@/components/pages/profileDependents/settings/settings-logic/SettingsContext";
 
 export function SettingToggle() {
   const { settings, updateSetting } = useSettings();

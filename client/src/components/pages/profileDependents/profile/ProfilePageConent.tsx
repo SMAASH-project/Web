@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 
 import { Label } from "@/components/ui/label";
 import { useSettings } from "../settings/settings-logic/SettingsContext";
-import { UpdateSheet } from "./Update-profile-sheet";
+import { UpdateSheet } from "./UpdateSheet";
 
 const username = "PlaceholderUserName";
 

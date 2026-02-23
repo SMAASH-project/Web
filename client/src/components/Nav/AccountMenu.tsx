@@ -11,7 +11,7 @@ import {
 import { User } from "lucide-react";
 import { Link } from "react-router";
 import { useNavbarContext } from "@/context/NavbarContextUtils";
-import { useSettings } from "../pages/profile-dependents/settings/settings-logic/SettingsContext";
+import { useSettings } from "../pages/profileDependents/settings/settings-logic/SettingsContext";
 
 export default function AccountMenu() {
   const { setIsDropdownHovering } = useNavbarContext();

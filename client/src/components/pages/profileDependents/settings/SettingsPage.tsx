@@ -1,10 +1,10 @@
 import Navbar from "@/components/nav/Navbar";
 import { WithOnloadAnimation } from "@/lib/OnloadAnimationNavbar";
-import CardAnimation from "@/lib/OnloadAnimationCard";
-import { useSettings } from "../settings/settings-logic/SettingsContext";
-import { ProfilePageContent } from "./Profie-page-content";
+import { CardAnimation } from "@/lib/OnloadAnimationCard";
+import { useSettings } from "./settings-logic/SettingsContext";
+import { SettingsPageContent } from "./settings-componenets/SettingsPageContent";
 
-export function ProfilePage() {
+export function SettingsPage() {
   const AnimatedNavbar = WithOnloadAnimation(Navbar);
   const { settings } = useSettings();
 
@@ -13,11 +13,11 @@ export function ProfilePage() {
       {settings.useAnimations ? <AnimatedNavbar /> : <Navbar />}
       {settings.useAnimations ? (
         <CardAnimation className="z-0 mt-20">
-          <ProfilePageContent />
+          <SettingsPageContent />
         </CardAnimation>
       ) : (
         <div className="z-0 mt-20">
-          <ProfilePageContent />
+          <SettingsPageContent />
         </div>
       )}
     </div>

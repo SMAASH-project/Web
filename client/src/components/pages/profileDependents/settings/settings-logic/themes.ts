@@ -1,4 +1,4 @@
-import { type ColorContextType } from "../settings-logic/color/ColorContext";
+import { type ColorContextType } from "./color/ColorContext";
 
 export interface Theme {
   name: string;

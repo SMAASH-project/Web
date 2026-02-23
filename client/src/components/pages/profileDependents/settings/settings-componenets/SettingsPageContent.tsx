@@ -6,8 +6,8 @@ import { useContext } from "react";
 import { ColorContext } from "../settings-logic/color/ColorContext";
 import { useSettings } from "../settings-logic/SettingsContext";
 import { THEMES, applyTheme } from "../settings-logic/Themes";
-import { SettingToggle } from "./Setting-toggle";
-import { ThemePicker } from "./Theme-picker";
+import { SettingToggle } from "./SettingToggle";
+import { ThemePicker } from "./ThemePicker";
 
 export function SettingsPageContent() {
   const { settings } = useSettings();
