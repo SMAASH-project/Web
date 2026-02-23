@@ -59,7 +59,7 @@ func (g GameAuthController) GameLogin(c *gin.Context) {
 	}
 
 	// Get PlayerProfile directly from repository
-	profile, err := g.playerProfileRepo.ReadByUserId(c.Request.Context(), user.ID)
+	profile, err := g.playerProfileRepo.ReadByUserID(c.Request.Context(), user.ID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusBadRequest, dtos.NewErrResp(

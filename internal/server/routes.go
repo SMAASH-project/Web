@@ -3,7 +3,6 @@ package server
 import (
 	"net/http"
 	"smaash-web/internal/middlewares"
-	"strings"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -44,19 +43,15 @@ func (s *Server) MountRoutes() *Server {
 		levels := api.Group("/levels")
 		{
 			levels.GET("/levels", s.levelsController.ReadAllLevels)
-			levels.GET("/levels/:id", s.levelsController.ReadLevelByID)
+			levels.GET("/levels/:id", middlewares.ValidateUrl, s.levelsController.ReadLevelByID)
 			levels.POST("/levels", s.levelsController.CreateLevel)
-			levels.PUT("/levels/:id", s.levelsController.UpdateLevel)
-			levels.DELETE("/levels/:id", s.levelsController.DeleteLevel)
+			levels.PUT("/levels/:id", middlewares.ValidateUrl, s.levelsController.UpdateLevel)
+			levels.DELETE("/levels/:id", middlewares.ValidateUrl, s.levelsController.DeleteLevel)
 		}
-
 	}
 
 	r.NoRoute(func(c *gin.Context) {
-		if !strings.HasPrefix(c.Request.RequestURI, "/api") {
-			http.ServeFile(c.Writer, c.Request, "./build/client")
-		}
-		c.Status(http.StatusNotFound)
+		http.ServeFile(c.Writer, c.Request, "./build/client")
 	})
 	s.srv.Handler = r
 	return s

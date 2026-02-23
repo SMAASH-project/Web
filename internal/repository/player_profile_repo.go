@@ -10,8 +10,8 @@ import (
 
 type PlayerProfileRepository interface {
 	Create(c context.Context, profile *models.PlayerProfile) error
-	ReadById(c context.Context, id uint) (*models.PlayerProfile, error)
-	ReadByUserId(c context.Context, userId uint) (*models.PlayerProfile, error)
+	ReadByID(c context.Context, id uint) (*models.PlayerProfile, error)
+	ReadByUserID(c context.Context, userId uint) (*models.PlayerProfile, error)
 	Update(c context.Context, profile *models.PlayerProfile) error
 	Delete(c context.Context, id uint) error
 }
@@ -29,13 +29,13 @@ func (p GormPlayerProfileRepo) Create(c context.Context, profile *models.PlayerP
 	return p.DB.WithContext(c).Create(profile).Error
 }
 
-func (p GormPlayerProfileRepo) ReadById(c context.Context, id uint) (*models.PlayerProfile, error) {
+func (p GormPlayerProfileRepo) ReadByID(c context.Context, id uint) (*models.PlayerProfile, error) {
 	var profile models.PlayerProfile
 	err := p.DB.WithContext(c).Preload("User").First(&profile, id).Error
 	return &profile, err
 }
 
-func (p GormPlayerProfileRepo) ReadByUserId(c context.Context, userID uint) (*models.PlayerProfile, error) {
+func (p GormPlayerProfileRepo) ReadByUserID(c context.Context, userID uint) (*models.PlayerProfile, error) {
 	var profile models.PlayerProfile
 	err := p.DB.WithContext(c).
 		Preload("User").
