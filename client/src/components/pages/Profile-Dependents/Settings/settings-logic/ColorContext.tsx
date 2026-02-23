@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from "react";
-import { ColorContext } from "@/context/ColorContext";
+import { ColorContext } from "./color/ColorContext";
 
 export function ColorProvider({ children }: { children: ReactNode }) {
   const [colorLeft, setColorLeft] = useState("#0f0f0f");

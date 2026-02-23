@@ -17,8 +17,8 @@ import { NotFoundPage } from "./components/pages/main-pages/notfound-page.tsx";
 import { ProfilePage } from "./components/pages/Profile-Dependents/Profile/profile-page.tsx";
 import { SettingsPage } from "./components/pages/Profile-Dependents/Settings/settings-page.tsx";
 import { Wrapper } from "./Wrapper.tsx";
-import { LoginForm } from "./components/Forms/Login-form.tsx";
-import { SignupForm } from "./components/Forms/Signup-form.tsx";
+import { LoginForm } from "./components/Forms/login-form.tsx";
+import { SignupForm } from "./components/Forms/signup-form.tsx";
 
 const router = createBrowserRouter([
   { path: "/app", element: <App /> },
