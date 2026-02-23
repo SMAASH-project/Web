@@ -15,6 +15,7 @@ import { WebstorePage } from "./components/pages/mainPages/WebstorePage.tsx";
 import { NewsPage } from "./components/pages/mainPages/NewsPage.tsx";
 import { NotFoundPage } from "./components/pages/mainPages/NotFoundPage.tsx";
 import { ProfilePage } from "./components/pages/profileDependents/profile/ProfilePage.tsx";
+import { ProfileSelectorForm } from "./components/forms/ProfileSelectorForm.tsx";
 
 import { Wrapper } from "./Wrapper.tsx";
 import { LoginForm } from "./components/forms/LoginForm.tsx";
@@ -37,6 +38,7 @@ const router = createBrowserRouter([
   { path: "*", element: <NotFoundPage /> },
   { path: "/app/profile", element: <ProfilePage /> },
   { path: "/app/settings", element: <SettingsPage /> },
+  { path: "/app/profile-selector", element: <ProfileSelectorForm /> },
 ]);
 
 createRoot(document.getElementById("root")!).render(

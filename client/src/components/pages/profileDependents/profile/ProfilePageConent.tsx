@@ -5,6 +5,8 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useSettings } from "../settings/settingsLogic/SettingsContext";
 import { UpdateSheet } from "./UpdateSheet";
+import { ExternalLink } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const username = "PlaceholderUserName";
 
@@ -53,6 +55,15 @@ export function ProfilePageContent() {
               className={`text-white cursor-pointer ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 border-2 shadow-sm shadow-white/20[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : "border-green-500 border-2 bg-amber-200"} `}
             >
               <AvatarImage src={avatarSrc} alt={username} />
+              <span
+                aria-hidden
+                className={cn(
+                  "absolute inset-0 flex items-center justify-center rounded-full bg-gray-700/70 opacity-0 transition-opacity duration-150 pointer-events-none",
+                  "group-hover/avatar:opacity-100",
+                )}
+              >
+                <ExternalLink className={cn("size-4 text-white opacity-100")} />
+              </span>
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
           </div>

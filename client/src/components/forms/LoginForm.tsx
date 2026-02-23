@@ -64,7 +64,7 @@ export function LoginForm({
 
   useEffect(() => {
     if (isLoggedIn) {
-      navigate("/app/releases");
+      navigate("/app/profile-selector");
     }
   }, [navigate, isLoggedIn]);
 
