@@ -14,18 +14,24 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import React from "react";
+import { useSettings } from "../Settings/settings-logic/SettingsContext";
 
 const Username = "placeholder";
 const Email = "lorem@ipsum.com";
 const Password = "password";
 
 export function UpdateSheet() {
+  const { settings } = useSettings();
   const [showPassword, setShowPassword] = React.useState(false);
   return (
     <div className="z-101">
       <Sheet>
         <SheetTrigger asChild>
-          <Button className="text-white cursor-pointer">Edit</Button>
+          <Button
+            className={`text-white cursor-pointer ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
+          >
+            Edit
+          </Button>
         </SheetTrigger>
         <SheetContent>
           <SheetHeader>

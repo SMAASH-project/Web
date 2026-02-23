@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 
 import { Label } from "@/components/ui/label";
 import { useSettings } from "../Settings/settings-logic/SettingsContext";
-import { UpdateSheet } from "./update-profile-sheet";
+import { UpdateSheet } from "./Update-profile-sheet";
 
 const username = "PlaceholderUserName";
 
@@ -50,7 +50,7 @@ export function ProfilePageContent() {
           <div onClick={() => pfpinputRef.current?.click()}>
             <Avatar
               size="lg"
-              className="border-green-500 border-2 bg-amber-200"
+              className={`text-white cursor-pointer ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 border-2 shadow-sm shadow-white/20[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : "border-green-500 border-2 bg-amber-200"} `}
             >
               <AvatarImage src={avatarSrc} alt={username} />
               <AvatarFallback>CN</AvatarFallback>
