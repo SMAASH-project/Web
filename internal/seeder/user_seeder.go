@@ -12,6 +12,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type UserSeeder struct{}
@@ -26,28 +27,27 @@ type UserDataFormat struct {
 	RoleID   int
 }
 
-func (us UserSeeder) Seed(c context.Context, data_root_path string, db_url string) error {
+func (us UserSeeder) Seed(c context.Context, data_root_path string, db_url string, errStream chan error, logger logger.Interface) {
 	log.Println("Starting user seeder")
-	db, err := gorm.Open(sqlite.Open(db_url))
+	db, err := gorm.Open(sqlite.Open(db_url), &gorm.Config{TranslateError: true, Logger: logger})
 	if err != nil {
-		return err
+		errStream <- err
 	}
 
 	raw, err := os.ReadFile(data_root_path + "/users.json")
 	if err != nil {
-		return err
+		errStream <- err
 	}
 
 	var target []UserDataFormat
 	if err = json.Unmarshal(raw, &target); err != nil {
-		return err
+		errStream <- err
 	}
 
-	errs := make([]error, len(target))
 	for _, val := range target {
 		passHash, err := bcrypt.GenerateFromPassword([]byte(val.Password), 10)
 		if err != nil {
-			return err
+			errStream <- err
 		}
 		if err = gorm.G[models.User](db).Create(c, &models.User{
 			Email:        val.Email,
@@ -56,16 +56,13 @@ func (us UserSeeder) Seed(c context.Context, data_root_path string, db_url strin
 			IsBanned:     false,
 			LastLogin:    time.Now(),
 		}); err != nil {
-			errs = append(errs, err)
+			if !errors.Is(err, gorm.ErrDuplicatedKey) {
+				errStream <- err
+			} else {
+				log.Println("Skipped creating user with email: ", val.Email)
+			}
+		} else {
+			log.Println("Created user with email: ", val.Email)
 		}
 	}
-
-	if len(errs) > 1 {
-		return errors.Join(errs...)
-	}
-	if len(errs) == 1 {
-		return errs[0]
-	}
-
-	return nil
 }

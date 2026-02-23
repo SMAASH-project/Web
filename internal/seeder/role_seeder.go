@@ -10,6 +10,7 @@ import (
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type RoleSeeder struct{}
@@ -22,35 +23,32 @@ type RoleDataFormat struct {
 	Name string
 }
 
-func (rs RoleSeeder) Seed(c context.Context, data_root_path string, db_url string) error {
+func (rs RoleSeeder) Seed(c context.Context, data_root_path string, db_url string, errStream chan error, logger logger.Interface) {
 	log.Println("Starting roles seeder")
-	db, err := gorm.Open(sqlite.Open(db_url))
+	db, err := gorm.Open(sqlite.Open(db_url), &gorm.Config{TranslateError: true, Logger: logger})
 	if err != nil {
-		return err
+		errStream <- err
 	}
 
 	raw, err := os.ReadFile(data_root_path + "/roles.json")
 	if err != nil {
-		return err
+		errStream <- err
 	}
 
 	var target []RoleDataFormat
 	if err = json.Unmarshal(raw, &target); err != nil {
-		return err
+		errStream <- err
 	}
 
-	errs := make([]error, len(target))
 	for _, val := range target {
 		if err := gorm.G[models.Role](db).Create(c, &models.Role{Name: val.Name}); err != nil {
-			errs = append(errs, err)
+			if !errors.Is(err, gorm.ErrDuplicatedKey) {
+				errStream <- err
+			} else {
+				log.Println("Skipped creating role with name: ", val.Name)
+			}
+		} else {
+			log.Println("Created role with name: ", val.Name)
 		}
 	}
-	if len(errs) > 1 {
-		return errors.Join(errs...)
-	}
-	if len(errs) == 1 {
-		return errs[0]
-	}
-
-	return nil
 }
