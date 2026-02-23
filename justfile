@@ -3,6 +3,7 @@
 alias r:=run
 alias b:=build
 alias bf:=build-fullstack
+alias bc:=build-client
 alias t:=test
 alias w:=watch
 alias c:=clean
@@ -12,21 +13,21 @@ alias c:=clean
 @default:
     just --list
 
-all: build test
+all: build-fullstack test
 
 @build:
-	echo "Building..."
-	go build -o build/main cmd/api/main.go
+	echo "Building backend"
+	@go build -v -o build/main cmd/api/main.go
 
-@build-fullstack:
-	echo "Building full application"
-	cd ./client && npm run build
-	go build -o build/main cmd/api/main.go
-	GOOS=windows GOARCH=amd64 go build -o build/main.exe cmd/api/main.go
+build-fullstack: build-client build
+
+@build-client:
+    echo "Building client"
+    cd ./client && npm install && npm run build
 
 # Run the application
-@run:
-	go run cmd/api/main.go
+@run: 
+	go run -v cmd/api/main.go
 
 # Test the application
 @test:
@@ -36,7 +37,7 @@ all: build test
 # Clean the binary
 @clean:
 	echo "Cleaning..."
-	rm -f build/main
+	rm -r build/*
 
 # Live Reload
 [script]
