@@ -61,14 +61,19 @@ func WithContext(ctx context.Context) SeederOpt {
 }
 
 func (sm *SeederManager) Seed() {
+	if os.Getenv("SQLITE_MODE") == "memory" {
+		sm.db_url = "file::memory:?cache=shared"
+	}
 	conn, err := gorm.Open(sqlite.Open(sm.db_url))
 	if err != nil {
 		log.Panicf("Could not connect to db. Error: %v", err)
 	}
 
+	log.Println("migrating db")
 	if err := database.AutoMigrate(conn); err != nil {
 		log.Panicf("Could not migrate models. Error: %v", err)
 	}
+	log.Println("migrating finished")
 
 	var wg sync.WaitGroup
 

@@ -55,7 +55,8 @@ jobs:
   seed:
     runs-on: ubuntu-latest
     env:
-      SEED_DATA_URI: ./internal/seeder/test_sources
+      SEED_DATA_URI: ./internal/seeder/test_source
+      SQLITE_MODE: memory
     steps:
     - uses: actions/checkout@v4
 
