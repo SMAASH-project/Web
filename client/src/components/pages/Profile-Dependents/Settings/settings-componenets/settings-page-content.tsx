@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { useContext } from "react";
 import { ColorContext } from "../settings-logic/color/ColorContext";
 import { useSettings } from "../settings-logic/SettingsContext";
-import { THEMES, applyTheme } from "../settings-logic/themes";
-import { SettingToggle } from "./setting-toggle";
+import { THEMES, applyTheme } from "../settings-logic/Themes";
+import { SettingToggle } from "./Setting-toggle";
 import { ThemePicker } from "./Theme-picker";
 
 export function SettingsPageContent() {

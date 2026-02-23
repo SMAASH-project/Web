@@ -19,7 +19,7 @@ import { ProfilePage } from "./components/pages/profile-dependents/profile/Profi
 import { Wrapper } from "./Wrapper.tsx";
 import { LoginForm } from "./components/forms/Login-form.tsx";
 import { SignupForm } from "./components/forms/Signup-form.tsx";
-import { SettingsPage } from "./components/pages/profile-dependents/settings/settings-page.tsx";
+import { SettingsPage } from "./components/pages/profile-dependents/settings/Settings-page";
 
 const router = createBrowserRouter([
   { path: "/app", element: <App /> },
