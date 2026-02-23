@@ -2,7 +2,7 @@ import Navbar from "@/components/nav/Navbar";
 import { WithOnloadAnimation } from "@/lib/OnloadAnimationNavbar";
 import { CardAnimation } from "@/lib/OnloadAnimationCard";
 import { useSettings } from "./settingsLogic/SettingsContext";
-import { SettingsPageContent } from "./settings-componenets/SettingsPageContent";
+import { SettingsPageContent } from "./settingsComponenets/SettingsPageContent";
 
 export function SettingsPage() {
   const AnimatedNavbar = WithOnloadAnimation(Navbar);
