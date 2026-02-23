@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import React from "react";
+import { generateRandomUsername } from "@/lib/GenerateRandomUsername";
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const [password, setPassword] = React.useState("");
@@ -23,6 +24,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const [email, setEmail] = React.useState("");
   const [error, setError] = React.useState("");
   const navigate = useNavigate();
+  const randomUsername = generateRandomUsername();
 
   const signup = async () => {
     try {
@@ -79,7 +81,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
               <Input
                 id="username"
                 type="text"
-                placeholder="JohnDoe"
+                placeholder={`${randomUsername.prefix}${randomUsername.suffix}`}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
