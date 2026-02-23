@@ -3,9 +3,9 @@ import { Label } from "@/components/ui/label";
 
 import { Button } from "@/components/ui/button";
 import { useContext } from "react";
-import { ColorContext } from "../settings-logic/color/ColorContext";
-import { useSettings } from "../settings-logic/SettingsContext";
-import { THEMES, applyTheme } from "../settings-logic/Themes";
+import { ColorContext } from "../settingsLogic/color/ColorContext";
+import { useSettings } from "../settingsLogic/SettingsContext";
+import { THEMES, applyTheme } from "../settingsLogic/Themes";
 import { SettingToggle } from "./SettingToggle";
 import { ThemePicker } from "./ThemePicker";
 

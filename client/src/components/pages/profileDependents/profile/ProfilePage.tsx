@@ -1,7 +1,7 @@
 import Navbar from "@/components/nav/Navbar";
 import { WithOnloadAnimation } from "@/lib/OnloadAnimationNavbar";
 import CardAnimation from "@/lib/OnloadAnimationCard";
-import { useSettings } from "../settings/settings-logic/SettingsContext";
+import { useSettings } from "../settings/settingsLogic/SettingsContext";
 import { ProfilePageContent } from "./ProfilePageConent";
 
 export function ProfilePage() {

@@ -14,7 +14,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import React from "react";
-import { useSettings } from "../settings/settings-logic/SettingsContext";
+import { useSettings } from "../settings/settingsLogic/SettingsContext";
 
 const Username = "placeholder";
 const Email = "lorem@ipsum.com";

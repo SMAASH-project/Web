@@ -1,7 +1,7 @@
 import Navbar from "@/components/nav/Navbar";
 import { WithOnloadAnimation } from "@/lib/OnloadAnimationNavbar";
 import { CardAnimation } from "@/lib/OnloadAnimationCard";
-import { useSettings } from "./settings-logic/SettingsContext";
+import { useSettings } from "./settingsLogic/SettingsContext";
 import { SettingsPageContent } from "./settings-componenets/SettingsPageContent";
 
 export function SettingsPage() {

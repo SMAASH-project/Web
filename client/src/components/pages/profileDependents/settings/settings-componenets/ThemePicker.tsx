@@ -1,8 +1,8 @@
 import { useContext, useState } from "react";
-import { ColorContext } from "../settings-logic/color/ColorContext";
+import { ColorContext } from "../settingsLogic/color/ColorContext";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useSettings } from "../settings-logic/SettingsContext";
+import { useSettings } from "../settingsLogic/SettingsContext";
 import { ColorPicker } from "@/components/ui/color-picker";
 
 export const ThemePicker = () => {
