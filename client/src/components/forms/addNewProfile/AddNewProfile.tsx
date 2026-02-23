@@ -12,6 +12,9 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { generateRandomUsername } from "@/lib/GenerateRandomUsername";
+import { useProfiles } from "./useProfiles";
+import { useState } from "react";
+import SlimeArt from "../../../assets/SlimeArt.png";
 
 interface AddNewProfileProps {
   open: boolean;
@@ -20,14 +23,31 @@ interface AddNewProfileProps {
 
 export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
   const randomUsername = generateRandomUsername();
+  const { addProfile } = useProfiles();
+  const [username, setUsername] = useState(
+    `${randomUsername.prefix}${randomUsername.suffix}`,
+  );
+  const [profilePicture, setProfilePicture] = useState(SlimeArt);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    addProfile({
+      name: username,
+      avatar: profilePicture,
+    });
+    onOpenChange(false);
+    setUsername(`${randomUsername.prefix}${randomUsername.suffix}`);
+    setProfilePicture(SlimeArt);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <form>
-        <DialogContent className="sm:max-w-sm">
+      <DialogContent className="sm:max-w-sm">
+        <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Edit profile</DialogTitle>
+            <DialogTitle>Create New Profile</DialogTitle>
             <DialogDescription>
-              Make changes to your profile here. Click save when you&apos;re
+              Add a new profile to your account. Click save when you&apos;re
               done.
             </DialogDescription>
           </DialogHeader>
@@ -37,15 +57,17 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
               <Input
                 id="username-1"
                 name="username"
-                defaultValue={`${randomUsername.prefix}${randomUsername.suffix}`}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
               />
             </Field>
             <Field>
-              <Label htmlFor="profile-picture-1">Profile Picture</Label>
+              <Label htmlFor="profile-picture-1">Profile Picture URL</Label>
               <Input
                 id="profile-picture-1"
                 name="profilePicture"
-                defaultValue=""
+                value={profilePicture}
+                onChange={(e) => setProfilePicture(e.target.value)}
               />
             </Field>
           </FieldGroup>
@@ -55,8 +77,8 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
             </DialogClose>
             <Button type="submit">Save changes</Button>
           </DialogFooter>
-        </DialogContent>
-      </form>
+        </form>
+      </DialogContent>
     </Dialog>
   );
 }

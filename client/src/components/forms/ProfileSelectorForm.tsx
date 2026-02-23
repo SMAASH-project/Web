@@ -2,17 +2,28 @@ import { cn } from "@/lib/utils";
 import { useSettings } from "../pages/profileDependents/settings/settingsLogic/SettingsContext";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Label } from "../ui/label";
-import { Plus, Play } from "lucide-react";
-import { Profiles } from "@/lib/Profile";
+import { Plus, Trash2, Play } from "lucide-react";
 import { Button } from "../ui/button";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AddNewProfile } from "./addNewProfile/AddNewProfile";
+import { useProfiles } from "./addNewProfile/useProfiles";
 
 export function ProfileSelectorForm() {
   const { settings } = useSettings();
-  const profiles = Profiles;
+  const { profiles, removeProfile } = useProfiles();
   const profileCount = profiles.length;
   const [showAddProfile, setShowAddProfile] = useState(false);
+  const [isManaging, setIsManaging] = useState(false);
+  const navigate = useNavigate();
+
+  const handleProfileClick = (name: string) => {
+    if (isManaging) {
+      removeProfile(name);
+      return;
+    }
+    navigate("/app/releases");
+  };
 
   return (
     <div className="flex-1 flex items-center justify-center flex-col gap-5">
@@ -30,10 +41,14 @@ export function ProfileSelectorForm() {
         <div className="flex flex-row items-center justify-center gap-6 z-1 flex-wrap">
           <div className="flex flex-row items-center gap-6">
             {profiles.map((p) => (
-              <div key={p.name} className="flex flex-col items-center gap-2">
+              <div
+                key={p.name}
+                className="flex flex-col items-center gap-2"
+                onClick={() => handleProfileClick(p.name)}
+              >
                 <Avatar
                   size="lg"
-                  className={`text-white cursor-pointer ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 border-2 shadow-sm shadow-white/20[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : "border-green-500 border-2 bg-amber-200"} `}
+                  className={`text-white cursor-pointer ${settings.useLiquidGlass ? `bg-white/30 backdrop-blur-lg border-2 shadow-sm shadow-white/20[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] ${isManaging ? "border-red-400" : "border-white/30"}` : `${isManaging ? "border-red-500" : "border-green-500"} border-2 bg-amber-200`} `}
                 >
                   <AvatarImage src={p.avatar} alt={p.name} />
                   <span
@@ -43,7 +58,13 @@ export function ProfileSelectorForm() {
                       "group-hover/avatar:opacity-100",
                     )}
                   >
-                    <Play className={cn("size-10 text-white opacity-100")} />
+                    {isManaging ? (
+                      <Trash2
+                        className={cn("size-10 text-white opacity-100")}
+                      />
+                    ) : (
+                      <Play className={cn("size-10 text-white opacity-100")} />
+                    )}
                   </span>
                   <AvatarFallback>
                     {p.name
@@ -73,9 +94,10 @@ export function ProfileSelectorForm() {
         </div>
         <div className="mb-4 z-1 ">
           <Button
+            onClick={() => setIsManaging((prev) => !prev)}
             className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30" : ""} cursor-pointer`}
           >
-            Manage Profiles
+            {isManaging ? "Done" : "Manage Profiles"}
           </Button>
         </div>
       </div>
