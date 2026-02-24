@@ -5,7 +5,8 @@ export interface Profile {
 
 export interface ProfileContextType {
   profiles: Profile[];
-  addProfile: (profile: Profile) => void;
+  // profilesResponse: Profile[];
+  addProfile: (profile: Profile) => Promise<void>;
   removeProfile: (name: string) => void;
   selectedProfile: Profile | null;
   selectProfile: (name: string) => void;

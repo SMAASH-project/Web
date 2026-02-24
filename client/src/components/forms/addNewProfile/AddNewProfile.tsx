@@ -55,7 +55,7 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
   }, [open]);
   const [profilePicture, setProfilePicture] = useState(SlimeArt);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Validate uniqueness on submit
     if (profiles.some((p) => p.name === username)) {
@@ -66,16 +66,17 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
       setUsername(generateUniqueUsername());
       return;
     }
-
-    addProfile({
-      name: username,
-      avatar: profilePicture,
-    });
-    setError(null);
-    onOpenChange(false);
-    // Prepare a fresh suggestion for the next time the dialog opens.
-    setUsername("");
-    setProfilePicture(SlimeArt);
+    try {
+      setError(null);
+      await addProfile({ name: username, avatar: profilePicture });
+      onOpenChange(false);
+      // Prepare a fresh suggestion for the next time the dialog opens.
+      setUsername("");
+      setProfilePicture(SlimeArt);
+    } catch (err) {
+      console.error("Failed to add profile:", err);
+      setError("Failed to save profile. Please try again.");
+    }
   };
 
   return (
