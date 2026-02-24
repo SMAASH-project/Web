@@ -40,7 +40,7 @@ export function ProfilePageContent() {
       className={`z-0 flex flex-row w-350 h-150 p-10 max-w-full max-h-lg ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20" : "bg-gray-600 border-2 border-green-400"}`}
     >
       {/* Left Section */}
-      <div className="flex-1 flex items-center justify-center flex-col gap-30">
+      <div className="flex-1 flex items-center justify-center flex-col gap-15">
         <div>
           {/*top area */}
           <input
@@ -78,7 +78,11 @@ export function ProfilePageContent() {
         </div>
         <div>
           {/*middle area */}
-          <Label>{username}</Label>
+          <Label
+            className={`font-semibold text-lg text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
+          >
+            {username}
+          </Label>
         </div>
         <div>
           {/*bottom area */}

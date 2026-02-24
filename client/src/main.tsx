@@ -17,7 +17,6 @@ import { NewsPage } from "./components/pages/mainPages/NewsPage.tsx";
 import { NotFoundPage } from "./components/pages/mainPages/NotFoundPage.tsx";
 import { ProfilePage } from "./components/pages/profileDependents/profile/ProfilePage.tsx";
 import { ProfileSelectorForm } from "./components/forms/ProfileSelectorForm.tsx";
-
 import { Wrapper } from "./Wrapper.tsx";
 import { LoginForm } from "./components/forms/LoginForm.tsx";
 import { SignupForm } from "./components/forms/SignUpForm.tsx";

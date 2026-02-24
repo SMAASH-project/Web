@@ -4,41 +4,13 @@ import { Label } from "@radix-ui/react-dropdown-menu";
 import { useSettings } from "../pages/profileDependents/settings/settingsLogic/SettingsContext";
 import { NavMenu } from "./NavMenu";
 import AccountMenu from "./AccountMenu";
+import { useProfiles } from "../forms/addNewProfile/useProfiles";
+import { Link } from "react-router";
 
 const Navbar = () => {
-  // const { userId } = React.useContext(AuthContext);
   const { settings } = useSettings();
-  // const [username, setUsername] = useState("");
-
-  // useEffect(() => {
-  //   const fetchUsername = async () => {
-  //     if (!userId) return;
-
-  //     try {
-  //       const response = await fetch(
-  //         `http://localhost:8080/api/users/${userId}`,
-  //         {
-  //           method: "GET",
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //           },
-  //         },
-  //       );
-
-  //       if (!response.ok) {
-  //         console.error("Failed to fetch username");
-  //         return;
-  //       }
-
-  //       const data = await response.json();
-  //       setUsername(data.email);
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   };
-
-  //   fetchUsername();
-  // });
+  const { selectedProfile } = useProfiles();
+  const username = selectedProfile?.name ?? "PlaceholderUserName";
   return (
     <nav
       className={`absolute top-0 left-0 right-0 flex justify-between items-center p-4 max-w-full w-full border-b-2 ${
@@ -48,14 +20,14 @@ const Navbar = () => {
       }`}
     >
       <div className="navbar-left"></div>
-      <div className="navbar-center">
+      <div className="flex items-center">
         <NavMenu useLiquidGlass={settings.useLiquidGlass} />
       </div>
       <div className="flex items-center gap-4">
         <Label
           className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
         >
-          Logged in as {/*{username} */}
+          Logged in as <Link to="/app/profile/">{username}</Link>
         </Label>
         <AccountMenu />
       </div>
