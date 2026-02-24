@@ -29,3 +29,10 @@ func MaxBy[T any, U ~int | ~uint | ~float32](in []T, f func(T) U) int {
 
 	return int(highest)
 }
+
+func Must[T any](val T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
