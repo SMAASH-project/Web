@@ -1,6 +1,4 @@
 import { Label } from "@radix-ui/react-dropdown-menu";
-// import { AuthContext } from "../../context/AuthContext";
-// import React, { useEffect, useState } from "react";
 import { useSettings } from "../pages/profileDependents/settings/settingsLogic/SettingsContext";
 import { NavMenu } from "./NavMenu";
 import AccountMenu from "./AccountMenu";
@@ -20,7 +18,7 @@ const Navbar = () => {
       }`}
     >
       <div className="navbar-left"></div>
-      <div className="flex items-center">
+      <div className="items-center ml-55">
         <NavMenu useLiquidGlass={settings.useLiquidGlass} />
       </div>
       <div className="flex items-center gap-4">
