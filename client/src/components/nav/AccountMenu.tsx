@@ -19,7 +19,7 @@ export default function AccountMenu() {
 
   const logout = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/auth/logout", {
+      const response = await fetch("/api/auth/logout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

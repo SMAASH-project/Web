@@ -30,7 +30,7 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
         throw new Error("User is not logged in");
       }
 
-      const response = await fetch("http://localhost:8080/api/auth/profiles", {
+      const response = await fetch("/api/auth/profiles", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
