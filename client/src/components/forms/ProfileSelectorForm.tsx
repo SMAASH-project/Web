@@ -11,7 +11,7 @@ import { useProfiles } from "./addNewProfile/useProfiles";
 
 export function ProfileSelectorForm() {
   const { settings } = useSettings();
-  const { profiles, removeProfile } = useProfiles();
+  const { profiles, removeProfile, selectProfile } = useProfiles();
   const profileCount = profiles.length;
   const [showAddProfile, setShowAddProfile] = useState(false);
   const [isManaging, setIsManaging] = useState(false);
@@ -22,6 +22,8 @@ export function ProfileSelectorForm() {
       removeProfile(name);
       return;
     }
+    // set the selected profile in context so other pages can render it
+    selectProfile(name);
     navigate("/app/releases");
   };
 

@@ -72,6 +72,12 @@ export default function AccountMenu() {
           <DropdownMenuItem disabled>Support</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
+        <Link to="/app/profile-selector">
+          <DropdownMenuItem className="cursor-pointer">
+            Change Profile
+          </DropdownMenuItem>
+        </Link>
+        <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
             Log out

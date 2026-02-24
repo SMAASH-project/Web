@@ -7,7 +7,7 @@ import { AuthProvider } from "./context/AuthProvider";
 import { SettingsProvider } from "./components/pages/profileDependents/settings/settingsLogic/SettingsContext.tsx";
 import { NavbarProvider } from "./context/NavbarContext";
 import { ColorProvider } from "./components/pages/profileDependents/settings/settingsLogic/color/ColorProvider.tsx";
-import { ProfileProvider } from "./components/forms/addNewProfile/ProfilesContext.tsx";
+import { ProfileProvider } from "@/components/forms/addNewProfile/ProfilesContext";
 import { PasswordResetForm } from "./components/forms/PasswordResetForm.tsx";
 import { ReleasesPage } from "./components/pages/mainPages/ReleasesPage.tsx";
 import { AboutPage } from "./components/pages/mainPages/AboutPage.tsx";
