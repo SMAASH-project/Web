@@ -1,4 +1,5 @@
 import { newsPosts } from "@/lib/PageTypes";
+import { formatDateTime } from "@/lib/utils";
 import Navbar from "../../nav/Navbar";
 import { Card } from "@/components/ui/card";
 import { useSettings } from "../profileDependents/settings/settingsLogic/SettingsContext";
@@ -34,7 +35,7 @@ export function NewsPage() {
                   <Label
                     className={`text-white text-lg ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""} italic text-right`}
                   >
-                    {post.createdAt.toLocaleDateString()}
+                    {formatDateTime(post.createdAt)}
                   </Label>
                 </span>
                 <Label
