@@ -5,6 +5,9 @@ import { Card } from "@/components/ui/card";
 import { useSettings } from "../profileDependents/settings/settingsLogic/SettingsContext";
 import { Label } from "@/components/ui/label";
 import { AddNews } from "./mainPageComponents/AddNews";
+import { RemoveButton } from "./mainPageComponents/RemoveButton";
+import { EditButton } from "./mainPageComponents/EditButton";
+import { ButtonGroup } from "@/components/ui/button-group";
 export function NewsPage() {
   const { settings } = useSettings();
   return (
@@ -37,6 +40,10 @@ export function NewsPage() {
                   >
                     {formatDateTime(post.createdAt)}
                   </Label>
+                  <ButtonGroup>
+                    <EditButton />
+                    <RemoveButton />
+                  </ButtonGroup>
                 </span>
                 <Label
                   className={`text-white text-sm ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""} text-justify`}
