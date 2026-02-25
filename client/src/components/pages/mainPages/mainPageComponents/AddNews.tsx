@@ -14,19 +14,30 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SquarePen, Trash2, MessageSquarePlus } from "lucide-react";
+import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
 
 export function AddNews() {
+  const { settings } = useSettings();
   return (
     <Dialog>
       <DialogTrigger>
-        <ButtonGroup orientation="horizontal">
-          <Button className="cursor-pointer">
+        <ButtonGroup
+          orientation="horizontal"
+          className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30" : ""}`}
+        >
+          <Button
+            className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30" : ""} cursor-pointer`}
+          >
             <MessageSquarePlus />
           </Button>
-          <Button className="cursor-pointer">
+          <Button
+            className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30" : ""} cursor-pointer`}
+          >
             <SquarePen />
           </Button>
-          <Button className="cursor-pointer">
+          <Button
+            className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30" : ""} cursor-pointer`}
+          >
             <Trash2 />
           </Button>
         </ButtonGroup>
