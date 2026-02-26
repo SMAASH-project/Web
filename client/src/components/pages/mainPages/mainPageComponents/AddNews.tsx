@@ -61,9 +61,12 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
           </Field>
           <Field>
             <Label>Content</Label>
-            <Input
+            <textarea
               value={content}
-              onChange={(e) => setContent((e.target as HTMLInputElement).value)}
+              onChange={(e) =>
+                setContent((e.target as HTMLTextAreaElement).value)
+              }
+              className="w-full min-h-32 rounded-md bg-input px-3 py-2 text-sm"
             />
           </Field>
         </FieldGroup>

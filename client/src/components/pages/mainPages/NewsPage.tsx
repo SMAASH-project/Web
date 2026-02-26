@@ -13,6 +13,7 @@ import { Search } from "./mainPageComponents/Search";
 export function NewsPage() {
   const { settings } = useSettings();
   const [posts, setPosts] = React.useState<NewsPost[]>(newsPosts);
+  const IsAdmin = true; // Replace with actual admin check
 
   function handleCreate(post: NewsPost) {
     setPosts((p) => [post, ...p]);
@@ -26,8 +27,14 @@ export function NewsPage() {
             orientation="horizontal"
             className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30" : ""}`}
           >
-            <AddNews onCreate={handleCreate} />
-            <Search />
+            {IsAdmin ? (
+              <>
+                <AddNews onCreate={handleCreate} />
+                <Search />
+              </>
+            ) : (
+              <Search />
+            )}
           </ButtonGroup>
 
           <Label
@@ -54,21 +61,25 @@ export function NewsPage() {
                   >
                     {formatDateTime(post.createdAt)}
                   </Label>
-                  <ButtonGroup>
-                    <EditButton
-                      post={post}
-                      onUpdate={(p) =>
-                        setPosts((list) =>
-                          list.map((it) => (it.id === p.id ? p : it)),
-                        )
-                      }
-                    />
-                    <RemoveButton
-                      onConfirm={() =>
-                        setPosts((p) => p.filter((x) => x.id !== post.id))
-                      }
-                    />
-                  </ButtonGroup>
+                  {IsAdmin ? (
+                    <ButtonGroup>
+                      <EditButton
+                        post={post}
+                        onUpdate={(p) =>
+                          setPosts((list) =>
+                            list.map((it) => (it.id === p.id ? p : it)),
+                          )
+                        }
+                      />
+                      <RemoveButton
+                        onConfirm={() =>
+                          setPosts((p) => p.filter((x) => x.id !== post.id))
+                        }
+                      />
+                    </ButtonGroup>
+                  ) : (
+                    <></>
+                  )}
                 </span>
                 <Label
                   className={`text-white text-sm ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""} text-justify`}
