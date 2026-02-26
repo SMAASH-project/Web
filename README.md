@@ -20,9 +20,9 @@ This section details how to get the source of project on your local machine to d
   - Just: a script runner (to replace Make), which we use to make running certain commands, like running, building, testing and seeding much more convinient. Installation instructions [here](https://github.com/casey/just).
   
   >[!NOTE]
-  > This documentation assumes that you have Just installed. If you choose not to use Just, you can run the commands defined in the [justfile](jusfile) manually.
+  > This documentation assumes that you have Just installed. If you choose not to use Just, you can run the commands defined in the [justfile](/jusfile) manually.
   
-  -Go Air: a daemon that watches for changes and dynamically recompiles your Go projects while they're running, so for example, you don't have to restart the backend server when you make a change. Air is started by running `just watch`, which, if you don't have air installed, will ask you if you want to install it on your system, making installation a breeze.
+  - Go Air: a daemon that watches for changes and dynamically recompiles your Go projects while they're running, so for example, you don't have to restart the backend server when you make a change. Air is started by running `just watch`, which, if you don't have air installed, will ask you if you want to install it on your system, making installation a breeze.
 ***
 
 1 - Clone the repo:
@@ -63,6 +63,8 @@ The project contains the following folders:
 + **cmd**: contains the entry point(s) of programs included in the project (api and seeder in our case)
 + **docs**: contains documentation
 + **internal** contains the source code of the Go backend server
+
+The documentation of the endpoints can be found in [/docs/endpoins.md](/docs/endpoints.md). For the schema of the DTOs, see inside the [/internal/DTOs](/internal/DTOs/) folder.
 
 For wrintig code, refer to the style guides and idioms of the languages we're using:
  - [Go standard](https://go.dev/doc/effective_go)

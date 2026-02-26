@@ -35,7 +35,7 @@ func (a AuthnController) SignUp(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dtos.UserToDTO(newUser))
+	c.JSON(http.StatusCreated, dtos.UserToDTO(newUser))
 }
 
 func (a AuthnController) Login(c *gin.Context) {
