@@ -74,7 +74,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
-          <Button onClick={handleSave}>Save changes</Button>
+          <Button onClick={handleSave}>Create Article</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

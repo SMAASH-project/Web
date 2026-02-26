@@ -11,7 +11,7 @@ const Navbar = () => {
   const username = selectedProfile?.name ?? "PlaceholderUserName";
   return (
     <nav
-      className={`absolute top-0 left-0 right-0 flex justify-between items-center p-4 max-w-full w-full border-b-2 ${
+      className={`absolute top-0 left-0 right-0 flex justify-between items-center p-4 max-w-full w-full border-b-2 z-50 ${
         settings.useLiquidGlass
           ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20"
           : "bg-linear-to-b from-gray-700 to-gray-500 [border-image:linear-gradient(to_right,var(--color-green-400),var(--color-green-600))_1]"

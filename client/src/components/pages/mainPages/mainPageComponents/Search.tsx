@@ -14,9 +14,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
 import { Search as SearchIcon } from "lucide-react";
+import { useState } from "react";
 
-export function Search() {
+export function Search({ onSearch }: { onSearch: (query: string) => void }) {
   const { settings } = useSettings();
+  const [query, setQuery] = useState("");
+
+  const handleSearch = () => {
+    onSearch(query);
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -29,15 +36,22 @@ export function Search() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Search News</DialogTitle>
-          <DialogDescription>Type to search posts</DialogDescription>
+          <DialogDescription>Type to search posts by title</DialogDescription>
         </DialogHeader>
         <FieldGroup>
           <Field>
             <Label>Search</Label>
-            <Input placeholder="Search posts..." />
+            <Input
+              placeholder="Search posts..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
           </Field>
         </FieldGroup>
         <DialogFooter>
+          <Button variant="outline" onClick={handleSearch}>
+            Search
+          </Button>
           <DialogClose asChild>
             <Button variant="outline">Close</Button>
           </DialogClose>
