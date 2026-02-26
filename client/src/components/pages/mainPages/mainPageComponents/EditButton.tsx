@@ -51,7 +51,7 @@ export function EditButton({
           <SquarePen />
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-full max-w-3xl">
+      <DialogContent className="w-full max-w-4xl! sm:max-w-4xl! overflow-visible">
         <DialogHeader>
           <DialogTitle>Edit News Article</DialogTitle>
         </DialogHeader>

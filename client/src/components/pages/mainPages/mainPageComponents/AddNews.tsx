@@ -47,7 +47,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
           <MessageSquarePlus />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="w-full max-w-4xl! sm:max-w-4xl! overflow-visible">
         <DialogHeader>
           <DialogTitle>Create new News Article</DialogTitle>
         </DialogHeader>
