@@ -15,6 +15,8 @@ import { FieldGroup, Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { NewsPost } from "@/lib/PageTypes";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export function EditButton({
   post,
@@ -64,7 +66,7 @@ export function EditButton({
             />
           </Field>
           <Field>
-            <Label>Content</Label>
+            <Label>Content (Markdown supported)</Label>
             <textarea
               value={content}
               onChange={(e) =>
@@ -72,13 +74,25 @@ export function EditButton({
               }
               className="w-full min-h-32 rounded-md bg-input px-3 py-2 text-sm"
             />
+            {content && (
+              <div className="mt-2 rounded-md border bg-gray-800/60 p-3 max-h-64 overflow-y-auto prose prose-sm prose-invert max-w-none">
+                <Label className="text-xs mb-1">Preview</Label>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {content}
+                </ReactMarkdown>
+              </div>
+            )}
           </Field>
         </FieldGroup>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline" className="cursor-pointer">
+              Cancel
+            </Button>
           </DialogClose>
-          <Button onClick={handleSave}>Save changes</Button>
+          <Button onClick={handleSave} className="cursor-pointer">
+            Save changes
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

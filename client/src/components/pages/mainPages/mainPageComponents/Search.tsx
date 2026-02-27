@@ -49,11 +49,17 @@ export function Search({ onSearch }: { onSearch: (query: string) => void }) {
           </Field>
         </FieldGroup>
         <DialogFooter>
-          <Button variant="outline" onClick={handleSearch}>
+          <Button
+            variant="outline"
+            className="cursor-pointer"
+            onClick={handleSearch}
+          >
             Search
           </Button>
           <DialogClose asChild>
-            <Button variant="outline">Close</Button>
+            <Button variant="outline" className="cursor-pointer">
+              Close
+            </Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

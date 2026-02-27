@@ -10,6 +10,8 @@ import { RemoveButton } from "./mainPageComponents/RemoveButton";
 import { EditButton } from "./mainPageComponents/EditButton";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Search } from "./mainPageComponents/Search";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export function NewsPage() {
   const { settings } = useSettings();
@@ -138,15 +140,17 @@ export function NewsPage() {
                     <></>
                   )}
                 </span>
-                <Label
+                <div
                   className={`text-white text-sm ${
                     settings.useLiquidGlass
                       ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
                       : ""
-                  } text-justify`}
+                  } text-justify prose prose-sm prose-invert max-w-none`}
                 >
-                  {post.content}
-                </Label>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {post.content}
+                  </ReactMarkdown>
+                </div>
               </li>
             </Card>
           ))}

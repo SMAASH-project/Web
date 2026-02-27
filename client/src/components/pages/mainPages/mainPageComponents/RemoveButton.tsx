@@ -33,10 +33,13 @@ export function RemoveButton({ onConfirm }: { onConfirm?: () => void }) {
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline" className="cursor-pointer">
+              Cancel
+            </Button>
           </DialogClose>
           <DialogClose asChild>
             <Button
+              className="cursor-pointer"
               variant="destructive"
               onClick={() => {
                 onConfirm?.();
