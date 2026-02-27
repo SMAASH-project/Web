@@ -7,14 +7,15 @@ import { useSettings } from "../settings/settingsLogic/SettingsContext";
 import { UpdateSheet } from "./UpdateSheet";
 import { ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const username = "PlaceholderUserName";
+import { useProfiles } from "@/components/forms/addNewProfile/useProfiles";
 
 export function ProfilePageContent() {
   const pfpinputRef = useRef<HTMLInputElement>(null);
-  const [avatarSrc, setAvatarSrc] = useState<string>(
-    "./src/assets/SlimeArt.png",
-  );
+  const { selectedProfile } = useProfiles();
+  // local avatarSrc is only used when the user picks a local file (blob)
+  // otherwise we display the selectedProfile.avatar
+  const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
+  const username = selectedProfile?.name ?? "PlaceholderUserName";
   const { settings } = useSettings();
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export function ProfilePageContent() {
       className={`z-0 flex flex-row w-350 h-150 p-10 max-w-full max-h-lg ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20" : "bg-gray-600 border-2 border-green-400"}`}
     >
       {/* Left Section */}
-      <div className="flex-1 flex items-center justify-center flex-col gap-30">
+      <div className="flex-1 flex items-center justify-center flex-col gap-15">
         <div>
           {/*top area */}
           <input
@@ -54,7 +55,14 @@ export function ProfilePageContent() {
               size="lg"
               className={`text-white cursor-pointer ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 border-2 shadow-sm shadow-white/20[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : "border-green-500 border-2 bg-amber-200"} `}
             >
-              <AvatarImage src={avatarSrc} alt={username} />
+              <AvatarImage
+                src={
+                  avatarSrc ??
+                  selectedProfile?.avatar ??
+                  "./src/assets/SlimeArt.png"
+                }
+                alt={username}
+              />
               <span
                 aria-hidden
                 className={cn(
@@ -70,7 +78,11 @@ export function ProfilePageContent() {
         </div>
         <div>
           {/*middle area */}
-          <Label>{username}</Label>
+          <Label
+            className={`font-semibold text-lg text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
+          >
+            {username}
+          </Label>
         </div>
         <div>
           {/*bottom area */}

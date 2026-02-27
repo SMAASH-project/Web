@@ -13,7 +13,7 @@ export function Wrapper({ children }: WrapperProps) {
 
   return (
     <div
-      className="text-white w-screen h-screen absolute top-0 left-0 flex items-center justify-center"
+      className="text-white w-screen min-h-screen absolute top-0 left-0 flex items-center justify-center"
       style={{
         backgroundImage: `linear-gradient(to right, ${colorLeft}, ${colorMiddle}, ${colorRight})`,
       }}

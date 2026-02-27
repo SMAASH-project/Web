@@ -12,6 +12,9 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { generateRandomUsername } from "@/lib/GenerateRandomUsername";
+import { useProfiles } from "./useProfiles";
+import { useEffect, useState } from "react";
+import SlimeArt from "../../../assets/SlimeArt.png";
 
 interface AddNewProfileProps {
   open: boolean;
@@ -19,15 +22,71 @@ interface AddNewProfileProps {
 }
 
 export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
-  const randomUsername = generateRandomUsername();
+  const { addProfile, profiles } = useProfiles();
+  const [username, setUsername] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  // Generate a username that's not already in `profiles`.
+  const generateUniqueUsername = () => {
+    const existing = new Set(profiles.map((p) => p.name));
+    // Try a few times to get a random username that isn't taken.
+    for (let i = 0; i < 20; i++) {
+      const r = generateRandomUsername();
+      const candidate = `${r.prefix}${r.suffix}`;
+      if (!existing.has(candidate)) return candidate;
+    }
+    // Fallback: append a counter to ensure uniqueness.
+    let counter = 1;
+    while (true) {
+      const r = generateRandomUsername();
+      const candidate = `${r.prefix}${r.suffix}-${counter}`;
+      if (!existing.has(candidate)) return candidate;
+      counter++;
+    }
+  };
+
+  // When the dialog opens, pick a fresh unique username.
+  useEffect(() => {
+    if (open) {
+      setError(null);
+      setUsername(generateUniqueUsername());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+  const [profilePicture, setProfilePicture] = useState(SlimeArt);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // Validate uniqueness on submit
+    if (profiles.some((p) => p.name === username)) {
+      setError(
+        "That username is already in use. Please choose a different one.",
+      );
+      // Rerandomize so the user gets a fresh suggestion
+      setUsername(generateUniqueUsername());
+      return;
+    }
+    try {
+      setError(null);
+      await addProfile({ name: username, avatar: profilePicture });
+      onOpenChange(false);
+      // Prepare a fresh suggestion for the next time the dialog opens.
+      setUsername("");
+      setProfilePicture(SlimeArt);
+    } catch (err) {
+      console.error("Failed to add profile:", err);
+      setError("Failed to save profile. Please try again.");
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <form>
-        <DialogContent className="sm:max-w-sm">
+      <DialogContent className="sm:max-w-sm">
+        <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Edit profile</DialogTitle>
+            <DialogTitle>Create New Profile</DialogTitle>
             <DialogDescription>
-              Make changes to your profile here. Click save when you&apos;re
+              Add a new profile to your account. Click save when you&apos;re
               done.
             </DialogDescription>
           </DialogHeader>
@@ -35,17 +94,33 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
             <Field>
               <Label htmlFor="username-1">Username</Label>
               <Input
+                type="text"
                 id="username-1"
                 name="username"
-                defaultValue={`${randomUsername.prefix}${randomUsername.suffix}`}
+                value={username}
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                  if (error) setError(null);
+                }}
               />
             </Field>
+            {error ? (
+              <div className="mt-1 text-sm text-red-600" role="alert">
+                {error}
+              </div>
+            ) : null}
             <Field>
               <Label htmlFor="profile-picture-1">Profile Picture</Label>
               <Input
+                type="file"
                 id="profile-picture-1"
                 name="profilePicture"
-                defaultValue=""
+                onChange={(e) => {
+                  if (e.target.files) {
+                    const file = e.target.files[0];
+                    setProfilePicture(URL.createObjectURL(file));
+                  }
+                }}
               />
             </Field>
           </FieldGroup>
@@ -55,8 +130,8 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
             </DialogClose>
             <Button type="submit">Save changes</Button>
           </DialogFooter>
-        </DialogContent>
-      </form>
+        </form>
+      </DialogContent>
     </Dialog>
   );
 }
