@@ -93,7 +93,7 @@ export function NewsPage() {
         <ul className="list-disc pl-5 w-full">
           {visiblePosts.map((post) => (
             <Card
-              className={`z-0 flex flex-row p-10 mb-5 max-w-full max-h-lg ${
+              className={`z-0 flex flex-row p-10 mb-5 max-w-full ${
                 settings.useLiquidGlass
                   ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20"
                   : "bg-gray-600 border-2 border-green-400"
@@ -147,7 +147,7 @@ export function NewsPage() {
                         src={post.image}
                         alt={post.imageAlt}
                         className="w-full rounded-md object-cover"
-                        style={{ height: `${post.imageSize}%` }}
+                        style={{ maxHeight: `${post.imageSize}vh` }}
                       />
                     )}
                     <div
