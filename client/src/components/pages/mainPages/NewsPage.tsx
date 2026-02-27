@@ -1,15 +1,15 @@
-import { newsPosts, type NewsPost } from "@/lib/PageTypes";
+import { newsPosts, type NewsPost } from "@/types/PageTypes";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { formatDateTime } from "@/lib/utils";
 import Navbar from "../../nav/Navbar";
 import { Card } from "@/components/ui/card";
 import { useSettings } from "../profileDependents/settings/settingsLogic/SettingsContext";
 import { Label } from "@/components/ui/label";
-import { AddNews } from "./mainPageComponents/AddNews";
-import { RemoveButton } from "./mainPageComponents/RemoveButton";
-import { EditButton } from "./mainPageComponents/EditButton";
+import { AddNews } from "./NewsPageComponents/AddNews";
+import { RemoveButton } from "./NewsPageComponents/RemoveButton";
+import { EditButton } from "./NewsPageComponents/EditButton";
 import { ButtonGroup } from "@/components/ui/button-group";
-import { Search } from "./mainPageComponents/Search";
+import { Search } from "./NewsPageComponents/Search";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -140,17 +140,52 @@ export function NewsPage() {
                     <></>
                   )}
                 </span>
-                <div
-                  className={`text-white text-sm ${
-                    settings.useLiquidGlass
-                      ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                      : ""
-                  } text-justify prose prose-sm prose-invert max-w-none`}
-                >
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {post.content}
-                  </ReactMarkdown>
-                </div>
+                {post.imagePosition === "Top" ? (
+                  <div className="flex flex-col gap-2 w-full">
+                    {post.image && (
+                      <img
+                        src={post.image}
+                        alt={post.imageAlt}
+                        className="w-full rounded-md object-cover"
+                        style={{ height: `${post.imageSize}%` }}
+                      />
+                    )}
+                    <div
+                      className={`text-white text-sm ${
+                        settings.useLiquidGlass
+                          ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
+                          : ""
+                      } text-justify prose prose-sm prose-invert max-w-none`}
+                    >
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {post.content}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-row gap-4 w-full">
+                    <div
+                      className={`text-white text-sm ${
+                        settings.useLiquidGlass
+                          ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
+                          : ""
+                      } text-justify prose prose-sm prose-invert max-w-none`}
+                      style={{ width: `${100 - (post.imageSize ?? 0)}%` }}
+                    >
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {post.content}
+                      </ReactMarkdown>
+                    </div>
+                    {post.image && (
+                      <img
+                        src={post.image}
+                        alt={post.imageAlt}
+                        className="rounded-md object-cover"
+                        style={{ width: `${post.imageSize}%` }}
+                      />
+                    )}
+                  </div>
+                )}
               </li>
             </Card>
           ))}

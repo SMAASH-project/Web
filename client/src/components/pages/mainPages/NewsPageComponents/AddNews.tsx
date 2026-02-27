@@ -13,11 +13,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MessageSquarePlus } from "lucide-react";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { DateTime } from "luxon";
-import type { NewsPost } from "@/lib/PageTypes";
+import type { NewsPost } from "@/types/PageTypes";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { RadioGroupChoiceCard } from "./RadioGroupChoiceCard";
+import { ResizableVertical } from "./ResizeableVertical";
+import { ResizableHorizontal } from "./ResizeableHorizontal";
 
 export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
   const { settings } = useSettings();
@@ -25,18 +28,41 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [imagePosition, setImagePosition] = useState<"Top" | "Right">("Top");
+  const [image, setImage] = useState("");
+  const [imageAlt, setImageAlt] = useState("");
+  const [imageSize, setImageSize] = useState(25);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageAlt(file.name.replace(/\.[^.]+$/, ""));
+    const reader = new FileReader();
+    reader.onload = () => setImage(reader.result as string);
+    reader.readAsDataURL(file);
+  }
 
   function handleSave() {
     const newPost: NewsPost = {
       id: Date.now().toString(),
       title,
       content,
+      image,
+      imageAlt,
+      imagePosition,
+      imageSize,
       createdAt: DateTime.now() as ReturnType<typeof DateTime.now>,
     };
 
     onCreate?.(newPost);
     setTitle("");
     setContent("");
+    setImage("");
+    setImageAlt("");
+    setImagePosition("Top");
+    setImageSize(25);
+    if (fileInputRef.current) fileInputRef.current.value = "";
     setOpen(false);
   }
 
@@ -49,7 +75,11 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
           <MessageSquarePlus />
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-full max-w-4xl! sm:max-w-4xl! overflow-visible">
+      <DialogContent
+        className="w-full max-w-4xl! sm:max-w-4xl! overflow-visible"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>Create new News Article</DialogTitle>
         </DialogHeader>
@@ -62,6 +92,32 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
             />
           </Field>
           <Field>
+            <Label>Image Position</Label>
+            <div className="flex flex-row gap-4 items-start">
+              <div className="flex flex-col gap-2 max-w-sm">
+                <RadioGroupChoiceCard
+                  value={imagePosition}
+                  onValueChange={(v) => setImagePosition(v as "Top" | "Right")}
+                />
+                <Input
+                  type="file"
+                  accept="image/*"
+                  id="article-image"
+                  name="articleImage"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                />
+              </div>
+              <div className="ml-auto">
+                {imagePosition === "Top" ? (
+                  <ResizableVertical onImageSizeChange={setImageSize} />
+                ) : (
+                  <ResizableHorizontal onImageSizeChange={setImageSize} />
+                )}
+              </div>
+            </div>
+          </Field>
+          <Field>
             <Label>Content (Markdown supported)</Label>
             <textarea
               value={content}
@@ -72,7 +128,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
             />
             {content && (
               <div className="mt-2 rounded-md border bg-gray-800/60 p-3 max-h-64 overflow-y-auto prose prose-sm prose-invert max-w-none">
-                <Label className="text-xs mb-1">Preview</Label>
+                <Label className="text-xs mb-1">Preview Text</Label>
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {content}
                 </ReactMarkdown>
