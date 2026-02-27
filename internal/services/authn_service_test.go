@@ -139,7 +139,7 @@ func (mp *MockProfilesRepo) Delete(c context.Context, id uint) error {
 	return nil
 }
 
-var authService = services.NewAuthenticationService(&MockUserRepo{}, &MockProfilesRepo{})
+var authService = services.NewAuthenticationService(&MockUserRepo{})
 
 func TestSignup(t *testing.T) {
 	newUser := &models.User{Email: "test@example.com", PasswordHash: "test1234", RoleID: 2}

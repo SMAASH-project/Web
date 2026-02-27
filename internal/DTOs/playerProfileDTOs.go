@@ -2,6 +2,7 @@ package dtos
 
 import (
 	"smaash-web/internal/models"
+	"time"
 )
 
 type PlayerProfileReadDTO struct {
@@ -29,5 +30,21 @@ func PlayerProfileToReadDTO(profile models.PlayerProfile) PlayerProfileReadDTO {
 		DisplayName: profile.DisplayName,
 		Coins:       profile.Coins,
 		LastLogin:   profile.LastLogin.Format("2006-01-02 15:04:05"),
+	}
+}
+
+func CreateDTOToPlayerProfile(p PlayerProfileCreateDto) models.PlayerProfile {
+	return models.PlayerProfile{
+		DisplayName: p.DisplayName,
+		UserID:      p.UserID,
+		Coins:       1000,
+		LastLogin:   time.Now(),
+	}
+}
+
+func UpdateDTOToPlayerProfile(p PlayerProfileUpdateDto) models.PlayerProfile {
+	return models.PlayerProfile{
+		DisplayName: p.DisplayName,
+		Coins:       int64(p.Coins),
 	}
 }
