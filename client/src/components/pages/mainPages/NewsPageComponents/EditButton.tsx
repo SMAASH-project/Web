@@ -1,4 +1,3 @@
-import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DialogTrigger,
@@ -20,6 +19,7 @@ import remarkGfm from "remark-gfm";
 import { RadioGroupChoiceCard } from "./RadioGroupChoiceCard";
 import { ResizableVertical } from "./ResizableVertical";
 import { ResizableHorizontal } from "./ResizableHorizontal";
+import { useNewsForm } from "./newsPageLogic/useNewsForm";
 
 export function EditButton({
   post,
@@ -29,49 +29,36 @@ export function EditButton({
   onUpdate?: (p: NewsPost) => void;
 }) {
   const { settings } = useSettings();
-  const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState(post.title ?? "");
-  const [content, setContent] = useState(post.content ?? "");
-  const [imagePosition, setImagePosition] = useState<"Top" | "Right">(
-    post.imagePosition ?? "Top",
-  );
-  const [image, setImage] = useState(post.image ?? "");
-  const [imageAlt, setImageAlt] = useState(post.imageAlt ?? "");
-  const [imageSize, setImageSize] = useState(post.imageSize ?? 25);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setImageAlt(file.name.replace(/\.[^.]+$/, ""));
-    const reader = new FileReader();
-    reader.onload = () => setImage(reader.result as string);
-    reader.readAsDataURL(file);
-  }
+  const {
+    open,
+    setOpen,
+    title,
+    setTitle,
+    content,
+    setContent,
+    imagePosition,
+    setImagePosition,
+    imageAlt,
+    setImageSize,
+    fileInputRef,
+    handleFileChange,
+    clearImage,
+    resetForm,
+    getFormValues,
+  } = useNewsForm({ initial: post });
 
-  // When dialog opens, ensure inputs reflect current post
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
     if (isOpen) {
-      setTitle(post.title ?? "");
-      setContent(post.content ?? "");
-      setImagePosition(post.imagePosition ?? "Top");
-      setImage(post.image ?? "");
-      setImageAlt(post.imageAlt ?? "");
-      setImageSize(post.imageSize ?? 25);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      resetForm(post);
     }
   };
 
   const handleSave = () => {
     onUpdate?.({
       ...post,
-      title,
-      content,
-      image,
-      imageAlt,
-      imagePosition,
-      imageSize,
+      ...getFormValues(),
     });
     setOpen(false);
   };
@@ -125,12 +112,7 @@ export function EditButton({
                     <button
                       type="button"
                       className="shrink-0 cursor-pointer rounded-md p-0.5 hover:bg-muted hover:text-red-500"
-                      onClick={() => {
-                        setImage("");
-                        setImageAlt("");
-                        if (fileInputRef.current)
-                          fileInputRef.current.value = "";
-                      }}
+                      onClick={clearImage}
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>

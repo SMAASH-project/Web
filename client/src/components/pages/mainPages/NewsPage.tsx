@@ -1,5 +1,3 @@
-import { newsPosts, type NewsPost } from "@/types/PageTypes";
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { formatDateTime } from "@/lib/utils";
 import Navbar from "../../nav/Navbar";
 import { Card } from "@/components/ui/card";
@@ -12,50 +10,20 @@ import { ButtonGroup } from "@/components/ui/button-group";
 import { Search } from "./NewsPageComponents/Search";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useNewsPosts } from "./NewsPageComponents/newsPageLogic/useNewsPosts";
 
 export function NewsPage() {
   const { settings } = useSettings();
-  const [allPosts, setAllPosts] = useState<NewsPost[]>(newsPosts);
-  const [postsToShow, setPostsToShow] = useState(2);
-  const [searchQuery, setSearchQuery] = useState("");
   const IsAdmin = true; // Replace with actual admin check
-  const containerRef = useRef<HTMLDivElement>(null);
 
-  const visiblePosts = useMemo(() => {
-    if (searchQuery) {
-      return allPosts.filter((post) =>
-        post.title.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
-    }
-    return allPosts.slice(0, postsToShow);
-  }, [allPosts, postsToShow, searchQuery]);
-
-  const handleScroll = useCallback(() => {
-    if (containerRef.current && !searchQuery) {
-      const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
-      if (scrollTop + clientHeight >= scrollHeight - 5) {
-        // 5px buffer
-        setPostsToShow((prev) => prev + 2);
-      }
-    }
-  }, [searchQuery]);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener("scroll", handleScroll);
-      return () => container.removeEventListener("scroll", handleScroll);
-    }
-  }, [handleScroll]);
-
-  function handleCreate(post: NewsPost) {
-    setAllPosts((p) => [post, ...p]);
-  }
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    setPostsToShow(2); // Reset pagination when a new search is made
-  };
+  const {
+    visiblePosts,
+    containerRef,
+    handleCreate,
+    handleUpdate,
+    handleRemove,
+    handleSearch,
+  } = useNewsPosts();
 
   return (
     <div className="p-4 h-screen overflow-y-auto" ref={containerRef}>
@@ -122,19 +90,8 @@ export function NewsPage() {
                   </Label>
                   {IsAdmin ? (
                     <ButtonGroup>
-                      <EditButton
-                        post={post}
-                        onUpdate={(p) =>
-                          setAllPosts((list) =>
-                            list.map((it) => (it.id === p.id ? p : it)),
-                          )
-                        }
-                      />
-                      <RemoveButton
-                        onConfirm={() =>
-                          setAllPosts((p) => p.filter((x) => x.id !== post.id))
-                        }
-                      />
+                      <EditButton post={post} onUpdate={handleUpdate} />
+                      <RemoveButton onConfirm={() => handleRemove(post.id)} />
                     </ButtonGroup>
                   ) : (
                     <></>

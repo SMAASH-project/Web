@@ -13,7 +13,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MessageSquarePlus, X } from "lucide-react";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
-import { useState, useRef } from "react";
 import { DateTime } from "luxon";
 import type { NewsPost } from "@/types/PageTypes";
 import ReactMarkdown from "react-markdown";
@@ -21,48 +20,38 @@ import remarkGfm from "remark-gfm";
 import { RadioGroupChoiceCard } from "./RadioGroupChoiceCard";
 import { ResizableVertical } from "./ResizableVertical";
 import { ResizableHorizontal } from "./ResizableHorizontal";
+import { useNewsForm } from "./newsPageLogic/useNewsForm";
 
 export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
   const { settings } = useSettings();
 
-  const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [imagePosition, setImagePosition] = useState<"Top" | "Right">("Top");
-  const [image, setImage] = useState("");
-  const [imageAlt, setImageAlt] = useState("");
-  const [imageSize, setImageSize] = useState(25);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setImageAlt(file.name.replace(/\.[^.]+$/, ""));
-    const reader = new FileReader();
-    reader.onload = () => setImage(reader.result as string);
-    reader.readAsDataURL(file);
-  }
+  const {
+    open,
+    setOpen,
+    title,
+    setTitle,
+    content,
+    setContent,
+    imagePosition,
+    setImagePosition,
+    imageAlt,
+    setImageSize,
+    fileInputRef,
+    handleFileChange,
+    clearImage,
+    resetForm,
+    getFormValues,
+  } = useNewsForm();
 
   function handleSave() {
     const newPost: NewsPost = {
       id: Date.now().toString(),
-      title,
-      content,
-      image,
-      imageAlt,
-      imagePosition,
-      imageSize,
+      ...getFormValues(),
       createdAt: DateTime.now() as ReturnType<typeof DateTime.now>,
     };
 
     onCreate?.(newPost);
-    setTitle("");
-    setContent("");
-    setImage("");
-    setImageAlt("");
-    setImagePosition("Top");
-    setImageSize(25);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    resetForm();
     setOpen(false);
   }
 
@@ -115,12 +104,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                     <button
                       type="button"
                       className="shrink-0 cursor-pointer rounded-md p-0.5 hover:bg-muted hover:text-red-500"
-                      onClick={() => {
-                        setImage("");
-                        setImageAlt("");
-                        if (fileInputRef.current)
-                          fileInputRef.current.value = "";
-                      }}
+                      onClick={clearImage}
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
