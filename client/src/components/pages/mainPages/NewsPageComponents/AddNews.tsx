@@ -11,7 +11,7 @@ import {
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MessageSquarePlus } from "lucide-react";
+import { MessageSquarePlus, X } from "lucide-react";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
 import { useState, useRef } from "react";
 import { DateTime } from "luxon";
@@ -19,8 +19,8 @@ import type { NewsPost } from "@/types/PageTypes";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { RadioGroupChoiceCard } from "./RadioGroupChoiceCard";
-import { ResizableVertical } from "./ResizeableVertical";
-import { ResizableHorizontal } from "./ResizeableHorizontal";
+import { ResizableVertical } from "./ResizableVertical";
+import { ResizableHorizontal } from "./ResizableHorizontal";
 
 export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
   const { settings } = useSettings();
@@ -107,6 +107,25 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                   ref={fileInputRef}
                   onChange={handleFileChange}
                 />
+                {imageAlt && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-muted-foreground truncate">
+                      Current: {imageAlt}
+                    </span>
+                    <button
+                      type="button"
+                      className="shrink-0 cursor-pointer rounded-md p-0.5 hover:bg-muted hover:text-red-500"
+                      onClick={() => {
+                        setImage("");
+                        setImageAlt("");
+                        if (fileInputRef.current)
+                          fileInputRef.current.value = "";
+                      }}
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
               </div>
               <div className="ml-auto">
                 {imagePosition === "Top" ? (

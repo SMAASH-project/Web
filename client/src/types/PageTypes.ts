@@ -1,5 +1,6 @@
 import { DateTime } from "luxon";
 import SlimeArt from "@/assets/SlimeArt.png";
+import SlimeArtTransparent from "@/assets/SlimeArtTransparent.png";
 
 export interface NewsPost {
   id: string;
@@ -14,9 +15,9 @@ export interface NewsPost {
 export const newsPosts: NewsPost[] = [
   {
     id: "1",
-    image: SlimeArt,
-    imageAlt: "Slime Art",
-    imagePosition: "Top",
+    image: SlimeArtTransparent,
+    imageAlt: "Slime Art Transparent",
+    imagePosition: "Right",
     imageSize: 25,
     title: "First News Article",
     content:
@@ -25,10 +26,6 @@ export const newsPosts: NewsPost[] = [
   },
   {
     id: "2",
-    image: SlimeArt,
-    imageAlt: "Slime Art",
-    imagePosition: "Right",
-    imageSize: 25,
     title: "Second News Article",
     content: `# H1\n ## H2\n ### H3\n ---\n**bold text**\n*italicized text*\n> blockquote\n---\n1. First item\n2. Second item\n3. Third item\n---\n- First item\n- Second item\n- Third item\n---\n\`code\`\n[mkd](https://www.markdownguide.org/cheat-sheet/)\n![alt text](${SlimeArt})`,
     createdAt: DateTime.now(),
@@ -37,7 +34,7 @@ export const newsPosts: NewsPost[] = [
     id: "3",
     image: SlimeArt,
     imageAlt: "Slime Art",
-    imagePosition: "Right",
+    imagePosition: "Top",
     imageSize: 25,
     title: "Third News Article",
     content:
@@ -46,10 +43,6 @@ export const newsPosts: NewsPost[] = [
   },
   {
     id: "4",
-    image: SlimeArt,
-    imageAlt: "Slime Art",
-    imagePosition: "Top",
-    imageSize: 25,
     title: "Fourth News Article",
     content: `# H1\n ## H2\n ### H3\n ---\n**bold text**\n*italicized text*\n> blockquote\n---\n1. First item\n2. Second item\n3. Third item\n---\n- First item\n- Second item\n- Third item\n---\n\`code\`\n[mkd](https://www.markdownguide.org/cheat-sheet/)\n![alt text](${SlimeArt})`,
     createdAt: DateTime.now(),
