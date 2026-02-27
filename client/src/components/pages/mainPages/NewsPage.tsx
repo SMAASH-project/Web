@@ -3,6 +3,7 @@ import Navbar from "../../nav/Navbar";
 import { Card } from "@/components/ui/card";
 import { useSettings } from "../profileDependents/settings/settingsLogic/SettingsContext";
 import { Label } from "@/components/ui/label";
+import type { NewsPost } from "@/types/PageTypes";
 import { AddNews } from "@/components/pages/mainPages/newsPageComponents/AddNews";
 import { RemoveButton } from "@/components/pages/mainPages/newsPageComponents/RemoveButton";
 import { EditButton } from "@/components/pages/mainPages/newsPageComponents/EditButton";
@@ -59,7 +60,7 @@ export function NewsPage() {
           </Label>
         </span>
         <ul className="list-disc pl-5 w-full">
-          {visiblePosts.map((post) => (
+          {visiblePosts.map((post: NewsPost) => (
             <Card
               className={`z-0 flex flex-row p-10 mb-5 max-w-full ${
                 settings.useLiquidGlass
