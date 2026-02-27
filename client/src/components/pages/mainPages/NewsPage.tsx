@@ -3,14 +3,14 @@ import Navbar from "../../nav/Navbar";
 import { Card } from "@/components/ui/card";
 import { useSettings } from "../profileDependents/settings/settingsLogic/SettingsContext";
 import { Label } from "@/components/ui/label";
-import { AddNews } from "./newsPageComponents/AddNews";
-import { RemoveButton } from "./newsPageComponents/RemoveButton";
-import { EditButton } from "./newsPageComponents/EditButton";
+import { AddNews } from "@/components/pages/mainPages/newsPageComponents/AddNews";
+import { RemoveButton } from "@/components/pages/mainPages/newsPageComponents/RemoveButton";
+import { EditButton } from "@/components/pages/mainPages/newsPageComponents/EditButton";
 import { ButtonGroup } from "@/components/ui/button-group";
-import { Search } from "./newsPageComponents/Search";
+import { Search } from "@/components/pages/mainPages/newsPageComponents/Search";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { useNewsPosts } from "./newsPageComponents/newsPageLogic/useNewsPosts";
+import { useNewsPosts } from "@/components/pages/mainPages/newsPageComponents/newsPageLogic/useNewsPosts";
 
 export function NewsPage() {
   const { settings } = useSettings();
