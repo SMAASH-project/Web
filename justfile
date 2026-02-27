@@ -1,23 +1,23 @@
 # By default just runs the first recipe (aliases are not considered recipes)
 
-alias r:=run
-alias b:=build
-alias bf:=build-fullstack
-alias bc:=build-client
-alias t:=test
-alias w:=watch
-alias c:=clean
+alias r := run
+alias b := build
+alias bf := build-fullstack
+alias bc := build-client
+alias t := test
+alias w := watch
+alias c := clean
 
 # much nicer to have it as private, so it doesn't show up in the recipe list
 [private]
 @default:
     just --list
 
-all: build-fullstack test
+all: build-fullstack test seed
 
 @build:
-	echo "Building backend"
-	@go build -v -o build/main cmd/api/main.go
+    echo "Building backend"
+    @go build -v -o build/main cmd/api/main.go
 
 build-fullstack: build-client build
 
@@ -26,18 +26,18 @@ build-fullstack: build-client build
     cd ./client && npm install && npm run build
 
 # Run the application
-@run: 
-	go run -v cmd/api/main.go
+@run:
+    go run -v cmd/api/main.go
 
 # Test the application
 @test:
-	echo "Testing..."
-	go test ./... -v
+    echo "Testing..."
+    go test ./... -v
 
 # Clean the binary
 @clean:
-	echo "Cleaning..."
-	rm -r build/*
+    echo "Cleaning..."
+    rm -r build/*
 
 # Live Reload
 [script]

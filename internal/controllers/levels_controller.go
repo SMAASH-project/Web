@@ -6,7 +6,6 @@ import (
 	dtos "smaash-web/internal/DTOs"
 	"smaash-web/internal/models"
 	"smaash-web/internal/repository"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -54,13 +53,9 @@ func (lc *LevelsController) ReadAllLevels(c *gin.Context) {
 }
 
 func (lc *LevelsController) ReadLevelByID(c *gin.Context) {
-	id, err := parseUintParam(c, "id")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp("Invalid id", c.Request.URL.Path))
-		return
-	}
+	id, _ := c.Get("id")
 
-	level, err := lc.levelRepo.ReadByID(c.Request.Context(), id)
+	level, err := lc.levelRepo.ReadByID(c.Request.Context(), id.(uint))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Level not found", c.Request.URL.Path))
@@ -73,11 +68,7 @@ func (lc *LevelsController) ReadLevelByID(c *gin.Context) {
 }
 
 func (lc *LevelsController) UpdateLevel(c *gin.Context) {
-	id, err := parseUintParam(c, "id")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp("Invalid id", c.Request.URL.Path))
-		return
-	}
+	id, _ := c.Get("id")
 
 	var body dtos.LevelUpdateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -85,7 +76,7 @@ func (lc *LevelsController) UpdateLevel(c *gin.Context) {
 		return
 	}
 
-	if id != body.ID {
+	if id.(uint) != body.ID {
 		c.JSON(http.StatusBadRequest, dtos.NewErrResp("ID in path and body do not match", c.Request.URL.Path))
 		return
 	}
@@ -112,13 +103,9 @@ func (lc *LevelsController) UpdateLevel(c *gin.Context) {
 }
 
 func (lc *LevelsController) DeleteLevel(c *gin.Context) {
-	id, err := parseUintParam(c, "id")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp("Invalid id", c.Request.URL.Path))
-		return
-	}
+	id, _ := c.Get("id")
 
-	if err := lc.levelRepo.Delete(c.Request.Context(), id); err != nil {
+	if err := lc.levelRepo.Delete(c.Request.Context(), id.(uint)); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Level not found", c.Request.URL.Path))
 			return
@@ -128,13 +115,4 @@ func (lc *LevelsController) DeleteLevel(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
-}
-
-func parseUintParam(c *gin.Context, name string) (uint, error) {
-	idStr := c.Param(name)
-	id, err := strconv.ParseUint(idStr, 10, 64)
-	if err != nil {
-		return 0, err
-	}
-	return uint(id), nil
 }

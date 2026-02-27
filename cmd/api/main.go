@@ -13,7 +13,7 @@ func main() {
 	appContext := context.Background()
 	userRepo := repository.NewGormUserRepo()
 	playerProfileRepo := repository.NewGormPlayerProfileRepo()
-	authnService := services.NewAuthenticationService(userRepo, playerProfileRepo)
+	authnService := services.NewAuthenticationService(userRepo)
 	levelRepo := repository.NewGormLevelRepo()
 
 	srv := server.NewServer(
@@ -21,6 +21,7 @@ func main() {
 		controllers.NewAuthnController(authnService),
 		controllers.NewGameAuthController(userRepo, playerProfileRepo),
 		controllers.NewLevelsController(levelRepo),
+		controllers.NewPlayerProfileController(playerProfileRepo),
 	).MountRoutes()
 
 	if err := srv.Run(appContext); err != nil {

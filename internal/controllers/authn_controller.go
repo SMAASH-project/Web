@@ -35,7 +35,7 @@ func (a AuthnController) SignUp(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dtos.UserToDTO(newUser))
+	c.JSON(http.StatusCreated, dtos.UserToDTO(newUser))
 }
 
 func (a AuthnController) Login(c *gin.Context) {
@@ -89,24 +89,4 @@ func (a AuthnController) Logout(c *gin.Context) {
 	)
 
 	c.Status(http.StatusNoContent)
-}
-
-func (a AuthnController) CreateProfileForUser(c *gin.Context) {
-	var body dtos.PlayerProfileCreateDto
-	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
-		return
-	}
-
-	newProfile, err := a.authService.CreateProfile(c.Request.Context(), body.UserID, body.DisplayName)
-	if err != nil {
-		if errors.Is(err, gorm.ErrDuplicatedKey) {
-			c.JSON(http.StatusBadRequest, dtos.NewErrResp("Display name already taken", c.Request.URL.Path))
-			return
-		}
-		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
-		return
-	}
-
-	c.JSON(http.StatusCreated, dtos.PlayerProfileToReadDTO(*newProfile))
 }

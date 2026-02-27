@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -58,34 +59,19 @@ func (g GameAuthController) GameLogin(c *gin.Context) {
 		return
 	}
 
-	// Get PlayerProfile directly from repository
-	profile, err := g.playerProfileRepo.ReadByUserId(c.Request.Context(), user.ID)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusBadRequest, dtos.NewErrResp(
-				"Player profile not found. Please create your profile on the website first.",
-				c.Request.URL.Path,
-			))
-			return
-		}
-		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
-		return
-	}
-
-	// Update last login directly
-	profile.LastLogin = time.Now()
-	if err := g.playerProfileRepo.Update(c.Request.Context(), profile); err != nil {
+	// Update last login time for the user
+	user.LastLogin = time.Now()
+	log.Println(user)
+	if err := g.userRepo.Update(c.Request.Context(), *user); err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
 	}
 
 	// Generate token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"playerProfileId": profile.ID,
-		"userId":          user.ID,
-		"email":           user.Email,
-		"displayName":     profile.DisplayName,
-		"exp":             time.Now().Add(time.Hour * 24).Unix(),
+		"userId": user.ID,
+		"email":  user.Email,
+		"exp":    time.Now().Add(time.Hour * 24).Unix(),
 	})
 
 	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET_KEY")))
@@ -95,7 +81,6 @@ func (g GameAuthController) GameLogin(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"token":   tokenString,
-		"profile": dtos.PlayerProfileToReadDTO(*profile),
+		"token": tokenString,
 	})
 }
