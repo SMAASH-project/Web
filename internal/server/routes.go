@@ -34,9 +34,12 @@ func (s *Server) MountRoutes() *Server {
 
 	users := api.Group("/users")
 	users.Use(middlewares.Authorize)
-	{
-		users.GET("", s.userController.ReadAllUsers)
-		users.GET("/:id", middlewares.ValidateUrl, s.userController.ReadUserByID)
+	{ // no creation, that happens on /auth/signup. No updating password either.
+		users.GET("", s.userController.ReadAll)
+		users.GET("/:id", middlewares.ValidateUrl, s.userController.ReadByID)
+		users.PUT("/:id", middlewares.ValidateUrl, s.userController.Update)
+		users.DELETE("/:id", middlewares.ValidateUrl, s.userController.Delete)
+		users.POST("/:id/profiles", middlewares.ValidateUrl, s.userController.AddProfileToUser)
 	}
 
 	levels := api.Group("/levels")

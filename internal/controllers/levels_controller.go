@@ -33,7 +33,7 @@ func (lc *LevelsController) CreateLevel(c *gin.Context) {
 
 	if err := lc.levelRepo.Create(c.Request.Context(), &level); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
-			c.JSON(http.StatusBadRequest, dtos.NewErrResp("Level already exists", c.Request.URL.Path))
+			c.JSON(http.StatusConflict, dtos.NewErrResp("Level already exists", c.Request.URL.Path))
 			return
 		}
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
@@ -92,7 +92,7 @@ func (lc *LevelsController) UpdateLevel(c *gin.Context) {
 			return
 		}
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
-			c.JSON(http.StatusBadRequest, dtos.NewErrResp("Level already exists", c.Request.URL.Path))
+			c.JSON(http.StatusConflict, dtos.NewErrResp("Level already exists", c.Request.URL.Path))
 			return
 		}
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))

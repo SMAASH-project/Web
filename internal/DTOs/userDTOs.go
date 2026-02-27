@@ -2,6 +2,8 @@ package dtos
 
 import (
 	"smaash-web/internal/models"
+
+	"gorm.io/gorm"
 )
 
 type UserReadDTO struct {
@@ -19,10 +21,9 @@ type UserCreateDTO struct {
 }
 
 type UserUpdateDTO struct {
-	ID       uint   `json:"id" binding:"required"`
-	Email    string `json:"email" binding:"required,max=30,email"`
-	Password string `json:"password" binding:"required,min=8,max=50"`
-	RoleID   uint   `json:"role_id"`
+	ID     uint   `json:"id" binding:"required"`
+	Email  string `json:"email" binding:"required,max=30,email"`
+	RoleID uint   `json:"role_id"`
 }
 
 type UserLoginDTO struct {
@@ -52,5 +53,13 @@ func LoginDTOToUser(dto *UserLoginDTO) *models.User {
 	return &models.User{
 		Email:        dto.Email,
 		PasswordHash: dto.Password,
+	}
+}
+
+func UpdateDTOToUser(dto UserUpdateDTO) models.User {
+	return models.User{
+		Model:  gorm.Model{ID: dto.ID},
+		Email:  dto.Email,
+		RoleID: dto.RoleID,
 	}
 }

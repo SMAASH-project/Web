@@ -17,7 +17,7 @@ func main() {
 	levelRepo := repository.NewGormLevelRepo()
 
 	srv := server.NewServer(
-		controllers.NewUserController(userRepo),
+		controllers.NewUserController(userRepo, playerProfileRepo),
 		controllers.NewAuthnController(authnService),
 		controllers.NewGameAuthController(userRepo, playerProfileRepo),
 		controllers.NewLevelsController(levelRepo),
