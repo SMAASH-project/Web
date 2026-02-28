@@ -1,20 +1,31 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { newsPosts, type NewsPost } from "@/types/PageTypes";
 
-export function useNewsPosts() {
+export function useNewsPosts(selectedCategories: NewsPost["category"][] = []) {
   const [allPosts, setAllPosts] = useState<NewsPost[]>(newsPosts);
   const [postsToShow, setPostsToShow] = useState(2);
   const [searchQuery, setSearchQuery] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const filteredPosts = useMemo(() => {
+    if (selectedCategories.length === 0) return [];
+    return allPosts.filter((post) =>
+      selectedCategories.includes(post.category),
+    );
+  }, [allPosts, selectedCategories]);
+
   const visiblePosts = useMemo(() => {
     if (searchQuery) {
-      return allPosts.filter((post) =>
+      return filteredPosts.filter((post) =>
         post.title.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
-    return allPosts.slice(0, postsToShow);
-  }, [allPosts, postsToShow, searchQuery]);
+    return filteredPosts.slice(0, postsToShow);
+  }, [filteredPosts, postsToShow, searchQuery]);
+
+  useEffect(() => {
+    setPostsToShow(2);
+  }, [selectedCategories]);
 
   const handleScroll = useCallback(() => {
     if (containerRef.current && !searchQuery) {

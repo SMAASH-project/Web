@@ -12,6 +12,7 @@ import { Search } from "@/components/pages/mainPages/newsPageComponents/Search";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useNewsPosts } from "@/components/pages/mainPages/newsPageComponents/newsPageLogic/useNewsPosts";
+import { useNewsCategoryFilter } from "@/components/pages/mainPages/newsPageComponents/newsPageLogic/useNewsCategoryFilter";
 import { LoadPost } from "@/lib/pageAnimations/newsPageAnimations/LoadPost";
 import { FilterSelect } from "./newsPageComponents/Filter";
 import { CategoryBadge } from "./newsPageComponents/CategoryBadge";
@@ -19,6 +20,8 @@ import { CategoryBadge } from "./newsPageComponents/CategoryBadge";
 export function NewsPage() {
   const { settings } = useSettings();
   const IsAdmin = true; // Replace with actual admin check
+  const { selectedByCategory, selectedCategories, setCategorySelected } =
+    useNewsCategoryFilter();
 
   const {
     visiblePosts,
@@ -27,7 +30,7 @@ export function NewsPage() {
     handleUpdate,
     handleRemove,
     handleSearch,
-  } = useNewsPosts();
+  } = useNewsPosts(selectedCategories);
 
   return (
     <div className="p-4 h-screen overflow-y-auto" ref={containerRef}>
@@ -61,7 +64,10 @@ export function NewsPage() {
             >
               Latest News
             </Label>
-            <FilterSelect />
+            <FilterSelect
+              selectedByCategory={selectedByCategory}
+              onCategoryChange={setCategorySelected}
+            />
           </span>
         </span>
         <ul className="list-disc pl-5 w-full">

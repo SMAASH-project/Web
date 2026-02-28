@@ -9,8 +9,17 @@ import {
 import { EllipsisVertical } from "lucide-react";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
 import { FilterSelection } from "./FilterSelection";
+import type { NewsPost } from "@/types/PageTypes";
 
-export function FilterSelect() {
+interface FilterSelectProps {
+  selectedByCategory: Record<NewsPost["category"], boolean>;
+  onCategoryChange: (category: NewsPost["category"], checked: boolean) => void;
+}
+
+export function FilterSelect({
+  selectedByCategory,
+  onCategoryChange,
+}: FilterSelectProps) {
   const { settings } = useSettings();
   return (
     <Popover>
@@ -29,7 +38,10 @@ export function FilterSelect() {
         <PopoverHeader>
           <PopoverTitle>Select Filters</PopoverTitle>
         </PopoverHeader>
-        <FilterSelection />
+        <FilterSelection
+          selectedByCategory={selectedByCategory}
+          onCategoryChange={onCategoryChange}
+        />
       </PopoverContent>
     </Popover>
   );
