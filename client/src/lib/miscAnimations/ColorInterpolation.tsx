@@ -3,99 +3,41 @@
 import { useAnimate } from "motion/react";
 import { useEffect, useRef } from "react";
 
-/**
- * A comparison of color interpolation between Motion and the Web Animations API.
- * Motion uses RGB interpolation by default, while WAAPI uses HSL interpolation.
- */
-export default function ColorInterpolation() {
-  const waapiRef = useRef<HTMLDivElement>(null);
-  const [motionRef, animate] = useAnimate();
-
-  useEffect(() => {
-    const waapiElement = waapiRef.current;
-    const motionElement = motionRef.current;
-
-    if (!waapiElement) return;
-
-    const waapiAnimation = waapiElement.animate(
-      [{ backgroundColor: "#ff0088" }, { backgroundColor: "#0d63f8" }],
-      {
-        duration: 2000,
-        iterations: Infinity,
-        direction: "alternate",
-        easing: "linear",
-      },
-    );
-
-    const motionAnimation = animate(
-      motionElement,
-      { backgroundColor: ["#ff0088", "#0d63f8"] },
-      {
-        duration: 2,
-        repeat: Infinity,
-        repeatType: "reverse",
-        ease: "linear",
-      },
-    );
-
-    console.log(motionAnimation);
-
-    return () => {
-      waapiAnimation.cancel();
-      motionAnimation.cancel();
-    };
-  }, []);
-
-  return (
-    <>
-      <div className="container">
-        <div className="swatch-container">
-          <div className="swatch waapi" ref={waapiRef} />
-          <div className="label small">Browser</div>
-        </div>
-        <div className="swatch-container">
-          <div className="swatch motion" ref={motionRef} />
-          <div className="label small">Motion</div>
-        </div>
-      </div>
-      <Stylesheet />
-    </>
-  );
+interface UseColorAnimationProps {
+  elementRef: React.RefObject<HTMLDivElement>;
+  gradient: string;
+  duration?: number;
+  useAnimation: boolean;
 }
 
 /**
- * ==============   Styles   ================
+ * Hook that animates gradient changes using Motion
  */
-function Stylesheet() {
-  return (
-    <style>
-      {`
-                .container {
-                    display: flex;
-                    gap: 30px;
-                    align-items: center;
-                    justify-content: center;
-                }
+export function useColorAnimation({
+  elementRef,
+  gradient,
+  duration = 0.6,
+  useAnimation,
+}: UseColorAnimationProps) {
+  const [, animate] = useAnimate();
+  const prevGradientRef = useRef<string>(gradient);
 
-                .swatch-container {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 16px;
-                }
+  useEffect(() => {
+    const element = elementRef.current;
+    if (!element || !useAnimation) return;
 
-                .swatch {
-                    width: 100px;
-                    height: 100px;
-                    border-radius: 8px;
-                    background-color: #ff0088;
-                }
+    // Only animate if gradient changed
+    if (prevGradientRef.current === gradient) return;
 
-                .label {
-                    color: #f5f5f5;
-                    font-size: 14px;
-                }
-            `}
-    </style>
-  );
+    animate(
+      element,
+      { backgroundImage: [prevGradientRef.current, gradient] },
+      {
+        duration,
+        ease: "easeInOut",
+      },
+    );
+
+    prevGradientRef.current = gradient;
+  }, [gradient, duration, useAnimation, animate, elementRef]);
 }
