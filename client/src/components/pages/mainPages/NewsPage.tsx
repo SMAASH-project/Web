@@ -154,7 +154,7 @@ export function NewsPage() {
                 {cardContent}
               </LoadPost>
             ) : (
-              cardContent
+              <div key={post.id}>{cardContent}</div>
             );
           })}
         </ul>

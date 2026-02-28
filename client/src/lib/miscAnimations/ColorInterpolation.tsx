@@ -23,8 +23,10 @@ export function useColorAnimation({
   const prevGradientRef = useRef<string>(gradient);
 
   useEffect(() => {
+    if (!useAnimation) return;
+
     const element = elementRef.current;
-    if (!element || !useAnimation) return;
+    if (!element) return;
 
     // Only animate if gradient changed
     if (prevGradientRef.current === gradient) return;
