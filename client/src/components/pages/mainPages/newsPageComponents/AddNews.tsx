@@ -8,6 +8,18 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  AnimatedAccordion,
+  AnimatedAccordionContent,
+  AnimatedAccordionItem,
+  AnimatedAccordionTrigger,
+} from "@/lib/miscAnimations/AnimatedAccordion";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,9 +29,10 @@ import { DateTime } from "luxon";
 import type { NewsPost } from "@/types/PageTypes";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { RadioGroupChoiceCard } from "./RadioGroupChoiceCard";
-import { ResizableVertical } from "./ResizableVertical";
-import { ResizableHorizontal } from "./ResizableHorizontal";
+import { RadioGroupChoiceCard } from "./addAndEdit/RadioGroupChoiceCard";
+import { ResizableVertical } from "./addAndEdit/ResizableVertical";
+import { ResizableHorizontal } from "./addAndEdit/ResizableHorizontal";
+import { CategorySelector } from "./addAndEdit/CategorySelector";
 import { useNewsForm } from "./newsPageLogic/useNewsForm";
 
 export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
@@ -32,6 +45,8 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
     setTitle,
     content,
     setContent,
+    category,
+    setCategory,
     imagePosition,
     setImagePosition,
     imageAlt,
@@ -81,64 +96,187 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
             />
           </Field>
           <Field>
-            <Label>Image Position</Label>
-            <div className="flex flex-row gap-4 items-start">
-              <div className="flex flex-col gap-2 max-w-sm">
-                <RadioGroupChoiceCard
-                  value={imagePosition}
-                  onValueChange={(v) => setImagePosition(v as "Top" | "Right")}
-                />
-                <Input
-                  type="file"
-                  accept="image/*"
-                  id="article-image"
-                  name="articleImage"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                />
-                {imageAlt && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs text-muted-foreground truncate">
-                      Current: {imageAlt}
-                    </span>
-                    <button
-                      type="button"
-                      className="shrink-0 cursor-pointer rounded-md p-0.5 hover:bg-muted hover:text-red-500"
-                      onClick={clearImage}
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                )}
-              </div>
-              <div className="ml-auto">
-                {imagePosition === "Top" ? (
-                  <ResizableVertical onImageSizeChange={setImageSize} />
-                ) : (
-                  <ResizableHorizontal onImageSizeChange={setImageSize} />
-                )}
-              </div>
-            </div>
-          </Field>
-          <Field>
-            <Label>Content (Markdown supported)</Label>
-            <textarea
-              value={content}
-              onChange={(e) =>
-                setContent((e.target as HTMLTextAreaElement).value)
-              }
-              className="w-full min-h-32 rounded-md bg-input px-3 py-2 text-sm"
-            />
-            {content && (
-              <div className="mt-2 rounded-md border bg-gray-800/60 p-3 max-h-64 overflow-y-auto prose prose-sm prose-invert max-w-none">
-                <Label className="text-xs mb-1">Preview Text</Label>
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {content}
-                </ReactMarkdown>
-              </div>
-            )}
+            <Label>Category</Label>
+            <CategorySelector value={category} onValueChange={setCategory} />
           </Field>
         </FieldGroup>
+        {settings.useAnimations ? (
+          <AnimatedAccordion
+            type="multiple"
+            defaultValue={["content"]}
+            className="w-full"
+          >
+            <AnimatedAccordionItem value="image">
+              <AnimatedAccordionTrigger>
+                Image Settings
+              </AnimatedAccordionTrigger>
+              <AnimatedAccordionContent>
+                <FieldGroup>
+                  <Field>
+                    <Label className="text-sm text-muted-foreground">
+                      Image Position
+                    </Label>
+                    <div className="flex flex-row gap-4 items-start">
+                      <div className="flex flex-col gap-2 max-w-sm">
+                        <RadioGroupChoiceCard
+                          value={imagePosition}
+                          onValueChange={(v) =>
+                            setImagePosition(v as "Top" | "Right")
+                          }
+                        />
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          id="article-image"
+                          name="articleImage"
+                          ref={fileInputRef}
+                          onChange={handleFileChange}
+                        />
+                        {imageAlt && (
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs text-muted-foreground truncate">
+                              Current: {imageAlt}
+                            </span>
+                            <button
+                              type="button"
+                              className="shrink-0 cursor-pointer rounded-md p-0.5 hover:bg-muted hover:text-red-500"
+                              onClick={clearImage}
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      <div className="ml-auto">
+                        {imagePosition === "Top" ? (
+                          <ResizableVertical onImageSizeChange={setImageSize} />
+                        ) : (
+                          <ResizableHorizontal
+                            onImageSizeChange={setImageSize}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </Field>
+                </FieldGroup>
+              </AnimatedAccordionContent>
+            </AnimatedAccordionItem>
+            <AnimatedAccordionItem value="content">
+              <AnimatedAccordionTrigger>Content</AnimatedAccordionTrigger>
+              <AnimatedAccordionContent>
+                <FieldGroup>
+                  <Field>
+                    <Label className="text-sm text-muted-foreground">
+                      Markdown supported
+                    </Label>
+                    <textarea
+                      value={content}
+                      onChange={(e) =>
+                        setContent((e.target as HTMLTextAreaElement).value)
+                      }
+                      className="w-full min-h-32 rounded-md bg-input px-3 py-2 text-sm"
+                    />
+                    {content && (
+                      <div className="mt-2 rounded-md border bg-gray-800/60 p-3 max-h-64 overflow-y-auto prose prose-sm prose-invert max-w-none">
+                        <Label className="text-xs mb-1">Preview Text</Label>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {content}
+                        </ReactMarkdown>
+                      </div>
+                    )}
+                  </Field>
+                </FieldGroup>
+              </AnimatedAccordionContent>
+            </AnimatedAccordionItem>
+          </AnimatedAccordion>
+        ) : (
+          <Accordion
+            type="multiple"
+            defaultValue={["content"]}
+            className="w-full"
+          >
+            <AccordionItem value="image">
+              <AccordionTrigger>Image Settings</AccordionTrigger>
+              <AccordionContent>
+                <FieldGroup>
+                  <Field>
+                    <Label className="text-sm text-muted-foreground">
+                      Image Position
+                    </Label>
+                    <div className="flex flex-row gap-4 items-start">
+                      <div className="flex flex-col gap-2 max-w-sm">
+                        <RadioGroupChoiceCard
+                          value={imagePosition}
+                          onValueChange={(v) =>
+                            setImagePosition(v as "Top" | "Right")
+                          }
+                        />
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          id="article-image"
+                          name="articleImage"
+                          ref={fileInputRef}
+                          onChange={handleFileChange}
+                        />
+                        {imageAlt && (
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs text-muted-foreground truncate">
+                              Current: {imageAlt}
+                            </span>
+                            <button
+                              type="button"
+                              className="shrink-0 cursor-pointer rounded-md p-0.5 hover:bg-muted hover:text-red-500"
+                              onClick={clearImage}
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      <div className="ml-auto">
+                        {imagePosition === "Top" ? (
+                          <ResizableVertical onImageSizeChange={setImageSize} />
+                        ) : (
+                          <ResizableHorizontal
+                            onImageSizeChange={setImageSize}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </Field>
+                </FieldGroup>
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="content">
+              <AccordionTrigger>Content</AccordionTrigger>
+              <AccordionContent>
+                <FieldGroup>
+                  <Field>
+                    <Label className="text-sm text-muted-foreground">
+                      Markdown supported
+                    </Label>
+                    <textarea
+                      value={content}
+                      onChange={(e) =>
+                        setContent((e.target as HTMLTextAreaElement).value)
+                      }
+                      className="w-full min-h-32 rounded-md bg-input px-3 py-2 text-sm"
+                    />
+                    {content && (
+                      <div className="mt-2 rounded-md border bg-gray-800/60 p-3 max-h-64 overflow-y-auto prose prose-sm prose-invert max-w-none">
+                        <Label className="text-xs mb-1">Preview Text</Label>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {content}
+                        </ReactMarkdown>
+                      </div>
+                    )}
+                  </Field>
+                </FieldGroup>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        )}
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="outline" className="cursor-pointer">

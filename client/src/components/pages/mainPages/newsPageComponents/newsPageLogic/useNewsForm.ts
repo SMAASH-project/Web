@@ -12,6 +12,9 @@ export function useNewsForm(options: UseNewsFormOptions = {}) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState(initial?.title ?? "");
   const [content, setContent] = useState(initial?.content ?? "");
+  const [category, setCategory] = useState<NewsPost["category"]>(
+    initial?.category ?? "Major update",
+  );
   const [imagePosition, setImagePosition] = useState<"Top" | "Right">(
     initial?.imagePosition ?? "Top",
   );
@@ -38,6 +41,7 @@ export function useNewsForm(options: UseNewsFormOptions = {}) {
   function resetForm(values?: Partial<NewsPost>) {
     setTitle(values?.title ?? "");
     setContent(values?.content ?? "");
+    setCategory(values?.category ?? "Major update");
     setImagePosition(values?.imagePosition ?? "Top");
     setImage(values?.image ?? "");
     setImageAlt(values?.imageAlt ?? "");
@@ -47,7 +51,15 @@ export function useNewsForm(options: UseNewsFormOptions = {}) {
 
   /** Get the current form values as a partial NewsPost */
   function getFormValues() {
-    return { title, content, image, imageAlt, imagePosition, imageSize };
+    return {
+      title,
+      content,
+      category,
+      image,
+      imageAlt,
+      imagePosition,
+      imageSize,
+    };
   }
 
   return {
@@ -57,6 +69,8 @@ export function useNewsForm(options: UseNewsFormOptions = {}) {
     setTitle,
     content,
     setContent,
+    category,
+    setCategory,
     imagePosition,
     setImagePosition,
     image,
