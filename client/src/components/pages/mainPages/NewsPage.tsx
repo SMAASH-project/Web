@@ -12,6 +12,7 @@ import { Search } from "@/components/pages/mainPages/newsPageComponents/Search";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useNewsPosts } from "@/components/pages/mainPages/newsPageComponents/newsPageLogic/useNewsPosts";
+import { LoadPost } from "@/lib/pageAnimations/newsPageAnimations/LoadPost";
 
 export function NewsPage() {
   const { settings } = useSettings();
@@ -60,93 +61,102 @@ export function NewsPage() {
           </Label>
         </span>
         <ul className="list-disc pl-5 w-full">
-          {visiblePosts.map((post: NewsPost) => (
-            <Card
-              className={`z-0 flex flex-row p-10 mb-5 max-w-full ${
-                settings.useLiquidGlass
-                  ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20"
-                  : "bg-gray-600 border-2 border-green-400"
-              }`}
-              key={post.id}
-            >
-              <li className="flex flex-col gap-2 w-full">
-                <span className="flex flex-row w-full justify-between">
-                  <Label
-                    className={`text-white text-lg ${
-                      settings.useLiquidGlass
-                        ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                        : ""
-                    } text-left`}
-                  >
-                    {post.title}
-                  </Label>
-                  <Label
-                    className={`text-white text-lg ${
-                      settings.useLiquidGlass
-                        ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                        : ""
-                    } italic text-right`}
-                  >
-                    {formatDateTime(post.createdAt)}
-                  </Label>
-                  {IsAdmin ? (
-                    <ButtonGroup>
-                      <EditButton post={post} onUpdate={handleUpdate} />
-                      <RemoveButton onConfirm={() => handleRemove(post.id)} />
-                    </ButtonGroup>
+          {visiblePosts.map((post: NewsPost, index: number) => {
+            const cardContent = (
+              <Card
+                className={`z-0 flex flex-row p-10 mb-5 max-w-full ${
+                  settings.useLiquidGlass
+                    ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20"
+                    : "bg-gray-600 border-2 border-green-400"
+                }`}
+              >
+                <li className="flex flex-col gap-2 w-full">
+                  <span className="flex flex-row w-full justify-between">
+                    <Label
+                      className={`text-white text-lg ${
+                        settings.useLiquidGlass
+                          ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
+                          : ""
+                      } text-left`}
+                    >
+                      {post.title}
+                    </Label>
+                    <Label
+                      className={`text-white text-lg ${
+                        settings.useLiquidGlass
+                          ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
+                          : ""
+                      } italic text-right`}
+                    >
+                      {formatDateTime(post.createdAt)}
+                    </Label>
+                    {IsAdmin ? (
+                      <ButtonGroup>
+                        <EditButton post={post} onUpdate={handleUpdate} />
+                        <RemoveButton onConfirm={() => handleRemove(post.id)} />
+                      </ButtonGroup>
+                    ) : (
+                      <></>
+                    )}
+                  </span>
+                  {post.imagePosition === "Top" ? (
+                    <div className="flex flex-col gap-2 w-full">
+                      {post.image && (
+                        <img
+                          src={post.image}
+                          alt={post.imageAlt}
+                          className="w-full rounded-md object-cover"
+                          style={{ maxHeight: `${post.imageSize}vh` }}
+                        />
+                      )}
+                      <div
+                        className={`text-white text-sm ${
+                          settings.useLiquidGlass
+                            ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
+                            : ""
+                        } text-justify prose prose-sm prose-invert max-w-none`}
+                      >
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {post.content}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
                   ) : (
-                    <></>
+                    <div className="flex flex-row gap-4 w-full">
+                      <div
+                        className={`text-white text-sm ${
+                          settings.useLiquidGlass
+                            ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
+                            : ""
+                        } text-justify prose prose-sm prose-invert max-w-none`}
+                        style={{ width: `${100 - (post.imageSize ?? 0)}%` }}
+                      >
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {post.content}
+                        </ReactMarkdown>
+                      </div>
+                      {post.image && (
+                        <img
+                          src={post.image}
+                          alt={post.imageAlt}
+                          className="rounded-md object-cover"
+                          style={{ width: `${post.imageSize}%` }}
+                        />
+                      )}
+                    </div>
                   )}
-                </span>
-                {post.imagePosition === "Top" ? (
-                  <div className="flex flex-col gap-2 w-full">
-                    {post.image && (
-                      <img
-                        src={post.image}
-                        alt={post.imageAlt}
-                        className="w-full rounded-md object-cover"
-                        style={{ maxHeight: `${post.imageSize}vh` }}
-                      />
-                    )}
-                    <div
-                      className={`text-white text-sm ${
-                        settings.useLiquidGlass
-                          ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                          : ""
-                      } text-justify prose prose-sm prose-invert max-w-none`}
-                    >
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {post.content}
-                      </ReactMarkdown>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-row gap-4 w-full">
-                    <div
-                      className={`text-white text-sm ${
-                        settings.useLiquidGlass
-                          ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                          : ""
-                      } text-justify prose prose-sm prose-invert max-w-none`}
-                      style={{ width: `${100 - (post.imageSize ?? 0)}%` }}
-                    >
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {post.content}
-                      </ReactMarkdown>
-                    </div>
-                    {post.image && (
-                      <img
-                        src={post.image}
-                        alt={post.imageAlt}
-                        className="rounded-md object-cover"
-                        style={{ width: `${post.imageSize}%` }}
-                      />
-                    )}
-                  </div>
-                )}
-              </li>
-            </Card>
-          ))}
+                </li>
+              </Card>
+            );
+
+            return settings.useAnimations ? (
+              <LoadPost key={post.id} index={index}>
+                {cardContent}
+              </LoadPost>
+            ) : (
+              cardContent
+            );
+          })}
         </ul>
       </div>
     </div>
