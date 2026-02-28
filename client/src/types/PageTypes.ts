@@ -2,9 +2,17 @@ import { DateTime } from "luxon";
 import SlimeArt from "@/assets/SlimeArt.png";
 import SlimeArtTransparent from "@/assets/SlimeArtTransparent.png";
 
+export const CATEGORY_COLORS: Record<string, string> = {
+  "Major update": "#3b82f6",
+  "Minor update": "#10b981",
+  Patch: "#f59e0b",
+  "Unrelated news": "#8b5cf6",
+};
+
 export interface NewsPost {
   id: string;
   title: string;
+  category: "Major update" | "Minor update" | "Patch" | "Unrelated news";
   image?: string;
   imageAlt?: string;
   imagePosition?: "Top" | "Right";
@@ -15,6 +23,7 @@ export interface NewsPost {
 export const newsPosts: NewsPost[] = [
   {
     id: "1",
+    category: "Major update",
     image: SlimeArtTransparent,
     imageAlt: "Slime Art Transparent",
     imagePosition: "Right",
@@ -26,12 +35,14 @@ export const newsPosts: NewsPost[] = [
   },
   {
     id: "2",
+    category: "Minor update",
     title: "Second News Article",
     content: `# H1\n ## H2\n ### H3\n ---\n**bold text**\n*italicized text*\n> blockquote\n---\n1. First item\n2. Second item\n3. Third item\n---\n- First item\n- Second item\n- Third item\n---\n\`code\`\n[mkd](https://www.markdownguide.org/cheat-sheet/)\n![alt text](${SlimeArt})`,
     createdAt: DateTime.now(),
   },
   {
     id: "3",
+    category: "Patch",
     image: SlimeArt,
     imageAlt: "Slime Art",
     imagePosition: "Top",
@@ -43,6 +54,7 @@ export const newsPosts: NewsPost[] = [
   },
   {
     id: "4",
+    category: "Unrelated news",
     title: "Fourth News Article",
     content: `# H1\n ## H2\n ### H3\n ---\n**bold text**\n*italicized text*\n> blockquote\n---\n1. First item\n2. Second item\n3. Third item\n---\n- First item\n- Second item\n- Third item\n---\n\`code\`\n[mkd](https://www.markdownguide.org/cheat-sheet/)\n![alt text](${SlimeArt})`,
     createdAt: DateTime.now(),

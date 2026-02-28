@@ -13,6 +13,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useNewsPosts } from "@/components/pages/mainPages/newsPageComponents/newsPageLogic/useNewsPosts";
 import { LoadPost } from "@/lib/pageAnimations/newsPageAnimations/LoadPost";
+import { FilterSelect } from "./newsPageComponents/Filter";
+import { CategoryBadge } from "./newsPageComponents/CategoryBadge";
 
 export function NewsPage() {
   const { settings } = useSettings();
@@ -49,16 +51,18 @@ export function NewsPage() {
               <Search onSearch={handleSearch} />
             )}
           </ButtonGroup>
-
-          <Label
-            className={`text-white text-lg ${
-              settings.useLiquidGlass
-                ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                : ""
-            } text-center`}
-          >
-            Latest News
-          </Label>
+          <span className="flex flex-row items-center gap-2">
+            <Label
+              className={`text-white text-lg ${
+                settings.useLiquidGlass
+                  ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
+                  : ""
+              } text-center`}
+            >
+              Latest News
+            </Label>
+            <FilterSelect />
+          </span>
         </span>
         <ul className="list-disc pl-5 w-full">
           {visiblePosts.map((post: NewsPost, index: number) => {
@@ -71,33 +75,40 @@ export function NewsPage() {
                 }`}
               >
                 <li className="flex flex-col gap-2 w-full">
-                  <span className="flex flex-row w-full justify-between">
-                    <Label
-                      className={`text-white text-lg ${
-                        settings.useLiquidGlass
-                          ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                          : ""
-                      } text-left`}
-                    >
-                      {post.title}
-                    </Label>
-                    <Label
-                      className={`text-white text-lg ${
-                        settings.useLiquidGlass
-                          ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                          : ""
-                      } italic text-right`}
-                    >
-                      {formatDateTime(post.createdAt)}
-                    </Label>
-                    {IsAdmin ? (
-                      <ButtonGroup>
-                        <EditButton post={post} onUpdate={handleUpdate} />
-                        <RemoveButton onConfirm={() => handleRemove(post.id)} />
-                      </ButtonGroup>
-                    ) : (
-                      <></>
-                    )}
+                  <span className="flex flex-row w-full items-start justify-between gap-4">
+                    <div className="flex flex-col gap-2 flex-1">
+                      <Label
+                        className={`text-white text-lg ${
+                          settings.useLiquidGlass
+                            ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
+                            : ""
+                        } text-left`}
+                      >
+                        {post.title}
+                      </Label>
+                      <CategoryBadge category={post.category} />
+                    </div>
+                    <div className="flex flex-col items-end gap-2 shrink-0">
+                      <Label
+                        className={`text-white text-lg ${
+                          settings.useLiquidGlass
+                            ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
+                            : ""
+                        } italic text-right`}
+                      >
+                        {formatDateTime(post.createdAt)}
+                      </Label>
+                      {IsAdmin ? (
+                        <ButtonGroup>
+                          <EditButton post={post} onUpdate={handleUpdate} />
+                          <RemoveButton
+                            onConfirm={() => handleRemove(post.id)}
+                          />
+                        </ButtonGroup>
+                      ) : (
+                        <></>
+                      )}
+                    </div>
                   </span>
                   {post.imagePosition === "Top" ? (
                     <div className="flex flex-col gap-2 w-full">
