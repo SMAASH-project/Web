@@ -1,14 +1,12 @@
 import { OsTypes } from "@/types/OsTypes";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
 import { Button } from "@/components/ui/button";
-import WindowsLogo from "@/assets/osLogos/WindowsLogoTransparent.png";
 import AppleLogo from "@/assets/osLogos/AppleLogoTransparent.svg?url";
-import LinuxLogo from "@/assets/osLogos/LinuxLogoTransparent.png";
+import AndroidLogo from "@/assets/osLogos/AndroidLogoTransparent.png";
 
 const osLogos: Record<string, string> = {
-  Windows: WindowsLogo,
-  macOS: AppleLogo,
-  Linux: LinuxLogo,
+  iOS: AppleLogo,
+  Android: AndroidLogo,
 };
 
 export function SelectOs({

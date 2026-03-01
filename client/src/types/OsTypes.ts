@@ -3,7 +3,6 @@ export interface OsType {
   name: string;
 }
 export const OsTypes: OsType[] = [
-  { id: 1, name: "Windows" },
-  { id: 2, name: "macOS" },
-  { id: 3, name: "Linux" },
+  { id: 1, name: "iOS" },
+  { id: 2, name: "Android" },
 ];
