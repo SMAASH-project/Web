@@ -110,4 +110,22 @@ export const releases: Release[] = [
     supports: ["Android"],
     createdAt: DateTime.now(),
   },
+  {
+    id: "4",
+    version: "2.1.0",
+    supports: ["iOS", "Android"],
+    createdAt: DateTime.now(),
+  },
+  {
+    id: "5",
+    version: "2.2.0",
+    supports: ["iOS"],
+    createdAt: DateTime.now(),
+  },
+  {
+    id: "6",
+    version: "2.3.0",
+    supports: ["Android"],
+    createdAt: DateTime.now(),
+  },
 ];
