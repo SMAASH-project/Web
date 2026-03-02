@@ -87,31 +87,27 @@ export const items: Item[] = [
 
 export interface Release {
   id: string;
-  title: string;
-  description: string;
+  version: string;
   supports: string[];
   createdAt: ReturnType<typeof DateTime.now>;
 }
 export const releases: Release[] = [
   {
     id: "1",
-    title: "First Release",
-    description: "This is the description for the first release.",
-    supports: ["Feature A", "Feature B"],
+    version: "1.0.0",
+    supports: ["iOS", "Android"],
     createdAt: DateTime.now(),
   },
   {
     id: "2",
-    title: "Second Release",
-    description: "This is the description for the second release.",
-    supports: ["Feature C", "Feature D"],
+    version: "1.1.0",
+    supports: ["iOS"],
     createdAt: DateTime.now(),
   },
   {
     id: "3",
-    title: "Third Release",
-    description: "This is the description for the third release.",
-    supports: ["Feature E", "Feature F"],
+    version: "2.0.0",
+    supports: ["Android"],
     createdAt: DateTime.now(),
   },
 ];

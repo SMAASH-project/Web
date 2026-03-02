@@ -1,9 +1,9 @@
 import { Card } from "@/components/ui/card";
 import Navbar from "../../nav/Navbar";
 import { SelectOs } from "./releasesPageComponents/SelectOs";
-import { Label } from "@/components/ui/label";
 import { useSettings } from "../profileDependents/settings/settingsLogic/SettingsContext";
 import { useState } from "react";
+import { Releases } from "./releasesPageComponents/Releases";
 
 export function ReleasesPage() {
   const { settings } = useSettings();
@@ -19,16 +19,8 @@ export function ReleasesPage() {
             : "bg-gray-600 border-2 border-green-400"
         }`}
       >
-        <Label
-          className={`text-2xl font-bold mb-6 block ${
-            settings.useLiquidGlass
-              ? "text-white [text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-              : "text-white"
-          }`}
-        >
-          Releases Page
-        </Label>
         <SelectOs selectedOs={selectedOs} onSelectOs={setSelectedOs} />
+        <Releases />
       </Card>
     </div>
   );
