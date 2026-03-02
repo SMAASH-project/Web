@@ -8,6 +8,7 @@ package wire_gen
 
 import (
 	"smaash-web/internal/controllers"
+	"smaash-web/internal/database"
 	"smaash-web/internal/repository"
 	"smaash-web/internal/server"
 	"smaash-web/internal/services"
@@ -16,15 +17,18 @@ import (
 // Injectors from wire.go:
 
 func InitializeServer() *server.Server {
-	userRepository := repository.NewGormUserRepo()
-	playerProfileRepository := repository.NewGormPlayerProfileRepo()
+	db := database.NewGormDBConn()
+	userRepository := repository.NewGormUserRepo(db)
+	playerProfileRepository := repository.NewGormPlayerProfileRepo(db)
 	userController := controllers.NewUserController(userRepository, playerProfileRepository)
 	authentication := services.NewAuthenticationService(userRepository)
 	authnController := controllers.NewAuthnController(authentication)
 	gameAuthController := controllers.NewGameAuthController(userRepository)
-	levelRepository := repository.NewGormLevelRepo()
+	levelRepository := repository.NewGormLevelRepo(db)
 	levelsController := controllers.NewLevelsController(levelRepository)
 	playerProfileController := controllers.NewPlayerProfileController(playerProfileRepository)
-	serverServer := server.NewServer(userController, authnController, gameAuthController, levelsController, playerProfileController)
+	roleRepository := repository.NewGormRoleRepo(db)
+	rolesController := controllers.NewRolesController(roleRepository)
+	serverServer := server.NewServer(userController, authnController, gameAuthController, levelsController, playerProfileController, rolesController)
 	return serverServer
 }

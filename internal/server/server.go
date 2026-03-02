@@ -23,6 +23,7 @@ type Server struct {
 	gameAuthController      *controllers.GameAuthController
 	levelsController        *controllers.LevelsController
 	playerProfileController *controllers.PlayerProfileController
+	rolesController         *controllers.RolesController
 }
 
 func NewServer(
@@ -31,6 +32,7 @@ func NewServer(
 	gc *controllers.GameAuthController,
 	lc *controllers.LevelsController,
 	pc *controllers.PlayerProfileController,
+	rc *controllers.RolesController,
 ) *Server {
 	return &Server{
 		gracePeriod: 10 * time.Second,
@@ -45,6 +47,7 @@ func NewServer(
 		levelsController:        lc,
 		gameAuthController:      gc,
 		playerProfileController: pc,
+		rolesController:         rc,
 	}
 }
 

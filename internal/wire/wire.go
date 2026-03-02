@@ -4,6 +4,7 @@ package wire_gen
 
 import (
 	"smaash-web/internal/controllers"
+	"smaash-web/internal/database"
 	"smaash-web/internal/repository"
 	"smaash-web/internal/server"
 	"smaash-web/internal/services"
@@ -19,10 +20,13 @@ func InitializeServer() *server.Server {
 		controllers.NewGameAuthController,
 		controllers.NewLevelsController,
 		controllers.NewPlayerProfileController,
+		controllers.NewRolesController,
 		services.NewAuthenticationService,
 		repository.NewGormUserRepo,
 		repository.NewGormLevelRepo,
 		repository.NewGormPlayerProfileRepo,
+		repository.NewGormRoleRepo,
+		database.NewGormDBConn,
 	)
 	return &server.Server{}
 }

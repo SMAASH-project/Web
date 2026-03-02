@@ -63,6 +63,16 @@ func (s *Server) MountRoutes() *Server {
 		profiles.DELETE("/:id", middlewares.ValidateUrl, s.playerProfileController.Delete)
 	}
 
+	roles := api.Group("/roles")
+	roles.Use(middlewares.Authorize)
+	{
+		roles.POST("", s.rolesController.Create)
+		roles.GET("", s.rolesController.ReadAll)
+		roles.GET("/:id", middlewares.ValidateUrl, s.rolesController.ReadByID)
+		roles.PUT("/:id", middlewares.ValidateUrl, s.rolesController.Update)
+		roles.DELETE("/:id", middlewares.ValidateUrl, s.rolesController.Delete)
+	}
+
 	r.NoRoute(func(c *gin.Context) {
 		http.ServeFile(c.Writer, c.Request, "./build/client")
 	})

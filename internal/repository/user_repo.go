@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"smaash-web/internal/database"
 	"smaash-web/internal/models"
 
 	"gorm.io/gorm"
@@ -21,9 +20,8 @@ type GormUserRepo struct {
 	DB *gorm.DB
 }
 
-func NewGormUserRepo() UserRepository {
-	db := database.NewGormDBConn().Init()
-	return &GormUserRepo{DB: db}
+func NewGormUserRepo(conn *gorm.DB) UserRepository {
+	return &GormUserRepo{DB: conn}
 }
 
 func (u GormUserRepo) Create(c context.Context, user *models.User) error {
