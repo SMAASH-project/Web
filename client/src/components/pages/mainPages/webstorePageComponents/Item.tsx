@@ -1,8 +1,12 @@
+import { useState } from "react";
 import type { Item as ItemType } from "@/types/PageTypes";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
+import { useCart } from "./webstorePageLogic/useCart";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Coins } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Coins, Minus, Plus, ShoppingCart } from "lucide-react";
+import { RemoveItemButton } from "./RemoveItemButton";
 
 const RARITY_COLORS: Record<string, string> = {
   Common: "#9ca3af",
@@ -12,10 +16,26 @@ const RARITY_COLORS: Record<string, string> = {
   Legendary: "#f59e0b",
 };
 
-export function Item({ item }: { item: ItemType }) {
+interface ItemProps {
+  item: ItemType;
+  onDelete?: (id: string) => void;
+}
+
+export function Item({ item, onDelete }: ItemProps) {
   const { settings } = useSettings();
+  const isAdmin = true;
+  const { addToCart } = useCart();
   const glass = settings.useLiquidGlass;
   const rarityColor = RARITY_COLORS[item.rarity] ?? "#9ca3af";
+  const [quantity, setQuantity] = useState(1);
+
+  const decrement = () => setQuantity((q) => Math.max(1, q - 1));
+  const increment = () => setQuantity((q) => q + 1);
+
+  const handleAddToCart = () => {
+    addToCart(item, quantity);
+    setQuantity(1);
+  };
 
   return (
     <Card
@@ -25,6 +45,13 @@ export function Item({ item }: { item: ItemType }) {
           : "bg-gray-800/80 border border-gray-700 hover:border-gray-600 hover:bg-gray-800"
       }`}
     >
+      {/* Admin delete button */}
+      {isAdmin && onDelete && (
+        <div className="absolute top-2 right-2 z-10">
+          <RemoveItemButton onConfirm={() => onDelete(item.id)} />
+        </div>
+      )}
+
       {/* Accent bar on top */}
       <div
         className="absolute top-0 left-0 right-0 h-1 rounded-t-lg"
@@ -33,7 +60,11 @@ export function Item({ item }: { item: ItemType }) {
 
       <div className="flex flex-col gap-3 p-5 pt-4">
         {/* Header: name + rarity badge */}
-        <div className="flex items-start justify-between gap-2">
+        <div
+          className={`flex items-start justify-between gap-2 ${
+            isAdmin && onDelete ? "pr-8" : ""
+          }`}
+        >
           <h3
             className={`text-sm font-semibold text-white leading-tight ${
               glass ? "[text-shadow:0_1px_4px_rgba(163,163,163,0.4)]" : ""
@@ -83,6 +114,46 @@ export function Item({ item }: { item: ItemType }) {
               {item.price.toLocaleString()}
             </span>
           </div>
+        </div>
+
+        {/* Quantity selector + Add to cart */}
+        <div className="flex items-center gap-2 pt-1">
+          <div
+            className={`flex items-center rounded-lg border ${
+              glass
+                ? "border-white/15 bg-white/5"
+                : "border-gray-600 bg-gray-700/40"
+            }`}
+          >
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10 rounded-r-none"
+              onClick={decrement}
+            >
+              <Minus className="w-3 h-3" />
+            </Button>
+            <span className="text-xs font-medium w-7 text-center text-white select-none">
+              {quantity}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10 rounded-l-none"
+              onClick={increment}
+            >
+              <Plus className="w-3 h-3" />
+            </Button>
+          </div>
+
+          <Button
+            size="sm"
+            className="flex-1 h-7 text-xs gap-1.5 bg-amber-500/90 text-black font-semibold hover:bg-amber-400 transition-colors"
+            onClick={handleAddToCart}
+          >
+            <ShoppingCart className="w-3 h-3" />
+            Add to Cart
+          </Button>
         </div>
       </div>
     </Card>
