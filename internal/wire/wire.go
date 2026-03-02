@@ -1,6 +1,6 @@
 //go:build wireinject
 
-package main
+package wire_gen
 
 import (
 	"smaash-web/internal/controllers"

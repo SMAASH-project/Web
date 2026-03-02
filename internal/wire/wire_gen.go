@@ -4,7 +4,7 @@
 //go:build !wireinject
 // +build !wireinject
 
-package main
+package wire_gen
 
 import (
 	"smaash-web/internal/controllers"
@@ -21,7 +21,7 @@ func InitializeServer() *server.Server {
 	userController := controllers.NewUserController(userRepository, playerProfileRepository)
 	authentication := services.NewAuthenticationService(userRepository)
 	authnController := controllers.NewAuthnController(authentication)
-	gameAuthController := controllers.NewGameAuthController(userRepository, playerProfileRepository)
+	gameAuthController := controllers.NewGameAuthController(userRepository)
 	levelRepository := repository.NewGormLevelRepo()
 	levelsController := controllers.NewLevelsController(levelRepository)
 	playerProfileController := controllers.NewPlayerProfileController(playerProfileRepository)
