@@ -19,7 +19,6 @@ export function SelectOs({
   const { settings } = useSettings();
 
   const handleOsSelect = (osName: string) => {
-    console.log(`Selected OS: ${osName}`);
     onSelectOs(osName);
   };
 

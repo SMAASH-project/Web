@@ -12,7 +12,7 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { RadioGroup } from "@/components/ui/radio-group";
 import { FilePlusCorner } from "lucide-react";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
 import { DateTime } from "luxon";
@@ -141,16 +141,35 @@ export function AddRelease({
               value={releaseType}
               onValueChange={(v) => setReleaseType(v as ReleaseType)}
             >
-              <div className="flex flex-row gap-4 mt-1">
-                {(["Major", "Minor", "Patch"] as const).map((type) => (
-                  <label
-                    key={type}
-                    className="flex items-center gap-2 p-2 rounded border cursor-pointer hover:bg-muted/50 transition-colors"
-                  >
-                    <RadioGroupItem value={type} />
-                    <span className="text-sm font-medium">{type}</span>
-                  </label>
-                ))}
+              <div className="grid grid-cols-3 gap-3 mt-1">
+                {(["Major", "Minor", "Patch"] as const).map((type) => {
+                  const colors: Record<ReleaseType, string> = {
+                    Major: "#3b82f6",
+                    Minor: "#10b981",
+                    Patch: "#f59e0b",
+                  };
+                  return (
+                    <label
+                      key={type}
+                      className="flex items-center gap-2 p-3 rounded border cursor-pointer hover:bg-muted/50 transition-colors"
+                      style={{
+                        borderLeftColor: colors[type],
+                        borderLeftWidth: "3px",
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        value={type}
+                        checked={releaseType === type}
+                        onChange={(e) =>
+                          setReleaseType(e.target.value as ReleaseType)
+                        }
+                        className="accent-primary"
+                      />
+                      <span className="text-sm font-medium">{type}</span>
+                    </label>
+                  );
+                })}
               </div>
             </RadioGroup>
           </Field>
