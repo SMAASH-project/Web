@@ -1,6 +1,5 @@
 import { OsTypes } from "@/types/OsTypes";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
-import { Button } from "@/components/ui/button";
 import AppleLogo from "@/assets/osLogos/AppleLogoTransparent.svg?url";
 import AndroidLogo from "@/assets/osLogos/AndroidLogoTransparent.png";
 
@@ -17,39 +16,48 @@ export function SelectOs({
   onSelectOs: (os: string) => void;
 }) {
   const { settings } = useSettings();
-
-  const handleOsSelect = (osName: string) => {
-    onSelectOs(osName);
-  };
+  const glass = settings.useLiquidGlass;
 
   return (
-    <div className="flex flex-row gap-4">
-      {OsTypes.map((os) => (
-        <Button
-          key={os.id}
-          onClick={() => handleOsSelect(os.name)}
-          type="button"
-          className={`w-20 h-20 p-2 rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer! pointer-events-auto! ${
-            settings.useLiquidGlass
-              ? `backdrop-blur-lg shadow-sm shadow-white/20 ${
-                  selectedOs === os.name
-                    ? "bg-white/40 border-white/60 border-2"
-                    : "bg-white/30 border-white/30 hover:bg-white/25"
-                }`
-              : `border-2 ${
-                  selectedOs === os.name
-                    ? "bg-green-600 border-green-400 border-4"
-                    : "bg-gray-600 border-gray-400 hover:bg-gray-650"
-                }`
-          }`}
-        >
-          <img
-            src={osLogos[os.name]}
-            alt={os.name}
-            className="w-16 h-16 object-contain pointer-events-none select-none"
-          />
-        </Button>
-      ))}
+    <div
+      className={`flex flex-row gap-1 p-1 rounded-xl ${
+        glass
+          ? "bg-white/15 backdrop-blur-lg border border-white/20"
+          : "bg-gray-700/60 border border-gray-600"
+      }`}
+    >
+      {OsTypes.map((os) => {
+        const isSelected = selectedOs === os.name;
+        return (
+          <button
+            key={os.id}
+            onClick={() => onSelectOs(os.name)}
+            type="button"
+            className={`relative flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer ${
+              isSelected
+                ? glass
+                  ? "bg-white/30 shadow-sm shadow-white/20"
+                  : "bg-green-600 shadow-md"
+                : glass
+                  ? "hover:bg-white/15"
+                  : "hover:bg-gray-600"
+            }`}
+          >
+            <img
+              src={osLogos[os.name]}
+              alt={os.name}
+              className="w-5 h-5 object-contain pointer-events-none select-none"
+            />
+            <span
+              className={`text-sm font-medium text-white transition-opacity ${
+                isSelected ? "opacity-100" : "opacity-60"
+              }`}
+            >
+              {os.name}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }

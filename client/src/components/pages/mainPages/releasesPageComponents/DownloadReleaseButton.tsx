@@ -4,16 +4,21 @@ import { useSettings } from "../../profileDependents/settings/settingsLogic/Sett
 
 export function DownloadReleaseButton({ version }: { version: string }) {
   const { settings } = useSettings();
+  const glass = settings.useLiquidGlass;
 
   return (
     <Button
-      className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30" : ""} cursor-pointer`}
+      size="sm"
+      variant="ghost"
+      className={`h-8 w-8 p-0 cursor-pointer text-white/60 hover:text-white ${
+        glass ? "hover:bg-white/15" : "hover:bg-gray-600"
+      }`}
       onClick={() => {
         // TODO: Replace with actual download logic
         console.log(`Downloading release ${version}`);
       }}
     >
-      <Download />
+      <Download className="w-4 h-4" />
     </Button>
   );
 }

@@ -14,14 +14,19 @@ import { useSettings } from "../../profileDependents/settings/settingsLogic/Sett
 
 export function RemoveReleaseButton({ onConfirm }: { onConfirm?: () => void }) {
   const { settings } = useSettings();
+  const glass = settings.useLiquidGlass;
 
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button
-          className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30" : ""} cursor-pointer`}
+          size="sm"
+          variant="ghost"
+          className={`h-8 w-8 p-0 cursor-pointer text-white/60 hover:text-red-400 ${
+            glass ? "hover:bg-red-500/15" : "hover:bg-red-900/30"
+          }`}
         >
-          <Trash2 />
+          <Trash2 className="w-4 h-4" />
         </Button>
       </DialogTrigger>
       <DialogContent>

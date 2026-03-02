@@ -1,19 +1,6 @@
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
-import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
-import { Search as SearchIcon } from "lucide-react";
+import { Search as SearchIcon, X } from "lucide-react";
 import { useState } from "react";
 
 export function SearchRelease({
@@ -23,52 +10,40 @@ export function SearchRelease({
 }) {
   const { settings } = useSettings();
   const [query, setQuery] = useState("");
+  const glass = settings.useLiquidGlass;
 
-  const handleSearch = () => {
-    onSearch(query);
+  const handleChange = (value: string) => {
+    setQuery(value);
+    onSearch(value);
+  };
+
+  const handleClear = () => {
+    setQuery("");
+    onSearch("");
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button
-          className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30" : ""} cursor-pointer`}
+    <div className="relative w-full">
+      <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 pointer-events-none" />
+      <Input
+        placeholder="Search by version…"
+        value={query}
+        onChange={(e) => handleChange((e.target as HTMLInputElement).value)}
+        className={`pl-9 pr-9 h-10 text-white placeholder:text-white/40 border ${
+          glass
+            ? "bg-white/10 backdrop-blur-lg border-white/20 focus:bg-white/15 focus:border-white/40"
+            : "bg-gray-700/60 border-gray-600 focus:bg-gray-700 focus:border-green-500"
+        } rounded-lg transition-all`}
+      />
+      {query && (
+        <button
+          onClick={handleClear}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/80 transition-colors cursor-pointer"
+          type="button"
         >
-          <SearchIcon />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Search Releases</DialogTitle>
-          <DialogDescription>
-            Type to search releases by version
-          </DialogDescription>
-        </DialogHeader>
-        <FieldGroup>
-          <Field>
-            <Label>Search</Label>
-            <Input
-              placeholder="Search releases..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </Field>
-        </FieldGroup>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            className="cursor-pointer"
-            onClick={handleSearch}
-          >
-            Search
-          </Button>
-          <DialogClose asChild>
-            <Button variant="outline" className="cursor-pointer">
-              Close
-            </Button>
-          </DialogClose>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <X className="w-4 h-4" />
+        </button>
+      )}
+    </div>
   );
 }

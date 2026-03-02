@@ -1,18 +1,32 @@
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
 import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { formatDateTime } from "@/lib/utils";
 import { LoadPost } from "@/lib/pageAnimations/newsPageAnimations/LoadPost";
-import { ButtonGroup } from "@/components/ui/button-group";
 import { RemoveReleaseButton } from "./RemoveReleaseButton";
 import { DownloadReleaseButton } from "./DownloadReleaseButton";
 import type { Release } from "@/types/PageTypes";
+import { Package } from "lucide-react";
+
+const VERSION_TYPE_COLORS: Record<string, string> = {
+  major: "#3b82f6",
+  minor: "#10b981",
+  patch: "#f59e0b",
+};
+
+function getVersionType(version: string): string {
+  const parts = version.split(".").map(Number);
+  if (parts[1] === 0 && parts[2] === 0) return "major";
+  if (parts[2] === 0) return "minor";
+  return "patch";
+}
 
 interface ReleasesProps {
   selectedOs: string;
   visibleReleases: Release[];
   containerRef: React.RefObject<HTMLDivElement | null>;
+  sentinelRef: React.RefObject<HTMLDivElement | null>;
+  hasMore: boolean;
   handleRemove: (id: string) => void;
 }
 
@@ -20,82 +34,114 @@ export function Releases({
   selectedOs,
   visibleReleases,
   containerRef,
+  sentinelRef,
+  hasMore,
   handleRemove,
 }: ReleasesProps) {
   const { settings } = useSettings();
   const IsAdmin = true; // Replace with actual admin check
+  const glass = settings.useLiquidGlass;
 
   return (
     <div
-      className="flex flex-col gap-5 w-full overflow-y-auto flex-1"
+      className="flex flex-col gap-3 w-full overflow-y-auto flex-1 pr-1"
       ref={containerRef}
     >
       {visibleReleases.length === 0 ? (
-        <Label
-          className={`text-white text-lg ${
-            settings.useLiquidGlass
-              ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-              : ""
-          } text-center mt-10`}
-        >
-          No releases found for {selectedOs}.
-        </Label>
+        <div className="flex flex-col items-center justify-center gap-3 mt-16 opacity-60">
+          <Package className="w-12 h-12 text-white/40" />
+          <p
+            className={`text-white/60 text-base ${
+              glass ? "[text-shadow:0_1px_3px_rgba(163,163,163,0.3)]" : ""
+            }`}
+          >
+            No releases found for {selectedOs}.
+          </p>
+        </div>
       ) : (
         visibleReleases.map((release, index) => {
+          const versionType = getVersionType(release.version);
+          const accentColor = VERSION_TYPE_COLORS[versionType];
+
           const cardContent = (
             <Card
-              className={`flex flex-col gap-3 p-8 ${
-                settings.useLiquidGlass
-                  ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20"
-                  : "bg-gray-600 border-2 border-green-400"
+              className={`group relative overflow-hidden p-0 transition-all duration-200 ${
+                glass
+                  ? "bg-white/10 backdrop-blur-lg border border-white/15 shadow-lg shadow-black/5 hover:bg-white/15 hover:border-white/25"
+                  : "bg-gray-800/80 border border-gray-700 hover:border-gray-600 hover:bg-gray-800"
               }`}
             >
-              <span className="flex flex-row w-full items-start justify-between gap-4">
-                <div className="flex flex-col gap-2">
-                  <Label
-                    className={`text-white text-xl font-bold ${
-                      settings.useLiquidGlass
-                        ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                        : ""
+              {/* Accent bar on left */}
+              <div
+                className="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg"
+                style={{ backgroundColor: accentColor }}
+              />
+
+              <div className="flex items-center justify-between gap-4 py-4 pl-6 pr-5">
+                {/* Left: version info */}
+                <div className="flex items-center gap-4 min-w-0">
+                  <div
+                    className={`flex items-center justify-center w-10 h-10 rounded-lg shrink-0 ${
+                      glass ? "bg-white/10" : "bg-gray-700/60"
                     }`}
                   >
-                    Version {release.version}
-                  </Label>
-                  <div className="flex flex-row gap-2">
-                    {release.supports.map((os) => (
-                      <Badge
-                        key={os}
-                        className={
-                          os === "iOS"
-                            ? "bg-blue-500/80 text-white"
-                            : "bg-green-500/80 text-white"
-                        }
+                    <Package className="w-5 h-5 text-white/70" />
+                  </div>
+                  <div className="flex flex-col gap-1 min-w-0">
+                    <div className="flex items-center gap-2.5">
+                      <span
+                        className={`text-base font-semibold text-white tracking-tight ${
+                          glass
+                            ? "[text-shadow:0_1px_4px_rgba(163,163,163,0.4)]"
+                            : ""
+                        }`}
                       >
-                        {os}
+                        v{release.version}
+                      </span>
+                      <Badge
+                        className="text-[10px] uppercase font-semibold tracking-wider px-2 py-0"
+                        style={{
+                          backgroundColor: `${accentColor}20`,
+                          color: accentColor,
+                          border: `1px solid ${accentColor}40`,
+                        }}
+                      >
+                        {versionType}
                       </Badge>
-                    ))}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {release.supports.map((os) => (
+                        <span
+                          key={os}
+                          className="text-xs text-white/40 font-medium"
+                        >
+                          {os}
+                        </span>
+                      ))}
+                      <span className="text-xs text-white/25">·</span>
+                      <span
+                        className={`text-xs text-white/40 ${
+                          glass
+                            ? "[text-shadow:0_1px_2px_rgba(163,163,163,0.2)]"
+                            : ""
+                        }`}
+                      >
+                        {formatDateTime(release.createdAt)}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-2 shrink-0">
-                  <Label
-                    className={`text-white text-sm ${
-                      settings.useLiquidGlass
-                        ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                        : ""
-                    } italic text-right`}
-                  >
-                    {formatDateTime(release.createdAt)}
-                  </Label>
-                  <ButtonGroup>
-                    <DownloadReleaseButton version={release.version} />
-                    {IsAdmin && (
-                      <RemoveReleaseButton
-                        onConfirm={() => handleRemove(release.id)}
-                      />
-                    )}
-                  </ButtonGroup>
+
+                {/* Right: actions */}
+                <div className="flex items-center gap-1.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
+                  <DownloadReleaseButton version={release.version} />
+                  {IsAdmin && (
+                    <RemoveReleaseButton
+                      onConfirm={() => handleRemove(release.id)}
+                    />
+                  )}
                 </div>
-              </span>
+              </div>
             </Card>
           );
 
@@ -108,6 +154,8 @@ export function Releases({
           );
         })
       )}
+      {/* Sentinel element observed by IntersectionObserver to trigger loading more */}
+      {hasMore && <div ref={sentinelRef} className="h-1 w-full shrink-0" />}
     </div>
   );
 }

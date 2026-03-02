@@ -70,6 +70,7 @@ export function AddRelease({
   const [releaseType, setReleaseType] = useState<ReleaseType>("Patch");
   const [autoName, setAutoName] = useState(false);
   const [fileName, setFileName] = useState("");
+  const glass = settings.useLiquidGlass;
 
   const autoVersion = useMemo(
     () => computeNextVersion(allReleases, releaseType),
@@ -122,9 +123,15 @@ export function AddRelease({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30" : ""} cursor-pointer`}
+          size="sm"
+          className={`cursor-pointer gap-2 ${
+            glass
+              ? "bg-white/20 backdrop-blur-lg border border-white/25 text-white hover:bg-white/30"
+              : "bg-green-600 hover:bg-green-700 text-white"
+          }`}
         >
-          <FilePlusCorner />
+          <FilePlusCorner className="w-4 h-4" />
+          <span className="text-sm font-medium">New Release</span>
         </Button>
       </DialogTrigger>
       <DialogContent
