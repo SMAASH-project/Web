@@ -25,7 +25,13 @@ type Server struct {
 	playerProfileController *controllers.PlayerProfileController
 }
 
-func NewServer(uc *controllers.UserController, ac *controllers.AuthnController, gc *controllers.GameAuthController, lc *controllers.LevelsController, pc *controllers.PlayerProfileController) *Server {
+func NewServer(
+	uc *controllers.UserController,
+	ac *controllers.AuthnController,
+	gc *controllers.GameAuthController,
+	lc *controllers.LevelsController,
+	pc *controllers.PlayerProfileController,
+) *Server {
 	return &Server{
 		gracePeriod: 10 * time.Second,
 		srv: &http.Server{
