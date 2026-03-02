@@ -155,25 +155,52 @@ export function AddRelease({
                     Minor: "#10b981",
                     Patch: "#f59e0b",
                   };
+                  const isSelected = releaseType === type;
+                  const color = colors[type];
                   return (
                     <label
                       key={type}
-                      className="flex items-center gap-2 p-3 rounded border cursor-pointer hover:bg-muted/50 transition-colors"
+                      className={`flex items-center gap-2.5 p-3 rounded-lg border cursor-pointer transition-all duration-150 ${
+                        isSelected
+                          ? "bg-muted/60 border-border"
+                          : "border-border/50 hover:bg-muted/30"
+                      }`}
                       style={{
-                        borderLeftColor: colors[type],
+                        borderLeftColor: color,
                         borderLeftWidth: "3px",
                       }}
                     >
                       <input
                         type="radio"
                         value={type}
-                        checked={releaseType === type}
+                        checked={isSelected}
                         onChange={(e) =>
                           setReleaseType(e.target.value as ReleaseType)
                         }
-                        className="accent-primary"
+                        className="sr-only"
                       />
-                      <span className="text-sm font-medium">{type}</span>
+                      <span
+                        className="size-4 shrink-0 rounded-full border-2 flex items-center justify-center"
+                        style={{
+                          borderColor: isSelected
+                            ? color
+                            : "var(--color-border)",
+                        }}
+                      >
+                        {isSelected && (
+                          <span
+                            className="size-2 rounded-full"
+                            style={{ backgroundColor: color }}
+                          />
+                        )}
+                      </span>
+                      <span
+                        className={`text-sm font-medium ${
+                          isSelected ? "text-black" : "text-black"
+                        }`}
+                      >
+                        {type}
+                      </span>
                     </label>
                   );
                 })}
