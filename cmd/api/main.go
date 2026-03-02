@@ -19,7 +19,7 @@ func main() {
 	srv := server.NewServer(
 		controllers.NewUserController(userRepo, playerProfileRepo),
 		controllers.NewAuthnController(authnService),
-		controllers.NewGameAuthController(userRepo, playerProfileRepo),
+		controllers.NewGameAuthController(userRepo),
 		controllers.NewLevelsController(levelRepo),
 		controllers.NewPlayerProfileController(playerProfileRepo),
 	).MountRoutes()

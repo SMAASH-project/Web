@@ -30,6 +30,7 @@ func (s *Server) MountRoutes() *Server {
 		auth.POST("/logout", s.authnController.Logout)
 
 		api.POST("/game-login", s.gameAuthController.GameLogin)
+		api.POST("/game-refresh", s.gameAuthController.Refresh)
 	}
 
 	users := api.Group("/users")
