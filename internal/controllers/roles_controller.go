@@ -20,6 +20,16 @@ func NewRolesController(rolesRepo repository.RoleRepository) *RolesController {
 	return &RolesController{rolesRepo: rolesRepo}
 }
 
+// @description Creates a new role
+// @tags roles
+// @accept json
+// @produce json
+// @param role_create_dto body dtos.RoleCreateDTO true "dto for creating a new role"
+// @success 201 {object} dtos.RoleReadDTO "returns newly created role"
+// @failure 400 {object} dtos.ErrResp "request body in wrong format"
+// @failure 409 {object} dtos.ErrResp "unique key violation"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /roles [post]
 func (rc RolesController) Create(c *gin.Context) {
 	path := c.Request.URL.Path
 
@@ -42,6 +52,13 @@ func (rc RolesController) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, dtos.RoleToDTO(*newRole))
 }
 
+// @description Reads all roles
+// @tags roles
+// @accept json
+// @produce json
+// @success 200 {array} dtos.RoleReadDTO "returns newly created role"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /roles [get]
 func (rc RolesController) ReadAll(c *gin.Context) {
 	path := c.Request.URL.Path
 

@@ -1,0 +1,135 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This site documents the endpoints for the smaash web app, allowing easy testing",
+        "title": "SMAASH API documentation",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {},
+        "license": {
+            "name": "MIT"
+        },
+        "version": "1.0"
+    },
+    "basePath": "/api",
+    "paths": {
+        "/roles": {
+            "get": {
+                "description": "Reads all roles",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "roles"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns newly created role",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.RoleReadDTO"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new role",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "roles"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for creating a new role",
+                        "name": "role_create_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.RoleCreateDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "returns newly created role",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.RoleReadDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dtos.ErrResp": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.RoleCreateDTO": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "maxLength": 7
+                }
+            }
+        },
+        "dtos.RoleReadDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

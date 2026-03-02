@@ -1,0 +1,89 @@
+basePath: /api
+definitions:
+  dtos.ErrResp:
+    properties:
+      error:
+        type: string
+      path:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  dtos.RoleCreateDTO:
+    properties:
+      name:
+        maxLength: 7
+        type: string
+    required:
+    - name
+    type: object
+  dtos.RoleReadDTO:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This site documents the endpoints for the smaash web app, allowing
+    easy testing
+  license:
+    name: MIT
+  termsOfService: http://swagger.io/terms/
+  title: SMAASH API documentation
+  version: "1.0"
+paths:
+  /roles:
+    get:
+      consumes:
+      - application/json
+      description: Reads all roles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: returns newly created role
+          schema:
+            items:
+              $ref: '#/definitions/dtos.RoleReadDTO'
+            type: array
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - roles
+    post:
+      consumes:
+      - application/json
+      description: Creates a new role
+      parameters:
+      - description: dto for creating a new role
+        in: body
+        name: role_create_dto
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.RoleCreateDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: returns newly created role
+          schema:
+            $ref: '#/definitions/dtos.RoleReadDTO'
+        "400":
+          description: request body in wrong format
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "409":
+          description: unique key violation
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - roles
+swagger: "2.0"

@@ -6,6 +6,12 @@ import (
 	wire_gen "smaash-web/internal/wire"
 )
 
+// @title SMAASH API documentation
+// @version 1.0
+// @license.name MIT
+// @description This site documents the endpoints for the smaash web app, allowing easy testing
+// @termsOfService http://swagger.io/terms/
+// @BasePath /api
 func main() {
 	appContext := context.Background()
 

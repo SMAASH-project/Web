@@ -2,10 +2,13 @@ package server
 
 import (
 	"net/http"
+	"smaash-web/docs"
 	"smaash-web/internal/middlewares"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func (s *Server) MountRoutes() *Server {
@@ -72,6 +75,9 @@ func (s *Server) MountRoutes() *Server {
 		roles.PUT("/:id", middlewares.ValidateUrl, s.rolesController.Update)
 		roles.DELETE("/:id", middlewares.ValidateUrl, s.rolesController.Delete)
 	}
+
+	docs.SwaggerInfo.BasePath = "/api"
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	r.NoRoute(func(c *gin.Context) {
 		http.ServeFile(c.Writer, c.Request, "./build/client")
