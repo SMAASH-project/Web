@@ -64,26 +64,12 @@ export const newsPosts: NewsPost[] = [
 export interface Item {
   id: string;
   name: string;
+  category: string;
+  rarity: "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
   description: string;
   price: number;
   createdAt: ReturnType<typeof DateTime.now>;
 }
-export const items: Item[] = [
-  {
-    id: "1",
-    name: "First Item",
-    description: "This is the description for the first item.",
-    price: 9.99,
-    createdAt: DateTime.now(),
-  },
-  {
-    id: "2",
-    name: "Second Item",
-    description: "This is the description for the second item.",
-    price: 19.99,
-    createdAt: DateTime.now(),
-  },
-];
 
 export interface Release {
   id: string;
