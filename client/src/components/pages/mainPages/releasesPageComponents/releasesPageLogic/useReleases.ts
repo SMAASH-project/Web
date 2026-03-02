@@ -2,12 +2,24 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import type { Release } from "@/types/PageTypes";
 import { exampleReleases } from "@/types/ExampleReleases";
 
+const PAGE_SIZE = 8;
+const LOAD_DELAY_MS = 400;
+
 export function useReleases(selectedOs: string) {
   const [allReleases, setAllReleases] = useState<Release[]>(exampleReleases);
   const containerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const [releasesToShow, setReleasesToShow] = useState(4);
+  const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const loadTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [lastOs, setLastOs] = useState(selectedOs);
+
+  // Reset page when OS changes (idiomatic React pattern — setState during render)
+  if (lastOs !== selectedOs) {
+    setLastOs(selectedOs);
+    setPage(1);
+  }
 
   const filteredReleases = useMemo(() => {
     return allReleases.filter((release) =>
@@ -17,8 +29,8 @@ export function useReleases(selectedOs: string) {
 
   const hasMore = useMemo(() => {
     if (searchQuery) return false;
-    return releasesToShow < filteredReleases.length;
-  }, [searchQuery, releasesToShow, filteredReleases.length]);
+    return page * PAGE_SIZE < filteredReleases.length;
+  }, [searchQuery, page, filteredReleases.length]);
 
   const visibleReleases = useMemo(() => {
     if (searchQuery) {
@@ -26,14 +38,36 @@ export function useReleases(selectedOs: string) {
         release.version.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
-    return filteredReleases.slice(0, releasesToShow);
-  }, [filteredReleases, releasesToShow, searchQuery]);
+    return filteredReleases.slice(0, page * PAGE_SIZE);
+  }, [filteredReleases, page, searchQuery]);
 
+  // Debounced loadMore — delays the next page load so fast scrolling
+  // doesn't instantly dump all items at once.
   const loadMore = useCallback(() => {
-    if (!searchQuery) {
-      setReleasesToShow((prev) => prev + 4);
+    if (searchQuery || isLoading) return;
+
+    // Cancel any pending load
+    if (loadTimerRef.current) {
+      clearTimeout(loadTimerRef.current);
     }
-  }, [searchQuery]);
+
+    setIsLoading(true);
+
+    loadTimerRef.current = setTimeout(() => {
+      setPage((prev) => prev + 1);
+      setIsLoading(false);
+      loadTimerRef.current = null;
+    }, LOAD_DELAY_MS);
+  }, [searchQuery, isLoading]);
+
+  // Clean up pending timer on unmount
+  useEffect(() => {
+    return () => {
+      if (loadTimerRef.current) {
+        clearTimeout(loadTimerRef.current);
+      }
+    };
+  }, []);
 
   // Use IntersectionObserver on a sentinel element at the bottom of the list.
   // Re-create the observer whenever visibleReleases changes so that it
@@ -43,8 +77,7 @@ export function useReleases(selectedOs: string) {
   // without re-observing it would only load one extra batch.
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    const container = containerRef.current;
-    if (!sentinel || !container || !hasMore) return;
+    if (!sentinel || !hasMore || isLoading) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -53,7 +86,7 @@ export function useReleases(selectedOs: string) {
         }
       },
       {
-        root: container,
+        root: null,
         rootMargin: "0px 0px 200px 0px",
         threshold: 0,
       },
@@ -61,7 +94,7 @@ export function useReleases(selectedOs: string) {
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [loadMore, hasMore, visibleReleases.length]);
+  }, [loadMore, hasMore, isLoading, visibleReleases.length]);
 
   function handleCreate(release: Release) {
     setAllReleases((prev) => [release, ...prev]);
@@ -73,7 +106,7 @@ export function useReleases(selectedOs: string) {
 
   function handleSearch(query: string) {
     setSearchQuery(query);
-    setReleasesToShow(4);
+    setPage(1);
   }
 
   return {
@@ -82,6 +115,7 @@ export function useReleases(selectedOs: string) {
     containerRef,
     sentinelRef,
     hasMore,
+    isLoading,
     handleCreate,
     handleRemove,
     handleSearch,

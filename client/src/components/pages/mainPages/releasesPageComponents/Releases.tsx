@@ -6,7 +6,7 @@ import { LoadPost } from "@/lib/pageAnimations/newsPageAnimations/LoadPost";
 import { RemoveReleaseButton } from "./RemoveReleaseButton";
 import { DownloadReleaseButton } from "./DownloadReleaseButton";
 import type { Release } from "@/types/PageTypes";
-import { Package } from "lucide-react";
+import { Package, Loader2 } from "lucide-react";
 
 const VERSION_TYPE_COLORS: Record<string, string> = {
   major: "#3b82f6",
@@ -27,6 +27,7 @@ interface ReleasesProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
   sentinelRef: React.RefObject<HTMLDivElement | null>;
   hasMore: boolean;
+  isLoading: boolean;
   handleRemove: (id: string) => void;
 }
 
@@ -36,6 +37,7 @@ export function Releases({
   containerRef,
   sentinelRef,
   hasMore,
+  isLoading,
   handleRemove,
 }: ReleasesProps) {
   const { settings } = useSettings();
@@ -43,10 +45,7 @@ export function Releases({
   const glass = settings.useLiquidGlass;
 
   return (
-    <div
-      className="flex flex-col gap-3 w-full overflow-y-auto flex-1 pr-1"
-      ref={containerRef}
-    >
+    <div className="flex flex-col gap-3 w-full" ref={containerRef}>
       {visibleReleases.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 mt-16 opacity-60">
           <Package className="w-12 h-12 text-white/40" />
@@ -155,7 +154,16 @@ export function Releases({
         })
       )}
       {/* Sentinel element observed by IntersectionObserver to trigger loading more */}
-      {hasMore && <div ref={sentinelRef} className="h-1 w-full shrink-0" />}
+      {hasMore && (
+        <div
+          ref={sentinelRef}
+          className="flex items-center justify-center py-4 w-full shrink-0"
+        >
+          {isLoading && (
+            <Loader2 className="w-5 h-5 text-white/40 animate-spin" />
+          )}
+        </div>
+      )}
     </div>
   );
 }

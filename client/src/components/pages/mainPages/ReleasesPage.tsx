@@ -18,6 +18,7 @@ export function ReleasesPage() {
     containerRef,
     sentinelRef,
     hasMore,
+    isLoading,
     handleCreate,
     handleRemove,
     handleSearch,
@@ -26,9 +27,9 @@ export function ReleasesPage() {
   const glass = settings.useLiquidGlass;
 
   return (
-    <div className="p-4 h-screen overflow-hidden flex flex-col">
+    <div className="p-4 min-h-screen w-full self-start flex flex-col">
       <Navbar />
-      <div className="mt-20 z-0 flex flex-col items-center justify-start gap-6 flex-1 overflow-hidden max-w-4xl mx-auto w-full">
+      <div className="mt-20 z-0 flex flex-col items-center justify-start gap-6 w-full max-w-4xl mx-auto pb-8">
         {/* Header section */}
         <div className="flex flex-col gap-5 w-full">
           {/* Title + OS selector row */}
@@ -70,6 +71,7 @@ export function ReleasesPage() {
           containerRef={containerRef}
           sentinelRef={sentinelRef}
           hasMore={hasMore}
+          isLoading={isLoading}
           handleRemove={handleRemove}
         />
       </div>
