@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import React from "react";
 import { generateRandomUsername } from "@/lib/GenerateRandomUsername";
+import { apiSignup } from "@/hooks/useApi";
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const [password, setPassword] = React.useState("");
@@ -26,21 +27,11 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const navigate = useNavigate();
   const randomUsername = generateRandomUsername();
 
+  // Calls the centralized signup API; navigates to login on success.
   const signup = async () => {
     try {
-      const response = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-          username: username,
-          role_id: 1,
-        }),
-      });
-      if (response.ok) {
+      const { ok } = await apiSignup({ email, password, username });
+      if (ok) {
         console.log("Signup successful");
         navigate("/app/login");
       } else {
