@@ -2,10 +2,13 @@ package server
 
 import (
 	"net/http"
+	"smaash-web/docs"
 	"smaash-web/internal/middlewares"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func (s *Server) MountRoutes() *Server {
@@ -30,13 +33,17 @@ func (s *Server) MountRoutes() *Server {
 		auth.POST("/logout", s.authnController.Logout)
 
 		api.POST("/game-login", s.gameAuthController.GameLogin)
+		api.POST("/game-refresh", s.gameAuthController.Refresh)
 	}
 
 	users := api.Group("/users")
 	users.Use(middlewares.Authorize)
-	{
-		users.GET("", s.userController.ReadAllUsers)
-		users.GET("/:id", middlewares.ValidateUrl, s.userController.ReadUserByID)
+	{ // no creation, that happens on /auth/signup. No updating password either.
+		users.GET("", s.userController.ReadAll)
+		users.GET("/:id", middlewares.ValidateUrl, s.userController.ReadByID)
+		users.PUT("/:id", middlewares.ValidateUrl, s.userController.Update)
+		users.DELETE("/:id", middlewares.ValidateUrl, s.userController.Delete)
+		users.POST("/:id/profiles", middlewares.ValidateUrl, s.userController.AddProfileToUser)
 	}
 
 	levels := api.Group("/levels")
@@ -58,6 +65,29 @@ func (s *Server) MountRoutes() *Server {
 		profiles.PUT("/:id", middlewares.ValidateUrl, s.playerProfileController.Update)
 		profiles.DELETE("/:id", middlewares.ValidateUrl, s.playerProfileController.Delete)
 	}
+
+	roles := api.Group("/roles")
+	roles.Use(middlewares.Authorize)
+	{
+		roles.POST("", s.rolesController.Create)
+		roles.GET("", s.rolesController.ReadAll)
+		roles.GET("/:id", middlewares.ValidateUrl, s.rolesController.ReadByID)
+		roles.PUT("/:id", middlewares.ValidateUrl, s.rolesController.Update)
+		roles.DELETE("/:id", middlewares.ValidateUrl, s.rolesController.Delete)
+	}
+
+	categories := api.Group("/categories")
+	categories.Use(middlewares.Authorize)
+	{
+		categories.POST("", s.categoriesController.Create)
+		categories.GET("", s.categoriesController.ReadAll)
+		categories.GET("/:id", middlewares.ValidateUrl, s.categoriesController.ReadByID)
+		categories.PUT("/:id", middlewares.ValidateUrl, s.categoriesController.Update)
+		categories.DELETE("/:id", middlewares.ValidateUrl, s.categoriesController.Delete)
+	}
+
+	docs.SwaggerInfo.BasePath = "/api"
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	r.NoRoute(func(c *gin.Context) {
 		http.ServeFile(c.Writer, c.Request, "./build/client")

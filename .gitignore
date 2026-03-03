@@ -36,3 +36,5 @@ go.work.sum
 build/
 *.db
 /internal/seeder/source/*
+
+.DS_Store

@@ -60,3 +60,11 @@ build-fullstack: build-client build
 @seed:
     echo "starting database seeding..."
     go run cmd/seeder/main.go
+
+@swagger:
+    echo "generating swagger docs..."
+    swag init -g ./cmd/api/main.go -o docs
+
+@wire:
+    echo "starting generation of dependency tree"
+    cd ./internal/wire && go generate

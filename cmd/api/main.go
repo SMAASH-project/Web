@@ -3,26 +3,20 @@ package main
 import (
 	"context"
 	"log"
-	"smaash-web/internal/controllers"
-	"smaash-web/internal/repository"
-	"smaash-web/internal/server"
-	"smaash-web/internal/services"
+	wire_gen "smaash-web/internal/wire"
 )
 
+// @title SMAASH API documentation
+// @version 1.0
+// @license.name MIT
+// @description This site documents the endpoints for the smaash web app, allowing easy testing
+// @termsOfService http://swagger.io/terms/
+// @BasePath /api
 func main() {
 	appContext := context.Background()
-	userRepo := repository.NewGormUserRepo()
-	playerProfileRepo := repository.NewGormPlayerProfileRepo()
-	authnService := services.NewAuthenticationService(userRepo)
-	levelRepo := repository.NewGormLevelRepo()
 
-	srv := server.NewServer(
-		controllers.NewUserController(userRepo),
-		controllers.NewAuthnController(authnService),
-		controllers.NewGameAuthController(userRepo, playerProfileRepo),
-		controllers.NewLevelsController(levelRepo),
-		controllers.NewPlayerProfileController(playerProfileRepo),
-	).MountRoutes()
+	srv := wire_gen.InitializeServer()
+	srv.MountRoutes()
 
 	if err := srv.Run(appContext); err != nil {
 		log.Fatalf("There was an error starting the server: %v", err)
