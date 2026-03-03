@@ -45,7 +45,7 @@ export const ThemePicker = () => {
   };
 
   return (
-    <div className="w-100 flex items-center justify-center gap-1">
+    <div className="w-full flex items-center justify-center gap-2 flex-wrap">
       <Label
         className={`text-white p-1.5 ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
       >

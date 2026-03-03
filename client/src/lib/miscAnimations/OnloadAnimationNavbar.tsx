@@ -1,11 +1,13 @@
 import { useNavbarContext } from "@/context/NavbarContextUtils";
 import { useEffect, useState, useRef, type ComponentType } from "react";
+import { useMediaQuery } from "@/components/nav/navLogic/useMediaQuery";
 
 export function WithOnloadAnimation(WrappedComponent: ComponentType) {
   return function OnloadAnimation() {
     const [hidden, setHidden] = useState(false);
     const { isDropdownHovering, setIsDropdownHovering } = useNavbarContext();
     const isFreshMountRef = useRef(true);
+    const isMobile = !useMediaQuery("(min-width: 768px)");
 
     useEffect(() => {
       // Reset dropdown hovering state when page loads
@@ -21,19 +23,22 @@ export function WithOnloadAnimation(WrappedComponent: ComponentType) {
       return () => clearTimeout(timer);
     }, [setIsDropdownHovering]);
 
+    // On mobile, always render the navbar without the peek animation
+    if (isMobile) {
+      return <WrappedComponent />;
+    }
+
     // Use fresh mount state to override isDropdownHovering during animation
     const shouldLockNavbar = !isFreshMountRef.current && isDropdownHovering;
 
     return (
-      <nav
-        className={`z-99 absolute hover:top-0 transition-all delay-150 duration-150 ease-in-out max-w-full w-full ${
-          hidden && !shouldLockNavbar ? "-top-17" : "top-0"
+      <div
+        className={`z-99 relative transition-all delay-150 duration-150 ease-in-out max-w-full w-full ${
+          hidden && !shouldLockNavbar ? "-mt-14 hover:mt-0" : "mt-0"
         }`}
       >
-        <div>
-          <WrappedComponent />
-        </div>
-      </nav>
+        <WrappedComponent />
+      </div>
     );
   };
 }

@@ -12,11 +12,11 @@ export function ProfilePage() {
     <div className="max-w-full w-full h-full flex flex-col items-center justify-start text-white">
       {settings.useAnimations ? <AnimatedNavbar /> : <Navbar />}
       {settings.useAnimations ? (
-        <CardAnimation className="z-0 mt-20">
+        <CardAnimation className="z-0 mt-20 w-full px-4 sm:px-6 lg:px-10 flex justify-center">
           <ProfilePageContent />
         </CardAnimation>
       ) : (
-        <div className="z-0 mt-20">
+        <div className="z-0 mt-20 w-full px-4 sm:px-6 lg:px-10 flex justify-center">
           <ProfilePageContent />
         </div>
       )}
