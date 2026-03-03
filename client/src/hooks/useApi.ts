@@ -66,8 +66,14 @@ async function api<T>(
     ...options,
   });
 
-  // Try to parse JSON; fall back to null for empty bodies (e.g. 204).
-  const data: T = await res.json().catch(() => null as T);
+  // Only attempt JSON parsing when the server actually returns JSON.
+  // This avoids noisy console errors when the response is HTML (e.g. a
+  // proxy fallback or an auth redirect) or has an empty body (204).
+  let data: T = null as T;
+  const contentType = res.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    data = await res.json().catch(() => null as T);
+  }
 
   return { data, ok: res.ok, status: res.status };
 }

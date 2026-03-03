@@ -49,9 +49,10 @@ export function ProfileSelectorForm() {
           <div className="flex flex-row items-center gap-6">
             {profiles.map((p) => (
               <div key={p.name} className="flex flex-col items-center gap-2">
-                <motion.button
+                <motion.div
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
+                  className="cursor-pointer"
                 >
                   <Avatar
                     size="lg"
@@ -92,11 +93,11 @@ export function ProfileSelectorForm() {
                   >
                     {p.name}
                   </span>
-                </motion.button>
+                </motion.div>
               </div>
             ))}
             {profileCount < 5 && (
-              <motion.button
+              <motion.div
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -114,19 +115,19 @@ export function ProfileSelectorForm() {
                     Add New
                   </span>
                 </div>
-              </motion.button>
+              </motion.div>
             )}
           </div>
         </div>
         <div className="mb-4 z-1 ">
-          <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
             <Button
               onClick={() => setIsManaging((prev) => !prev)}
               className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30" : ""} cursor-pointer`}
             >
               {isManaging ? "Done" : "Manage Profiles"}
             </Button>
-          </motion.button>
+          </motion.div>
         </div>
       </div>
       <AddNewProfile open={showAddProfile} onOpenChange={setShowAddProfile} />
