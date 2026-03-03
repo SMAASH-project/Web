@@ -110,7 +110,7 @@ export function NavMenu({ useLiquidGlass }: NavMenuProps) {
           onMouseEnter={handleMouseEnter}
         >
           <Link to={item.path}>
-            <Label>{item.label}</Label>
+            <Label className="px-2">{item.label}</Label>
           </Link>
         </li>
       ))}
