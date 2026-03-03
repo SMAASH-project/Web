@@ -60,7 +60,7 @@ export function ItemFilters({
   };
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-1.5 items-center">
       <span
         className={`text-xs font-medium text-white/50 uppercase tracking-wider ${
           glass ? "[text-shadow:0_1px_2px_rgba(163,163,163,0.2)]" : ""

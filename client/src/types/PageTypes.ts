@@ -61,13 +61,17 @@ export const newsPosts: NewsPost[] = [
   },
 ];
 
-export interface Item {
+export type Rarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
+
+export interface WebstoreItem {
   id: string;
   name: string;
-  category: string;
-  rarity: "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
+  kind: "Skin" | "Character";
+  combatType?: "Melee" | "Ranged";
+  rarity: Rarity;
   description: string;
   price: number;
+  owned: boolean;
   createdAt: ReturnType<typeof DateTime.now>;
 }
 

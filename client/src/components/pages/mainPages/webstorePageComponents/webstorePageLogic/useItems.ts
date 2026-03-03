@@ -1,24 +1,24 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { exampleItems } from "@/types/ExampleItems";
+import type { WebstoreItem } from "@/types/PageTypes";
 
 const PAGE_SIZE = 12;
 const LOAD_DELAY_MS = 400;
 
 export function useItems() {
-  const allItems = exampleItems;
+  const [allItems, setAllItems] = useState<WebstoreItem[]>(exampleItems);
   const containerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedKind, setSelectedKind] = useState("All");
   const [selectedRarity, setSelectedRarity] = useState("All");
+  const [selectedCombatType, setSelectedCombatType] = useState("All");
+  const [selectedOwnership, setSelectedOwnership] = useState("All");
   const [isLoading, setIsLoading] = useState(false);
   const loadTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const categories = useMemo(() => {
-    const cats = Array.from(new Set(allItems.map((item) => item.category)));
-    return ["All", ...cats.sort()];
-  }, [allItems]);
+  const kinds: string[] = ["All", "Character", "Skin"];
 
   const rarities: string[] = [
     "All",
@@ -29,15 +29,40 @@ export function useItems() {
     "Legendary",
   ];
 
+  const combatTypes: string[] = ["All", "Melee", "Ranged"];
+
+  const ownershipOptions: string[] = ["All", "Owned", "Unowned"];
+
+  // Only show ownership filter when characters are selected (or All with some characters visible)
+  const showOwnershipFilter = selectedKind !== "Skin";
+
+  // Only show combat type filter when characters are visible
+  const showCombatTypeFilter = selectedKind !== "Skin";
+
   const filteredItems = useMemo(() => {
     return allItems.filter((item) => {
-      const matchesCategory =
-        selectedCategory === "All" || item.category === selectedCategory;
+      const matchesKind = selectedKind === "All" || item.kind === selectedKind;
       const matchesRarity =
         selectedRarity === "All" || item.rarity === selectedRarity;
-      return matchesCategory && matchesRarity;
+      const matchesCombatType =
+        selectedCombatType === "All" ||
+        item.kind !== "Character" ||
+        item.combatType === selectedCombatType;
+      const matchesOwnership =
+        selectedOwnership === "All" ||
+        (selectedOwnership === "Owned" && item.owned) ||
+        (selectedOwnership === "Unowned" && !item.owned);
+      return (
+        matchesKind && matchesRarity && matchesCombatType && matchesOwnership
+      );
     });
-  }, [allItems, selectedCategory, selectedRarity]);
+  }, [
+    allItems,
+    selectedKind,
+    selectedRarity,
+    selectedCombatType,
+    selectedOwnership,
+  ]);
 
   const hasMore = useMemo(() => {
     if (searchQuery) return false;
@@ -107,14 +132,35 @@ export function useItems() {
     setPage(1);
   }
 
-  function handleCategoryChange(category: string) {
-    setSelectedCategory(category);
+  function handleKindChange(kind: string) {
+    setSelectedKind(kind);
     setPage(1);
+    // Reset combat type and ownership when switching to Skin
+    if (kind === "Skin") {
+      setSelectedCombatType("All");
+      setSelectedOwnership("All");
+    }
   }
 
   function handleRarityChange(rarity: string) {
     setSelectedRarity(rarity);
     setPage(1);
+  }
+
+  function handleCombatTypeChange(combatType: string) {
+    setSelectedCombatType(combatType);
+    setPage(1);
+  }
+
+  function handleOwnershipChange(ownership: string) {
+    setSelectedOwnership(ownership);
+    setPage(1);
+  }
+
+  function unlockItem(id: string) {
+    setAllItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, owned: true } : item)),
+    );
   }
 
   return {
@@ -124,12 +170,21 @@ export function useItems() {
     sentinelRef,
     hasMore,
     isLoading,
-    categories,
+    kinds,
     rarities,
-    selectedCategory,
+    combatTypes,
+    ownershipOptions,
+    selectedKind,
     selectedRarity,
+    selectedCombatType,
+    selectedOwnership,
+    showOwnershipFilter,
+    showCombatTypeFilter,
     handleSearch,
-    handleCategoryChange,
+    handleKindChange,
     handleRarityChange,
+    handleCombatTypeChange,
+    handleOwnershipChange,
+    unlockItem,
   };
 }

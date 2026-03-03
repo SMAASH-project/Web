@@ -12,22 +12,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Field, FieldGroup } from "@/components/ui/field";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
 import { Plus } from "lucide-react";
 
 const RARITIES = ["Common", "Uncommon", "Rare", "Epic", "Legendary"] as const;
-const CATEGORIES = [
-  "Weapons",
-  "Armor",
-  "Consumables",
-  "Utilities",
-  "Accessories",
-];
+const KINDS = ["Character", "Skin"] as const;
+const COMBAT_TYPES = ["Melee", "Ranged"] as const;
 
 interface CreateItemDialogProps {
   onCreate: (data: {
     name: string;
-    category: string;
+    kind: (typeof KINDS)[number];
+    combatType?: (typeof COMBAT_TYPES)[number];
     rarity: (typeof RARITIES)[number];
     description: string;
     price: number;
@@ -39,7 +36,9 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
   const glass = settings.useLiquidGlass;
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
-  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [kind, setKind] = useState<(typeof KINDS)[number]>("Character");
+  const [combatType, setCombatType] =
+    useState<(typeof COMBAT_TYPES)[number]>("Melee");
   const [rarity, setRarity] = useState<(typeof RARITIES)[number]>("Common");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -48,26 +47,23 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
     if (!name.trim() || !description.trim() || !price) return;
     onCreate({
       name: name.trim(),
-      category,
+      kind,
+      ...(kind === "Character" ? { combatType } : {}),
       rarity,
       description: description.trim(),
       price: Number(price),
     });
     setName("");
-    setCategory(CATEGORIES[0]);
+    setKind("Character");
+    setCombatType("Melee");
     setRarity("Common");
     setDescription("");
     setPrice("");
     setOpen(false);
   };
 
-  const inputCls = `text-white ${
-    glass
-      ? "bg-white/10 border-white/20 focus:bg-white/15 focus:border-white/40"
-      : "bg-gray-700/60 border-gray-600 focus:bg-gray-700"
-  }`;
-
-  const selectCls = `w-full rounded-lg border px-3 py-2 text-sm outline-none transition-all ${inputCls}`;
+  const selectCls =
+    "w-full rounded-md border border-input bg-transparent dark:bg-input/30 px-3 py-2 text-base md:text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]";
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -94,34 +90,35 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
           <DialogDescription>Add a new item to the webstore.</DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <Label className="text-white/80 text-xs">Name</Label>
+        <FieldGroup>
+          <Field>
+            <Label>Name</Label>
             <Input
               value={name}
               onChange={(e) => setName((e.target as HTMLInputElement).value)}
               placeholder="Item name"
-              className={inputCls}
             />
-          </div>
+          </Field>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <Label className="text-white/80 text-xs">Category</Label>
+            <Field>
+              <Label>Kind</Label>
               <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                value={kind}
+                onChange={(e) =>
+                  setKind(e.target.value as (typeof KINDS)[number])
+                }
                 className={selectCls}
               >
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c} className="bg-gray-800">
-                    {c}
+                {KINDS.map((k) => (
+                  <option key={k} value={k}>
+                    {k}
                   </option>
                 ))}
               </select>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label className="text-white/80 text-xs">Rarity</Label>
+            </Field>
+            <Field>
+              <Label>Rarity</Label>
               <select
                 value={rarity}
                 onChange={(e) =>
@@ -130,38 +127,55 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
                 className={selectCls}
               >
                 {RARITIES.map((r) => (
-                  <option key={r} value={r} className="bg-gray-800">
+                  <option key={r} value={r}>
                     {r}
                   </option>
                 ))}
               </select>
-            </div>
+            </Field>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <Label className="text-white/80 text-xs">Description</Label>
+          {kind === "Character" && (
+            <Field>
+              <Label>Combat Type</Label>
+              <select
+                value={combatType}
+                onChange={(e) =>
+                  setCombatType(e.target.value as (typeof COMBAT_TYPES)[number])
+                }
+                className={selectCls}
+              >
+                {COMBAT_TYPES.map((ct) => (
+                  <option key={ct} value={ct}>
+                    {ct}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          )}
+
+          <Field>
+            <Label>Description</Label>
             <Input
               value={description}
               onChange={(e) =>
                 setDescription((e.target as HTMLInputElement).value)
               }
               placeholder="Item description"
-              className={inputCls}
             />
-          </div>
+          </Field>
 
-          <div className="flex flex-col gap-1.5">
-            <Label className="text-white/80 text-xs">Price</Label>
+          <Field>
+            <Label>Price</Label>
             <Input
               type="number"
               min={1}
               value={price}
               onChange={(e) => setPrice((e.target as HTMLInputElement).value)}
               placeholder="0"
-              className={inputCls}
             />
-          </div>
-        </div>
+          </Field>
+        </FieldGroup>
 
         <DialogFooter>
           <DialogClose asChild>
