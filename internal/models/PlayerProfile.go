@@ -17,3 +17,7 @@ type PlayerProfile struct {
 	Purchases   []Purchase
 	Matches     []*Match `gorm:"many2many:match_participation"`
 }
+
+func (pp PlayerProfile) GetID() uint {
+	return pp.ID
+}

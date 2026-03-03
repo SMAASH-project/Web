@@ -16,14 +16,14 @@ import (
 )
 
 type GameAuthController struct {
-	userRepo repository.UserRepository
+	userRepoActions *repository.UserRepositoryActions
 }
 
 func NewGameAuthController(
-	userRepo repository.UserRepository,
+	userRepoActions *repository.UserRepositoryActions,
 ) *GameAuthController {
 	return &GameAuthController{
-		userRepo: userRepo,
+		userRepoActions: userRepoActions,
 	}
 }
 
@@ -35,7 +35,7 @@ func (g GameAuthController) GameLogin(c *gin.Context) {
 	}
 
 	// Get User by email
-	user, err := g.userRepo.ReadByEmail(c.Request.Context(), body.Email)
+	user, err := g.userRepoActions.ReadByEmail(c.Request.Context(), body.Email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusUnauthorized, dtos.NewErrResp(
@@ -57,7 +57,7 @@ func (g GameAuthController) GameLogin(c *gin.Context) {
 
 	// Update last login time for the user
 	user.LastLogin = time.Now()
-	if err := g.userRepo.Update(c.Request.Context(), *user); err != nil {
+	if err := g.userRepoActions.Update(c.Request.Context(), user); err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
 	}
@@ -120,7 +120,7 @@ func (g GameAuthController) Refresh(c *gin.Context) {
 	}
 
 	// Ensure user still exists
-	user, err := g.userRepo.ReadByEmail(c.Request.Context(), email)
+	user, err := g.userRepoActions.ReadByEmail(c.Request.Context(), email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusUnauthorized, dtos.NewErrResp("User no longer exists", c.Request.URL.Path))

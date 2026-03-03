@@ -49,11 +49,11 @@ func (s *Server) MountRoutes() *Server {
 	levels := api.Group("/levels")
 	levels.Use(middlewares.Authorize)
 	{
-		levels.GET("", s.levelsController.ReadAllLevels)
-		levels.GET("/:id", middlewares.ValidateUrl, s.levelsController.ReadLevelByID)
-		levels.POST("", s.levelsController.CreateLevel)
-		levels.PUT("/:id", middlewares.ValidateUrl, s.levelsController.UpdateLevel)
-		levels.DELETE("/:id", middlewares.ValidateUrl, s.levelsController.DeleteLevel)
+		levels.GET("", s.levelsController.ReadAll)
+		levels.GET("/:id", middlewares.ValidateUrl, s.levelsController.ReadByID)
+		levels.POST("", s.levelsController.Create)
+		levels.PUT("/:id", middlewares.ValidateUrl, s.levelsController.Update)
+		levels.DELETE("/:id", middlewares.ValidateUrl, s.levelsController.Delete)
 	}
 
 	profiles := api.Group("/profiles")

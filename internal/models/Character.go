@@ -7,3 +7,7 @@ type Character struct {
 	Name   string `gorm:"unique;not null;type:varchar(20)"`
 	ImgUri string `gorm:"not null"`
 }
+
+func (c Character) GetID() uint {
+	return c.ID
+}

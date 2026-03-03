@@ -14,3 +14,7 @@ type Match struct {
 	Level     Level
 	Players   []*PlayerProfile `gorm:"many2many:match_participation"`
 }
+
+func (m Match) GetID() uint {
+	return m.ID
+}
