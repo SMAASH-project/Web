@@ -40,6 +40,14 @@ export interface AddProfileResponse {
   avatar?: string;
 }
 
+/** Shape of a player profile as returned by the server (PlayerProfileReadDTO). */
+export interface ProfileResponse {
+  id: number;
+  display_name: string;
+  coins: number;
+  last_login: string;
+}
+
 // ─── Internal helper ─────────────────────────────────────────────────────────
 
 /**
@@ -97,5 +105,19 @@ export async function apiAddProfile(payload: AddProfilePayload) {
   return api<AddProfileResponse>(`/api/users/${user_id}/profiles`, {
     method: "POST",
     body: JSON.stringify(body),
+  });
+}
+
+/** GET /api/users/:id/profiles — fetch all player profiles belonging to a user. */
+export async function apiGetProfilesByUserId(userId: number) {
+  return api<ProfileResponse[]>(`/api/users/${userId}/profiles`, {
+    method: "GET",
+  });
+}
+
+/** DELETE /api/profiles/:id — delete a player profile by its server-side id. */
+export async function apiDeleteProfile(profileId: number) {
+  return api<null>(`/api/profiles/${profileId}`, {
+    method: "DELETE",
   });
 }

@@ -18,9 +18,13 @@ export function ProfileSelectorForm() {
   const [isManaging, setIsManaging] = useState(false);
   const navigate = useNavigate();
 
-  const handleProfileClick = (name: string) => {
+  const handleProfileClick = async (name: string) => {
     if (isManaging) {
-      removeProfile(name);
+      try {
+        await removeProfile(name);
+      } catch (error) {
+        console.error("Failed to delete profile:", error);
+      }
       return;
     }
     // set the selected profile in context so other pages can render it

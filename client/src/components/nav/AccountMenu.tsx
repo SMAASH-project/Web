@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User } from "lucide-react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useNavbarContext } from "@/context/NavbarContextUtils";
 import { useSettings } from "../pages/profileDependents/settings/settingsLogic/SettingsContext";
 import { apiLogout } from "@/hooks/useApi";
@@ -17,6 +17,7 @@ import { apiLogout } from "@/hooks/useApi";
 export default function AccountMenu() {
   const { setIsDropdownHovering } = useNavbarContext();
   const { settings } = useSettings();
+  const navigate = useNavigate();
 
   // Calls the centralized logout API to end the session.
   const logout = async () => {
@@ -24,6 +25,7 @@ export default function AccountMenu() {
       const { ok } = await apiLogout();
       if (ok) {
         console.log("Logout successful");
+        navigate("/app/login");
       } else {
         console.error("Logout failed");
       }
