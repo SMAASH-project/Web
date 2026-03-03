@@ -29,6 +29,8 @@ func InitializeServer() *server.Server {
 	playerProfileController := controllers.NewPlayerProfileController(playerProfileRepository)
 	roleRepository := repository.NewGormRoleRepo(db)
 	rolesController := controllers.NewRolesController(roleRepository)
-	serverServer := server.NewServer(userController, authnController, gameAuthController, levelsController, playerProfileController, rolesController)
+	categoryRepository := repository.NewGormCategoryRepo(db)
+	categoriesController := controllers.NewCategoriesController(categoryRepository)
+	serverServer := server.NewServer(userController, authnController, gameAuthController, levelsController, playerProfileController, rolesController, categoriesController)
 	return serverServer
 }

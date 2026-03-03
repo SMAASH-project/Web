@@ -64,3 +64,7 @@ build-fullstack: build-client build
 @swagger:
     echo "generating swagger docs..."
     swag init -g ./cmd/api/main.go -o docs
+
+@wire:
+    echo "starting generation of dependency tree"
+    cd ./internal/wire && go generate

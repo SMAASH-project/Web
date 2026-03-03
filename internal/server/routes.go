@@ -76,6 +76,16 @@ func (s *Server) MountRoutes() *Server {
 		roles.DELETE("/:id", middlewares.ValidateUrl, s.rolesController.Delete)
 	}
 
+	categories := api.Group("/categories")
+	categories.Use(middlewares.Authorize)
+	{
+		categories.POST("", s.categoriesController.Create)
+		categories.GET("", s.categoriesController.ReadAll)
+		categories.GET("/:id", middlewares.ValidateUrl, s.categoriesController.ReadByID)
+		categories.PUT("/:id", middlewares.ValidateUrl, s.categoriesController.Update)
+		categories.DELETE("/:id", middlewares.ValidateUrl, s.categoriesController.Delete)
+	}
+
 	docs.SwaggerInfo.BasePath = "/api"
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 

@@ -21,11 +21,13 @@ func InitializeServer() *server.Server {
 		controllers.NewLevelsController,
 		controllers.NewPlayerProfileController,
 		controllers.NewRolesController,
+		controllers.NewCategoriesController,
 		services.NewAuthenticationService,
 		repository.NewGormUserRepo,
 		repository.NewGormLevelRepo,
 		repository.NewGormPlayerProfileRepo,
 		repository.NewGormRoleRepo,
+		repository.NewGormCategoryRepo,
 		database.NewGormDBConn,
 	)
 	return &server.Server{}

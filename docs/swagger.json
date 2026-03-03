@@ -12,6 +12,262 @@
     },
     "basePath": "/api",
     "paths": {
+        "/categories": {
+            "get": {
+                "description": "Reads categories",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns all categories",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.CategoryReadDTO"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for creating a new category",
+                        "name": "category_create_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CategoryCreateDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "returns newly created category",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CategoryReadDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/categories/{id}": {
+            "get": {
+                "description": "Reads a category by it's id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "the id of the desired category",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns the desired category",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CategoryReadDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Updates the category with the given id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for updating a category",
+                        "name": "category_update_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CategoryUpdateDTO"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "id of desired category",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "400": {
+                        "description": "id from url and id from request body doesn't match",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a category with the given id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of desired category",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
         "/roles": {
             "get": {
                 "description": "Reads all roles",
@@ -32,6 +288,12 @@
                             "items": {
                                 "$ref": "#/definitions/dtos.RoleReadDTO"
                             }
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
                         }
                     },
                     "500": {
@@ -77,8 +339,178 @@
                             "$ref": "#/definitions/dtos.ErrResp"
                         }
                     },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
                     "409": {
                         "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/roles/{id}": {
+            "get": {
+                "description": "Reads a role by it's id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "roles"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "the id of the desired role",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns the desired role",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.RoleReadDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Updates the role with the given id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "roles"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for updating a role",
+                        "name": "role_update_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.RoleUpdateDTO"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "id of desired role",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "400": {
+                        "description": "id from url and id from request body doesn't match",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a role with the given id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "roles"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of desired role",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
                         "schema": {
                             "$ref": "#/definitions/dtos.ErrResp"
                         }
@@ -94,6 +526,45 @@
         }
     },
     "definitions": {
+        "dtos.CategoryCreateDTO": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "maxLength": 20
+                }
+            }
+        },
+        "dtos.CategoryReadDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.CategoryUpdateDTO": {
+            "type": "object",
+            "required": [
+                "id",
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 20
+                }
+            }
+        },
         "dtos.ErrResp": {
             "type": "object",
             "properties": {
@@ -128,6 +599,22 @@
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "dtos.RoleUpdateDTO": {
+            "type": "object",
+            "required": [
+                "id",
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 7
                 }
             }
         }
