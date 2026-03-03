@@ -1,18 +1,11 @@
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
+import { navItems } from "./navLogic/navItems";
 
 interface NavMenuProps {
   useLiquidGlass: boolean;
 }
-
-const navItems = [
-  { label: "About Us", path: "/app/about" },
-  { label: "Gallery", path: "/app/gallery" },
-  { label: "Releases", path: "/app/releases" },
-  { label: "Webstore", path: "/app/webstore" },
-  { label: "News", path: "/app/news" },
-];
 
 export function NavMenu({ useLiquidGlass }: NavMenuProps) {
   const location = useLocation();
@@ -83,7 +76,7 @@ export function NavMenu({ useLiquidGlass }: NavMenuProps) {
   return (
     <ul
       ref={ulRef}
-      className={`nav-links list-none flex m-0 p-0 gap-10 relative ${useLiquidGlass ? "rounded-lg bg-white/10" : ""}`}
+      className={`nav-links list-none flex m-0 p-0 gap-2 lg:gap-6 xl:gap-10 relative whitespace-nowrap ${useLiquidGlass ? "rounded-lg bg-white/10" : ""}`}
       onMouseLeave={handleMouseLeave}
     >
       {useLiquidGlass && isHovering && (
@@ -100,7 +93,7 @@ export function NavMenu({ useLiquidGlass }: NavMenuProps) {
       {navItems.map((item) => (
         <li
           key={item.path}
-          className={`m-4 p-0.5 relative z-10 ${
+          className={`m-2 lg:m-4 p-0.5 relative z-10 ${
             useLiquidGlass ? "cursor-pointer" : "hover:text-green-400"
           } ${
             !useLiquidGlass && item.path === location.pathname
@@ -110,7 +103,7 @@ export function NavMenu({ useLiquidGlass }: NavMenuProps) {
           onMouseEnter={handleMouseEnter}
         >
           <Link to={item.path}>
-            <Label className="px-2">{item.label}</Label>
+            <Label className="px-1 lg:px-2">{item.label}</Label>
           </Link>
         </li>
       ))}
