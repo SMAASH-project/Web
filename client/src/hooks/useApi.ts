@@ -91,10 +91,11 @@ export async function apiLogout() {
 
 // ─── Profiles ────────────────────────────────────────────────────────────────
 
-/** POST /api/auth/profiles — create a new player profile for the logged-in user. */
+/** POST /api/users/:id/profiles — create a new player profile for the logged-in user. */
 export async function apiAddProfile(payload: AddProfilePayload) {
-  return api<AddProfileResponse>("/api/auth/profiles", {
+  const { user_id, ...body } = payload;
+  return api<AddProfileResponse>(`/api/users/${user_id}/profiles`, {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   });
 }
