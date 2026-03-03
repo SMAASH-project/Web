@@ -1,6 +1,6 @@
 import Navbar from "@/components/nav/Navbar";
-import { WithOnloadAnimation } from "@/lib/OnloadAnimationNavbar";
-import { CardAnimation } from "@/lib/OnloadAnimationCard";
+import { WithOnloadAnimation } from "@/lib/miscAnimations/OnloadAnimationNavbar";
+import { CardAnimation } from "@/lib/miscAnimations/OnloadAnimationCard";
 import { useSettings } from "./settingsLogic/SettingsContext";
 import { SettingsPageContent } from "./settingsComponenets/SettingsPageContent";
 

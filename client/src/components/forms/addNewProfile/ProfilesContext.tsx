@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from "react";
 import type { Profile, ProfileContextType } from "./ProfilesTypes";
 import { AuthContext } from "@/context/AuthContext";
+import { apiAddProfile } from "@/hooks/useApi";
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
 
@@ -23,33 +24,27 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
 
   const { userId } = useContext(AuthContext);
 
+  // Posts to the server via the centralized API, then updates local state on success.
   const addProfile = async (profile: Profile) => {
-    // Post to server first, then update local state on success.
     try {
       if (userId === null) {
         throw new Error("User is not logged in");
       }
 
-      const response = await fetch("/api/auth/profiles", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          display_name: profile.name,
-          user_id: Number(userId),
-        }),
+      const { data, ok, status } = await apiAddProfile({
+        display_name: profile.name,
+        user_id: Number(userId),
       });
 
-      if (!response.ok) {
-        const text = await response.text().catch(() => "");
-        throw new Error(`Failed to add profile: ${response.status} ${text}`);
+      if (!ok) {
+        throw new Error(`Failed to add profile: ${status}`);
       }
 
-      // If server returns the created profile, use it; otherwise fall back to the provided profile.
-      const created = await response.json().catch(() => null);
-      const toAdd: Profile = created && created.name ? created : profile;
+      // The server may return the created profile with a `name` field.
+      // If it does, use it; otherwise fall back to the profile we sent.
+      const toAdd: Profile = data?.name
+        ? { name: data.name, avatar: data.avatar ?? profile.avatar }
+        : profile;
       setProfiles((prev) => [...prev, toAdd]);
     } catch (error) {
       console.error("Error adding profile:", error);

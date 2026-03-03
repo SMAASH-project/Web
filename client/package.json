@@ -34,6 +34,7 @@
     "react-colorful": "^5.6.1",
     "react-dom": "^19.2.0",
     "react-markdown": "^10.1.0",
+    "react-resizable-panels": "^4.6.5",
     "react-router-dom": "^7.13.0",
     "remark-gfm": "^4.0.1",
     "shadcn": "^3.8.5",

@@ -1,61 +1,36 @@
-import { newsPosts, type NewsPost } from "@/lib/PageTypes";
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { formatDateTime } from "@/lib/utils";
 import Navbar from "../../nav/Navbar";
 import { Card } from "@/components/ui/card";
 import { useSettings } from "../profileDependents/settings/settingsLogic/SettingsContext";
 import { Label } from "@/components/ui/label";
-import { AddNews } from "./mainPageComponents/AddNews";
-import { RemoveButton } from "./mainPageComponents/RemoveButton";
-import { EditButton } from "./mainPageComponents/EditButton";
+import type { NewsPost } from "@/types/PageTypes";
+import { AddNews } from "@/components/pages/mainPages/newsPageComponents/AddNews";
+import { RemoveButton } from "@/components/pages/mainPages/newsPageComponents/RemoveButton";
+import { EditButton } from "@/components/pages/mainPages/newsPageComponents/EditButton";
 import { ButtonGroup } from "@/components/ui/button-group";
-import { Search } from "./mainPageComponents/Search";
+import { Search } from "@/components/pages/mainPages/newsPageComponents/Search";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useNewsPosts } from "@/components/pages/mainPages/newsPageComponents/newsPageLogic/useNewsPosts";
+import { useNewsCategoryFilter } from "@/components/pages/mainPages/newsPageComponents/newsPageLogic/useNewsCategoryFilter";
+import { LoadPost } from "@/lib/pageAnimations/newsPageAnimations/LoadPost";
+import { FilterSelect } from "./newsPageComponents/Filter";
+import { CategoryBadge } from "./newsPageComponents/CategoryBadge";
 
 export function NewsPage() {
   const { settings } = useSettings();
-  const [allPosts, setAllPosts] = useState<NewsPost[]>(newsPosts);
-  const [postsToShow, setPostsToShow] = useState(2);
-  const [searchQuery, setSearchQuery] = useState("");
   const IsAdmin = true; // Replace with actual admin check
-  const containerRef = useRef<HTMLDivElement>(null);
+  const { selectedByCategory, selectedCategories, setCategorySelected } =
+    useNewsCategoryFilter();
 
-  const visiblePosts = useMemo(() => {
-    if (searchQuery) {
-      return allPosts.filter((post) =>
-        post.title.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
-    }
-    return allPosts.slice(0, postsToShow);
-  }, [allPosts, postsToShow, searchQuery]);
-
-  const handleScroll = useCallback(() => {
-    if (containerRef.current && !searchQuery) {
-      const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
-      if (scrollTop + clientHeight >= scrollHeight - 5) {
-        // 5px buffer
-        setPostsToShow((prev) => prev + 2);
-      }
-    }
-  }, [searchQuery]);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener("scroll", handleScroll);
-      return () => container.removeEventListener("scroll", handleScroll);
-    }
-  }, [handleScroll]);
-
-  function handleCreate(post: NewsPost) {
-    setAllPosts((p) => [post, ...p]);
-  }
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    setPostsToShow(2); // Reset pagination when a new search is made
-  };
+  const {
+    visiblePosts,
+    containerRef,
+    handleCreate,
+    handleUpdate,
+    handleRemove,
+    handleSearch,
+  } = useNewsPosts(selectedCategories);
 
   return (
     <div className="p-4 h-screen overflow-y-auto" ref={containerRef}>
@@ -79,81 +54,126 @@ export function NewsPage() {
               <Search onSearch={handleSearch} />
             )}
           </ButtonGroup>
-
-          <Label
-            className={`text-white text-lg ${
-              settings.useLiquidGlass
-                ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                : ""
-            } text-center`}
-          >
-            Latest News
-          </Label>
+          <span className="flex flex-row items-center gap-2">
+            <Label
+              className={`text-white text-lg ${
+                settings.useLiquidGlass
+                  ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
+                  : ""
+              } text-center`}
+            >
+              Latest News
+            </Label>
+            <FilterSelect
+              selectedByCategory={selectedByCategory}
+              onCategoryChange={setCategorySelected}
+            />
+          </span>
         </span>
         <ul className="list-disc pl-5 w-full">
-          {visiblePosts.map((post) => (
-            <Card
-              className={`z-0 flex flex-row p-10 mb-5 max-w-full max-h-lg ${
-                settings.useLiquidGlass
-                  ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20"
-                  : "bg-gray-600 border-2 border-green-400"
-              }`}
-              key={post.id}
-            >
-              <li className="flex flex-col gap-2 w-full">
-                <span className="flex flex-row w-full justify-between">
-                  <Label
-                    className={`text-white text-lg ${
-                      settings.useLiquidGlass
-                        ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                        : ""
-                    } text-left`}
-                  >
-                    {post.title}
-                  </Label>
-                  <Label
-                    className={`text-white text-lg ${
-                      settings.useLiquidGlass
-                        ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                        : ""
-                    } italic text-right`}
-                  >
-                    {formatDateTime(post.createdAt)}
-                  </Label>
-                  {IsAdmin ? (
-                    <ButtonGroup>
-                      <EditButton
-                        post={post}
-                        onUpdate={(p) =>
-                          setAllPosts((list) =>
-                            list.map((it) => (it.id === p.id ? p : it)),
-                          )
-                        }
-                      />
-                      <RemoveButton
-                        onConfirm={() =>
-                          setAllPosts((p) => p.filter((x) => x.id !== post.id))
-                        }
-                      />
-                    </ButtonGroup>
+          {visiblePosts.map((post: NewsPost, index: number) => {
+            const cardContent = (
+              <Card
+                className={`z-0 flex flex-row p-10 mb-5 max-w-full ${
+                  settings.useLiquidGlass
+                    ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20"
+                    : "bg-gray-600 border-2 border-green-400"
+                }`}
+              >
+                <li className="flex flex-col gap-2 w-full">
+                  <span className="flex flex-row w-full items-start justify-between gap-4">
+                    <div className="flex flex-col gap-2 flex-1">
+                      <Label
+                        className={`text-white text-lg ${
+                          settings.useLiquidGlass
+                            ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
+                            : ""
+                        } text-left`}
+                      >
+                        {post.title}
+                      </Label>
+                      <CategoryBadge category={post.category} />
+                    </div>
+                    <div className="flex flex-col items-end gap-2 shrink-0">
+                      <Label
+                        className={`text-white text-lg ${
+                          settings.useLiquidGlass
+                            ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
+                            : ""
+                        } italic text-right`}
+                      >
+                        {formatDateTime(post.createdAt)}
+                      </Label>
+                      {IsAdmin ? (
+                        <ButtonGroup>
+                          <EditButton post={post} onUpdate={handleUpdate} />
+                          <RemoveButton
+                            onConfirm={() => handleRemove(post.id)}
+                          />
+                        </ButtonGroup>
+                      ) : (
+                        <></>
+                      )}
+                    </div>
+                  </span>
+                  {post.imagePosition === "Top" ? (
+                    <div className="flex flex-col gap-2 w-full">
+                      {post.image && (
+                        <img
+                          src={post.image}
+                          alt={post.imageAlt}
+                          className="w-full rounded-md object-cover"
+                          style={{ maxHeight: `${post.imageSize}vh` }}
+                        />
+                      )}
+                      <div
+                        className={`text-white text-sm ${
+                          settings.useLiquidGlass
+                            ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
+                            : ""
+                        } text-justify prose prose-sm prose-invert max-w-none`}
+                      >
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {post.content}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
                   ) : (
-                    <></>
+                    <div className="flex flex-row gap-4 w-full">
+                      <div
+                        className={`text-white text-sm ${
+                          settings.useLiquidGlass
+                            ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
+                            : ""
+                        } text-justify prose prose-sm prose-invert max-w-none`}
+                        style={{ width: `${100 - (post.imageSize ?? 0)}%` }}
+                      >
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {post.content}
+                        </ReactMarkdown>
+                      </div>
+                      {post.image && (
+                        <img
+                          src={post.image}
+                          alt={post.imageAlt}
+                          className="rounded-md object-cover"
+                          style={{ width: `${post.imageSize}%` }}
+                        />
+                      )}
+                    </div>
                   )}
-                </span>
-                <div
-                  className={`text-white text-sm ${
-                    settings.useLiquidGlass
-                      ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                      : ""
-                  } text-justify prose prose-sm prose-invert max-w-none`}
-                >
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {post.content}
-                  </ReactMarkdown>
-                </div>
-              </li>
-            </Card>
-          ))}
+                </li>
+              </Card>
+            );
+
+            return settings.useAnimations ? (
+              <LoadPost key={post.id} index={index}>
+                {cardContent}
+              </LoadPost>
+            ) : (
+              <div key={post.id}>{cardContent}</div>
+            );
+          })}
         </ul>
       </div>
     </div>

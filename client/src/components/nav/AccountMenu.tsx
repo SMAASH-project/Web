@@ -12,20 +12,17 @@ import { User } from "lucide-react";
 import { Link } from "react-router";
 import { useNavbarContext } from "@/context/NavbarContextUtils";
 import { useSettings } from "../pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { apiLogout } from "@/hooks/useApi";
 
 export default function AccountMenu() {
   const { setIsDropdownHovering } = useNavbarContext();
   const { settings } = useSettings();
 
+  // Calls the centralized logout API to end the session.
   const logout = async () => {
     try {
-      const response = await fetch("/api/auth/logout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (response.ok) {
+      const { ok } = await apiLogout();
+      if (ok) {
         console.log("Logout successful");
       } else {
         console.error("Logout failed");

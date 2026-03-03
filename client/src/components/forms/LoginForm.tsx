@@ -12,6 +12,7 @@ import { Input } from "../ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import React, { useEffect } from "react";
 import { AuthContext } from "@/context/AuthContext";
+import { apiLogin } from "@/hooks/useApi";
 
 export function LoginForm({
   className,
@@ -25,23 +26,16 @@ export function LoginForm({
 
   const navigate = useNavigate();
 
+  // Calls the centralized login API; on success stores the user id in context.
   const Login = async () => {
     setError("");
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: email, password: password }),
-      });
+      const { data, ok } = await apiLogin({ email, password });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (ok) {
         console.log("Login successful");
 
-        if (data.id !== undefined && data.id !== null) {
+        if (data?.id !== undefined && data?.id !== null) {
           setUserId(BigInt(data.id));
         }
 
