@@ -12,19 +12,19 @@ import (
 )
 
 type UserController struct {
-	UserRepoActions        *repository.UserRepositoryActions
-	baseRepoProfileActions *repository.BaseRepositoryActions[models.PlayerProfile]
+	userRepo        repository.UserRepository
+	profileBaseRepo repository.BaseRepository[models.PlayerProfile]
 }
 
 func NewUserController(
-	UserRepoActions *repository.UserRepositoryActions,
-	baseRepoProfileActions *repository.BaseRepositoryActions[models.PlayerProfile],
+	userRepo repository.UserRepository,
+	profilesBaseRepo repository.BaseRepository[models.PlayerProfile],
 ) *UserController {
-	return &UserController{UserRepoActions: UserRepoActions, baseRepoProfileActions: baseRepoProfileActions}
+	return &UserController{userRepo: userRepo, profileBaseRepo: profilesBaseRepo}
 }
 
 func (uc *UserController) ReadAll(c *gin.Context) {
-	users, err := uc.UserRepoActions.ReadAll(c.Request.Context())
+	users, err := uc.userRepo.ReadAll(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
@@ -34,7 +34,7 @@ func (uc *UserController) ReadAll(c *gin.Context) {
 
 func (uc *UserController) ReadByID(c *gin.Context) {
 	id, _ := c.Get("id")
-	user, err := uc.UserRepoActions.ReadByID(c.Request.Context(), id.(uint))
+	user, err := uc.userRepo.ReadByID(c.Request.Context(), id.(uint))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
@@ -62,7 +62,7 @@ func (uc *UserController) Update(c *gin.Context) {
 		return
 	}
 
-	if err := uc.UserRepoActions.Update(c.Request.Context(), dtos.UpdateDTOToUser(body)); err != nil {
+	if err := uc.userRepo.Update(c.Request.Context(), dtos.UpdateDTOToUser(body)); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Record not found", path))
 			return
@@ -82,7 +82,7 @@ func (uc *UserController) Delete(c *gin.Context) {
 	id, _ := c.Get("id")
 	path := c.Request.URL.Path
 
-	if err := uc.UserRepoActions.Delete(c.Request.Context(), id.(uint)); err != nil {
+	if err := uc.userRepo.Delete(c.Request.Context(), id.(uint)); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Record not found", path))
 			return
@@ -107,7 +107,7 @@ func (uc *UserController) AddProfileToUser(c *gin.Context) {
 	newProfile := dtos.AppendDTOToPlayerProfile(body)
 	newProfile.UserID = id.(uint)
 
-	if err := uc.baseRepoProfileActions.Create(c.Request.Context(), &newProfile); err != nil {
+	if err := uc.profileBaseRepo.Create(c.Request.Context(), &newProfile); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			c.JSON(http.StatusConflict, dtos.NewErrResp("Display name already taken", path))
 			return

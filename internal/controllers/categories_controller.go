@@ -13,11 +13,11 @@ import (
 )
 
 type CategoriesController struct {
-	baseRepoActions *repository.BaseRepositoryActions[models.Category]
+	categoryBaseRepo repository.BaseRepository[models.Category]
 }
 
-func NewCategoriesController(baseRepoActions *repository.BaseRepositoryActions[models.Category]) *CategoriesController {
-	return &CategoriesController{baseRepoActions: baseRepoActions}
+func NewCategoriesController(categoryBaseRepo repository.BaseRepository[models.Category]) *CategoriesController {
+	return &CategoriesController{categoryBaseRepo: categoryBaseRepo}
 }
 
 // @description Creates a new category
@@ -41,7 +41,7 @@ func (cc CategoriesController) Create(c *gin.Context) {
 	}
 
 	newCategory := dtos.CreateDTOToCategory(body)
-	if err := cc.baseRepoActions.Create(c.Request.Context(), newCategory); err != nil {
+	if err := cc.categoryBaseRepo.Create(c.Request.Context(), newCategory); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			c.JSON(http.StatusConflict, dtos.NewErrResp("A category with such name already exists", path))
 			return
@@ -64,7 +64,7 @@ func (cc CategoriesController) Create(c *gin.Context) {
 func (rc CategoriesController) ReadAll(c *gin.Context) {
 	path := c.Request.URL.Path
 
-	res, err := rc.baseRepoActions.ReadAll(c.Request.Context())
+	res, err := rc.categoryBaseRepo.ReadAll(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
 		return
@@ -87,7 +87,7 @@ func (rc CategoriesController) ReadByID(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
 
-	res, err := rc.baseRepoActions.ReadByID(c.Request.Context(), id.(uint))
+	res, err := rc.categoryBaseRepo.ReadByID(c.Request.Context(), id.(uint))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Record not found", path))
@@ -129,7 +129,7 @@ func (rc CategoriesController) Update(c *gin.Context) {
 		return
 	}
 
-	if err := rc.baseRepoActions.Update(c, dtos.UpdateDTOToCategory(body)); err != nil {
+	if err := rc.categoryBaseRepo.Update(c, dtos.UpdateDTOToCategory(body)); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Record not found", path))
 			return
@@ -159,7 +159,7 @@ func (rc CategoriesController) Delete(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
 
-	if err := rc.baseRepoActions.Delete(c, id.(uint)); err != nil {
+	if err := rc.categoryBaseRepo.Delete(c, id.(uint)); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Record not found", path))
 			return

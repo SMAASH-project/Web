@@ -13,11 +13,11 @@ import (
 )
 
 type RolesController struct {
-	baseRepoActions *repository.BaseRepositoryActions[models.Role]
+	rolesBaseRepo repository.BaseRepository[models.Role]
 }
 
-func NewRolesController(baseRepoActions *repository.BaseRepositoryActions[models.Role]) *RolesController {
-	return &RolesController{baseRepoActions: baseRepoActions}
+func NewRolesController(rolesBaseRepo repository.BaseRepository[models.Role]) *RolesController {
+	return &RolesController{rolesBaseRepo: rolesBaseRepo}
 }
 
 // @description Creates a new role
@@ -41,7 +41,7 @@ func (rc RolesController) Create(c *gin.Context) {
 	}
 
 	newRole := dtos.CreateDTOToRole(body)
-	if err := rc.baseRepoActions.Create(c.Request.Context(), newRole); err != nil {
+	if err := rc.rolesBaseRepo.Create(c.Request.Context(), newRole); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			c.JSON(http.StatusConflict, dtos.NewErrResp("A role with such name already exists", path))
 			return
@@ -64,7 +64,7 @@ func (rc RolesController) Create(c *gin.Context) {
 func (rc RolesController) ReadAll(c *gin.Context) {
 	path := c.Request.URL.Path
 
-	res, err := rc.baseRepoActions.ReadAll(c.Request.Context())
+	res, err := rc.rolesBaseRepo.ReadAll(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
 		return
@@ -87,7 +87,7 @@ func (rc RolesController) ReadByID(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
 
-	res, err := rc.baseRepoActions.ReadByID(c.Request.Context(), id.(uint))
+	res, err := rc.rolesBaseRepo.ReadByID(c.Request.Context(), id.(uint))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Record not found", path))
@@ -129,7 +129,7 @@ func (rc RolesController) Update(c *gin.Context) {
 		return
 	}
 
-	if err := rc.baseRepoActions.Update(c, dtos.UpdateDTOToRole(body)); err != nil {
+	if err := rc.rolesBaseRepo.Update(c, dtos.UpdateDTOToRole(body)); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Record not found", path))
 			return
@@ -159,7 +159,7 @@ func (rc RolesController) Delete(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
 
-	if err := rc.baseRepoActions.Delete(c, id.(uint)); err != nil {
+	if err := rc.rolesBaseRepo.Delete(c, id.(uint)); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Record not found", path))
 			return

@@ -7,16 +7,23 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserRepositoryActions struct {
-	*BaseRepositoryActions[models.User]
-	ReadByEmail func(c context.Context, email string) (models.User, error)
+type UserRepository interface {
+	BaseRepository[models.User]
+	ReadByEmail(context.Context, string) (models.User, error)
 }
 
-func NewUserRepositoryActions(conn *gorm.DB) *UserRepositoryActions {
+type UserRepositoryActions struct {
+	conn *gorm.DB
+	BaseRepository[models.User]
+}
+
+func NewUserRepositoryActions(conn *gorm.DB) UserRepository {
 	return &UserRepositoryActions{
-		BaseRepositoryActions: NewBaseRepositoryActions[models.User](conn),
-		ReadByEmail: func(c context.Context, email string) (models.User, error) {
-			return gorm.G[models.User](conn).Where("email = ?", email).First(c)
-		},
+		conn:           conn,
+		BaseRepository: NewBaseRepositoryActions[models.User](conn),
 	}
+}
+
+func (ura UserRepositoryActions) ReadByEmail(c context.Context, email string) (models.User, error) {
+	return gorm.G[models.User](ura.conn).Where("email = ?", email).First(c)
 }

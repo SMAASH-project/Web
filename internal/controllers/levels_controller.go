@@ -12,11 +12,11 @@ import (
 )
 
 type LevelsController struct {
-	baseRepoActions *repository.BaseRepositoryActions[models.Level]
+	levelsBaseRepo repository.BaseRepository[models.Level]
 }
 
-func NewLevelsController(baseRepoActions *repository.BaseRepositoryActions[models.Level]) *LevelsController {
-	return &LevelsController{baseRepoActions: baseRepoActions}
+func NewLevelsController(levelsBaseRepo repository.BaseRepository[models.Level]) *LevelsController {
+	return &LevelsController{levelsBaseRepo: levelsBaseRepo}
 }
 
 func (lc *LevelsController) Create(c *gin.Context) {
@@ -31,7 +31,7 @@ func (lc *LevelsController) Create(c *gin.Context) {
 		ImgUri: body.ImgUri,
 	}
 
-	if err := lc.baseRepoActions.Create(c.Request.Context(), &level); err != nil {
+	if err := lc.levelsBaseRepo.Create(c.Request.Context(), &level); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			c.JSON(http.StatusConflict, dtos.NewErrResp("Level already exists", c.Request.URL.Path))
 			return
@@ -44,7 +44,7 @@ func (lc *LevelsController) Create(c *gin.Context) {
 }
 
 func (lc *LevelsController) ReadAll(c *gin.Context) {
-	levels, err := lc.baseRepoActions.ReadAll(c.Request.Context())
+	levels, err := lc.levelsBaseRepo.ReadAll(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
@@ -55,7 +55,7 @@ func (lc *LevelsController) ReadAll(c *gin.Context) {
 func (lc *LevelsController) ReadByID(c *gin.Context) {
 	id, _ := c.Get("id")
 
-	level, err := lc.baseRepoActions.ReadByID(c.Request.Context(), id.(uint))
+	level, err := lc.levelsBaseRepo.ReadByID(c.Request.Context(), id.(uint))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Level not found", c.Request.URL.Path))
@@ -86,7 +86,7 @@ func (lc *LevelsController) Update(c *gin.Context) {
 		ImgUri: body.ImgUri,
 	}
 
-	if err := lc.baseRepoActions.Update(c.Request.Context(), level); err != nil {
+	if err := lc.levelsBaseRepo.Update(c.Request.Context(), level); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Level not found", c.Request.URL.Path))
 			return
@@ -105,7 +105,7 @@ func (lc *LevelsController) Update(c *gin.Context) {
 func (lc *LevelsController) Delete(c *gin.Context) {
 	id, _ := c.Get("id")
 
-	if err := lc.baseRepoActions.Delete(c.Request.Context(), id.(uint)); err != nil {
+	if err := lc.levelsBaseRepo.Delete(c.Request.Context(), id.(uint)); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Level not found", c.Request.URL.Path))
 			return

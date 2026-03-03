@@ -13,15 +13,15 @@ import (
 )
 
 type PlayerProfileController struct {
-	baseRepoAction *repository.BaseRepositoryActions[models.PlayerProfile]
+	profilesBaseRepo repository.BaseRepository[models.PlayerProfile]
 }
 
-func NewPlayerProfileController(baseRepoActions *repository.BaseRepositoryActions[models.PlayerProfile]) *PlayerProfileController {
-	return &PlayerProfileController{baseRepoAction: baseRepoActions}
+func NewPlayerProfileController(profilesBaseRepo repository.BaseRepository[models.PlayerProfile]) *PlayerProfileController {
+	return &PlayerProfileController{profilesBaseRepo: profilesBaseRepo}
 }
 
 func (pc PlayerProfileController) ReadAll(c *gin.Context) {
-	profiles, err := pc.baseRepoAction.ReadAll(c.Request.Context())
+	profiles, err := pc.profilesBaseRepo.ReadAll(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
@@ -33,7 +33,7 @@ func (pc PlayerProfileController) ReadAll(c *gin.Context) {
 func (pc PlayerProfileController) ReadByID(c *gin.Context) {
 	id, _ := c.Get("id")
 	path := c.Request.URL.Path
-	profile, err := pc.baseRepoAction.ReadByID(c, id.(uint))
+	profile, err := pc.profilesBaseRepo.ReadByID(c, id.(uint))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp(err.Error(), path))
@@ -54,7 +54,7 @@ func (pc PlayerProfileController) Create(c *gin.Context) {
 	}
 
 	newProfile := dtos.CreateDTOToPlayerProfile(body)
-	if err := pc.baseRepoAction.Create(c, &newProfile); err != nil {
+	if err := pc.profilesBaseRepo.Create(c, &newProfile); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			c.JSON(http.StatusConflict, dtos.NewErrResp("Display name already taken", path))
 			return
@@ -81,7 +81,7 @@ func (pc PlayerProfileController) Update(c *gin.Context) {
 		return
 	}
 
-	if err := pc.baseRepoAction.Update(c.Request.Context(), dtos.UpdateDTOToPlayerProfile(body)); err != nil {
+	if err := pc.profilesBaseRepo.Update(c.Request.Context(), dtos.UpdateDTOToPlayerProfile(body)); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Record not found", path))
 			return
@@ -101,7 +101,7 @@ func (pc PlayerProfileController) Delete(c *gin.Context) {
 	id, _ := c.Get("id")
 	path := c.Request.URL.Path
 
-	if err := pc.baseRepoAction.Delete(c.Request.Context(), id.(uint)); err != nil {
+	if err := pc.profilesBaseRepo.Delete(c.Request.Context(), id.(uint)); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Record not found", path))
 			return
