@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	dtos "smaash-web/internal/DTOs"
+	"smaash-web/internal/middlewares"
 	"smaash-web/internal/models"
 	"smaash-web/internal/repository"
 	"smaash-web/internal/utils"
@@ -27,7 +28,7 @@ func (pc PlayerProfileController) ReadAll(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, utils.Map(profiles, func(p models.PlayerProfile) dtos.PlayerProfileReadDTO { return dtos.PlayerProfileToReadDTO(p) }))
+	c.JSON(http.StatusOK, utils.Map(profiles, dtos.PlayerProfileToReadDTO))
 }
 
 func (pc PlayerProfileController) ReadByID(c *gin.Context) {
@@ -111,4 +112,14 @@ func (pc PlayerProfileController) Delete(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+func (pc PlayerProfileController) MountRoutes(apiGroup *gin.RouterGroup) {
+	profiles := apiGroup.Group("/profiles")
+	profiles.Use(middlewares.Authorize)
+	profiles.GET("", pc.ReadAll)
+	profiles.GET("/:id", middlewares.ValidateUrl, pc.ReadByID)
+	profiles.POST("", pc.Create)
+	profiles.PUT("/:id", middlewares.ValidateUrl, pc.Update)
+	profiles.DELETE("/:id", middlewares.ValidateUrl, pc.Delete)
 }

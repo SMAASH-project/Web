@@ -4,8 +4,10 @@ import (
 	"errors"
 	"net/http"
 	dtos "smaash-web/internal/DTOs"
+	"smaash-web/internal/middlewares"
 	"smaash-web/internal/models"
 	"smaash-web/internal/repository"
+	"smaash-web/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -29,7 +31,7 @@ func (uc *UserController) ReadAll(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
 	}
-	c.JSON(http.StatusOK, users)
+	c.JSON(http.StatusOK, utils.Map(users, dtos.UserToDTO))
 }
 
 func (uc *UserController) ReadByID(c *gin.Context) {
@@ -43,7 +45,7 @@ func (uc *UserController) ReadByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
 	}
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, dtos.UserToDTO(user))
 }
 
 // NOTE: You can't change the password here, that requires separate functionality
@@ -117,4 +119,16 @@ func (uc *UserController) AddProfileToUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, dtos.PlayerProfileToReadDTO(newProfile))
+}
+
+func (uc UserController) MountRoutes(apiGroup *gin.RouterGroup) {
+	users := apiGroup.Group("/users")
+	users.Use(middlewares.Authorize)
+	{ // no creation, that happens on /auth/signup. No updating password either.
+		users.GET("", uc.ReadAll)
+		users.GET("/:id", middlewares.ValidateUrl, uc.ReadByID)
+		users.PUT("/:id", middlewares.ValidateUrl, uc.Update)
+		users.DELETE("/:id", middlewares.ValidateUrl, uc.Delete)
+		users.POST("/:id/profiles", middlewares.ValidateUrl, uc.AddProfileToUser)
+	}
 }

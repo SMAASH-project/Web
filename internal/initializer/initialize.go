@@ -7,6 +7,7 @@ import (
 	"smaash-web/internal/repository"
 	"smaash-web/internal/server"
 	"smaash-web/internal/services"
+	"time"
 )
 
 func Initialize() *server.Server {
@@ -16,13 +17,13 @@ func Initialize() *server.Server {
 
 	authService := services.NewAuthenticationService(userRepo)
 
-	return server.NewServer(
-		controllers.NewUserController(userRepo, profilesBaseRepo),
-		controllers.NewAuthnController(authService),
-		controllers.NewGameAuthController(userRepo),
-		controllers.NewLevelsController(repository.NewBaseRepositoryActions[models.Level](conn)),
-		controllers.NewPlayerProfileController(profilesBaseRepo),
-		controllers.NewRolesController(repository.NewBaseRepositoryActions[models.Role](conn)),
-		controllers.NewCategoriesController(repository.NewBaseRepositoryActions[models.Category](conn)),
-	)
+	return server.NewServer().
+		SetGracePeriod(10 * time.Second).
+		AddController(controllers.NewUserController(userRepo, profilesBaseRepo)).
+		AddController(controllers.NewAuthnController(authService)).
+		AddController(controllers.NewGameAuthController(userRepo)).
+		AddController(controllers.NewLevelsController(repository.NewBaseRepositoryActions[models.Level](conn))).
+		AddController(controllers.NewPlayerProfileController(profilesBaseRepo)).
+		AddController(controllers.NewRolesController(repository.NewBaseRepositoryActions[models.Role](conn))).
+		AddController(controllers.NewCategoriesController(repository.NewBaseRepositoryActions[models.Category](conn)))
 }

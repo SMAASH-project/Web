@@ -179,3 +179,8 @@ func (g GameAuthController) issueGameTokens(userID uint, email string) (string, 
 
 	return accessTokenString, refreshTokenString, nil
 }
+
+func (gc GameAuthController) MountRoutes(apiGroup *gin.RouterGroup) {
+	apiGroup.POST("/game-login", gc.GameLogin)
+	apiGroup.POST("/game-refresh", gc.Refresh)
+}

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	dtos "smaash-web/internal/DTOs"
+	"smaash-web/internal/middlewares"
 	"smaash-web/internal/models"
 	"smaash-web/internal/repository"
 	"smaash-web/internal/utils"
@@ -70,7 +71,7 @@ func (rc RolesController) ReadAll(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, utils.Map(res, func(r models.Role) dtos.RoleReadDTO { return dtos.RoleToDTO(r) }))
+	c.JSON(http.StatusOK, utils.Map(res, dtos.RoleToDTO))
 }
 
 // @description Reads a role by it's id
@@ -169,4 +170,16 @@ func (rc RolesController) Delete(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+func (rc RolesController) MountRoutes(apiGroup *gin.RouterGroup) {
+	roles := apiGroup.Group("/roles")
+	roles.Use(middlewares.Authorize)
+	{
+		roles.POST("", rc.Create)
+		roles.GET("", rc.ReadAll)
+		roles.GET("/:id", middlewares.ValidateUrl, rc.ReadByID)
+		roles.PUT("/:id", middlewares.ValidateUrl, rc.Update)
+		roles.DELETE("/:id", middlewares.ValidateUrl, rc.Delete)
+	}
 }
