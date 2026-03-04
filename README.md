@@ -66,6 +66,39 @@ The project contains the following folders:
 
 The documentation of the endpoints can be found in [/docs/endpoins.md](/docs/endpoints.md). For the schema of the DTOs, see inside the [/internal/DTOs](/internal/DTOs/) folder.
 
+- *Dependency injection, layers*:  
+The project adheres to the following layering:  
+**database** -> **repository** -> **service** (optional) -> **controller** -> **server**  
+The workflow of creating endpoints should be as follows:  
+  1. Create a custom repository for your modes, or use the generic one
+  2. If you need to handle buisness login, put it in a service which depends on your repo
+  3. Define a controller that depends on your service, or if you didn't need one, your repo directly
+  4. In the initialize function, found in /internal/initializer/initailzer.go, register your controller
+  
+> [!WARNING]
+> NEVER put database queries or buisness logic in a controller. That's what repositories and services are for. Instead, make your controller depend on your services/repos by utilizing [dependency injection](https://www.freecodecamp.org/news/how-to-use-dependency-injection-in-go/)
+
+- *Defining repositories*:
+The project is making use of the [repository design pattern](https://dev.to/team3/repository-pattern-in-golang-a-practical-guide-1kla). A generic **BaseRepository** can be used in case you only need basic CRUD actions for a type in it's corresponging controller or service. E.g:
+```Go
+type RolesController struct {
+	rolesBaseRepo repository.BaseRepository[models.Role]
+}
+```
+
+In case you need custom or extended functionality, you can define a custom repo for a model in /internal/repository, by embedding the BaseRepository interface in your custom repo's interface, like so:
+```Go
+type UserRepository interface {
+	BaseRepository[models.User]
+	ReadByEmail(context.Context, string) (models.User, error)
+}
+
+type UserRepositoryActions struct {
+	conn *gorm.DB
+	BaseRepository[models.User]
+}
+```
+
 For wrintig code, refer to the style guides and idioms of the languages we're using:
  - [Go standard](https://go.dev/doc/effective_go)
  - [React standard](https://react.dev/reference/rules)
@@ -96,6 +129,29 @@ The project defines a database seeder, which can be used in the following way:
 ```
 
 2. Run `just seed` and watch the result in your terminal.
+
+> [!NOTE]
+> The json source data has to follow the Go casing rules for public struct fields (Pascal case)
+
+## Swagger documentation
+This project makes use of the [swaggo/gin-swagger](https://github.com/swaggo/gin-swagger) library, allowing declarative documentation comments to be used as OpenAPI definitions when automatically generating swagger docs. An example documentation for a controller:  
+```Go
+// @description Creates a new role
+// @tags roles
+// @accept json
+// @produce json
+// @param role_create_dto body dtos.RoleCreateDTO true "dto for creating a new role"
+// @success 201 {object} dtos.RoleReadDTO "returns newly created role"
+// @failure 400 {object} dtos.ErrResp "request body in wrong format"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 409 {object} dtos.ErrResp "unique key violation"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /roles [post]
+func (rc RolesController) Create(c *gin.Context) {...}
+```
+A detailed listing of available doc comments can be found [here](https://github.com/swaggo/swag/blob/master/README.md#declarative-comments-format)  
+
+When you're done doc-commenting your code run `just swagger` to generate the swagger.json and swagger.yml files. To view the generated web UI of the docs, navigate to `/swagger/index.html`
 
 ## Version control and CI/CD
 Here are the branches defined in this repository (and how to use them):
