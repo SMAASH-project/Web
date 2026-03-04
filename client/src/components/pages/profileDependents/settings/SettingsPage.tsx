@@ -9,14 +9,16 @@ export function SettingsPage() {
   const { settings } = useSettings();
 
   return (
-    <div className="max-w-full w-full h-full flex flex-col items-center justify-start text-white">
-      {settings.useAnimations ? <AnimatedNavbar /> : <Navbar />}
+    <div className="min-h-screen w-full self-start flex flex-col items-center text-white">
+      <div className="-mt-2 w-full">
+        {settings.useAnimations ? <AnimatedNavbar /> : <Navbar />}
+      </div>
       {settings.useAnimations ? (
-        <CardAnimation className="z-0 mt-20 w-full px-4 sm:px-6 lg:px-10 flex justify-center">
+        <CardAnimation className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 flex items-center justify-center">
           <SettingsPageContent />
         </CardAnimation>
       ) : (
-        <div className="z-0 mt-20 w-full px-4 sm:px-6 lg:px-10 flex justify-center">
+        <div className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 flex items-center justify-center">
           <SettingsPageContent />
         </div>
       )}
