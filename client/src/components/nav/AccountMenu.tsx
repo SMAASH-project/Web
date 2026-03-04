@@ -15,6 +15,7 @@ import { useNavbarContext } from "@/context/NavbarContextUtils";
 import { useSettings } from "../pages/profileDependents/settings/settingsLogic/SettingsContext";
 import { AuthContext } from "@/context/AuthContext";
 import { apiLogout } from "@/hooks/useApi";
+import { m } from "motion/react";
 
 export default function AccountMenu() {
   const { setIsDropdownHovering, setIsDropdownOpen } = useNavbarContext();
@@ -47,83 +48,112 @@ export default function AccountMenu() {
   return (
     <DropdownMenu onOpenChange={(open: boolean) => setIsDropdownOpen(open)}>
       <DropdownMenuTrigger asChild>
-        <Button
-          size="icon"
-          className={`transition-colors duration-150 ${
-            settings.useLiquidGlass
-              ? isDark
-                ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-full bg-white/20 text-white"
-                : "rounded-full bg-white/90 text-gray-800"
-              : isDark
-                ? "rounded-full bg-white/5 hover:bg-white/10 text-white"
-                : "rounded-full bg-white/90 text-gray-800"
-          } cursor-pointer shadow-sm p-2`}
-          aria-label="Account menu"
-        >
-          <User size={16} />
-        </Button>
+        <m.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+          <Button
+            size="icon"
+            className={`transition-colors duration-150 ${
+              settings.useLiquidGlass
+                ? isDark
+                  ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-full bg-white/20 text-white hover:bg-white/30"
+                  : "rounded-full bg-white/90 hover:bg-white text-gray-800"
+                : isDark
+                  ? "rounded-full bg-white/5 hover:bg-white/10 text-white"
+                  : "rounded-full bg-white/90 hover:bg-white text-gray-800"
+            } cursor-pointer shadow-sm p-2`}
+            aria-label="Account menu"
+          >
+            <User size={16} />
+          </Button>
+        </m.div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className={`w-44 z-9999 rounded-lg p-1 shadow-lg ${
-          isDark
-            ? "bg-black/60 backdrop-blur-sm border border-white/10 text-white"
-            : "bg-white/90 border border-gray-200 text-gray-900"
-        }`}
-        align="start"
-        onMouseEnter={() => setIsDropdownHovering(true)}
-        onMouseLeave={() => setIsDropdownHovering(false)}
+      <m.div
+        initial={{ opacity: 0, scale: 0.95, y: -10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: -10 }}
+        transition={{ duration: 0.15 }}
       >
-        <DropdownMenuGroup>
-          <DropdownMenuLabel
-            className={`px-3 py-2 text-sm font-semibold ${isDark ? "text-white/90" : "text-gray-800"}`}
-          >
-            My Account
-          </DropdownMenuLabel>
-          <DropdownMenuItem
-            asChild
-            className={`px-3 py-2 rounded-md text-sm transition-colors ${isDark ? "hover:bg-white/10 hover:text-white" : "hover:bg-gray-100 hover:text-gray-900"}`}
-          >
-            <Link to="/app/profile">Profile</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            asChild
-            className={`px-3 py-2 rounded-md text-sm transition-colors ${isDark ? "hover:bg-white/10 hover:text-white" : "hover:bg-gray-100 hover:text-gray-900"}`}
-          >
-            <Link to="/app/settings">Settings</Link>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator
-          className={`my-1 ${isDark ? "border-white/12" : "border-gray-200"}`}
-        />
-        <DropdownMenuGroup>
-          <DropdownMenuItem
-            disabled
-            className={`px-3 py-2 text-sm ${isDark ? "text-white/40" : "text-gray-400"}`}
-          >
-            Support
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator
-          className={`my-1 ${isDark ? "border-white/12" : "border-gray-200"}`}
-        />
-        <DropdownMenuItem
-          asChild
-          className={`px-3 py-2 rounded-md text-sm transition-colors ${isDark ? "hover:bg-white/10 hover:text-white" : "hover:bg-gray-100 hover:text-gray-900"}`}
+        <DropdownMenuContent
+          className={`w-48 z-9999 rounded-xl p-2 shadow-xl backdrop-blur-md border ${
+            isDark
+              ? "bg-black/80 border-white/10 text-white"
+              : "bg-white/95 border-gray-200 text-gray-900"
+          }`}
+          align="end"
+          onMouseEnter={() => setIsDropdownHovering(true)}
+          onMouseLeave={() => setIsDropdownHovering(false)}
         >
-          <Link to="/app/profile-selector">Change Profile</Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator
-          className={`my-1 ${isDark ? "border-white/12" : "border-gray-200"}`}
-        />
-        <DropdownMenuGroup>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel
+              className={`px-3 py-2 text-xs font-semibold uppercase tracking-wider ${
+                isDark ? "text-white/70" : "text-gray-600"
+              }`}
+            >
+              My Account
+            </DropdownMenuLabel>
+            <DropdownMenuItem
+              asChild
+              className={`px-3 py-2.5 rounded-md text-sm transition-all duration-150 ${
+                isDark
+                  ? "hover:bg-white/10 hover:text-white"
+                  : "hover:bg-gray-100 hover:text-gray-900"
+              }`}
+            >
+              <Link to="/app/profile">Profile</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              asChild
+              className={`px-3 py-2.5 rounded-md text-sm transition-all duration-150 ${
+                isDark
+                  ? "hover:bg-white/10 hover:text-white"
+                  : "hover:bg-gray-100 hover:text-gray-900"
+              }`}
+            >
+              <Link to="/app/settings">Settings</Link>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator
+            className={`my-2 ${isDark ? "bg-white/10" : "bg-gray-200"}`}
+          />
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              disabled
+              className={`px-3 py-2 text-sm rounded-md ${
+                isDark ? "text-white/30" : "text-gray-400"
+              }`}
+            >
+              Support
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator
+            className={`my-2 ${isDark ? "bg-white/10" : "bg-gray-200"}`}
+          />
           <DropdownMenuItem
-            className={`px-3 py-2 rounded-md text-sm transition-colors ${isDark ? "hover:bg-red-600 hover:text-white" : "hover:bg-red-100 hover:text-red-700"}`}
-            onClick={handleLogout}
+            asChild
+            className={`px-3 py-2.5 rounded-md text-sm transition-all duration-150 ${
+              isDark
+                ? "hover:bg-white/10 hover:text-white"
+                : "hover:bg-gray-100 hover:text-gray-900"
+            }`}
           >
-            Log out
+            <Link to="/app/profile-selector">Change Profile</Link>
           </DropdownMenuItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
+          <DropdownMenuSeparator
+            className={`my-2 ${isDark ? "bg-white/10" : "bg-gray-200"}`}
+          />
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              className={`px-3 py-2.5 rounded-md text-sm transition-all duration-150 ${
+                isDark
+                  ? "hover:bg-red-600/80 hover:text-white"
+                  : "hover:bg-red-50 hover:text-red-700"
+              }`}
+              onClick={handleLogout}
+            >
+              Log out
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </m.div>
     </DropdownMenu>
   );
 }
