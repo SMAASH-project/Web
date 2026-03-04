@@ -5,7 +5,8 @@ import { useMediaQuery } from "@/components/nav/navLogic/useMediaQuery";
 export function WithOnloadAnimation(WrappedComponent: ComponentType) {
   return function OnloadAnimation() {
     const [hidden, setHidden] = useState(false);
-    const { isDropdownHovering, setIsDropdownHovering } = useNavbarContext();
+    const { isDropdownHovering, setIsDropdownHovering, isDropdownOpen } =
+      useNavbarContext();
     const isFreshMountRef = useRef(true);
     const isMobile = !useMediaQuery("(min-width: 768px)");
 
@@ -28,8 +29,10 @@ export function WithOnloadAnimation(WrappedComponent: ComponentType) {
       return <WrappedComponent />;
     }
 
-    // Use fresh mount state to override isDropdownHovering during animation
-    const shouldLockNavbar = !isFreshMountRef.current && isDropdownHovering;
+    // Lock navbar open if the dropdown menu is open OR content is being hovered,
+    // but only after the initial mount animation has completed
+    const shouldLockNavbar =
+      !isFreshMountRef.current && (isDropdownOpen || isDropdownHovering);
 
     return (
       <div

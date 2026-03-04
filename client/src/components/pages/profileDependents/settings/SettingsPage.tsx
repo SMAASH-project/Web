@@ -10,7 +10,7 @@ export function SettingsPage() {
 
   return (
     <div className="min-h-screen w-full self-start flex flex-col items-center text-white">
-      <div className="-mt-2 w-full">
+      <div className="w-full">
         {settings.useAnimations ? <AnimatedNavbar /> : <Navbar />}
       </div>
       {settings.useAnimations ? (
