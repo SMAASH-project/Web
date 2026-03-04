@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	dtos "smaash-web/internal/DTOs"
+	"smaash-web/internal/middlewares"
 	"smaash-web/internal/models"
 	"smaash-web/internal/repository"
 	"smaash-web/internal/utils"
@@ -13,11 +14,11 @@ import (
 )
 
 type CategoriesController struct {
-	categoriesRepo repository.CategoryRepository
+	categoryBaseRepo repository.BaseRepository[models.Category]
 }
 
-func NewCategoriesController(categoriesRepo repository.CategoryRepository) *CategoriesController {
-	return &CategoriesController{categoriesRepo: categoriesRepo}
+func NewCategoriesController(categoryBaseRepo repository.BaseRepository[models.Category]) *CategoriesController {
+	return &CategoriesController{categoryBaseRepo: categoryBaseRepo}
 }
 
 // @description Creates a new category
@@ -41,7 +42,7 @@ func (cc CategoriesController) Create(c *gin.Context) {
 	}
 
 	newCategory := dtos.CreateDTOToCategory(body)
-	if err := cc.categoriesRepo.Create(c.Request.Context(), newCategory); err != nil {
+	if err := cc.categoryBaseRepo.Create(c.Request.Context(), newCategory); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			c.JSON(http.StatusConflict, dtos.NewErrResp("A category with such name already exists", path))
 			return
@@ -61,16 +62,16 @@ func (cc CategoriesController) Create(c *gin.Context) {
 // @failure 401 {object} dtos.ErrResp "unauthorized"
 // @failure 500 {object} dtos.ErrResp "internal server error"
 // @router /categories [get]
-func (rc CategoriesController) ReadAll(c *gin.Context) {
+func (cc CategoriesController) ReadAll(c *gin.Context) {
 	path := c.Request.URL.Path
 
-	res, err := rc.categoriesRepo.ReadAll(c.Request.Context())
+	res, err := cc.categoryBaseRepo.ReadAll(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
 		return
 	}
 
-	c.JSON(http.StatusOK, utils.Map(res, func(c models.Category) dtos.CategoryReadDTO { return dtos.CategoryToDTO(c) }))
+	c.JSON(http.StatusOK, utils.Map(res, dtos.CategoryToDTO))
 }
 
 // @description Reads a category by it's id
@@ -83,11 +84,11 @@ func (rc CategoriesController) ReadAll(c *gin.Context) {
 // @failure 404 {object} dtos.ErrResp "record not found"
 // @failure 500 {object} dtos.ErrResp "internal server error"
 // @router /categories/{id} [get]
-func (rc CategoriesController) ReadByID(c *gin.Context) {
+func (cc CategoriesController) ReadByID(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
 
-	res, err := rc.categoriesRepo.ReadByID(c.Request.Context(), id.(uint))
+	res, err := cc.categoryBaseRepo.ReadByID(c.Request.Context(), id.(uint))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Record not found", path))
@@ -114,7 +115,7 @@ func (rc CategoriesController) ReadByID(c *gin.Context) {
 // @failure 409 {object} dtos.ErrResp "unique key violation"
 // @failure 500 {object} dtos.ErrResp "internal server error"
 // @router /categories/{id} [put]
-func (rc CategoriesController) Update(c *gin.Context) {
+func (cc CategoriesController) Update(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
 
@@ -129,7 +130,7 @@ func (rc CategoriesController) Update(c *gin.Context) {
 		return
 	}
 
-	if err := rc.categoriesRepo.Update(c, dtos.UpdateDTOToCategory(body)); err != nil {
+	if err := cc.categoryBaseRepo.Update(c, dtos.UpdateDTOToCategory(body)); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Record not found", path))
 			return
@@ -155,11 +156,11 @@ func (rc CategoriesController) Update(c *gin.Context) {
 // @failure 404 {object} dtos.ErrResp "record not found"
 // @failure 500 {object} dtos.ErrResp "internal server error"
 // @router /categories/{id} [delete]
-func (rc CategoriesController) Delete(c *gin.Context) {
+func (cc CategoriesController) Delete(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
 
-	if err := rc.categoriesRepo.Delete(c, id.(uint)); err != nil {
+	if err := cc.categoryBaseRepo.Delete(c, id.(uint)); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Record not found", path))
 			return
@@ -169,4 +170,14 @@ func (rc CategoriesController) Delete(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+func (cc CategoriesController) MountRoutes(apiGroup *gin.RouterGroup) {
+	cat := apiGroup.Group("/categories")
+	cat.Use(middlewares.Authorize)
+	cat.POST("", cc.Create)
+	cat.GET("", cc.ReadAll)
+	cat.GET("/:id", middlewares.ValidateUrl, cc.ReadByID)
+	cat.PUT("/:id", middlewares.ValidateUrl, cc.Update)
+	cat.DELETE("/:id", middlewares.ValidateUrl, cc.Delete)
 }

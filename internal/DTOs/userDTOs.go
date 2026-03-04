@@ -31,7 +31,7 @@ type UserLoginDTO struct {
 	Password string `json:"password" binding:"required"`
 }
 
-func UserToDTO(user *models.User) UserReadDTO {
+func UserToDTO(user models.User) UserReadDTO {
 	return UserReadDTO{
 		ID:        user.ID,
 		Email:     user.Email,

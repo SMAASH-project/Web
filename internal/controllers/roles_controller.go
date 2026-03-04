@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	dtos "smaash-web/internal/DTOs"
+	"smaash-web/internal/middlewares"
 	"smaash-web/internal/models"
 	"smaash-web/internal/repository"
 	"smaash-web/internal/utils"
@@ -13,11 +14,11 @@ import (
 )
 
 type RolesController struct {
-	rolesRepo repository.RoleRepository
+	rolesBaseRepo repository.BaseRepository[models.Role]
 }
 
-func NewRolesController(rolesRepo repository.RoleRepository) *RolesController {
-	return &RolesController{rolesRepo: rolesRepo}
+func NewRolesController(rolesBaseRepo repository.BaseRepository[models.Role]) *RolesController {
+	return &RolesController{rolesBaseRepo: rolesBaseRepo}
 }
 
 // @description Creates a new role
@@ -41,7 +42,7 @@ func (rc RolesController) Create(c *gin.Context) {
 	}
 
 	newRole := dtos.CreateDTOToRole(body)
-	if err := rc.rolesRepo.Create(c.Request.Context(), newRole); err != nil {
+	if err := rc.rolesBaseRepo.Create(c.Request.Context(), newRole); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			c.JSON(http.StatusConflict, dtos.NewErrResp("A role with such name already exists", path))
 			return
@@ -64,13 +65,13 @@ func (rc RolesController) Create(c *gin.Context) {
 func (rc RolesController) ReadAll(c *gin.Context) {
 	path := c.Request.URL.Path
 
-	res, err := rc.rolesRepo.ReadAll(c.Request.Context())
+	res, err := rc.rolesBaseRepo.ReadAll(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
 		return
 	}
 
-	c.JSON(http.StatusOK, utils.Map(res, func(r models.Role) dtos.RoleReadDTO { return dtos.RoleToDTO(r) }))
+	c.JSON(http.StatusOK, utils.Map(res, dtos.RoleToDTO))
 }
 
 // @description Reads a role by it's id
@@ -87,7 +88,7 @@ func (rc RolesController) ReadByID(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
 
-	res, err := rc.rolesRepo.ReadByID(c.Request.Context(), id.(uint))
+	res, err := rc.rolesBaseRepo.ReadByID(c.Request.Context(), id.(uint))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Record not found", path))
@@ -129,7 +130,7 @@ func (rc RolesController) Update(c *gin.Context) {
 		return
 	}
 
-	if err := rc.rolesRepo.Update(c, dtos.UpdateDTOToRole(body)); err != nil {
+	if err := rc.rolesBaseRepo.Update(c, dtos.UpdateDTOToRole(body)); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Record not found", path))
 			return
@@ -159,7 +160,7 @@ func (rc RolesController) Delete(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
 
-	if err := rc.rolesRepo.Delete(c, id.(uint)); err != nil {
+	if err := rc.rolesBaseRepo.Delete(c, id.(uint)); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Record not found", path))
 			return
@@ -169,4 +170,16 @@ func (rc RolesController) Delete(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+func (rc RolesController) MountRoutes(apiGroup *gin.RouterGroup) {
+	roles := apiGroup.Group("/roles")
+	roles.Use(middlewares.Authorize)
+	{
+		roles.POST("", rc.Create)
+		roles.GET("", rc.ReadAll)
+		roles.GET("/:id", middlewares.ValidateUrl, rc.ReadByID)
+		roles.PUT("/:id", middlewares.ValidateUrl, rc.Update)
+		roles.DELETE("/:id", middlewares.ValidateUrl, rc.Delete)
+	}
 }

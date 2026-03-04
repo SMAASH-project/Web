@@ -18,11 +18,11 @@ type Authentication interface {
 }
 
 type AuthenticationService struct {
-	usersRepo repository.UserRepository
+	userRepo repository.UserRepository
 }
 
-func NewAuthenticationService(ur repository.UserRepository) Authentication {
-	return AuthenticationService{usersRepo: ur}
+func NewAuthenticationService(userRepo repository.UserRepository) Authentication {
+	return AuthenticationService{userRepo: userRepo}
 }
 
 var (
@@ -35,12 +35,12 @@ func (a AuthenticationService) SignUp(c context.Context, u *models.User) (*model
 		return nil, err
 	}
 	u.PasswordHash = string(hash)
-	err = a.usersRepo.Create(c, u)
+	err = a.userRepo.Create(c, u)
 	return u, err
 }
 
 func (a AuthenticationService) Login(c context.Context, u *models.User) (*string, uint, error) {
-	user, err := a.usersRepo.ReadByEmail(c, u.Email)
+	user, err := a.userRepo.ReadByEmail(c, u.Email)
 	if err != nil {
 		return nil, 0, err
 	}

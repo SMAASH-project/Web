@@ -57,7 +57,7 @@ func (g GameAuthController) GameLogin(c *gin.Context) {
 
 	// Update last login time for the user
 	user.LastLogin = time.Now()
-	if err := g.userRepo.Update(c.Request.Context(), *user); err != nil {
+	if err := g.userRepo.Update(c.Request.Context(), user); err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
 	}
@@ -178,4 +178,9 @@ func (g GameAuthController) issueGameTokens(userID uint, email string) (string, 
 	}
 
 	return accessTokenString, refreshTokenString, nil
+}
+
+func (gc GameAuthController) MountRoutes(apiGroup *gin.RouterGroup) {
+	apiGroup.POST("/game-login", gc.GameLogin)
+	apiGroup.POST("/game-refresh", gc.Refresh)
 }

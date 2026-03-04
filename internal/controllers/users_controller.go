@@ -4,19 +4,25 @@ import (
 	"errors"
 	"net/http"
 	dtos "smaash-web/internal/DTOs"
+	"smaash-web/internal/middlewares"
+	"smaash-web/internal/models"
 	"smaash-web/internal/repository"
+	"smaash-web/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 type UserController struct {
-	userRepo    repository.UserRepository
-	profileRepo repository.PlayerProfileRepository
+	userRepo        repository.UserRepository
+	profileBaseRepo repository.BaseRepository[models.PlayerProfile]
 }
 
-func NewUserController(userRepo repository.UserRepository, profileRepo repository.PlayerProfileRepository) *UserController {
-	return &UserController{userRepo: userRepo, profileRepo: profileRepo}
+func NewUserController(
+	userRepo repository.UserRepository,
+	profilesBaseRepo repository.BaseRepository[models.PlayerProfile],
+) *UserController {
+	return &UserController{userRepo: userRepo, profileBaseRepo: profilesBaseRepo}
 }
 
 func (uc *UserController) ReadAll(c *gin.Context) {
@@ -25,7 +31,7 @@ func (uc *UserController) ReadAll(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
 	}
-	c.JSON(http.StatusOK, users)
+	c.JSON(http.StatusOK, utils.Map(users, dtos.UserToDTO))
 }
 
 func (uc *UserController) ReadByID(c *gin.Context) {
@@ -39,7 +45,7 @@ func (uc *UserController) ReadByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
 	}
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, dtos.UserToDTO(user))
 }
 
 // NOTE: You can't change the password here, that requires separate functionality
@@ -103,7 +109,7 @@ func (uc *UserController) AddProfileToUser(c *gin.Context) {
 	newProfile := dtos.AppendDTOToPlayerProfile(body)
 	newProfile.UserID = id.(uint)
 
-	if err := uc.profileRepo.Create(c.Request.Context(), &newProfile); err != nil {
+	if err := uc.profileBaseRepo.Create(c.Request.Context(), &newProfile); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			c.JSON(http.StatusConflict, dtos.NewErrResp("Display name already taken", path))
 			return
@@ -113,4 +119,16 @@ func (uc *UserController) AddProfileToUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, dtos.PlayerProfileToReadDTO(newProfile))
+}
+
+func (uc UserController) MountRoutes(apiGroup *gin.RouterGroup) {
+	users := apiGroup.Group("/users")
+	users.Use(middlewares.Authorize)
+	{ // no creation, that happens on /auth/signup. No updating password either.
+		users.GET("", uc.ReadAll)
+		users.GET("/:id", middlewares.ValidateUrl, uc.ReadByID)
+		users.PUT("/:id", middlewares.ValidateUrl, uc.Update)
+		users.DELETE("/:id", middlewares.ValidateUrl, uc.Delete)
+		users.POST("/:id/profiles", middlewares.ValidateUrl, uc.AddProfileToUser)
+	}
 }

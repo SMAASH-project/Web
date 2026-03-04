@@ -35,7 +35,7 @@ func (a AuthnController) SignUp(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, dtos.UserToDTO(newUser))
+	c.JSON(http.StatusCreated, dtos.UserToDTO(*newUser))
 }
 
 func (a AuthnController) Login(c *gin.Context) {
@@ -89,4 +89,11 @@ func (a AuthnController) Logout(c *gin.Context) {
 	)
 
 	c.Status(http.StatusNoContent)
+}
+
+func (a AuthnController) MountRoutes(apiGroup *gin.RouterGroup) {
+	auth := apiGroup.Group("/auth")
+	auth.POST("/signup", a.SignUp)
+	auth.POST("/login", a.Login)
+	auth.POST("/logout", a.Logout)
 }
