@@ -58,7 +58,7 @@ func (rc RolesController) Create(c *gin.Context) {
 // @tags roles
 // @accept json
 // @produce json
-// @success 200 {array} dtos.RoleReadDTO "returns newly created role"
+// @success 200 {array} dtos.RoleReadDTO "returns all roles"
 // @failure 401 {object} dtos.ErrResp "unauthorized"
 // @failure 500 {object} dtos.ErrResp "internal server error"
 // @router /roles [get]

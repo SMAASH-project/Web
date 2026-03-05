@@ -530,6 +530,339 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users": {
+            "get": {
+                "description": "Reads all users",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns all users",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.UserReadDTO"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "description": "Reads a user by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of desired user",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns the user with the given id",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UserReadDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "User with given ID not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Updates the user with the given id. (Cannot modify the users password)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for updating a user",
+                        "name": "user_update_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UserUpdateDTO"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "id of desired user",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "400": {
+                        "description": "id from url and id from request body doesn't match",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a user with the given id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of desired user",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}/profiles": {
+            "get": {
+                "description": "Reads all profiles of a given user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the user whose profiles you attempt to fetch",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "returns profiles of the given user",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.PlayerProfileReadDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "user with given ID not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new profile for a given user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for creating a new profile for a given user",
+                        "name": "profile_append_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PlayerProfileAppendDTO"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the user to whose profiles you attempt to append",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "returns newly created profile",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PlayerProfileReadDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "user with given ID not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -586,6 +919,35 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.PlayerProfileAppendDTO": {
+            "type": "object",
+            "required": [
+                "display_name"
+            ],
+            "properties": {
+                "display_name": {
+                    "type": "string",
+                    "maxLength": 20
+                }
+            }
+        },
+        "dtos.PlayerProfileReadDTO": {
+            "type": "object",
+            "properties": {
+                "coins": {
+                    "type": "integer"
+                },
+                "display_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_login": {
+                    "type": "string"
+                }
+            }
+        },
         "dtos.RoleCreateDTO": {
             "type": "object",
             "required": [
@@ -622,6 +984,42 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "maxLength": 7
+                }
+            }
+        },
+        "dtos.UserReadDTO": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_banned": {
+                    "type": "boolean"
+                },
+                "last_login": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.UserUpdateDTO": {
+            "type": "object",
+            "required": [
+                "email",
+                "id"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "maxLength": 30
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "role_id": {
+                    "type": "integer"
                 }
             }
         }

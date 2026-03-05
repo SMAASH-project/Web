@@ -10,6 +10,7 @@ import (
 type UserRepository interface {
 	BaseRepository[models.User]
 	ReadByEmail(context.Context, string) (models.User, error)
+	ReadUsersProfiles(c context.Context, userID uint) ([]models.PlayerProfile, error)
 }
 
 type UserRepositoryActions struct {
@@ -26,4 +27,8 @@ func NewUserRepositoryActions(conn *gorm.DB) UserRepository {
 
 func (ura UserRepositoryActions) ReadByEmail(c context.Context, email string) (models.User, error) {
 	return gorm.G[models.User](ura.conn).Where("email = ?", email).First(c)
+}
+
+func (ura UserRepositoryActions) ReadUsersProfiles(c context.Context, userID uint) ([]models.PlayerProfile, error) {
+	return gorm.G[models.PlayerProfile](ura.conn).Where("user_id = ?", userID).Find(c)
 }
