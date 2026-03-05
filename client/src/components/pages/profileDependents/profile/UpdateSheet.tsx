@@ -73,7 +73,11 @@ export function UpdateSheet() {
               >
                 Username
               </Label>
-              <Input id="sheet-name" defaultValue={Username} />
+              <Input
+                id="sheet-name"
+                className={`text-white cursor-pointer ${settings.useLiquidGlass ? "bg-white/20 backdrop-blur-xl border border-white/30 shadow-lg shadow-white/10 ring-1 ring-white/20 [text-shadow:0_2px_4px_rgba(163,163,163,0.8)] placeholder:text-white/50" : ""}`}
+                defaultValue={Username}
+              />
             </div>
             <div className="grid gap-3">
               <Label
@@ -86,7 +90,12 @@ export function UpdateSheet() {
               >
                 Email Address
               </Label>
-              <Input id="sheet-email" type="email" defaultValue={Email} />
+              <Input
+                id="sheet-email"
+                type="email"
+                className={`text-white cursor-pointer ${settings.useLiquidGlass ? "bg-white/20 backdrop-blur-xl border border-white/30 shadow-lg shadow-white/10 ring-1 ring-white/20 [text-shadow:0_2px_4px_rgba(163,163,163,0.8)] placeholder:text-white/50" : ""}`}
+                defaultValue={Email}
+              />
             </div>
             <div className="grid gap-3">
               <div className="flex items-center space-x-2">
@@ -104,22 +113,28 @@ export function UpdateSheet() {
                   <Field>
                     {/* Container to align checkbox and label horizontally */}
                     <div className="flex items-center gap-2">
-                      <Checkbox
-                        className="cursor-pointer"
-                        id="show-password-check" // Add an ID
-                        checked={showPassword}
-                        onCheckedChange={(checked) => {
-                          setShowPassword(
-                            checked === "indeterminate" ? true : checked,
-                          );
-                        }}
-                      />
-                      <FieldLabel
-                        htmlFor="show-password-check" // Link to checkbox ID
-                        className="text-muted-foreground text-sm cursor-pointer"
-                      >
-                        Show password
-                      </FieldLabel>
+                      <span className="flex flex-row items-center gap-1">
+                        <Checkbox
+                          className={`cursor-pointer rounded-sm lg-inner ${settings.useLiquidGlass ? "bg-white/20 backdrop-blur-xl border border-white/30 shadow-lg shadow-white/10 ring-1 ring-white/20" : ""}`}
+                          id="show-password-check" // Add an ID
+                          checked={showPassword}
+                          onCheckedChange={(checked) => {
+                            setShowPassword(
+                              checked === "indeterminate" ? true : checked,
+                            );
+                          }}
+                        />
+                        <FieldLabel
+                          htmlFor="show-password-check" // Link to checkbox ID
+                          className={`text-white/50 text-xs cursor-pointer ${
+                            settings.useLiquidGlass
+                              ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
+                              : ""
+                          }`}
+                        >
+                          Show password
+                        </FieldLabel>
+                      </span>
                     </div>
                   </Field>
                 </FieldGroup>
