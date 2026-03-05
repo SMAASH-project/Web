@@ -40,6 +40,14 @@ export interface AddProfileResponse {
   avatar?: string;
 }
 
+/** Shape of a player profile as returned by the server (PlayerProfileReadDTO). */
+export interface ProfileResponse {
+  id: number;
+  display_name: string;
+  coins: number;
+  last_login: string;
+}
+
 // ─── Internal helper ─────────────────────────────────────────────────────────
 
 /**
@@ -58,8 +66,14 @@ async function api<T>(
     ...options,
   });
 
-  // Try to parse JSON; fall back to null for empty bodies (e.g. 204).
-  const data: T = await res.json().catch(() => null as T);
+  // Only attempt JSON parsing when the server actually returns JSON.
+  // This avoids noisy console errors when the response is HTML (e.g. a
+  // proxy fallback or an auth redirect) or has an empty body (204).
+  let data: T = null as T;
+  const contentType = res.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    data = await res.json().catch(() => null as T);
+  }
 
   return { data, ok: res.ok, status: res.status };
 }
@@ -91,10 +105,25 @@ export async function apiLogout() {
 
 // ─── Profiles ────────────────────────────────────────────────────────────────
 
-/** POST /api/auth/profiles — create a new player profile for the logged-in user. */
+/** POST /api/users/:id/profiles — create a new player profile for the logged-in user. */
 export async function apiAddProfile(payload: AddProfilePayload) {
-  return api<AddProfileResponse>("/api/auth/profiles", {
+  const { user_id, ...body } = payload;
+  return api<AddProfileResponse>(`/api/users/${user_id}/profiles`, {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
+  });
+}
+
+/** GET /api/users/:id/profiles — fetch all player profiles belonging to a user. */
+export async function apiGetProfilesByUserId(userId: number) {
+  return api<ProfileResponse[]>(`/api/users/${userId}/profiles`, {
+    method: "GET",
+  });
+}
+
+/** DELETE /api/profiles/:id — delete a player profile by its server-side id. */
+export async function apiDeleteProfile(profileId: number) {
+  return api<null>(`/api/profiles/${profileId}`, {
+    method: "DELETE",
   });
 }

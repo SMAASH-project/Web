@@ -1,11 +1,16 @@
 import { useNavbarContext } from "@/context/NavbarContextUtils";
 import { useEffect, useState, useRef, type ComponentType } from "react";
+import { useMediaQuery } from "@/components/nav/navLogic/useMediaQuery";
+import { m } from "motion/react";
 
 export function WithOnloadAnimation(WrappedComponent: ComponentType) {
   return function OnloadAnimation() {
     const [hidden, setHidden] = useState(false);
-    const { isDropdownHovering, setIsDropdownHovering } = useNavbarContext();
+    const [isHovering, setIsHovering] = useState(false);
+    const { isDropdownHovering, setIsDropdownHovering, isDropdownOpen } =
+      useNavbarContext();
     const isFreshMountRef = useRef(true);
+    const isMobile = !useMediaQuery("(min-width: 768px)");
 
     useEffect(() => {
       // Reset dropdown hovering state when page loads
@@ -21,19 +26,40 @@ export function WithOnloadAnimation(WrappedComponent: ComponentType) {
       return () => clearTimeout(timer);
     }, [setIsDropdownHovering]);
 
-    // Use fresh mount state to override isDropdownHovering during animation
-    const shouldLockNavbar = !isFreshMountRef.current && isDropdownHovering;
+    // On mobile, always render the navbar without the peek animation
+    if (isMobile) {
+      return <WrappedComponent />;
+    }
+
+    // Lock navbar open if the dropdown menu is open OR content is being hovered,
+    // but only after the initial mount animation has completed
+    const shouldLockNavbar =
+      !isFreshMountRef.current && (isDropdownOpen || isDropdownHovering);
+
+    const isVisible = !hidden || shouldLockNavbar || isHovering;
 
     return (
-      <nav
-        className={`z-99 absolute hover:top-0 transition-all delay-150 duration-150 ease-in-out max-w-full w-full ${
-          hidden && !shouldLockNavbar ? "-top-17" : "top-0"
-        }`}
+      <m.div
+        initial={{ y: -80, opacity: 0 }}
+        animate={{
+          y: isVisible ? 0 : -80,
+          opacity: 1,
+        }}
+        transition={{
+          y: {
+            type: "spring",
+            stiffness: 200,
+            damping: 25,
+            mass: 0.5,
+          },
+          opacity: { duration: 0.4 },
+        }}
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+        className="z-99 relative max-w-full w-full"
       >
-        <div>
-          <WrappedComponent />
-        </div>
-      </nav>
+        <WrappedComponent />
+      </m.div>
     );
   };
 }

@@ -14,25 +14,24 @@ export function SettingsPageContent() {
   const context = useContext(ColorContext);
   return (
     <Card
-      className={`z-0 flex flex-row w-350 h-150 p-10 max-w-full max-h-lg ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20" : "bg-gray-600 border-2 border-green-400"}`}
+      className={`z-0 flex flex-col lg:flex-row w-full max-w-6xl p-6 sm:p-8 lg:p-10 gap-8 lg:gap-10 ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20" : "bg-gray-600 border-2 border-green-400"}`}
     >
-      {/* Left Section */}
-      <div className="flex-1 flex items-center justify-center flex-col gap-25">
-        <div className="mb-4 z-1">
+      {/* Visual Section */}
+      <div className="flex-1 flex items-center justify-center flex-col gap-6">
+        <div className="z-1">
           <Label
             className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
           >
             Visual
           </Label>
         </div>
-        <div className="z-1">
+        <div className="z-1 w-full flex justify-center">
           <SettingToggle />
         </div>
-        <div></div>
       </div>
 
-      {/* Middle Section */}
-      <div className="flex-1 flex items-center justify-center flex-col">
+      {/* Themes Section */}
+      <div className="flex-1 flex items-center justify-center flex-col gap-6">
         <div>
           <Label
             className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
@@ -40,10 +39,10 @@ export function SettingsPageContent() {
             Themes
           </Label>
         </div>
-        <div className="flex-1 flex items-center justify-center gap-1">
+        <div className="flex items-center justify-center gap-2 flex-wrap">
           {THEMES.map((theme) => (
             <Button
-              className={`text-white cursor-pointer ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
+              className={`text-white cursor-pointer ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20 [text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
               key={theme.name}
               onClick={() => applyTheme(theme, context)}
             >
@@ -55,9 +54,6 @@ export function SettingsPageContent() {
           <ThemePicker />
         </div>
       </div>
-
-      {/* Right Section */}
-      <div className="flex-1 flex items-center justify-center"></div>
     </Card>
   );
 }

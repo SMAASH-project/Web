@@ -37,12 +37,11 @@ export function ProfilePageContent() {
 
   return (
     <Card
-      className={`z-0 flex flex-row w-350 h-150 p-10 max-w-full max-h-lg ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20" : "bg-gray-600 border-2 border-green-400"}`}
+      className={`z-0 flex flex-col lg:flex-row w-full max-w-6xl p-6 sm:p-8 lg:p-10 gap-8 lg:gap-10 ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20" : "bg-gray-600 border-2 border-green-400"}`}
     >
-      {/* Left Section */}
-      <div className="flex-1 flex items-center justify-center flex-col gap-15">
+      {/* Profile Section */}
+      <div className="flex-1 flex items-center justify-center flex-col gap-6">
         <div>
-          {/*top area */}
           <input
             type="file"
             ref={pfpinputRef}
@@ -53,7 +52,7 @@ export function ProfilePageContent() {
           <div onClick={() => pfpinputRef.current?.click()}>
             <Avatar
               size="lg"
-              className={`text-white cursor-pointer ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 border-2 shadow-sm shadow-white/20[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : "border-green-500 border-2 bg-amber-200"} `}
+              className={`text-white cursor-pointer ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 border-2 shadow-sm shadow-white/20 [text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : "border-green-500 border-2 bg-amber-200"} `}
             >
               <AvatarImage
                 src={
@@ -77,7 +76,6 @@ export function ProfilePageContent() {
           </div>
         </div>
         <div>
-          {/*middle area */}
           <Label
             className={`font-semibold text-lg text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
           >
@@ -85,19 +83,18 @@ export function ProfilePageContent() {
           </Label>
         </div>
         <div>
-          {/*bottom area */}
           <UpdateSheet />
         </div>
       </div>
 
-      {/* Middle Section */}
+      {/* Stats Section */}
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-bold">Stats</h2>
         </div>
       </div>
 
-      {/* Right Section */}
+      {/* Match History Section */}
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center">
           <p className="text-sm">Match History</p>

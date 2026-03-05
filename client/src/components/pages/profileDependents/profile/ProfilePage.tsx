@@ -9,14 +9,16 @@ export function ProfilePage() {
   const { settings } = useSettings();
 
   return (
-    <div className="max-w-full w-full h-full flex flex-col items-center justify-start text-white">
-      {settings.useAnimations ? <AnimatedNavbar /> : <Navbar />}
+    <div className="min-h-screen w-full self-start flex flex-col items-center text-white">
+      <div className="w-full">
+        {settings.useAnimations ? <AnimatedNavbar /> : <Navbar />}
+      </div>
       {settings.useAnimations ? (
-        <CardAnimation className="z-0 mt-20">
+        <CardAnimation className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 flex items-center justify-center">
           <ProfilePageContent />
         </CardAnimation>
       ) : (
-        <div className="z-0 mt-20">
+        <div className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 flex items-center justify-center">
           <ProfilePageContent />
         </div>
       )}

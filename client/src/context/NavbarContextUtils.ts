@@ -3,6 +3,8 @@ import { createContext, useContext } from "react";
 interface NavbarContextType {
   isDropdownHovering: boolean;
   setIsDropdownHovering: (value: boolean) => void;
+  isDropdownOpen: boolean;
+  setIsDropdownOpen: (value: boolean) => void;
 }
 
 export const NavbarContext = createContext<NavbarContextType | undefined>(
@@ -15,6 +17,8 @@ export function useNavbarContext() {
     return {
       isDropdownHovering: false,
       setIsDropdownHovering: () => {},
+      isDropdownOpen: false,
+      setIsDropdownOpen: () => {},
     };
   }
   return context;

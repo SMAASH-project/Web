@@ -13,7 +13,7 @@ export function SettingToggle() {
   const { settings, updateSetting } = useSettings();
 
   return (
-    <FieldGroup className="w-100 max-w-full">
+    <FieldGroup className="w-full max-w-md">
       <FieldLabel>
         <Field orientation="horizontal">
           <FieldContent>
