@@ -1,10 +1,12 @@
 import { useNavbarContext } from "@/context/NavbarContextUtils";
 import { useEffect, useState, useRef, type ComponentType } from "react";
 import { useMediaQuery } from "@/components/nav/navLogic/useMediaQuery";
+import { m } from "motion/react";
 
 export function WithOnloadAnimation(WrappedComponent: ComponentType) {
   return function OnloadAnimation() {
     const [hidden, setHidden] = useState(false);
+    const [isHovering, setIsHovering] = useState(false);
     const { isDropdownHovering, setIsDropdownHovering, isDropdownOpen } =
       useNavbarContext();
     const isFreshMountRef = useRef(true);
@@ -34,14 +36,30 @@ export function WithOnloadAnimation(WrappedComponent: ComponentType) {
     const shouldLockNavbar =
       !isFreshMountRef.current && (isDropdownOpen || isDropdownHovering);
 
+    const isVisible = !hidden || shouldLockNavbar || isHovering;
+
     return (
-      <div
-        className={`z-99 relative transition-all delay-150 duration-150 ease-in-out max-w-full w-full ${
-          hidden && !shouldLockNavbar ? "-mt-14 hover:mt-0" : "mt-0"
-        }`}
+      <m.div
+        initial={{ y: -80, opacity: 0 }}
+        animate={{
+          y: isVisible ? 0 : -80,
+          opacity: 1,
+        }}
+        transition={{
+          y: {
+            type: "spring",
+            stiffness: 200,
+            damping: 25,
+            mass: 0.5,
+          },
+          opacity: { duration: 0.4 },
+        }}
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+        className="z-99 relative max-w-full w-full"
       >
         <WrappedComponent />
-      </div>
+      </m.div>
     );
   };
 }
