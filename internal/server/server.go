@@ -16,42 +16,31 @@ import (
 )
 
 type Server struct {
-	srv                     *http.Server
-	gracePeriod             time.Duration
-	userController          *controllers.UserController
-	authnController         *controllers.AuthnController
-	gameAuthController      *controllers.GameAuthController
-	levelsController        *controllers.LevelsController
-	playerProfileController *controllers.PlayerProfileController
-	rolesController         *controllers.RolesController
-	categoriesController    *controllers.CategoriesController
+	srv         *http.Server
+	gracePeriod time.Duration
+	controllers []controllers.Controller
 }
 
-func NewServer(
-	uc *controllers.UserController,
-	ac *controllers.AuthnController,
-	gc *controllers.GameAuthController,
-	lc *controllers.LevelsController,
-	pc *controllers.PlayerProfileController,
-	rc *controllers.RolesController,
-	cc *controllers.CategoriesController,
-) *Server {
+func NewServer() *Server {
 	return &Server{
-		gracePeriod: 10 * time.Second,
+		gracePeriod: 5 * time.Second,
 		srv: &http.Server{
 			Addr:              fmt.Sprintf(":%v", os.Getenv("PORT")),
 			IdleTimeout:       time.Minute,
 			ReadHeaderTimeout: 10 * time.Second,
 			WriteTimeout:      30 * time.Second,
 		},
-		userController:          uc,
-		authnController:         ac,
-		levelsController:        lc,
-		gameAuthController:      gc,
-		playerProfileController: pc,
-		rolesController:         rc,
-		categoriesController:    cc,
 	}
+}
+
+func (s *Server) AddController(c controllers.Controller) *Server {
+	s.controllers = append(s.controllers, c)
+	return s
+}
+
+func (s *Server) SetGracePeriod(gracePeriod time.Duration) *Server {
+	s.gracePeriod = gracePeriod
+	return s
 }
 
 func (s *Server) Run(c context.Context) error {

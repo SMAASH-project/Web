@@ -12,3 +12,7 @@ type Item struct {
 	Purchases   []*Purchase `gorm:"many2many:purchase_items"`
 	Categories  []*Category `gorm:"many2many:item_category"`
 }
+
+func (i Item) GetID() uint {
+	return i.ID
+}

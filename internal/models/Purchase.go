@@ -12,3 +12,7 @@ type Purchase struct {
 	Date            time.Time `gorm:"not null"`
 	Items           []*Item   `gorm:"many2many:purchase_items"`
 }
+
+func (p Purchase) GetID() uint {
+	return p.ID
+}

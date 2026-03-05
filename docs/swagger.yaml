@@ -35,6 +35,25 @@ definitions:
       timestamp:
         type: string
     type: object
+  dtos.PlayerProfileAppendDTO:
+    properties:
+      display_name:
+        maxLength: 20
+        type: string
+    required:
+    - display_name
+    type: object
+  dtos.PlayerProfileReadDTO:
+    properties:
+      coins:
+        type: integer
+      display_name:
+        type: string
+      id:
+        type: integer
+      last_login:
+        type: string
+    type: object
   dtos.RoleCreateDTO:
     properties:
       name:
@@ -60,6 +79,30 @@ definitions:
     required:
     - id
     - name
+    type: object
+  dtos.UserReadDTO:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      is_banned:
+        type: boolean
+      last_login:
+        type: string
+    type: object
+  dtos.UserUpdateDTO:
+    properties:
+      email:
+        maxLength: 30
+        type: string
+      id:
+        type: integer
+      role_id:
+        type: integer
+    required:
+    - email
+    - id
     type: object
 info:
   contact: {}
@@ -407,4 +450,223 @@ paths:
             $ref: '#/definitions/dtos.ErrResp'
       tags:
       - roles
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Reads all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: returns all users
+          schema:
+            items:
+              $ref: '#/definitions/dtos.UserReadDTO'
+            type: array
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - users
+  /users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a user with the given id
+      parameters:
+      - description: id of desired user
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: doesn't return anything
+          schema:
+            type: ""
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - users
+    get:
+      consumes:
+      - application/json
+      description: Reads a user by id
+      parameters:
+      - description: ID of desired user
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: returns the user with the given id
+          schema:
+            $ref: '#/definitions/dtos.UserReadDTO'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: User with given ID not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Updates the user with the given id. (Cannot modify the users password)
+      parameters:
+      - description: dto for updating a user
+        in: body
+        name: user_update_dto
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UserUpdateDTO'
+      - description: id of desired user
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: doesn't return anything
+          schema:
+            type: ""
+        "400":
+          description: id from url and id from request body doesn't match
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "409":
+          description: unique key violation
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - users
+  /users/{id}/profiles:
+    get:
+      consumes:
+      - application/json
+      description: Reads all profiles of a given user
+      parameters:
+      - description: ID of the user whose profiles you attempt to fetch
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: returns profiles of the given user
+          schema:
+            items:
+              $ref: '#/definitions/dtos.PlayerProfileReadDTO'
+            type: array
+        "400":
+          description: request body in wrong format
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: user with given ID not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "409":
+          description: unique key violation
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Creates a new profile for a given user
+      parameters:
+      - description: dto for creating a new profile for a given user
+        in: body
+        name: profile_append_dto
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.PlayerProfileAppendDTO'
+      - description: ID of the user to whose profiles you attempt to append
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: returns newly created profile
+          schema:
+            $ref: '#/definitions/dtos.PlayerProfileReadDTO'
+        "400":
+          description: request body in wrong format
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: user with given ID not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "409":
+          description: unique key violation
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - users
 swagger: "2.0"

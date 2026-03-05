@@ -16,3 +16,7 @@ type User struct {
 	LastLogin      time.Time `gorm:"not null"`
 	PlayerProfiles []PlayerProfile
 }
+
+func (u User) GetID() uint {
+	return u.ID
+}
