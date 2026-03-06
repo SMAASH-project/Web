@@ -72,10 +72,8 @@ export function useItems() {
   const visibleItems = useMemo(() => {
     let items = filteredItems;
     if (searchQuery) {
-      items = items.filter(
-        (item) =>
-          item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.description.toLowerCase().includes(searchQuery.toLowerCase()),
+      items = items.filter((item) =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
       return items;
     }

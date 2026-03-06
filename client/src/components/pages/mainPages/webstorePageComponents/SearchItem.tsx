@@ -26,7 +26,7 @@ export function SearchItem({
     <div className="relative w-full">
       <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 pointer-events-none" />
       <Input
-        placeholder="Search items…"
+        placeholder="Search by item name…"
         value={query}
         onChange={(e) => handleChange((e.target as HTMLInputElement).value)}
         className={`pl-9 pr-9 h-10 text-white placeholder:text-white/40 border ${

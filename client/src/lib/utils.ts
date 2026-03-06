@@ -154,8 +154,8 @@ export function getLiquidGlassDialogFooterClasses(
 ): string {
   if (!useLiquidGlass) return "";
   return useDarkMode
-    ? "-mx-6 -mb-6 mt-4 px-6 py-4 border-t border-black/35 bg-black/22 rounded-b-xl"
-    : "-mx-6 -mb-6 mt-4 px-6 py-4 border-t border-white/30 bg-white/18 rounded-b-xl";
+    ? "mt-4 pt-4 border-t border-black/35"
+    : "mt-4 pt-4 border-t border-white/30";
 }
 
 /**
