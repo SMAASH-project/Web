@@ -3,7 +3,7 @@ import React, {
   useContext,
   useState,
   useEffect,
-  useCallback,
+  // useCallback,
 } from "react";
 import type { Profile, ProfileContextType } from "./ProfilesTypes";
 import { AuthContext } from "@/context/AuthContext";
@@ -23,32 +23,38 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
 
   const { userId } = useContext(AuthContext);
 
-  const fetchProfiles = useCallback(async () => {
-    if (userId === null) return;
-
-    try {
-      const { data, ok } = await apiGetProfilesByUserId(Number(userId));
-
-      if (!ok || !data) return;
-
-      const fetched: Profile[] = data.map((p) => ({
-        id: p.id,
-        name: p.display_name,
-        avatar: "",
-      }));
-
-      setProfiles(fetched);
-      if (fetched.length > 0) {
-        setSelectedProfile(fetched[0]);
-      }
-    } catch (error) {
-      console.error("Error fetching profiles:", error);
-    }
-  }, [userId]);
+  console.warn("User: ", userId);
+  console.warn("Profiles: ", profiles);
 
   useEffect(() => {
+    const fetchProfiles = async () => {
+      if (userId === null) return;
+
+      try {
+        const { data, ok } = await apiGetProfilesByUserId(Number(userId));
+
+        if (!ok || !data) return;
+
+        const fetched: Profile[] = data.map((p) => ({
+          id: p.id,
+          name: p.display_name,
+          avatar: "",
+        }));
+
+        setProfiles(fetched);
+        if (fetched.length > 0) {
+          setSelectedProfile(fetched[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching profiles:", error);
+      }
+    }
     fetchProfiles();
-  }, [fetchProfiles]);
+  }, [userId]);
+
+  // useEffect(() => {
+  //   fetchProfiles();
+  // }, [fetchProfiles]);
 
   // Posts to the server via the centralized API, then updates local state on success.
   const addProfile = async (profile: Profile) => {
