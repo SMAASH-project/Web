@@ -112,10 +112,8 @@ export function NavMenu({ useLiquidGlass, useDarkMode = false }: NavMenuProps) {
           className={`m-2 lg:m-4 p-0.5 relative z-10 cursor-pointer transition-colors duration-300 ${
             !useLiquidGlass
               ? item.path === location.pathname
-                ? useDarkMode
-                  ? "text-emerald-300 font-bold"
-                  : "text-emerald-700 font-bold"
-                : `${subtextColor} ${useDarkMode ? "hover:text-emerald-300" : "hover:text-emerald-700"}`
+                ? "text-(--theme-accent) font-bold"
+                : `${subtextColor} hover:text-(--theme-accent-hover)`
               : `${textColor} ${textShadow}`
           }`}
           onMouseEnter={handleMouseEnter}

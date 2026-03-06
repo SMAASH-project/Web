@@ -22,6 +22,7 @@ import {
   getDialogFooterClasses,
   getTextShadow,
   getSubtextColor,
+  getTextColor,
 } from "@/lib/utils";
 
 export function Search({ onSearch }: { onSearch: (query: string) => void }) {
@@ -52,6 +53,7 @@ export function Search({ onSearch }: { onSearch: (query: string) => void }) {
     settings.useLiquidGlass,
     settings.useDarkMode,
   );
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
 
   const handleSearch = () => {
     onSearch(query);
@@ -68,7 +70,7 @@ export function Search({ onSearch }: { onSearch: (query: string) => void }) {
       </DialogTrigger>
       <DialogContent className={`${dialogClass} ${textShadow}`}>
         <DialogHeader>
-          <DialogTitle className={textShadow}>Search News</DialogTitle>
+          <DialogTitle className={textColor}>Search News</DialogTitle>
           <DialogDescription className={subtextColor}>
             Type to search posts by title
           </DialogDescription>

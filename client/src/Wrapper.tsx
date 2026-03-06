@@ -2,7 +2,12 @@ import { useContext, useRef } from "react";
 import { ColorContext } from "./components/pages/profileDependents/settings/settingsLogic/color/ColorContext";
 import { useSettings } from "./components/pages/profileDependents/settings/settingsLogic/SettingsContext";
 import { useColorAnimation } from "./lib/miscAnimations/ColorInterpolation";
-import { getTextColor } from "./lib/utils";
+import {
+  getAverageHexColor,
+  getTextColor,
+  lightenHexColor,
+  toRgbaColor,
+} from "./lib/utils";
 
 interface WrapperProps {
   children: React.ReactNode;
@@ -18,6 +23,24 @@ export function Wrapper({ children }: WrapperProps) {
   const colorRight = context?.colorRight || "#616161";
 
   const currentGradient = `linear-gradient(to right, ${colorLeft}, ${colorMiddle}, ${colorRight})`;
+  const themeAverage = getAverageHexColor([colorLeft, colorMiddle, colorRight]);
+  const themeAccent = lightenHexColor(
+    themeAverage,
+    settings.useDarkMode ? 0.08 : 0.02,
+  );
+  const themeAccentHover = lightenHexColor(
+    themeAverage,
+    settings.useDarkMode ? 0.22 : 0.14,
+  );
+  const themeAccentSoft = toRgbaColor(
+    themeAverage,
+    settings.useDarkMode ? 0.32 : 0.25,
+  );
+  const themeNavBorder = themeAverage;
+  const themeNavShadow = toRgbaColor(
+    lightenHexColor(themeAverage, settings.useDarkMode ? 0.25 : 0.16),
+    settings.useDarkMode ? 0.42 : 0.34,
+  );
 
   // Use the animation hook for smooth color transitions
   useColorAnimation({
@@ -32,12 +55,17 @@ export function Wrapper({ children }: WrapperProps) {
   return (
     <div
       ref={wrapperRef}
-      className={`${textColor} w-screen min-h-screen absolute top-0 left-0 flex items-center justify-center`}
+      className={`${textColor} w-screen min-h-screen absolute top-0 left-0 flex items-center justify-center ${settings.useAnimations ? "theme-color-interpolate" : ""}`}
       style={{
         backgroundImage: currentGradient,
         transition: settings.useAnimations
           ? "none"
           : "background-image 0.6s ease-in-out",
+        ["--theme-accent" as string]: themeAccent,
+        ["--theme-accent-hover" as string]: themeAccentHover,
+        ["--theme-accent-soft" as string]: themeAccentSoft,
+        ["--theme-nav-border" as string]: themeNavBorder,
+        ["--theme-nav-shadow" as string]: themeNavShadow,
       }}
     >
       {children}

@@ -107,7 +107,7 @@ export function SelectOs({
             className={`relative z-10 flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition-colors duration-200 ${
               !glass
                 ? isSelected
-                  ? "bg-green-600 shadow-md"
+                  ? "bg-(--theme-accent) hover:bg-(--theme-accent-hover) shadow-md"
                   : "hover:bg-gray-600"
                 : ""
             }`}

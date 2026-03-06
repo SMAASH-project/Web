@@ -61,7 +61,7 @@ export function ProfileSelectorForm() {
                   <Avatar
                     size="lg"
                     onClick={() => handleProfileClick(p.name)}
-                    className={`text-white cursor-pointer ${settings.useLiquidGlass ? `${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} border-2 ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} ${isManaging ? "border-red-400" : settings.useDarkMode ? "border-black/40" : "border-white/30"}` : `${isManaging ? "border-red-500" : "border-green-500"} border-2 bg-amber-200`}`}
+                    className={`text-white cursor-pointer ${settings.useLiquidGlass ? `${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} border-2 ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} ${isManaging ? "border-red-400" : settings.useDarkMode ? "border-black/40" : "border-white/30"}` : `${isManaging ? "border-red-500" : "border-(--theme-accent)"} border-2 bg-amber-200`}`}
                   >
                     <AvatarImage src={p.avatar} alt={p.name} />
                     <span
@@ -91,7 +91,6 @@ export function ProfileSelectorForm() {
                         : "NA"}
                     </AvatarFallback>
                   </Avatar>
-
                   <span
                     className={`text-white ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
                   >

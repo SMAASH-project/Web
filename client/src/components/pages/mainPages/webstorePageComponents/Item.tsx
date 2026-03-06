@@ -59,9 +59,14 @@ export function Item({ item, onDelete, onUnlock }: ItemProps) {
 
   return (
     <Card
-      className={`group relative overflow-hidden p-0 transition-all duration-200 h-full ${bgClass} hover:shadow-xl ${
-        item.owned ? "ring-1 ring-green-500/30" : ""
-      }`}
+      className={`group relative overflow-hidden p-0 transition-all duration-200 h-full ${bgClass} hover:shadow-xl`}
+      style={
+        item.owned
+          ? {
+              boxShadow: "inset 0 0 0 1px var(--theme-accent-soft)",
+            }
+          : undefined
+      }
     >
       {/* Admin delete button */}
       {isAdmin && onDelete && (
@@ -147,13 +152,12 @@ export function Item({ item, onDelete, onUnlock }: ItemProps) {
         <div className="pt-1">
           {item.owned ? (
             <div
-              className={`flex items-center justify-center gap-1.5 h-7 rounded-md text-xs font-medium ${
-                settings.useLiquidGlass
-                  ? "bg-green-500/15 text-green-300 border border-green-500/20"
-                  : settings.useDarkMode
-                    ? "bg-green-900/30 text-green-400 border border-green-700/40"
-                    : "bg-green-100/80 text-green-700 border border-green-300/60"
-              }`}
+              className="flex items-center justify-center gap-1.5 h-7 rounded-md text-xs font-medium border"
+              style={{
+                backgroundColor: "var(--theme-accent-soft)",
+                borderColor: "var(--theme-accent)",
+                color: settings.useDarkMode ? "#ffffff" : "var(--theme-accent)",
+              }}
             >
               <CheckCircle className="w-3 h-3" />
               Owned

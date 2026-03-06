@@ -16,6 +16,7 @@ import {
   getTextShadow,
   getSubtextColor,
   getBackgroundClasses,
+  getTextColor,
 } from "@/lib/utils";
 import {
   Accordion,
@@ -76,6 +77,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
     settings.useDarkMode,
     "light",
   );
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
 
   const {
     open,
@@ -124,7 +126,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle className={textShadow}>
+          <DialogTitle className={textColor}>
             Create new News Article
           </DialogTitle>
         </DialogHeader>
@@ -149,7 +151,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
             className="w-full"
           >
             <AnimatedAccordionItem value="image">
-              <AnimatedAccordionTrigger>
+              <AnimatedAccordionTrigger className={textColor}>
                 Image Settings
               </AnimatedAccordionTrigger>
               <AnimatedAccordionContent>
@@ -204,7 +206,9 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
               </AnimatedAccordionContent>
             </AnimatedAccordionItem>
             <AnimatedAccordionItem value="content">
-              <AnimatedAccordionTrigger>Content</AnimatedAccordionTrigger>
+              <AnimatedAccordionTrigger className={textColor}>
+                Content
+              </AnimatedAccordionTrigger>
               <AnimatedAccordionContent>
                 <FieldGroup>
                   <Field>
@@ -219,7 +223,9 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                       className={`w-full min-h-32 rounded-md px-3 py-2 text-sm ${inputClass}`}
                     />
                     {content && (
-                      <div className="mt-2 rounded-md border bg-gray-800/60 p-3 max-h-64 overflow-y-auto prose prose-sm prose-invert max-w-none">
+                      <div
+                        className={`mt-2 rounded-md border ${bgClass} p-3 max-h-64 overflow-y-auto prose prose-sm prose-invert max-w-none`}
+                      >
                         <Label className="text-xs mb-1">Preview Text</Label>
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {content}
@@ -238,7 +244,9 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
             className="w-full"
           >
             <AccordionItem value="image">
-              <AccordionTrigger>Image Settings</AccordionTrigger>
+              <AccordionTrigger className={textColor}>
+                Image Settings
+              </AccordionTrigger>
               <AccordionContent>
                 <FieldGroup>
                   <Field>
@@ -293,7 +301,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="content">
-              <AccordionTrigger>Content</AccordionTrigger>
+              <AccordionTrigger className={textColor}>Content</AccordionTrigger>
               <AccordionContent>
                 <FieldGroup>
                   <Field>

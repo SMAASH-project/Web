@@ -1,29 +1,22 @@
 import { CATEGORY_COLORS } from "@/types/PageTypes";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
-import { getBackgroundClasses, getTextShadow, getTextColor } from "@/lib/utils";
+import { getTextShadow } from "@/lib/utils";
 
 export function CategoryBadge({ category }: { category: string }) {
   const { settings } = useSettings();
-  const bgClass = getBackgroundClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-    "light",
-  );
   const textShadow = getTextShadow(
     settings.useLiquidGlass,
     settings.useDarkMode,
   );
-  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const categoryColor =
+    CATEGORY_COLORS[category] || CATEGORY_COLORS["Unrelated news"];
 
   return (
     <div
-      className={`w-fit px-2 py-1 rounded ${textColor} text-xs font-semibold ${bgClass} ${textShadow} border border-l-4`}
+      className={`w-fit px-2 py-1 rounded text-white text-xs font-semibold ${textShadow} border`}
       style={{
-        borderLeftColor:
-          CATEGORY_COLORS[category] || CATEGORY_COLORS["Unrelated news"],
-        borderColor: settings.useDarkMode
-          ? "rgba(0,0,0,0.4)"
-          : "rgba(255,255,255,0.4)",
+        backgroundColor: categoryColor,
+        borderColor: categoryColor,
       }}
     >
       {category}

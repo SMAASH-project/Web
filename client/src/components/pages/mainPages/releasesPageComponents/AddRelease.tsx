@@ -79,7 +79,6 @@ export function AddRelease({
   const [releaseType, setReleaseType] = useState<ReleaseType>("Patch");
   const [autoName, setAutoName] = useState(false);
   const [fileName, setFileName] = useState("");
-  const glass = settings.useLiquidGlass;
 
   const autoVersion = useMemo(
     () => computeNextVersion(allReleases, releaseType),
@@ -154,15 +153,7 @@ export function AddRelease({
       <DialogTrigger asChild>
         <Button
           size="sm"
-          className={`cursor-pointer gap-2 ${textShadow} ${
-            glass
-              ? settings.useDarkMode
-                ? "bg-black/20 backdrop-blur-lg border border-black/25 hover:bg-black/30"
-                : "bg-white/20 backdrop-blur-lg border border-white/25 hover:bg-white/30"
-              : settings.useDarkMode
-                ? "bg-green-600 hover:bg-green-700"
-                : "bg-green-600 hover:bg-green-700"
-          } ${textColor}`}
+          className={`cursor-pointer gap-2 ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "primary")} ${textShadow}`}
         >
           <FilePlusCorner className="w-4 h-4" />
           <span className="text-sm font-medium">New Release</span>
@@ -174,7 +165,7 @@ export function AddRelease({
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle className={textShadow}>Upload New Release</DialogTitle>
+          <DialogTitle className={textColor}>Upload New Release</DialogTitle>
         </DialogHeader>
         <FieldGroup>
           <Field>
@@ -233,7 +224,9 @@ export function AddRelease({
                           />
                         )}
                       </span>
-                      <span className={`text-sm font-medium ${textShadow}`}>
+                      <span
+                        className={`text-sm font-medium ${textColor} ${textShadow}`}
+                      >
                         {type}
                       </span>
                     </label>
@@ -286,7 +279,7 @@ export function AddRelease({
               {OsTypes.map((os) => (
                 <label
                   key={os.id}
-                  className="flex items-center gap-2 cursor-pointer"
+                  className={`flex items-center gap-2 cursor-pointer ${textColor}`}
                 >
                   <Checkbox
                     checked={supports.includes(os.name)}

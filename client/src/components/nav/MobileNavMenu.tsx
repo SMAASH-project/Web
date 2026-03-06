@@ -44,17 +44,13 @@ export function MobileNavMenu({
     getLiquidGlassNavHighlight(useLiquidGlass, useDarkMode) ||
     (useLiquidGlass
       ? "bg-white/20 rounded-sm"
-      : useDarkMode
-        ? "text-emerald-300 font-bold"
-        : "text-emerald-700 font-bold");
+      : "text-(--theme-accent) font-bold");
 
   const hoverClass = useLiquidGlass
     ? useDarkMode
       ? "hover:bg-black/15 rounded-sm"
       : "hover:bg-white/15 rounded-sm"
-    : useDarkMode
-      ? "hover:text-emerald-300"
-      : "hover:text-emerald-700";
+    : "hover:text-(--theme-accent-hover)";
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -105,7 +101,7 @@ export function MobileNavMenu({
         </nav>
 
         <Separator
-          className={`mx-3 ${useLiquidGlass ? (useDarkMode ? "bg-black/20" : "bg-white/20") : "bg-green-400/40"}`}
+          className={`mx-3 ${useLiquidGlass ? (useDarkMode ? "bg-black/20" : "bg-white/20") : "bg-(--theme-accent-soft)"}`}
         />
 
         {/* Account section */}
@@ -150,14 +146,14 @@ export function MobileNavMenu({
         {/* Footer: logged in + log out */}
         <div className="mt-auto px-3 pb-4">
           <Separator
-            className={`mb-3 ${useLiquidGlass ? (useDarkMode ? "bg-black/20" : "bg-white/20") : "bg-green-400/40"}`}
+            className={`mb-3 ${useLiquidGlass ? (useDarkMode ? "bg-black/20" : "bg-white/20") : "bg-(--theme-accent-soft)"}`}
           />
           <p className={`px-3 pb-2 text-xs ${subtextColor}`}>
             Logged in as{" "}
             <SheetClose asChild>
               <Link
                 to="/app/profile/"
-                className={`font-medium ${useLiquidGlass ? textColor : useDarkMode ? "text-emerald-300" : "text-emerald-700"} no-underline`}
+                className={`font-medium ${useLiquidGlass ? textColor : "text-(--theme-accent)"} no-underline`}
               >
                 {username}
               </Link>

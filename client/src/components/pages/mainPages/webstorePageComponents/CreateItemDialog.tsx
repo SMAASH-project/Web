@@ -22,6 +22,7 @@ import {
   getDialogFooterClasses,
   getTextShadow,
   getSubtextColor,
+  getTextColor,
 } from "@/lib/utils";
 
 const RARITIES = ["Common", "Uncommon", "Rare", "Epic", "Legendary"] as const;
@@ -74,6 +75,7 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
     settings.useLiquidGlass,
     settings.useDarkMode,
   );
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
 
   const handleSubmit = () => {
     if (!name.trim() || !description.trim() || !price) return;
@@ -115,7 +117,7 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle className={textShadow}>Create New Item</DialogTitle>
+          <DialogTitle className={textColor}>Create New Item</DialogTitle>
           <DialogDescription className={subtextColor}>
             Add a new item to the webstore.
           </DialogDescription>

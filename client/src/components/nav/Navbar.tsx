@@ -55,7 +55,11 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`absolute top-0 left-0 right-0 flex justify-between items-center p-4 max-w-full w-full border-b z-50 ${navBackground} ${settings.useDarkMode ? "border-black/30" : "border-white/40"}`}
+      className={`absolute top-0 left-0 right-0 flex justify-between items-center p-4 max-w-full w-full border-b border-transparent z-50 ${navBackground}`}
+      style={{
+        borderBottomColor: "var(--theme-nav-border)",
+        boxShadow: "0 8px 18px -14px var(--theme-nav-shadow)",
+      }}
     >
       {isDesktop ? (
         <>

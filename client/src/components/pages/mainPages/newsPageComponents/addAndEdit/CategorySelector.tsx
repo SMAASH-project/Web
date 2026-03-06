@@ -1,7 +1,7 @@
 import { RadioGroup } from "@/components/ui/radio-group";
 import { CATEGORY_COLORS, type NewsPost } from "@/types/PageTypes";
 import { useSettings } from "../../../profileDependents/settings/settingsLogic/SettingsContext";
-import { getLiquidGlassTextShadow } from "@/lib/utils";
+import { getLiquidGlassTextShadow, getTextColor } from "@/lib/utils";
 
 interface CategorySelectorProps {
   value: NewsPost["category"];
@@ -20,6 +20,8 @@ export function CategorySelector({
   onValueChange,
 }: CategorySelectorProps) {
   const { settings } = useSettings();
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+
   return (
     <RadioGroup
       value={value}
@@ -69,7 +71,7 @@ export function CategorySelector({
                 )}
               </span>
               <span
-                className={`text-sm font-medium text-white ${getLiquidGlassTextShadow(
+                className={`text-sm font-medium ${textColor} ${getLiquidGlassTextShadow(
                   settings.useLiquidGlass,
                   settings.useDarkMode,
                 )}`}

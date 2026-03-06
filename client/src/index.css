@@ -187,3 +187,12 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+
+.theme-color-interpolate,
+.theme-color-interpolate * {
+  transition-property:
+    background-color, border-color, color, box-shadow, fill, stroke,
+    outline-color, text-decoration-color;
+  transition-duration: 450ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
