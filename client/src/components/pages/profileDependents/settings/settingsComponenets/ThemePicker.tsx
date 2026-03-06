@@ -72,12 +72,21 @@ export const ThemePicker = () => {
         }}
         value={displayColorRight}
       />
-      <Button
-        className={`text-white cursor-pointer ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
-        onClick={handleApplyChanges}
-      >
-        Apply changes
-      </Button>
+      {(() => {
+        const liquidBtn = settings.useLiquidGlass
+          ? settings.useDarkMode
+            ? "bg-black/30 backdrop-blur-lg border-black/30 shadow-sm shadow-black/30 [text-shadow:0_2px_4px_rgba(32,32,32,0.8)]"
+            : "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20 [text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
+          : "";
+        return (
+          <Button
+            className={`text-white cursor-pointer ${liquidBtn}`}
+            onClick={handleApplyChanges}
+          >
+            Apply changes
+          </Button>
+        );
+      })()}
     </div>
   );
 };

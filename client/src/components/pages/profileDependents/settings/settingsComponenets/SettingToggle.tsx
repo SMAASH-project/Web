@@ -63,6 +63,28 @@ export function SettingToggle() {
           />
         </Field>
       </FieldLabel>
+      <FieldLabel>
+        <Field orientation="horizontal">
+          <FieldContent>
+            <FieldTitle
+              className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
+            >
+              Toggle Dark Mode
+            </FieldTitle>
+            <FieldDescription
+              className={`text-neutral-400 ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(255,255,255,0.2)]" : ""}`}
+            >
+              Enable a dark theme for the interface, which may be easier on the
+              eyes in low-light environments.
+            </FieldDescription>
+          </FieldContent>
+          <Switch
+            id="switch-dark-mode"
+            checked={settings.useDarkMode}
+            onCheckedChange={(checked) => updateSetting("useDarkMode", checked)}
+          />
+        </Field>
+      </FieldLabel>
     </FieldGroup>
   );
 }

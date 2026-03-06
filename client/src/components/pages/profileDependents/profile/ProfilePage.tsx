@@ -1,17 +1,18 @@
 import Navbar from "@/components/nav/Navbar";
-import { WithOnloadAnimation } from "@/lib/miscAnimations/OnloadAnimationNavbar";
+// import { WithOnloadAnimation } from "@/lib/miscAnimations/OnloadAnimationNavbar";
 import CardAnimation from "@/lib/miscAnimations/OnloadAnimationCard";
 import { useSettings } from "../settings/settingsLogic/SettingsContext";
 import { ProfilePageContent } from "./ProfilePageConent";
 
 export function ProfilePage() {
-  const AnimatedNavbar = WithOnloadAnimation(Navbar);
+  // const AnimatedNavbar = WithOnloadAnimation(Navbar);
   const { settings } = useSettings();
 
   return (
     <div className="min-h-screen w-full self-start flex flex-col items-center text-white">
-      <div className="w-full">
-        {settings.useAnimations ? <AnimatedNavbar /> : <Navbar />}
+      <div className="w-full ">
+        {/* {settings.useAnimations ? <AnimatedNavbar /> : <Navbar />} */}
+        <Navbar />
       </div>
       {settings.useAnimations ? (
         <CardAnimation className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 flex items-center justify-center">
