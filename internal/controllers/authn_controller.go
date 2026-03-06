@@ -18,6 +18,16 @@ func NewAuthnController(authService services.Authentication) *AuthnController {
 	return &AuthnController{authService: authService}
 }
 
+// @description Register a new user
+// @tags auth
+// @accept json
+// @produce json
+// @param user_create_dto body dtos.UserCreateDTO true "dto for creating a new user"
+// @success 201 {object} dtos.UserReadDTO "returns newly created user"
+// @failure 400 {object} dtos.ErrResp "request body in wrong format"
+// @failure 409 {object} dtos.ErrResp "unique key violation"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /auth/signup [post]
 func (a AuthnController) SignUp(c *gin.Context) {
 	var body dtos.UserCreateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -38,6 +48,17 @@ func (a AuthnController) SignUp(c *gin.Context) {
 	c.JSON(http.StatusCreated, dtos.UserToDTO(*newUser))
 }
 
+// @description Logs in a user
+// @tags auth
+// @accept json
+// @produce json
+// @param user_login_dto body dtos.UserLoginDTO true "dto for logging in a user"
+// @success 200 {int} int "returns the id of the logged in user"
+// @failure 400 {object} dtos.ErrResp "request body in wrong format"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /auth/login [post]
 func (a AuthnController) Login(c *gin.Context) {
 	var body dtos.UserLoginDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -76,6 +97,12 @@ func (a AuthnController) Login(c *gin.Context) {
 	})
 }
 
+// @description Logs out a user
+// @tags auth
+// @accept json
+// @produce json
+// @success 204 {} nil "doesn't return anything"
+// @router /auth/logout [post]
 func (a AuthnController) Logout(c *gin.Context) {
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(

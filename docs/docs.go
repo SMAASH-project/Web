@@ -19,6 +19,136 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/login": {
+            "post": {
+                "description": "Logs in a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for logging in a user",
+                        "name": "user_login_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UserLoginDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns the id of the logged in user",
+                        "schema": {
+                            "type": "int"
+                        }
+                    },
+                    "400": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "description": "Logs out a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/signup": {
+            "post": {
+                "description": "Register a new user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for creating a new user",
+                        "name": "user_create_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UserCreateDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "returns newly created user",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UserReadDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
         "/categories": {
             "get": {
                 "description": "Reads categories",
@@ -275,6 +405,518 @@ const docTemplate = `{
                 }
             }
         },
+        "/levels": {
+            "get": {
+                "description": "Reads all levels",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "levels"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns all levels",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.LevelReadDTO"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new level",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "levels"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for creating a new level",
+                        "name": "level_create_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.LevelCreateDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "returns newly created level",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.LevelReadDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/levels/{id}": {
+            "get": {
+                "description": "Reads a level by it's id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "levels"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "the id of the desired level",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns the desired level",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.LevelReadDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Updates the level with the given id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "levels"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for updating a level",
+                        "name": "level_update_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.LevelUpdateDTO"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "id of desired level",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "400": {
+                        "description": "id from url and id from request body doesn't match",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a level with the given id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "levels"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of desired level",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/profiles": {
+            "get": {
+                "description": "Reads all profile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profiles"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns all profiles",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.PlayerProfileReadDTO"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new profile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profiles"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for creating a new profile",
+                        "name": "profile_create_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PlayerProfileCreateDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "returns newly created profile",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PlayerProfileReadDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/profiles/{id}": {
+            "get": {
+                "description": "Reads a user by it's id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profiles"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "the id of the desired profile",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns the desired profile",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PlayerProfileReadDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Updates the profile with the given id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profiles"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for updating a profile",
+                        "name": "profile_update_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PlayerProfileUpdateDTO"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "id of desired profile",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "400": {
+                        "description": "id from url and id from request body doesn't match",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a profile with the given id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profiles"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of desired profile",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
         "/roles": {
             "get": {
                 "description": "Reads all roles",
@@ -289,7 +931,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "returns newly created role",
+                        "description": "returns all roles",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -919,6 +1561,56 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.LevelCreateDTO": {
+            "type": "object",
+            "required": [
+                "img_uri",
+                "name"
+            ],
+            "properties": {
+                "img_uri": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 20
+                }
+            }
+        },
+        "dtos.LevelReadDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "img_uri": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.LevelUpdateDTO": {
+            "type": "object",
+            "required": [
+                "id",
+                "img_uri",
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "img_uri": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 20
+                }
+            }
+        },
         "dtos.PlayerProfileAppendDTO": {
             "type": "object",
             "required": [
@@ -928,6 +1620,22 @@ const docTemplate = `{
                 "display_name": {
                     "type": "string",
                     "maxLength": 20
+                }
+            }
+        },
+        "dtos.PlayerProfileCreateDTO": {
+            "type": "object",
+            "required": [
+                "display_name",
+                "user_id"
+            ],
+            "properties": {
+                "display_name": {
+                    "type": "string",
+                    "maxLength": 20
+                },
+                "user_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -945,6 +1653,25 @@ const docTemplate = `{
                 },
                 "last_login": {
                     "type": "string"
+                }
+            }
+        },
+        "dtos.PlayerProfileUpdateDTO": {
+            "type": "object",
+            "required": [
+                "display_name",
+                "id"
+            ],
+            "properties": {
+                "coins": {
+                    "type": "integer"
+                },
+                "display_name": {
+                    "type": "string",
+                    "maxLength": 20
+                },
+                "id": {
+                    "type": "integer"
                 }
             }
         },
@@ -984,6 +1711,49 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "maxLength": 7
+                }
+            }
+        },
+        "dtos.UserCreateDTO": {
+            "type": "object",
+            "required": [
+                "email",
+                "password",
+                "role_id",
+                "username"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "maxLength": 30
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 8
+                },
+                "role_id": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 3
+                }
+            }
+        },
+        "dtos.UserLoginDTO": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
                 }
             }
         },

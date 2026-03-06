@@ -78,7 +78,7 @@ func (pc PlayerProfileController) ReadByID(c *gin.Context) {
 // @router /profiles [post]
 func (pc PlayerProfileController) Create(c *gin.Context) {
 	path := c.Request.URL.Path
-	var body dtos.PlayerProfileCreateDto
+	var body dtos.PlayerProfileCreateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), path))
 	}
@@ -114,7 +114,7 @@ func (pc PlayerProfileController) Update(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
 
-	var body dtos.PlayerProfileUpdateDto
+	var body dtos.PlayerProfileUpdateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), path))
 		return

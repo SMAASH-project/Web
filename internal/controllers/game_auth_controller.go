@@ -27,6 +27,16 @@ func NewGameAuthController(
 	}
 }
 
+// @description Logs a user into the game
+// @tags game-auth
+// @accept json
+// @produce json
+// @param user_login_dto body dtos.UserLoginDTO true "dto for logging in a user"
+// @success 200 {int} int "returns the id of the logged in user"
+// @failure 400 {object} dtos.ErrResp "request body in wrong format"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /game-login [post]
 func (g GameAuthController) GameLogin(c *gin.Context) {
 	var body dtos.UserLoginDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -76,6 +86,16 @@ func (g GameAuthController) GameLogin(c *gin.Context) {
 	})
 }
 
+// @description Asks for a refresh token
+// @tags game-auth
+// @accept json
+// @produce json
+// @param user_login_dto body dtos.TokenRefreshRequest true "dto for asking fo a refresh token"
+// @success 200 {int} int "returns the new access and refresh tokens"
+// @failure 400 {object} dtos.ErrResp "request body in wrong format"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /game-refresh [post]
 func (g GameAuthController) Refresh(c *gin.Context) {
 	var body dtos.TokenRefreshRequest
 	if err := c.ShouldBindJSON(&body); err != nil {
