@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useSettings } from "../settingsLogic/SettingsContext";
 import { ColorPicker } from "@/components/ui/color-picker";
-import { getLiquidGlassClasses, getLiquidGlassTextShadow } from "@/lib/utils";
+import { getTextColor, getTextShadow, getButtonClasses } from "@/lib/utils";
 
 export const ThemePicker = () => {
   const context = useContext(ColorContext);
@@ -45,13 +45,19 @@ export const ThemePicker = () => {
     setPendingColorRight(null);
   };
 
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const buttonClass = getButtonClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+
   return (
     <div className="w-full flex items-center justify-center gap-2 flex-wrap">
-      <Label
-        className={`text-white p-1.5 ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
-      >
-        Custom Theme
-      </Label>
+      <Label className={`${textColor} p-1.5 ${textShadow}`}>Custom Theme</Label>
       <ColorPicker
         className="w-10 cursor-pointer"
         onChange={(v) => {
@@ -73,23 +79,12 @@ export const ThemePicker = () => {
         }}
         value={displayColorRight}
       />
-      {(() => {
-        const liquidBtn =
-          getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode) +
-          " " +
-          getLiquidGlassTextShadow(
-            settings.useLiquidGlass,
-            settings.useDarkMode,
-          );
-        return (
-          <Button
-            className={`text-white cursor-pointer ${liquidBtn}`}
-            onClick={handleApplyChanges}
-          >
-            Apply changes
-          </Button>
-        );
-      })()}
+      <Button
+        className={`cursor-pointer ${buttonClass} ${textShadow}`}
+        onClick={handleApplyChanges}
+      >
+        Apply changes
+      </Button>
     </div>
   );
 };

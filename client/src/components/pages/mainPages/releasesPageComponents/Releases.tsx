@@ -1,7 +1,13 @@
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { formatDateTime } from "@/lib/utils";
+import {
+  formatDateTime,
+  getBackgroundClasses,
+  getTextShadow,
+  getTextColor,
+  getSubtextColor,
+} from "@/lib/utils";
 import { LoadPost } from "@/lib/pageAnimations/newsPageAnimations/LoadPost";
 import { RemoveReleaseButton } from "./RemoveReleaseButton";
 import { DownloadReleaseButton } from "./DownloadReleaseButton";
@@ -43,21 +49,27 @@ export function Releases({
   const { settings } = useSettings();
   const IsAdmin = true; // Replace with actual admin check
   const glass = settings.useLiquidGlass;
+  const bgClass = getBackgroundClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+    "light",
+  );
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const subtextColor = getSubtextColor(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
 
   return (
     <div className="flex flex-col gap-3 w-full" ref={containerRef}>
       {visibleReleases.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 mt-16 opacity-60">
-          <Package className="w-12 h-12 text-white/40" />
-          <p
-            className={`text-white/60 text-base ${
-              glass
-                ? settings.useDarkMode
-                  ? "[text-shadow:0_1px_3px_rgba(32,32,32,0.3)]"
-                  : "[text-shadow:0_1px_3px_rgba(163,163,163,0.3)]"
-                : ""
-            }`}
-          >
+          <Package className={`w-12 h-12 ${subtextColor}`} />
+          <p className={`${subtextColor} text-base ${textShadow}`}>
             No releases found for {selectedOs}.
           </p>
         </div>
@@ -68,12 +80,12 @@ export function Releases({
 
           const cardContent = (
             <Card
-              className={`group relative overflow-hidden p-0 transition-all duration-200 ${
+              className={`group relative overflow-hidden p-0 transition-all duration-200 ${bgClass} border shadow-lg ${
                 glass
                   ? settings.useDarkMode
-                    ? "bg-black/10 backdrop-blur-lg border border-black/15 shadow-lg shadow-black/20 hover:bg-black/15 hover:border-black/25"
-                    : "bg-white/10 backdrop-blur-lg border border-white/15 shadow-lg shadow-black/5 hover:bg-white/15 hover:border-white/25"
-                  : "bg-gray-800/80 border border-gray-700 hover:border-gray-600 hover:bg-gray-800"
+                    ? "border-black/15 shadow-black/20 hover:border-black/25"
+                    : "border-white/15 shadow-black/5 hover:border-white/25"
+                  : "border-gray-700 hover:border-gray-600"
               }`}
             >
               {/* Accent bar on left */}
@@ -94,18 +106,12 @@ export function Releases({
                         : "bg-gray-700/60"
                     }`}
                   >
-                    <Package className="w-5 h-5 text-white/70" />
+                    <Package className={`w-5 h-5 ${subtextColor}`} />
                   </div>
                   <div className="flex flex-col gap-1 min-w-0">
                     <div className="flex items-center gap-2.5">
                       <span
-                        className={`text-base font-semibold text-white tracking-tight ${
-                          glass
-                            ? settings.useDarkMode
-                              ? "[text-shadow:0_1px_4px_rgba(32,32,32,0.4)]"
-                              : "[text-shadow:0_1px_4px_rgba(163,163,163,0.4)]"
-                            : ""
-                        }`}
+                        className={`text-base font-semibold ${textColor} tracking-tight ${textShadow}`}
                       >
                         v{release.version}
                       </span>
@@ -124,21 +130,13 @@ export function Releases({
                       {release.supports.map((os) => (
                         <span
                           key={os}
-                          className="text-xs text-white/40 font-medium"
+                          className={`text-xs ${subtextColor} font-medium`}
                         >
                           {os}
                         </span>
                       ))}
-                      <span className="text-xs text-white/25">·</span>
-                      <span
-                        className={`text-xs text-white/40 ${
-                          glass
-                            ? settings.useDarkMode
-                              ? "[text-shadow:0_1px_2px_rgba(32,32,32,0.2)]"
-                              : "[text-shadow:0_1px_2px_rgba(163,163,163,0.2)]"
-                            : ""
-                        }`}
-                      >
+                      <span className={`text-xs ${subtextColor}`}>·</span>
+                      <span className={`text-xs ${subtextColor} ${textShadow}`}>
                         {formatDateTime(release.createdAt)}
                       </span>
                     </div>
@@ -174,7 +172,7 @@ export function Releases({
           className="flex items-center justify-center py-4 w-full shrink-0"
         >
           {isLoading && (
-            <Loader2 className="w-5 h-5 text-white/40 animate-spin" />
+            <Loader2 className={`w-5 h-5 ${subtextColor} animate-spin`} />
           )}
         </div>
       )}

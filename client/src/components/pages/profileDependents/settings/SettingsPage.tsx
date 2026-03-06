@@ -3,13 +3,17 @@ import Navbar from "@/components/nav/Navbar";
 import { CardAnimation } from "@/lib/miscAnimations/OnloadAnimationCard";
 import { useSettings } from "./settingsLogic/SettingsContext";
 import { SettingsPageContent } from "./settingsComponenets/SettingsPageContent";
+import { getTextColor } from "@/lib/utils";
 
 export function SettingsPage() {
   // const AnimatedNavbar = WithOnloadAnimation(Navbar);
   const { settings } = useSettings();
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
 
   return (
-    <div className="min-h-screen w-full self-start flex flex-col items-center text-white">
+    <div
+      className={`min-h-screen w-full self-start flex flex-col items-center ${textColor}`}
+    >
       <div className="w-full">
         {/* {settings.useAnimations ? <AnimatedNavbar /> : <Navbar />} */}
         <Navbar />

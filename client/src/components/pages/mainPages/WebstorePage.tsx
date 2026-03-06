@@ -7,11 +7,16 @@ import { CreateItemDialog } from "./webstorePageComponents/CreateItemDialog";
 import { useSettings } from "../profileDependents/settings/settingsLogic/SettingsContext";
 import { LoadPost } from "@/lib/pageAnimations/newsPageAnimations/LoadPost";
 import { ShoppingBag, Loader2, Coins } from "lucide-react";
+import {
+  getTextColor,
+  getTextShadow,
+  getSubtextColor,
+  getBackgroundClasses,
+} from "@/lib/utils";
 
 export function WebstorePage() {
   const { settings } = useSettings();
   const isAdmin = true;
-  const glass = settings.useLiquidGlass;
   const userCoins = 5000; // Replace with actual coin balance from API
 
   const {
@@ -55,6 +60,21 @@ export function WebstorePage() {
     console.log("Delete item:", id);
   };
 
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const subtextColor = getSubtextColor(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const bgClass = getBackgroundClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+    "light",
+  );
+
   return (
     <div className="p-4 min-h-screen w-full self-start flex flex-col">
       <Navbar />
@@ -65,25 +85,11 @@ export function WebstorePage() {
           <div className="flex items-center justify-between w-full">
             <div className="flex flex-col gap-1">
               <h1
-                className={`text-2xl font-bold text-white tracking-tight ${
-                  glass
-                    ? settings.useDarkMode
-                      ? "[text-shadow:0_2px_8px_rgba(32,32,32,0.5)]"
-                      : "[text-shadow:0_2px_8px_rgba(163,163,163,0.5)]"
-                    : ""
-                }`}
+                className={`text-2xl font-bold ${textColor} tracking-tight ${textShadow}`}
               >
                 Webstore
               </h1>
-              <p
-                className={`text-sm text-white/60 ${
-                  glass
-                    ? settings.useDarkMode
-                      ? "[text-shadow:0_1px_3px_rgba(32,32,32,0.3)]"
-                      : "[text-shadow:0_1px_3px_rgba(163,163,163,0.3)]"
-                    : ""
-                }`}
-              >
+              <p className={`text-sm ${subtextColor}`}>
                 Unlock characters and skins
               </p>
             </div>
@@ -92,23 +98,11 @@ export function WebstorePage() {
             <div className="flex items-center gap-3">
               {/* Coins display */}
               <div
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${
-                  glass
-                    ? settings.useDarkMode
-                      ? "bg-black/10 border-black/15 backdrop-blur-lg"
-                      : "bg-white/10 border-white/15 backdrop-blur-lg"
-                    : "bg-gray-800/80 border-gray-700"
-                }`}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${bgClass}`}
               >
                 <Coins className="w-4 h-4 text-amber-400" />
                 <span
-                  className={`text-sm font-bold ${
-                    glass
-                      ? settings.useDarkMode
-                        ? "text-white [text-shadow:0_1px_3px_rgba(32,32,32,0.3)]"
-                        : "text-white [text-shadow:0_1px_3px_rgba(163,163,163,0.3)]"
-                      : "text-amber-400"
-                  }`}
+                  className={`text-sm font-bold text-amber-400 ${textShadow}`}
                 >
                   {userCoins.toLocaleString()}
                 </span>
@@ -159,18 +153,8 @@ export function WebstorePage() {
         <div ref={containerRef} className="w-full">
           {visibleItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-3 mt-16 opacity-60">
-              <ShoppingBag className="w-12 h-12 text-white/40" />
-              <p
-                className={`text-white/60 text-base ${
-                  glass
-                    ? settings.useDarkMode
-                      ? "[text-shadow:0_1px_3px_rgba(32,32,32,0.3)]"
-                      : "[text-shadow:0_1px_3px_rgba(163,163,163,0.3)]"
-                    : ""
-                }`}
-              >
-                No items found.
-              </p>
+              <ShoppingBag className={`w-12 h-12 ${subtextColor}`} />
+              <p className={`text-base ${subtextColor}`}>No items found.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -203,7 +187,7 @@ export function WebstorePage() {
               className="flex items-center justify-center py-4 w-full shrink-0"
             >
               {isLoading && (
-                <Loader2 className="w-5 h-5 text-white/40 animate-spin" />
+                <Loader2 className={`w-5 h-5 ${subtextColor} animate-spin`} />
               )}
             </div>
           )}

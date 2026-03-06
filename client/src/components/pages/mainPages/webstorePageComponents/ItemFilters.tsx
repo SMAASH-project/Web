@@ -1,5 +1,6 @@
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { getBackgroundClasses, getSubtextColor } from "@/lib/utils";
 
 interface ItemFiltersProps {
   label: string;
@@ -15,10 +16,19 @@ export function ItemFilters({
   onSelect,
 }: ItemFiltersProps) {
   const { settings } = useSettings();
-  const glass = settings.useLiquidGlass;
   const containerRef = useRef<HTMLDivElement>(null);
   const [highlightPos, setHighlightPos] = useState({ left: 0, width: 0 });
   const [isHovering, setIsHovering] = useState(false);
+
+  const subtextColor = getSubtextColor(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const bgClass = getBackgroundClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+    "light",
+  );
 
   const updateHighlightToSelected = useCallback(() => {
     if (!containerRef.current) return;
@@ -40,7 +50,7 @@ export function ItemFilters({
   }, [updateHighlightToSelected]);
 
   const handleMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!glass) return;
+    if (!settings.useLiquidGlass) return;
     setIsHovering(true);
     const rect = e.currentTarget.getBoundingClientRect();
     const parent = containerRef.current;
@@ -54,7 +64,7 @@ export function ItemFilters({
   };
 
   const handleMouseLeave = () => {
-    if (!glass) return;
+    if (!settings.useLiquidGlass) return;
     setIsHovering(false);
     updateHighlightToSelected();
   };
@@ -62,28 +72,16 @@ export function ItemFilters({
   return (
     <div className="flex flex-col gap-1.5 items-center">
       <span
-        className={`text-xs font-medium text-white/50 uppercase tracking-wider ${
-          glass
-            ? settings.useDarkMode
-              ? "[text-shadow:0_1px_2px_rgba(32,32,32,0.2)]"
-              : "[text-shadow:0_1px_2px_rgba(163,163,163,0.2)]"
-            : ""
-        }`}
+        className={`text-xs font-medium uppercase tracking-wider ${subtextColor}`}
       >
         {label}
       </span>
       <div
         ref={containerRef}
-        className={`relative flex flex-row flex-wrap gap-1 p-1 rounded-xl ${
-          glass
-            ? settings.useDarkMode
-              ? "bg-black/15 backdrop-blur-lg border border-black/20"
-              : "bg-white/15 backdrop-blur-lg border border-white/20"
-            : "bg-gray-700/60 border border-gray-600"
-        }`}
+        className={`relative flex flex-row flex-wrap gap-1 p-1 rounded-xl ${bgClass}`}
         onMouseLeave={handleMouseLeave}
       >
-        {glass && (
+        {settings.useLiquidGlass && (
           <div
             className={`absolute rounded-lg shadow-sm transition-all duration-300 ease-out pointer-events-none ${
               settings.useDarkMode
@@ -108,15 +106,25 @@ export function ItemFilters({
               onMouseEnter={handleMouseEnter}
               type="button"
               className={`relative z-10 flex items-center px-3 py-1.5 rounded-lg cursor-pointer transition-colors duration-200 ${
-                !glass
+                !settings.useLiquidGlass
                   ? isSelected
-                    ? "bg-green-600 shadow-md"
-                    : "hover:bg-gray-600"
+                    ? settings.useDarkMode
+                      ? "bg-gray-700 shadow-md"
+                      : "bg-gray-200 shadow-md"
+                    : settings.useDarkMode
+                      ? "hover:bg-gray-700"
+                      : "hover:bg-gray-100"
                   : ""
               }`}
             >
               <span
-                className={`text-xs font-medium text-white transition-opacity ${
+                className={`text-xs font-medium ${
+                  settings.useLiquidGlass
+                    ? "text-white"
+                    : settings.useDarkMode
+                      ? "text-white"
+                      : "text-gray-900"
+                } transition-opacity ${
                   isSelected && !isHovering
                     ? "opacity-100"
                     : isHovering

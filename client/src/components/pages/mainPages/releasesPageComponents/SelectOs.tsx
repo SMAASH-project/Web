@@ -3,7 +3,11 @@ import { useSettings } from "../../profileDependents/settings/settingsLogic/Sett
 import AppleLogo from "@/assets/osLogos/AppleLogoTransparent.svg?url";
 import AndroidLogo from "@/assets/osLogos/AndroidLogoTransparent.png";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getLiquidGlassNavHighlight } from "@/lib/utils";
+import {
+  getLiquidGlassNavHighlight,
+  getBackgroundClasses,
+  getTextColor,
+} from "@/lib/utils";
 
 const osLogos: Record<string, string> = {
   iOS: AppleLogo,
@@ -19,6 +23,12 @@ export function SelectOs({
 }) {
   const { settings } = useSettings();
   const glass = settings.useLiquidGlass;
+  const bgClass = getBackgroundClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+    "light",
+  );
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
   const containerRef = useRef<HTMLDivElement>(null);
   const [highlightPos, setHighlightPos] = useState({ left: 0, width: 0 });
   const [isHovering, setIsHovering] = useState(false);
@@ -65,12 +75,12 @@ export function SelectOs({
   return (
     <div
       ref={containerRef}
-      className={`relative flex flex-row gap-1 p-1 rounded-xl ${
+      className={`relative flex flex-row gap-1 p-1 rounded-xl ${bgClass} border ${
         glass
           ? settings.useDarkMode
-            ? "bg-black/15 backdrop-blur-lg border border-black/20"
-            : "bg-white/15 backdrop-blur-lg border border-white/20"
-          : "bg-gray-700/60 border border-gray-600"
+            ? "border-black/20"
+            : "border-white/20"
+          : "border-gray-600"
       }`}
       onMouseLeave={handleMouseLeave}
     >
@@ -108,7 +118,7 @@ export function SelectOs({
               className="w-5 h-5 object-contain pointer-events-none select-none"
             />
             <span
-              className={`text-sm font-medium text-white transition-opacity ${
+              className={`text-sm font-medium ${textColor} transition-opacity ${
                 isSelected && !isHovering
                   ? "opacity-100"
                   : isHovering

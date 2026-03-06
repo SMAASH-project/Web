@@ -16,16 +16,42 @@ import { useSettings } from "../../profileDependents/settings/settingsLogic/Sett
 import { Search as SearchIcon } from "lucide-react";
 import { useState } from "react";
 import {
-  getLiquidGlassClasses,
-  getLiquidGlassControlClasses,
-  getLiquidGlassDialogClasses,
-  getLiquidGlassDialogFooterClasses,
-  getLiquidGlassTextShadow,
+  getButtonClasses,
+  getInputClasses,
+  getDialogClasses,
+  getDialogFooterClasses,
+  getTextShadow,
+  getSubtextColor,
 } from "@/lib/utils";
 
 export function Search({ onSearch }: { onSearch: (query: string) => void }) {
   const { settings } = useSettings();
   const [query, setQuery] = useState("");
+  const buttonClass = getButtonClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+    "primary",
+  );
+  const inputClass = getInputClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const dialogClass = getDialogClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const footerClass = getDialogFooterClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const subtextColor = getSubtextColor(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
 
   const handleSearch = () => {
     onSearch(query);
@@ -35,29 +61,15 @@ export function Search({ onSearch }: { onSearch: (query: string) => void }) {
     <Dialog>
       <DialogTrigger asChild>
         <Button
-          className={`text-white ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} rounded-lg cursor-pointer`}
+          className={`${buttonClass} ${textShadow} rounded-lg cursor-pointer`}
         >
           <SearchIcon />
         </Button>
       </DialogTrigger>
-      <DialogContent
-        className={`${getLiquidGlassDialogClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
-      >
+      <DialogContent className={`${dialogClass} ${textShadow}`}>
         <DialogHeader>
-          <DialogTitle
-            className={getLiquidGlassTextShadow(
-              settings.useLiquidGlass,
-              settings.useDarkMode,
-            )}
-          >
-            Search News
-          </DialogTitle>
-          <DialogDescription
-            className={getLiquidGlassTextShadow(
-              settings.useLiquidGlass,
-              settings.useDarkMode,
-            )}
-          >
+          <DialogTitle className={textShadow}>Search News</DialogTitle>
+          <DialogDescription className={subtextColor}>
             Type to search posts by title
           </DialogDescription>
         </DialogHeader>
@@ -68,22 +80,14 @@ export function Search({ onSearch }: { onSearch: (query: string) => void }) {
               placeholder="Search posts..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className={getLiquidGlassControlClasses(
-                settings.useLiquidGlass,
-                settings.useDarkMode,
-              )}
+              className={inputClass}
             />
           </Field>
         </FieldGroup>
-        <DialogFooter
-          className={getLiquidGlassDialogFooterClasses(
-            settings.useLiquidGlass,
-            settings.useDarkMode,
-          )}
-        >
+        <DialogFooter className={footerClass}>
           <Button
             variant="outline"
-            className={`cursor-pointer ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode, "input")} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+            className={`cursor-pointer ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "outline")} ${textShadow}`}
             onClick={handleSearch}
           >
             Search
@@ -91,7 +95,7 @@ export function Search({ onSearch }: { onSearch: (query: string) => void }) {
           <DialogClose asChild>
             <Button
               variant="outline"
-              className={`cursor-pointer ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode, "input")} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+              className={`cursor-pointer ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "outline")} ${textShadow}`}
             >
               Close
             </Button>

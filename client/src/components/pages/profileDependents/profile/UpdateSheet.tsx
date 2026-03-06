@@ -15,7 +15,14 @@ import {
 } from "@/components/ui/sheet";
 import React from "react";
 import { useSettings } from "../settings/settingsLogic/SettingsContext";
-import { getLiquidGlassClasses, getLiquidGlassTextShadow } from "@/lib/utils";
+import {
+  getBackgroundClasses,
+  getButtonClasses,
+  getInputClasses,
+  getTextColor,
+  getTextShadow,
+  getSubtextColor,
+} from "@/lib/utils";
 
 const Username = "placeholder";
 const Email = "lorem@ipsum.com";
@@ -24,31 +31,43 @@ const Password = "password";
 export function UpdateSheet() {
   const { settings } = useSettings();
   const [showPassword, setShowPassword] = React.useState(false);
+
+  const bgClass = getBackgroundClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const buttonClass = getButtonClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const inputClass = getInputClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const subtextColor = getSubtextColor(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+
   return (
     <div className="z-101">
       <Sheet>
         <SheetTrigger asChild>
-          <Button
-            className={`text-white cursor-pointer ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
-          >
+          <Button className={`cursor-pointer ${buttonClass} ${textShadow}`}>
             Edit
           </Button>
         </SheetTrigger>
-        <SheetContent
-          className={getLiquidGlassClasses(
-            settings.useLiquidGlass,
-            settings.useDarkMode,
-          )}
-        >
+        <SheetContent className={bgClass}>
           <SheetHeader>
-            <SheetTitle
-              className={`text-white text-lg ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
-            >
+            <SheetTitle className={`text-lg ${textColor} ${textShadow}`}>
               Edit profile
             </SheetTitle>
-            <SheetDescription
-              className={`text-white text-sm ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
-            >
+            <SheetDescription className={`text-sm ${subtextColor}`}>
               Make changes to your profile here. <br />
               Click save when you&apos;re done.
             </SheetDescription>
@@ -57,27 +76,27 @@ export function UpdateSheet() {
             <div className="grid gap-3">
               <Label
                 htmlFor="sheet-username"
-                className={`text-white text-md ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+                className={`text-md ${textColor} ${textShadow}`}
               >
                 Username
               </Label>
               <Input
                 id="sheet-name"
-                className={`text-white cursor-pointer ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode, "input")} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} placeholder:text-white/50`}
+                className={`cursor-pointer ${inputClass}`}
                 defaultValue={Username}
               />
             </div>
             <div className="grid gap-3">
               <Label
                 htmlFor="sheet-email"
-                className={`text-white text-md ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+                className={`text-md ${textColor} ${textShadow}`}
               >
                 Email Address
               </Label>
               <Input
                 id="sheet-email"
                 type="email"
-                className={`text-white cursor-pointer ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode, "input")} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} placeholder:text-white/50`}
+                className={`cursor-pointer ${inputClass}`}
                 defaultValue={Email}
               />
             </div>
@@ -85,7 +104,7 @@ export function UpdateSheet() {
               <div className="flex items-center space-x-2">
                 <Label
                   htmlFor="sheet-username"
-                  className={`cursor-pointer text-white text-md ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+                  className={`cursor-pointer text-md ${textColor} ${textShadow}`}
                 >
                   Password
                 </Label>
@@ -95,7 +114,7 @@ export function UpdateSheet() {
                     <div className="flex items-center gap-2">
                       <span className="flex flex-row items-center gap-1">
                         <Checkbox
-                          className={`cursor-pointer rounded-sm lg-inner ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode, "input")}`}
+                          className={`cursor-pointer rounded-sm lg-inner ${inputClass}`}
                           id="show-password-check"
                           checked={showPassword}
                           onCheckedChange={(checked) => {
@@ -106,7 +125,7 @@ export function UpdateSheet() {
                         />
                         <FieldLabel
                           htmlFor="show-password-check"
-                          className={`text-white/50 text-xs cursor-pointer ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+                          className={`text-xs cursor-pointer ${subtextColor}`}
                         >
                           Show password
                         </FieldLabel>
@@ -117,7 +136,7 @@ export function UpdateSheet() {
               </div>
               <Input
                 id="sheet-password"
-                className={`text-white cursor-pointer ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode, "input")} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} placeholder:text-white/50`}
+                className={`cursor-pointer ${inputClass}`}
                 type={showPassword ? "text" : "password"}
                 defaultValue={Password}
               />
@@ -126,14 +145,12 @@ export function UpdateSheet() {
           <SheetFooter>
             <Button
               type="submit"
-              className={`text-white cursor-pointer ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+              className={`cursor-pointer ${buttonClass} ${textShadow}`}
             >
               Save changes
             </Button>
             <SheetClose asChild>
-              <Button
-                className={`text-white cursor-pointer ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
-              >
+              <Button className={`cursor-pointer ${buttonClass} ${textShadow}`}>
                 Close
               </Button>
             </SheetClose>

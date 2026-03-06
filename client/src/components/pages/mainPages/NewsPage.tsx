@@ -1,7 +1,9 @@
 import {
   formatDateTime,
-  getLiquidGlassClasses,
-  getLiquidGlassTextShadow,
+  getBackgroundClasses,
+  getTextColor,
+  getTextShadow,
+  getButtonClasses,
 } from "@/lib/utils";
 import Navbar from "../../nav/Navbar";
 import { Card } from "@/components/ui/card";
@@ -36,6 +38,20 @@ export function NewsPage() {
     handleSearch,
   } = useNewsPosts(selectedCategories);
 
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const bgClass = getBackgroundClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const buttonClass = getButtonClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+
   return (
     <div className="p-4 h-screen overflow-y-auto" ref={containerRef}>
       <Navbar />
@@ -43,7 +59,7 @@ export function NewsPage() {
         <span className="flex flex-row w-full justify-between">
           <ButtonGroup
             orientation="horizontal"
-            className={`text-white ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} rounded-lg`}
+            className={`${buttonClass} rounded-lg`}
           >
             {IsAdmin ? (
               <>
@@ -55,9 +71,7 @@ export function NewsPage() {
             )}
           </ButtonGroup>
           <span className="flex flex-row items-center gap-2">
-            <Label
-              className={`text-white text-lg ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} text-center`}
-            >
+            <Label className={`text-lg ${textColor} ${textShadow} text-center`}>
               Latest News
             </Label>
             <FilterSelect
@@ -70,13 +84,13 @@ export function NewsPage() {
           {visiblePosts.map((post: NewsPost, index: number) => {
             const cardContent = (
               <Card
-                className={`z-0 flex flex-row p-10 mb-5 max-w-full ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)}`}
+                className={`z-0 flex flex-row p-10 mb-5 max-w-full ${bgClass}`}
               >
                 <li className="flex flex-col gap-2 w-full">
                   <span className="flex flex-row w-full items-start justify-between gap-4">
                     <div className="flex flex-col gap-2 flex-1">
                       <Label
-                        className={`text-white text-lg ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} text-left`}
+                        className={`text-lg ${textColor} ${textShadow} text-left`}
                       >
                         {post.title}
                       </Label>
@@ -84,7 +98,7 @@ export function NewsPage() {
                     </div>
                     <div className="flex flex-col items-end gap-2 shrink-0">
                       <Label
-                        className={`text-white text-lg ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} italic text-right`}
+                        className={`text-lg ${textColor} ${textShadow} italic text-right`}
                       >
                         {formatDateTime(post.createdAt)}
                       </Label>
@@ -111,7 +125,7 @@ export function NewsPage() {
                         />
                       )}
                       <div
-                        className={`text-white text-sm ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} text-justify prose prose-sm prose-invert max-w-none`}
+                        className={`text-sm ${textColor} ${textShadow} text-justify prose prose-sm prose-invert max-w-none`}
                       >
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {post.content}
@@ -121,7 +135,7 @@ export function NewsPage() {
                   ) : (
                     <div className="flex flex-row gap-4 w-full">
                       <div
-                        className={`text-white text-sm ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} text-justify prose prose-sm prose-invert max-w-none`}
+                        className={`text-sm ${textColor} ${textShadow} text-justify prose prose-sm prose-invert max-w-none`}
                         style={{ width: `${100 - (post.imageSize ?? 0)}%` }}
                       >
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>

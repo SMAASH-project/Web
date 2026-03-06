@@ -12,15 +12,34 @@ import {
 import { Trash2 } from "lucide-react";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
 import {
-  getLiquidGlassClasses,
-  getLiquidGlassDialogClasses,
-  getLiquidGlassDialogFooterClasses,
-  getLiquidGlassTextShadow,
+  getButtonClasses,
+  getDialogClasses,
+  getDialogFooterClasses,
+  getTextShadow,
+  getSubtextColor,
+  getTextColor,
 } from "@/lib/utils";
 
 export function RemoveReleaseButton({ onConfirm }: { onConfirm?: () => void }) {
   const { settings } = useSettings();
   const glass = settings.useLiquidGlass;
+  const dialogClass = getDialogClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const footerClass = getDialogFooterClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const subtextColor = getSubtextColor(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
 
   return (
     <Dialog>
@@ -28,52 +47,33 @@ export function RemoveReleaseButton({ onConfirm }: { onConfirm?: () => void }) {
         <Button
           size="sm"
           variant="ghost"
-          className={`h-8 w-8 p-0 cursor-pointer text-white/60 hover:text-red-400 ${
+          className={`h-8 w-8 p-0 cursor-pointer ${glass ? textColor : subtextColor} hover:text-red-400 ${
             glass ? "hover:bg-red-500/15" : "hover:bg-red-900/30"
           }`}
         >
           <Trash2 className="w-4 h-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent
-        className={`${getLiquidGlassDialogClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
-      >
+      <DialogContent className={`${dialogClass} ${textShadow}`}>
         <DialogHeader>
-          <DialogTitle
-            className={getLiquidGlassTextShadow(
-              settings.useLiquidGlass,
-              settings.useDarkMode,
-            )}
-          >
-            Confirm Deletion
-          </DialogTitle>
-          <DialogDescription
-            className={getLiquidGlassTextShadow(
-              settings.useLiquidGlass,
-              settings.useDarkMode,
-            )}
-          >
+          <DialogTitle className={textShadow}>Confirm Deletion</DialogTitle>
+          <DialogDescription className={subtextColor}>
             Are you sure you want to delete this release? This action cannot be
             undone.
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter
-          className={getLiquidGlassDialogFooterClasses(
-            settings.useLiquidGlass,
-            settings.useDarkMode,
-          )}
-        >
+        <DialogFooter className={footerClass}>
           <DialogClose asChild>
             <Button
               variant="outline"
-              className={`cursor-pointer ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode, "input")} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+              className={`cursor-pointer ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "outline")} ${textShadow}`}
             >
               Cancel
             </Button>
           </DialogClose>
           <DialogClose asChild>
             <Button
-              className={`cursor-pointer ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+              className={`cursor-pointer ${textShadow}`}
               variant="destructive"
               onClick={() => {
                 onConfirm?.();

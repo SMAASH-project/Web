@@ -3,8 +3,11 @@ import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { navItems } from "./navLogic/navItems";
 import {
+  getBackgroundClasses,
   getLiquidGlassNavHighlight,
-  getLiquidGlassTextShadow,
+  getSubtextColor,
+  getTextColor,
+  getTextShadow,
 } from "@/lib/utils";
 
 interface NavMenuProps {
@@ -17,6 +20,14 @@ export function NavMenu({ useLiquidGlass, useDarkMode = false }: NavMenuProps) {
   const [highlightPos, setHighlightPos] = useState({ left: 0, width: 0 });
   const [isHovering, setIsHovering] = useState(false);
   const ulRef = useRef<HTMLUListElement>(null);
+  const textColor = getTextColor(useLiquidGlass, useDarkMode);
+  const subtextColor = getSubtextColor(useLiquidGlass, useDarkMode);
+  const textShadow = getTextShadow(useLiquidGlass, useDarkMode);
+  const navBackground = getBackgroundClasses(
+    useLiquidGlass,
+    useDarkMode,
+    "light",
+  );
 
   useEffect(() => {
     // Find the matching nav item based on current route
@@ -81,7 +92,7 @@ export function NavMenu({ useLiquidGlass, useDarkMode = false }: NavMenuProps) {
   return (
     <ul
       ref={ulRef}
-      className={`nav-links list-none flex m-0 p-0 gap-2 lg:gap-6 xl:gap-10 relative whitespace-nowrap ${useLiquidGlass ? (useDarkMode ? "rounded-lg bg-black/10" : "rounded-lg bg-white/10") : ""}`}
+      className={`nav-links list-none flex m-0 p-0 gap-2 lg:gap-6 xl:gap-10 relative whitespace-nowrap rounded-lg ${navBackground}`}
       onMouseLeave={handleMouseLeave}
     >
       {useLiquidGlass && isHovering && (
@@ -98,13 +109,15 @@ export function NavMenu({ useLiquidGlass, useDarkMode = false }: NavMenuProps) {
       {navItems.map((item) => (
         <li
           key={item.path}
-          className={`m-2 lg:m-4 p-0.5 relative z-10 ${
-            useLiquidGlass ? "cursor-pointer" : "hover:text-green-400"
-          } ${
-            !useLiquidGlass && item.path === location.pathname
-              ? "text-green-600 font-bold"
-              : getLiquidGlassTextShadow(useLiquidGlass, useDarkMode)
-          } transition-colors duration-300`}
+          className={`m-2 lg:m-4 p-0.5 relative z-10 cursor-pointer transition-colors duration-300 ${
+            !useLiquidGlass
+              ? item.path === location.pathname
+                ? useDarkMode
+                  ? "text-emerald-300 font-bold"
+                  : "text-emerald-700 font-bold"
+                : `${subtextColor} ${useDarkMode ? "hover:text-emerald-300" : "hover:text-emerald-700"}`
+              : `${textColor} ${textShadow}`
+          }`}
           onMouseEnter={handleMouseEnter}
         >
           <Link to={item.path}>

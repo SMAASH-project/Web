@@ -2,6 +2,7 @@ import { useContext, useRef } from "react";
 import { ColorContext } from "./components/pages/profileDependents/settings/settingsLogic/color/ColorContext";
 import { useSettings } from "./components/pages/profileDependents/settings/settingsLogic/SettingsContext";
 import { useColorAnimation } from "./lib/miscAnimations/ColorInterpolation";
+import { getTextColor } from "./lib/utils";
 
 interface WrapperProps {
   children: React.ReactNode;
@@ -26,10 +27,12 @@ export function Wrapper({ children }: WrapperProps) {
     useAnimation: settings.useAnimations,
   });
 
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+
   return (
     <div
       ref={wrapperRef}
-      className="text-white w-screen min-h-screen absolute top-0 left-0 flex items-center justify-center"
+      className={`${textColor} w-screen min-h-screen absolute top-0 left-0 flex items-center justify-center`}
       style={{
         backgroundImage: currentGradient,
         transition: settings.useAnimations

@@ -9,11 +9,13 @@ import {
   Dialog,
 } from "@/components/ui/dialog";
 import {
-  getLiquidGlassClasses,
-  getLiquidGlassControlClasses,
-  getLiquidGlassDialogClasses,
-  getLiquidGlassDialogFooterClasses,
-  getLiquidGlassTextShadow,
+  getButtonClasses,
+  getInputClasses,
+  getDialogClasses,
+  getDialogFooterClasses,
+  getTextShadow,
+  getSubtextColor,
+  getBackgroundClasses,
 } from "@/lib/utils";
 import {
   Accordion,
@@ -49,9 +51,35 @@ export function EditButton({
   onUpdate?: (p: NewsPost) => void;
 }) {
   const { settings } = useSettings();
-  const controlClasses = getLiquidGlassControlClasses(
+  const buttonClass = getButtonClasses(
     settings.useLiquidGlass,
     settings.useDarkMode,
+    "primary",
+  );
+  const inputClass = getInputClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const dialogClass = getDialogClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const footerClass = getDialogFooterClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const subtextColor = getSubtextColor(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const bgClass = getBackgroundClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+    "light",
   );
 
   const {
@@ -93,25 +121,18 @@ export function EditButton({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button
-          className={`text-white ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} rounded-lg cursor-pointer`}
+          className={`${buttonClass} ${textShadow} rounded-lg cursor-pointer`}
         >
           <SquarePen />
         </Button>
       </DialogTrigger>
       <DialogContent
-        className={`w-full max-w-4xl! sm:max-w-4xl! overflow-visible ${getLiquidGlassDialogClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+        className={`w-full max-w-4xl! sm:max-w-4xl! overflow-visible ${dialogClass} ${textShadow}`}
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle
-            className={getLiquidGlassTextShadow(
-              settings.useLiquidGlass,
-              settings.useDarkMode,
-            )}
-          >
-            Edit News Article
-          </DialogTitle>
+          <DialogTitle className={textShadow}>Edit News Article</DialogTitle>
         </DialogHeader>
         <FieldGroup>
           <Field>
@@ -119,7 +140,7 @@ export function EditButton({
             <Input
               value={title}
               onChange={(e) => setTitle((e.target as HTMLInputElement).value)}
-              className={controlClasses}
+              className={inputClass}
             />
           </Field>
           <Field>
@@ -140,7 +161,7 @@ export function EditButton({
               <AnimatedAccordionContent>
                 <FieldGroup>
                   <Field>
-                    <Label className="text-sm text-muted-foreground">
+                    <Label className={`text-sm ${subtextColor}`}>
                       Image Position
                     </Label>
                     <div className="flex flex-row gap-4 items-start">
@@ -197,7 +218,7 @@ export function EditButton({
               <AnimatedAccordionContent>
                 <FieldGroup>
                   <Field>
-                    <Label className="text-sm text-muted-foreground">
+                    <Label className={`text-sm ${subtextColor}`}>
                       Markdown supported
                     </Label>
                     <textarea
@@ -205,7 +226,7 @@ export function EditButton({
                       onChange={(e) =>
                         setContent((e.target as HTMLTextAreaElement).value)
                       }
-                      className={`w-full min-h-32 rounded-md px-3 py-2 text-sm ${controlClasses}`}
+                      className={`w-full min-h-32 rounded-md px-3 py-2 text-sm ${inputClass}`}
                     />
                     {content && (
                       <div className="mt-2 rounded-md border bg-gray-800/60 p-3 max-h-64 overflow-y-auto prose prose-sm prose-invert max-w-none">
@@ -231,7 +252,7 @@ export function EditButton({
               <AccordionContent>
                 <FieldGroup>
                   <Field>
-                    <Label className="text-sm text-muted-foreground">
+                    <Label className={`text-sm ${subtextColor}`}>
                       Image Position
                     </Label>
                     <div className="flex flex-row gap-4 items-start">
@@ -252,7 +273,9 @@ export function EditButton({
                         />
                         {imageAlt && (
                           <div className="flex items-center gap-1">
-                            <span className="text-xs text-muted-foreground truncate">
+                            <span
+                              className={`text-xs ${subtextColor} truncate`}
+                            >
                               Current: {imageAlt}
                             </span>
                             <button
@@ -288,7 +311,7 @@ export function EditButton({
               <AccordionContent>
                 <FieldGroup>
                   <Field>
-                    <Label className="text-sm text-muted-foreground">
+                    <Label className={`text-sm ${subtextColor}`}>
                       Markdown supported
                     </Label>
                     <textarea
@@ -296,10 +319,12 @@ export function EditButton({
                       onChange={(e) =>
                         setContent((e.target as HTMLTextAreaElement).value)
                       }
-                      className={`w-full min-h-32 rounded-md px-3 py-2 text-sm ${controlClasses}`}
+                      className={`w-full min-h-32 rounded-md px-3 py-2 text-sm ${inputClass}`}
                     />
                     {content && (
-                      <div className="mt-2 rounded-md border bg-gray-800/60 p-3 max-h-64 overflow-y-auto prose prose-sm prose-invert max-w-none">
+                      <div
+                        className={`mt-2 rounded-md border ${bgClass} p-3 max-h-64 overflow-y-auto prose prose-sm prose-invert max-w-none`}
+                      >
                         <Label className="text-xs mb-1">Preview Text</Label>
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {content}
@@ -312,23 +337,18 @@ export function EditButton({
             </AccordionItem>
           </Accordion>
         )}
-        <DialogFooter
-          className={getLiquidGlassDialogFooterClasses(
-            settings.useLiquidGlass,
-            settings.useDarkMode,
-          )}
-        >
+        <DialogFooter className={footerClass}>
           <DialogClose asChild>
             <Button
               variant="outline"
-              className={`cursor-pointer ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode, "input")} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+              className={`cursor-pointer ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "outline")} ${textShadow}`}
             >
               Cancel
             </Button>
           </DialogClose>
           <Button
             onClick={handleSave}
-            className={`cursor-pointer ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+            className={`cursor-pointer ${buttonClass} ${textShadow}`}
           >
             Save changes
           </Button>

@@ -8,7 +8,12 @@ import { Link, useNavigate } from "react-router";
 import { useMediaQuery } from "./navLogic/useMediaQuery";
 import { apiLogout } from "@/hooks/useApi";
 import { AuthContext } from "@/context/AuthContext";
-import { getLiquidGlassClasses, getLiquidGlassTextShadow } from "@/lib/utils";
+import {
+  getBackgroundClasses,
+  getSubtextColor,
+  getTextColor,
+  getTextShadow,
+} from "@/lib/utils";
 
 const Navbar = () => {
   const { settings } = useSettings();
@@ -17,6 +22,20 @@ const Navbar = () => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const navigate = useNavigate();
   const { setIsLoggedIn, setUserId } = useContext(AuthContext);
+  const navBackground = getBackgroundClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+    "light",
+  );
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const subtextColor = getSubtextColor(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
 
   const handleLogout = async () => {
     try {
@@ -36,7 +55,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`absolute top-0 left-0 right-0 flex justify-between items-center p-4 max-w-full w-full border-b-2 z-50 ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode) || "bg-linear-to-b from-gray-700 to-gray-500 [border-image:linear-gradient(to_right,var(--color-green-400),var(--color-green-600))_1]"}`}
+      className={`absolute top-0 left-0 right-0 flex justify-between items-center p-4 max-w-full w-full border-b z-50 ${navBackground} ${settings.useDarkMode ? "border-black/30" : "border-white/40"}`}
     >
       {isDesktop ? (
         <>
@@ -50,9 +69,11 @@ const Navbar = () => {
           </div>
           <div className="flex-1 min-w-0 flex justify-end items-center gap-2 lg:gap-4 overflow-hidden">
             <span
-              className={`text-white whitespace-nowrap truncate ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+              className={`whitespace-nowrap truncate ${textColor} ${textShadow}`}
             >
-              <span className="hidden xl:inline">Logged in as </span>
+              <span className={`hidden xl:inline ${subtextColor}`}>
+                Logged in as{" "}
+              </span>
               <Link to="/app/profile/" className="hidden lg:inline">
                 {username}
               </Link>
@@ -72,7 +93,7 @@ const Navbar = () => {
             onLogout={handleLogout}
           />
           <span
-            className={`text-white text-sm truncate max-w-[50vw] ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+            className={`text-sm truncate max-w-[50vw] ${textColor} ${textShadow}`}
           >
             <Link to="/app/profile/">{username}</Link>
           </span>

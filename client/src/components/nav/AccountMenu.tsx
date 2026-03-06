@@ -16,13 +16,32 @@ import { useSettings } from "../pages/profileDependents/settings/settingsLogic/S
 import { AuthContext } from "@/context/AuthContext";
 import { apiLogout } from "@/hooks/useApi";
 import { m } from "motion/react";
-import { getLiquidGlassClasses, getLiquidGlassTextShadow } from "@/lib/utils";
+import {
+  getBackgroundClasses,
+  getSubtextColor,
+  getTextColor,
+  getTextShadow,
+} from "@/lib/utils";
 
 export default function AccountMenu() {
   const { setIsDropdownHovering, setIsDropdownOpen } = useNavbarContext();
   const { settings } = useSettings();
   const { setIsLoggedIn, setUserId } = useContext(AuthContext);
   const navigate = useNavigate();
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const subtextColor = getSubtextColor(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const dropdownBackground = getBackgroundClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+    "strong",
+  );
 
   // Calls the centralized logout API to end the session.
   const logout = async () => {
@@ -50,15 +69,15 @@ export default function AccountMenu() {
         <m.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
           <Button
             size="icon"
-            className={`transition-colors duration-150 ${
+            className={`transition-colors duration-150 rounded-full cursor-pointer shadow-sm p-2 ${textColor} ${textShadow} ${
               settings.useLiquidGlass
                 ? settings.useDarkMode
-                  ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-full bg-black/20 text-white hover:bg-black/30"
-                  : "rounded-full bg-white/90 hover:bg-white text-gray-800"
+                  ? "bg-black/20 hover:bg-black/30"
+                  : "bg-white/20 hover:bg-white/30"
                 : settings.useDarkMode
-                  ? "rounded-full bg-white/5 hover:bg-white/10 text-white"
-                  : "rounded-full bg-white/90 hover:bg-white text-gray-800"
-            } cursor-pointer shadow-sm p-2`}
+                  ? "bg-gray-800/80 hover:bg-gray-700/90"
+                  : "bg-white/90 hover:bg-white"
+            }`}
             aria-label="Account menu"
           >
             <User size={16} />
@@ -72,20 +91,14 @@ export default function AccountMenu() {
         transition={{ duration: 0.15 }}
       >
         <DropdownMenuContent
-          className={`w-48 z-9999 rounded-xl p-2 shadow-xl backdrop-blur-md border ${
-            settings.useDarkMode
-              ? "bg-black/80 border-white/10 text-white"
-              : "bg-white/95 border-gray-200 text-gray-900"
-          }`}
+          className={`w-48 z-9999 rounded-xl p-2 shadow-xl backdrop-blur-md border ${dropdownBackground} ${textColor}`}
           align="end"
           onMouseEnter={() => setIsDropdownHovering(true)}
           onMouseLeave={() => setIsDropdownHovering(false)}
         >
           <DropdownMenuGroup>
             <DropdownMenuLabel
-              className={`px-3 py-2 text-xs font-semibold uppercase tracking-wider ${
-                settings.useDarkMode ? "text-white/70" : "text-gray-600"
-              }`}
+              className={`px-3 py-2 text-xs font-semibold uppercase tracking-wider ${subtextColor}`}
             >
               My Account
             </DropdownMenuLabel>

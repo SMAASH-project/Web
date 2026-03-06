@@ -10,7 +10,7 @@ import { EllipsisVertical } from "lucide-react";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
 import { FilterSelection } from "./FilterSelection";
 import type { NewsPost } from "@/types/PageTypes";
-import { getLiquidGlassClasses, getLiquidGlassTextShadow } from "@/lib/utils";
+import { getButtonClasses, getTextShadow } from "@/lib/utils";
 
 interface FilterSelectProps {
   selectedByCategory: Record<NewsPost["category"], boolean>;
@@ -22,11 +22,20 @@ export function FilterSelect({
   onCategoryChange,
 }: FilterSelectProps) {
   const { settings } = useSettings();
+  const buttonClass = getButtonClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+    "primary",
+  );
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          className={`text-white ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} rounded-lg cursor-pointer`}
+          className={`${buttonClass} ${textShadow} rounded-lg cursor-pointer`}
         >
           <EllipsisVertical />
         </Button>
