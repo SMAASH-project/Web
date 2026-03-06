@@ -31,10 +31,9 @@ go.work.sum
 # .idea/
 # .vscode/
 
-/build/*
-/build/**/*
 build/
 *.db
 /internal/seeder/source/*
 
 .DS_Store
+/docs/swagger/
