@@ -10,6 +10,8 @@ import {
   cn,
   getLiquidGlassClasses,
   getLiquidGlassTextShadow,
+  getBackgroundClasses,
+  getTextColor,
 } from "@/lib/utils";
 import { useProfiles } from "@/components/forms/addNewProfile/useProfiles";
 
@@ -39,9 +41,18 @@ export function ProfilePageContent() {
     });
   };
 
+  const bgClass = getBackgroundClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const cardClasses = settings.useLiquidGlass
+    ? getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)
+    : bgClass;
+
   return (
     <Card
-      className={`z-0 flex flex-col lg:flex-row w-full max-w-6xl p-6 sm:p-8 lg:p-10 gap-8 lg:gap-10 ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)}`}
+      className={`z-0 flex flex-col lg:flex-row w-full max-w-6xl p-6 sm:p-8 lg:p-10 gap-8 lg:gap-10 ${cardClasses}`}
     >
       {/* Profile Section */}
       <div className="flex-1 flex items-center justify-center flex-col gap-6">
@@ -81,7 +92,7 @@ export function ProfilePageContent() {
         </div>
         <div>
           <Label
-            className={`font-semibold text-lg text-white ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+            className={`font-semibold text-lg ${textColor} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
           >
             {username}
           </Label>
