@@ -63,7 +63,11 @@ export function ItemFilters({
     <div className="flex flex-col gap-1.5 items-center">
       <span
         className={`text-xs font-medium text-white/50 uppercase tracking-wider ${
-          glass ? "[text-shadow:0_1px_2px_rgba(163,163,163,0.2)]" : ""
+          glass
+            ? settings.useDarkMode
+              ? "[text-shadow:0_1px_2px_rgba(32,32,32,0.2)]"
+              : "[text-shadow:0_1px_2px_rgba(163,163,163,0.2)]"
+            : ""
         }`}
       >
         {label}
@@ -72,14 +76,20 @@ export function ItemFilters({
         ref={containerRef}
         className={`relative flex flex-row flex-wrap gap-1 p-1 rounded-xl ${
           glass
-            ? "bg-white/15 backdrop-blur-lg border border-white/20"
+            ? settings.useDarkMode
+              ? "bg-black/15 backdrop-blur-lg border border-black/20"
+              : "bg-white/15 backdrop-blur-lg border border-white/20"
             : "bg-gray-700/60 border border-gray-600"
         }`}
         onMouseLeave={handleMouseLeave}
       >
         {glass && (
           <div
-            className="absolute bg-white/25 rounded-lg shadow-sm shadow-white/20 transition-all duration-300 ease-out pointer-events-none"
+            className={`absolute rounded-lg shadow-sm transition-all duration-300 ease-out pointer-events-none ${
+              settings.useDarkMode
+                ? "bg-black/25 shadow-black/20"
+                : "bg-white/25 shadow-white/20"
+            }`}
             style={{
               left: `${highlightPos.left}px`,
               width: `${highlightPos.width}px`,

@@ -6,7 +6,11 @@ import { Label } from "@/components/ui/label";
 import { useSettings } from "../settings/settingsLogic/SettingsContext";
 import { UpdateSheet } from "./UpdateSheet";
 import { ExternalLink } from "lucide-react";
-import { cn } from "@/lib/utils";
+import {
+  cn,
+  getLiquidGlassClasses,
+  getLiquidGlassTextShadow,
+} from "@/lib/utils";
 import { useProfiles } from "@/components/forms/addNewProfile/useProfiles";
 
 export function ProfilePageContent() {
@@ -37,7 +41,7 @@ export function ProfilePageContent() {
 
   return (
     <Card
-      className={`z-0 flex flex-col lg:flex-row w-full max-w-6xl p-6 sm:p-8 lg:p-10 gap-8 lg:gap-10 ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20" : "bg-gray-600 border-2 border-green-400"}`}
+      className={`z-0 flex flex-col lg:flex-row w-full max-w-6xl p-6 sm:p-8 lg:p-10 gap-8 lg:gap-10 ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)}`}
     >
       {/* Profile Section */}
       <div className="flex-1 flex items-center justify-center flex-col gap-6">
@@ -52,7 +56,7 @@ export function ProfilePageContent() {
           <div onClick={() => pfpinputRef.current?.click()}>
             <Avatar
               size="lg"
-              className={`text-white cursor-pointer ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 border-2 shadow-sm shadow-white/20 [text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : "border-green-500 border-2 bg-amber-200"} `}
+              className={`text-white cursor-pointer ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
             >
               <AvatarImage
                 src={
@@ -77,7 +81,7 @@ export function ProfilePageContent() {
         </div>
         <div>
           <Label
-            className={`font-semibold text-lg text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
+            className={`font-semibold text-lg text-white ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
           >
             {username}
           </Label>

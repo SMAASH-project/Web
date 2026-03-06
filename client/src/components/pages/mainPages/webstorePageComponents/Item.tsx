@@ -41,7 +41,9 @@ export function Item({ item, onDelete, onUnlock }: ItemProps) {
     <Card
       className={`group relative overflow-hidden p-0 transition-all duration-200 h-full ${
         glass
-          ? "bg-white/10 backdrop-blur-lg border border-white/15 shadow-lg shadow-black/5 hover:bg-white/15 hover:border-white/25 hover:shadow-xl hover:shadow-black/10"
+          ? settings.useDarkMode
+            ? "bg-black/10 backdrop-blur-lg border border-black/15 shadow-lg shadow-black/20 hover:bg-black/15 hover:border-black/25 hover:shadow-xl hover:shadow-black/30"
+            : "bg-white/10 backdrop-blur-lg border border-white/15 shadow-lg shadow-black/5 hover:bg-white/15 hover:border-white/25 hover:shadow-xl hover:shadow-black/10"
           : "bg-gray-800/80 border border-gray-700 hover:border-gray-600 hover:bg-gray-800"
       } ${item.owned ? "ring-1 ring-green-500/30" : ""}`}
     >
@@ -67,7 +69,11 @@ export function Item({ item, onDelete, onUnlock }: ItemProps) {
         >
           <h3
             className={`text-sm font-semibold text-white leading-tight ${
-              glass ? "[text-shadow:0_1px_4px_rgba(163,163,163,0.4)]" : ""
+              glass
+                ? settings.useDarkMode
+                  ? "[text-shadow:0_1px_4px_rgba(32,32,32,0.4)]"
+                  : "[text-shadow:0_1px_4px_rgba(163,163,163,0.4)]"
+                : ""
             }`}
           >
             {item.name}
@@ -87,14 +93,26 @@ export function Item({ item, onDelete, onUnlock }: ItemProps) {
         {/* Description */}
         <p
           className={`text-xs text-white/50 leading-relaxed line-clamp-2 min-h-10 ${
-            glass ? "[text-shadow:0_1px_2px_rgba(163,163,163,0.2)]" : ""
+            glass
+              ? settings.useDarkMode
+                ? "[text-shadow:0_1px_2px_rgba(32,32,32,0.2)]"
+                : "[text-shadow:0_1px_2px_rgba(163,163,163,0.2)]"
+              : ""
           }`}
         >
           {item.description}
         </p>
 
         {/* Footer: kind / combat type + price */}
-        <div className="flex items-center justify-between mt-auto pt-2 border-t border-white/10">
+        <div
+          className={`flex items-center justify-between mt-auto pt-2 border-t ${
+            glass
+              ? settings.useDarkMode
+                ? "border-black/10"
+                : "border-white/10"
+              : "border-white/10"
+          }`}
+        >
           <div className="flex items-center gap-1.5">
             {item.kind === "Character" ? (
               item.combatType === "Melee" ? (
@@ -118,7 +136,9 @@ export function Item({ item, onDelete, onUnlock }: ItemProps) {
             <span
               className={`text-sm font-bold ${
                 glass
-                  ? "text-white [text-shadow:0_1px_3px_rgba(163,163,163,0.3)]"
+                  ? settings.useDarkMode
+                    ? "text-white [text-shadow:0_1px_3px_rgba(32,32,32,0.3)]"
+                    : "text-white [text-shadow:0_1px_3px_rgba(163,163,163,0.3)]"
                   : "text-green-400"
               }`}
             >

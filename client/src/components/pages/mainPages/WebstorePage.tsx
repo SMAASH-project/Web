@@ -66,14 +66,22 @@ export function WebstorePage() {
             <div className="flex flex-col gap-1">
               <h1
                 className={`text-2xl font-bold text-white tracking-tight ${
-                  glass ? "[text-shadow:0_2px_8px_rgba(163,163,163,0.5)]" : ""
+                  glass
+                    ? settings.useDarkMode
+                      ? "[text-shadow:0_2px_8px_rgba(32,32,32,0.5)]"
+                      : "[text-shadow:0_2px_8px_rgba(163,163,163,0.5)]"
+                    : ""
                 }`}
               >
                 Webstore
               </h1>
               <p
                 className={`text-sm text-white/60 ${
-                  glass ? "[text-shadow:0_1px_3px_rgba(163,163,163,0.3)]" : ""
+                  glass
+                    ? settings.useDarkMode
+                      ? "[text-shadow:0_1px_3px_rgba(32,32,32,0.3)]"
+                      : "[text-shadow:0_1px_3px_rgba(163,163,163,0.3)]"
+                    : ""
                 }`}
               >
                 Unlock characters and skins
@@ -86,7 +94,9 @@ export function WebstorePage() {
               <div
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${
                   glass
-                    ? "bg-white/10 border-white/15 backdrop-blur-lg"
+                    ? settings.useDarkMode
+                      ? "bg-black/10 border-black/15 backdrop-blur-lg"
+                      : "bg-white/10 border-white/15 backdrop-blur-lg"
                     : "bg-gray-800/80 border-gray-700"
                 }`}
               >
@@ -94,7 +104,9 @@ export function WebstorePage() {
                 <span
                   className={`text-sm font-bold ${
                     glass
-                      ? "text-white [text-shadow:0_1px_3px_rgba(163,163,163,0.3)]"
+                      ? settings.useDarkMode
+                        ? "text-white [text-shadow:0_1px_3px_rgba(32,32,32,0.3)]"
+                        : "text-white [text-shadow:0_1px_3px_rgba(163,163,163,0.3)]"
                       : "text-amber-400"
                   }`}
                 >
@@ -150,7 +162,11 @@ export function WebstorePage() {
               <ShoppingBag className="w-12 h-12 text-white/40" />
               <p
                 className={`text-white/60 text-base ${
-                  glass ? "[text-shadow:0_1px_3px_rgba(163,163,163,0.3)]" : ""
+                  glass
+                    ? settings.useDarkMode
+                      ? "[text-shadow:0_1px_3px_rgba(32,32,32,0.3)]"
+                      : "[text-shadow:0_1px_3px_rgba(163,163,163,0.3)]"
+                    : ""
                 }`}
               >
                 No items found.

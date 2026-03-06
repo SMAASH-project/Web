@@ -31,7 +31,9 @@ export function SearchItem({
         onChange={(e) => handleChange((e.target as HTMLInputElement).value)}
         className={`pl-9 pr-9 h-10 text-white placeholder:text-white/40 border ${
           glass
-            ? "bg-white/10 backdrop-blur-lg border-white/20 focus:bg-white/15 focus:border-white/40"
+            ? settings.useDarkMode
+              ? "bg-black/10 backdrop-blur-lg border-black/20 focus:bg-black/15 focus:border-black/40"
+              : "bg-white/10 backdrop-blur-lg border-white/20 focus:bg-white/15 focus:border-white/40"
             : "bg-gray-700/60 border-gray-600 focus:bg-gray-700 focus:border-green-500"
         } rounded-lg transition-all`}
       />

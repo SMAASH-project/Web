@@ -8,6 +8,7 @@ import { Link, useNavigate } from "react-router";
 import { useMediaQuery } from "./navLogic/useMediaQuery";
 import { apiLogout } from "@/hooks/useApi";
 import { AuthContext } from "@/context/AuthContext";
+import { getLiquidGlassClasses, getLiquidGlassTextShadow } from "@/lib/utils";
 
 const Navbar = () => {
   const { settings } = useSettings();
@@ -35,22 +36,21 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`absolute top-0 left-0 right-0 flex justify-between items-center p-4 max-w-full w-full border-b-2 z-50 ${
-        settings.useLiquidGlass
-          ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20"
-          : "bg-linear-to-b from-gray-700 to-gray-500 [border-image:linear-gradient(to_right,var(--color-green-400),var(--color-green-600))_1]"
-      }`}
+      className={`absolute top-0 left-0 right-0 flex justify-between items-center p-4 max-w-full w-full border-b-2 z-50 ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode) || "bg-linear-to-b from-gray-700 to-gray-500 [border-image:linear-gradient(to_right,var(--color-green-400),var(--color-green-600))_1]"}`}
     >
       {isDesktop ? (
         <>
           {/* Desktop layout — left/right have equal min-width so center stays centered */}
           <div className="flex-1 min-w-0"></div>
           <div className="shrink-0">
-            <NavMenu useLiquidGlass={settings.useLiquidGlass} />
+            <NavMenu
+              useLiquidGlass={settings.useLiquidGlass}
+              useDarkMode={settings.useDarkMode}
+            />
           </div>
           <div className="flex-1 min-w-0 flex justify-end items-center gap-2 lg:gap-4 overflow-hidden">
             <span
-              className={`text-white whitespace-nowrap truncate ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
+              className={`text-white whitespace-nowrap truncate ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
             >
               <span className="hidden xl:inline">Logged in as </span>
               <Link to="/app/profile/" className="hidden lg:inline">
@@ -67,11 +67,12 @@ const Navbar = () => {
           {/* Mobile layout */}
           <MobileNavMenu
             useLiquidGlass={settings.useLiquidGlass}
+            useDarkMode={settings.useDarkMode}
             username={username}
             onLogout={handleLogout}
           />
           <span
-            className={`text-white text-sm truncate max-w-[50vw] ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
+            className={`text-white text-sm truncate max-w-[50vw] ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
           >
             <Link to="/app/profile/">{username}</Link>
           </span>

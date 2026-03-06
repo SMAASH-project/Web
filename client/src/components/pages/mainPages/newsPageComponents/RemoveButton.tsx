@@ -11,6 +11,12 @@ import {
 } from "@/components/ui/dialog";
 import { Trash2 } from "lucide-react";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
+import {
+  getLiquidGlassClasses,
+  getLiquidGlassDialogClasses,
+  getLiquidGlassDialogFooterClasses,
+  getLiquidGlassTextShadow,
+} from "@/lib/utils";
 
 export function RemoveButton({ onConfirm }: { onConfirm?: () => void }) {
   const { settings } = useSettings();
@@ -19,27 +25,49 @@ export function RemoveButton({ onConfirm }: { onConfirm?: () => void }) {
     <Dialog>
       <DialogTrigger asChild>
         <Button
-          className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30" : ""} cursor-pointer`}
+          className={`text-white ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} rounded-lg cursor-pointer`}
         >
           <Trash2 />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent
+        className={`${getLiquidGlassDialogClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+      >
         <DialogHeader>
-          <DialogTitle>Confirm Action</DialogTitle>
-          <DialogDescription>
+          <DialogTitle
+            className={getLiquidGlassTextShadow(
+              settings.useLiquidGlass,
+              settings.useDarkMode,
+            )}
+          >
+            Confirm Action
+          </DialogTitle>
+          <DialogDescription
+            className={getLiquidGlassTextShadow(
+              settings.useLiquidGlass,
+              settings.useDarkMode,
+            )}
+          >
             Are you sure you want to perform this action?
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter>
+        <DialogFooter
+          className={getLiquidGlassDialogFooterClasses(
+            settings.useLiquidGlass,
+            settings.useDarkMode,
+          )}
+        >
           <DialogClose asChild>
-            <Button variant="outline" className="cursor-pointer">
+            <Button
+              variant="outline"
+              className={`cursor-pointer ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode, "input")} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+            >
               Cancel
             </Button>
           </DialogClose>
           <DialogClose asChild>
             <Button
-              className="cursor-pointer"
+              className={`cursor-pointer ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
               variant="destructive"
               onClick={() => {
                 onConfirm?.();

@@ -19,6 +19,13 @@ import { DateTime } from "luxon";
 import type { Release } from "@/types/PageTypes";
 import { OsTypes } from "@/types/OsTypes";
 import { useState, useMemo } from "react";
+import {
+  getLiquidGlassClasses,
+  getLiquidGlassControlClasses,
+  getLiquidGlassDialogClasses,
+  getLiquidGlassDialogFooterClasses,
+  getLiquidGlassTextShadow,
+} from "@/lib/utils";
 
 type ReleaseType = "Major" | "Minor" | "Patch";
 
@@ -76,6 +83,10 @@ export function AddRelease({
     () => computeNextVersion(allReleases, releaseType),
     [allReleases, releaseType],
   );
+  const controlClasses = getLiquidGlassControlClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
 
   const effectiveVersion = autoName ? autoVersion : version;
 
@@ -126,7 +137,9 @@ export function AddRelease({
           size="sm"
           className={`cursor-pointer gap-2 ${
             glass
-              ? "bg-white/20 backdrop-blur-lg border border-white/25 text-white hover:bg-white/30"
+              ? settings.useDarkMode
+                ? "bg-black/20 backdrop-blur-lg border border-black/25 text-white hover:bg-black/30"
+                : "bg-white/20 backdrop-blur-lg border border-white/25 text-white hover:bg-white/30"
               : "bg-green-600 hover:bg-green-700 text-white"
           }`}
         >
@@ -135,11 +148,19 @@ export function AddRelease({
         </Button>
       </DialogTrigger>
       <DialogContent
+        className={`${getLiquidGlassDialogClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Upload New Release</DialogTitle>
+          <DialogTitle
+            className={getLiquidGlassTextShadow(
+              settings.useLiquidGlass,
+              settings.useDarkMode,
+            )}
+          >
+            Upload New Release
+          </DialogTitle>
         </DialogHeader>
         <FieldGroup>
           <Field>
@@ -162,8 +183,12 @@ export function AddRelease({
                       key={type}
                       className={`flex items-center gap-2.5 p-3 rounded-lg border cursor-pointer transition-all duration-150 ${
                         isSelected
-                          ? "bg-muted/60 border-border"
-                          : "border-border/50 hover:bg-muted/30"
+                          ? settings.useDarkMode
+                            ? "bg-black/35 border-black/35"
+                            : "bg-white/35 border-white/35"
+                          : settings.useDarkMode
+                            ? "border-black/35 hover:bg-black/20"
+                            : "border-white/35 hover:bg-white/20"
                       }`}
                       style={{
                         borderLeftColor: color,
@@ -195,9 +220,10 @@ export function AddRelease({
                         )}
                       </span>
                       <span
-                        className={`text-sm font-medium ${
-                          isSelected ? "text-black" : "text-black"
-                        }`}
+                        className={`text-sm font-medium text-white ${getLiquidGlassTextShadow(
+                          settings.useLiquidGlass,
+                          settings.useDarkMode,
+                        )}`}
                       >
                         {type}
                       </span>
@@ -223,7 +249,7 @@ export function AddRelease({
               value={effectiveVersion}
               onChange={(e) => setVersion((e.target as HTMLInputElement).value)}
               disabled={autoName}
-              className={autoName ? "opacity-60" : ""}
+              className={`${controlClasses} ${autoName ? "opacity-60" : ""}`}
             />
             {autoName && (
               <p className="text-xs text-muted-foreground mt-1">
@@ -234,7 +260,11 @@ export function AddRelease({
           </Field>
           <Field>
             <Label>Release File</Label>
-            <Input type="file" onChange={handleFileChange} />
+            <Input
+              type="file"
+              onChange={handleFileChange}
+              className={controlClasses}
+            />
             {fileName && (
               <p className="text-xs text-muted-foreground mt-1">
                 Selected: {fileName}
@@ -259,10 +289,15 @@ export function AddRelease({
             </div>
           </Field>
         </FieldGroup>
-        <DialogFooter>
+        <DialogFooter
+          className={getLiquidGlassDialogFooterClasses(
+            settings.useLiquidGlass,
+            settings.useDarkMode,
+          )}
+        >
           <Button
             variant="outline"
-            className="cursor-pointer"
+            className={`cursor-pointer ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode, "input")} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
             onClick={handleSave}
             disabled={!effectiveVersion.trim() || supports.length === 0}
           >
@@ -271,7 +306,7 @@ export function AddRelease({
           <DialogClose asChild>
             <Button
               variant="outline"
-              className="cursor-pointer"
+              className={`cursor-pointer ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode, "input")} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
               onClick={resetForm}
             >
               Cancel

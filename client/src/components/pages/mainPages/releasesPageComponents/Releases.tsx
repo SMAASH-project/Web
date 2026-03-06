@@ -51,7 +51,11 @@ export function Releases({
           <Package className="w-12 h-12 text-white/40" />
           <p
             className={`text-white/60 text-base ${
-              glass ? "[text-shadow:0_1px_3px_rgba(163,163,163,0.3)]" : ""
+              glass
+                ? settings.useDarkMode
+                  ? "[text-shadow:0_1px_3px_rgba(32,32,32,0.3)]"
+                  : "[text-shadow:0_1px_3px_rgba(163,163,163,0.3)]"
+                : ""
             }`}
           >
             No releases found for {selectedOs}.
@@ -66,7 +70,9 @@ export function Releases({
             <Card
               className={`group relative overflow-hidden p-0 transition-all duration-200 ${
                 glass
-                  ? "bg-white/10 backdrop-blur-lg border border-white/15 shadow-lg shadow-black/5 hover:bg-white/15 hover:border-white/25"
+                  ? settings.useDarkMode
+                    ? "bg-black/10 backdrop-blur-lg border border-black/15 shadow-lg shadow-black/20 hover:bg-black/15 hover:border-black/25"
+                    : "bg-white/10 backdrop-blur-lg border border-white/15 shadow-lg shadow-black/5 hover:bg-white/15 hover:border-white/25"
                   : "bg-gray-800/80 border border-gray-700 hover:border-gray-600 hover:bg-gray-800"
               }`}
             >
@@ -81,7 +87,11 @@ export function Releases({
                 <div className="flex items-center gap-4 min-w-0">
                   <div
                     className={`flex items-center justify-center w-10 h-10 rounded-lg shrink-0 ${
-                      glass ? "bg-white/10" : "bg-gray-700/60"
+                      glass
+                        ? settings.useDarkMode
+                          ? "bg-black/10"
+                          : "bg-white/10"
+                        : "bg-gray-700/60"
                     }`}
                   >
                     <Package className="w-5 h-5 text-white/70" />
@@ -91,7 +101,9 @@ export function Releases({
                       <span
                         className={`text-base font-semibold text-white tracking-tight ${
                           glass
-                            ? "[text-shadow:0_1px_4px_rgba(163,163,163,0.4)]"
+                            ? settings.useDarkMode
+                              ? "[text-shadow:0_1px_4px_rgba(32,32,32,0.4)]"
+                              : "[text-shadow:0_1px_4px_rgba(163,163,163,0.4)]"
                             : ""
                         }`}
                       >
@@ -121,7 +133,9 @@ export function Releases({
                       <span
                         className={`text-xs text-white/40 ${
                           glass
-                            ? "[text-shadow:0_1px_2px_rgba(163,163,163,0.2)]"
+                            ? settings.useDarkMode
+                              ? "[text-shadow:0_1px_2px_rgba(32,32,32,0.2)]"
+                              : "[text-shadow:0_1px_2px_rgba(163,163,163,0.2)]"
                             : ""
                         }`}
                       >

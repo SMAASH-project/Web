@@ -15,6 +15,13 @@ import { Label } from "@/components/ui/label";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
 import { Search as SearchIcon } from "lucide-react";
 import { useState } from "react";
+import {
+  getLiquidGlassClasses,
+  getLiquidGlassControlClasses,
+  getLiquidGlassDialogClasses,
+  getLiquidGlassDialogFooterClasses,
+  getLiquidGlassTextShadow,
+} from "@/lib/utils";
 
 export function Search({ onSearch }: { onSearch: (query: string) => void }) {
   const { settings } = useSettings();
@@ -28,15 +35,31 @@ export function Search({ onSearch }: { onSearch: (query: string) => void }) {
     <Dialog>
       <DialogTrigger asChild>
         <Button
-          className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30" : ""} cursor-pointer`}
+          className={`text-white ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} rounded-lg cursor-pointer`}
         >
           <SearchIcon />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent
+        className={`${getLiquidGlassDialogClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+      >
         <DialogHeader>
-          <DialogTitle>Search News</DialogTitle>
-          <DialogDescription>Type to search posts by title</DialogDescription>
+          <DialogTitle
+            className={getLiquidGlassTextShadow(
+              settings.useLiquidGlass,
+              settings.useDarkMode,
+            )}
+          >
+            Search News
+          </DialogTitle>
+          <DialogDescription
+            className={getLiquidGlassTextShadow(
+              settings.useLiquidGlass,
+              settings.useDarkMode,
+            )}
+          >
+            Type to search posts by title
+          </DialogDescription>
         </DialogHeader>
         <FieldGroup>
           <Field>
@@ -45,19 +68,31 @@ export function Search({ onSearch }: { onSearch: (query: string) => void }) {
               placeholder="Search posts..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              className={getLiquidGlassControlClasses(
+                settings.useLiquidGlass,
+                settings.useDarkMode,
+              )}
             />
           </Field>
         </FieldGroup>
-        <DialogFooter>
+        <DialogFooter
+          className={getLiquidGlassDialogFooterClasses(
+            settings.useLiquidGlass,
+            settings.useDarkMode,
+          )}
+        >
           <Button
             variant="outline"
-            className="cursor-pointer"
+            className={`cursor-pointer ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode, "input")} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
             onClick={handleSearch}
           >
             Search
           </Button>
           <DialogClose asChild>
-            <Button variant="outline" className="cursor-pointer">
+            <Button
+              variant="outline"
+              className={`cursor-pointer ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode, "input")} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+            >
               Close
             </Button>
           </DialogClose>

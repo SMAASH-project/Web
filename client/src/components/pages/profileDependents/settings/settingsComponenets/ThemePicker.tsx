@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useSettings } from "../settingsLogic/SettingsContext";
 import { ColorPicker } from "@/components/ui/color-picker";
+import { getLiquidGlassClasses, getLiquidGlassTextShadow } from "@/lib/utils";
 
 export const ThemePicker = () => {
   const context = useContext(ColorContext);
@@ -47,7 +48,7 @@ export const ThemePicker = () => {
   return (
     <div className="w-full flex items-center justify-center gap-2 flex-wrap">
       <Label
-        className={`text-white p-1.5 ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
+        className={`text-white p-1.5 ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
       >
         Custom Theme
       </Label>
@@ -73,11 +74,13 @@ export const ThemePicker = () => {
         value={displayColorRight}
       />
       {(() => {
-        const liquidBtn = settings.useLiquidGlass
-          ? settings.useDarkMode
-            ? "bg-black/30 backdrop-blur-lg border-black/30 shadow-sm shadow-black/30 [text-shadow:0_2px_4px_rgba(32,32,32,0.8)]"
-            : "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20 [text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-          : "";
+        const liquidBtn =
+          getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode) +
+          " " +
+          getLiquidGlassTextShadow(
+            settings.useLiquidGlass,
+            settings.useDarkMode,
+          );
         return (
           <Button
             className={`text-white cursor-pointer ${liquidBtn}`}

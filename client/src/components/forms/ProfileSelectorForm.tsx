@@ -1,4 +1,8 @@
-import { cn } from "@/lib/utils";
+import {
+  cn,
+  getLiquidGlassClasses,
+  getLiquidGlassTextShadow,
+} from "@/lib/utils";
 import { useSettings } from "../pages/profileDependents/settings/settingsLogic/SettingsContext";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Label } from "../ui/label";
@@ -36,7 +40,7 @@ export function ProfileSelectorForm() {
     <div className="flex-1 flex items-center justify-center flex-col gap-5">
       <div className="mb-4 z-1">
         <Label
-          className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
+          className={`text-white ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
         >
           Select a Profile
         </Label>
@@ -57,7 +61,7 @@ export function ProfileSelectorForm() {
                   <Avatar
                     size="lg"
                     onClick={() => handleProfileClick(p.name)}
-                    className={`text-white cursor-pointer ${settings.useLiquidGlass ? `bg-white/30 backdrop-blur-lg border-2 shadow-sm shadow-white/20[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] ${isManaging ? "border-red-400" : "border-white/30"}` : `${isManaging ? "border-red-500" : "border-green-500"} border-2 bg-amber-200`} `}
+                    className={`text-white cursor-pointer ${settings.useLiquidGlass ? `${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} border-2 ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} ${isManaging ? "border-red-400" : settings.useDarkMode ? "border-black/40" : "border-white/30"}` : `${isManaging ? "border-red-500" : "border-green-500"} border-2 bg-amber-200`}`}
                   >
                     <AvatarImage src={p.avatar} alt={p.name} />
                     <span
@@ -89,7 +93,7 @@ export function ProfileSelectorForm() {
                   </Avatar>
 
                   <span
-                    className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
+                    className={`text-white ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
                   >
                     {p.name}
                   </span>
@@ -110,7 +114,7 @@ export function ProfileSelectorForm() {
                   </button>
 
                   <span
-                    className={`text-white text-sm ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
+                    className={`text-white text-sm ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
                   >
                     Add New
                   </span>
@@ -123,7 +127,7 @@ export function ProfileSelectorForm() {
           <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
             <Button
               onClick={() => setIsManaging((prev) => !prev)}
-              className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30" : ""} cursor-pointer`}
+              className={`text-white ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} rounded-lg cursor-pointer`}
             >
               {isManaging ? "Done" : "Manage Profiles"}
             </Button>

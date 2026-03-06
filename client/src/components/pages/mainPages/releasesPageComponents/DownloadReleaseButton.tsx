@@ -11,7 +11,11 @@ export function DownloadReleaseButton({ version }: { version: string }) {
       size="sm"
       variant="ghost"
       className={`h-8 w-8 p-0 cursor-pointer text-white/60 hover:text-white ${
-        glass ? "hover:bg-white/15" : "hover:bg-gray-600"
+        glass
+          ? settings.useDarkMode
+            ? "hover:bg-black/15"
+            : "hover:bg-white/15"
+          : "hover:bg-gray-600"
       }`}
       onClick={() => {
         // TODO: Replace with actual download logic

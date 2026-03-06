@@ -1,4 +1,8 @@
-import { formatDateTime } from "@/lib/utils";
+import {
+  formatDateTime,
+  getLiquidGlassClasses,
+  getLiquidGlassTextShadow,
+} from "@/lib/utils";
 import Navbar from "../../nav/Navbar";
 import { Card } from "@/components/ui/card";
 import { useSettings } from "../profileDependents/settings/settingsLogic/SettingsContext";
@@ -39,11 +43,7 @@ export function NewsPage() {
         <span className="flex flex-row w-full justify-between">
           <ButtonGroup
             orientation="horizontal"
-            className={`text-white ${
-              settings.useLiquidGlass
-                ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30"
-                : ""
-            }`}
+            className={`text-white ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} rounded-lg`}
           >
             {IsAdmin ? (
               <>
@@ -56,11 +56,7 @@ export function NewsPage() {
           </ButtonGroup>
           <span className="flex flex-row items-center gap-2">
             <Label
-              className={`text-white text-lg ${
-                settings.useLiquidGlass
-                  ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                  : ""
-              } text-center`}
+              className={`text-white text-lg ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} text-center`}
             >
               Latest News
             </Label>
@@ -74,21 +70,13 @@ export function NewsPage() {
           {visiblePosts.map((post: NewsPost, index: number) => {
             const cardContent = (
               <Card
-                className={`z-0 flex flex-row p-10 mb-5 max-w-full ${
-                  settings.useLiquidGlass
-                    ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20"
-                    : "bg-gray-600 border-2 border-green-400"
-                }`}
+                className={`z-0 flex flex-row p-10 mb-5 max-w-full ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)}`}
               >
                 <li className="flex flex-col gap-2 w-full">
                   <span className="flex flex-row w-full items-start justify-between gap-4">
                     <div className="flex flex-col gap-2 flex-1">
                       <Label
-                        className={`text-white text-lg ${
-                          settings.useLiquidGlass
-                            ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                            : ""
-                        } text-left`}
+                        className={`text-white text-lg ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} text-left`}
                       >
                         {post.title}
                       </Label>
@@ -96,11 +84,7 @@ export function NewsPage() {
                     </div>
                     <div className="flex flex-col items-end gap-2 shrink-0">
                       <Label
-                        className={`text-white text-lg ${
-                          settings.useLiquidGlass
-                            ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                            : ""
-                        } italic text-right`}
+                        className={`text-white text-lg ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} italic text-right`}
                       >
                         {formatDateTime(post.createdAt)}
                       </Label>
@@ -127,11 +111,7 @@ export function NewsPage() {
                         />
                       )}
                       <div
-                        className={`text-white text-sm ${
-                          settings.useLiquidGlass
-                            ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                            : ""
-                        } text-justify prose prose-sm prose-invert max-w-none`}
+                        className={`text-white text-sm ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} text-justify prose prose-sm prose-invert max-w-none`}
                       >
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {post.content}
@@ -141,11 +121,7 @@ export function NewsPage() {
                   ) : (
                     <div className="flex flex-row gap-4 w-full">
                       <div
-                        className={`text-white text-sm ${
-                          settings.useLiquidGlass
-                            ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                            : ""
-                        } text-justify prose prose-sm prose-invert max-w-none`}
+                        className={`text-white text-sm ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} text-justify prose prose-sm prose-invert max-w-none`}
                         style={{ width: `${100 - (post.imageSize ?? 0)}%` }}
                       >
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>

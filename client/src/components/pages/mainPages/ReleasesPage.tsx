@@ -37,14 +37,22 @@ export function ReleasesPage() {
             <div className="flex flex-col gap-1">
               <h1
                 className={`text-2xl font-bold text-white tracking-tight ${
-                  glass ? "[text-shadow:0_2px_8px_rgba(163,163,163,0.5)]" : ""
+                  glass
+                    ? settings.useDarkMode
+                      ? "[text-shadow:0_2px_8px_rgba(32,32,32,0.5)]"
+                      : "[text-shadow:0_2px_8px_rgba(163,163,163,0.5)]"
+                    : ""
                 }`}
               >
                 Releases
               </h1>
               <p
                 className={`text-sm text-white/60 ${
-                  glass ? "[text-shadow:0_1px_3px_rgba(163,163,163,0.3)]" : ""
+                  glass
+                    ? settings.useDarkMode
+                      ? "[text-shadow:0_1px_3px_rgba(32,32,32,0.3)]"
+                      : "[text-shadow:0_1px_3px_rgba(163,163,163,0.3)]"
+                    : ""
                 }`}
               >
                 Browse and manage app releases

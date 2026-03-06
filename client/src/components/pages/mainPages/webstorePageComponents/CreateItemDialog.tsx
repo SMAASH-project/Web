@@ -15,6 +15,13 @@ import { Label } from "@/components/ui/label";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
 import { Plus } from "lucide-react";
+import {
+  getLiquidGlassClasses,
+  getLiquidGlassControlClasses,
+  getLiquidGlassDialogClasses,
+  getLiquidGlassDialogFooterClasses,
+  getLiquidGlassTextShadow,
+} from "@/lib/utils";
 
 const RARITIES = ["Common", "Uncommon", "Rare", "Epic", "Legendary"] as const;
 const KINDS = ["Character", "Skin"] as const;
@@ -64,6 +71,10 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
 
   const selectCls =
     "w-full rounded-md border border-input bg-transparent dark:bg-input/30 px-3 py-2 text-base md:text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]";
+  const controlClasses = getLiquidGlassControlClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -72,7 +83,9 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
           size="sm"
           className={`cursor-pointer gap-2 ${
             glass
-              ? "bg-white/20 text-white hover:bg-white/30 [text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
+              ? settings.useDarkMode
+                ? "bg-black/20 text-white hover:bg-black/30 [text-shadow:0_2px_4px_rgba(32,32,32,0.8)]"
+                : "bg-white/20 text-white hover:bg-white/30 [text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
               : "bg-green-600 text-white hover:bg-green-500"
           }`}
         >
@@ -82,12 +95,27 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
       </DialogTrigger>
 
       <DialogContent
+        className={`${getLiquidGlassDialogClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Create New Item</DialogTitle>
-          <DialogDescription>Add a new item to the webstore.</DialogDescription>
+          <DialogTitle
+            className={getLiquidGlassTextShadow(
+              settings.useLiquidGlass,
+              settings.useDarkMode,
+            )}
+          >
+            Create New Item
+          </DialogTitle>
+          <DialogDescription
+            className={getLiquidGlassTextShadow(
+              settings.useLiquidGlass,
+              settings.useDarkMode,
+            )}
+          >
+            Add a new item to the webstore.
+          </DialogDescription>
         </DialogHeader>
 
         <FieldGroup>
@@ -97,6 +125,7 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
               value={name}
               onChange={(e) => setName((e.target as HTMLInputElement).value)}
               placeholder="Item name"
+              className={controlClasses}
             />
           </Field>
 
@@ -108,7 +137,7 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
                 onChange={(e) =>
                   setKind(e.target.value as (typeof KINDS)[number])
                 }
-                className={selectCls}
+                className={`${selectCls} ${controlClasses}`}
               >
                 {KINDS.map((k) => (
                   <option key={k} value={k}>
@@ -124,7 +153,7 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
                 onChange={(e) =>
                   setRarity(e.target.value as (typeof RARITIES)[number])
                 }
-                className={selectCls}
+                className={`${selectCls} ${controlClasses}`}
               >
                 {RARITIES.map((r) => (
                   <option key={r} value={r}>
@@ -143,7 +172,7 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
                 onChange={(e) =>
                   setCombatType(e.target.value as (typeof COMBAT_TYPES)[number])
                 }
-                className={selectCls}
+                className={`${selectCls} ${controlClasses}`}
               >
                 {COMBAT_TYPES.map((ct) => (
                   <option key={ct} value={ct}>
@@ -162,6 +191,7 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
                 setDescription((e.target as HTMLInputElement).value)
               }
               placeholder="Item description"
+              className={controlClasses}
             />
           </Field>
 
@@ -173,20 +203,29 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
               value={price}
               onChange={(e) => setPrice((e.target as HTMLInputElement).value)}
               placeholder="0"
+              className={controlClasses}
             />
           </Field>
         </FieldGroup>
 
-        <DialogFooter>
+        <DialogFooter
+          className={getLiquidGlassDialogFooterClasses(
+            settings.useLiquidGlass,
+            settings.useDarkMode,
+          )}
+        >
           <DialogClose asChild>
-            <Button variant="outline" className="cursor-pointer">
+            <Button
+              variant="outline"
+              className={`cursor-pointer ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode, "input")} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+            >
               Cancel
             </Button>
           </DialogClose>
           <Button
             onClick={handleSubmit}
             disabled={!name.trim() || !description.trim() || !price}
-            className="cursor-pointer"
+            className={`cursor-pointer ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
           >
             Create Item
           </Button>

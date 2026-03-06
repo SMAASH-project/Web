@@ -1,5 +1,7 @@
 import { RadioGroup } from "@/components/ui/radio-group";
 import { CATEGORY_COLORS, type NewsPost } from "@/types/PageTypes";
+import { useSettings } from "../../../profileDependents/settings/settingsLogic/SettingsContext";
+import { getLiquidGlassTextShadow } from "@/lib/utils";
 
 interface CategorySelectorProps {
   value: NewsPost["category"];
@@ -17,6 +19,7 @@ export function CategorySelector({
   value,
   onValueChange,
 }: CategorySelectorProps) {
+  const { settings } = useSettings();
   return (
     <RadioGroup
       value={value}
@@ -31,8 +34,12 @@ export function CategorySelector({
               key={category}
               className={`flex items-center gap-2.5 p-3 rounded-lg border cursor-pointer transition-all duration-150 ${
                 isSelected
-                  ? "bg-muted/60 border-border"
-                  : "border-border/50 hover:bg-muted/30"
+                  ? settings.useDarkMode
+                    ? "bg-black/35 border-black/35"
+                    : "bg-white/35 border-white/35"
+                  : settings.useDarkMode
+                    ? "border-black/35 hover:bg-black/20"
+                    : "border-white/35 hover:bg-white/20"
               }`}
               style={{
                 borderLeftColor: color,
@@ -62,9 +69,10 @@ export function CategorySelector({
                 )}
               </span>
               <span
-                className={`text-sm font-medium ${
-                  isSelected ? "text-black" : "text-black"
-                }`}
+                className={`text-sm font-medium text-white ${getLiquidGlassTextShadow(
+                  settings.useLiquidGlass,
+                  settings.useDarkMode,
+                )}`}
               >
                 {category}
               </span>

@@ -2,12 +2,17 @@ import { Label } from "@radix-ui/react-dropdown-menu";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { navItems } from "./navLogic/navItems";
+import {
+  getLiquidGlassNavHighlight,
+  getLiquidGlassTextShadow,
+} from "@/lib/utils";
 
 interface NavMenuProps {
   useLiquidGlass: boolean;
+  useDarkMode?: boolean;
 }
 
-export function NavMenu({ useLiquidGlass }: NavMenuProps) {
+export function NavMenu({ useLiquidGlass, useDarkMode = false }: NavMenuProps) {
   const location = useLocation();
   const [highlightPos, setHighlightPos] = useState({ left: 0, width: 0 });
   const [isHovering, setIsHovering] = useState(false);
@@ -76,12 +81,12 @@ export function NavMenu({ useLiquidGlass }: NavMenuProps) {
   return (
     <ul
       ref={ulRef}
-      className={`nav-links list-none flex m-0 p-0 gap-2 lg:gap-6 xl:gap-10 relative whitespace-nowrap ${useLiquidGlass ? "rounded-lg bg-white/10" : ""}`}
+      className={`nav-links list-none flex m-0 p-0 gap-2 lg:gap-6 xl:gap-10 relative whitespace-nowrap ${useLiquidGlass ? (useDarkMode ? "rounded-lg bg-black/10" : "rounded-lg bg-white/10") : ""}`}
       onMouseLeave={handleMouseLeave}
     >
       {useLiquidGlass && isHovering && (
         <div
-          className="absolute bg-white/20 rounded-sm transition-all duration-300 ease-out pointer-events-none"
+          className={`absolute rounded-sm transition-all duration-300 ease-out pointer-events-none ${getLiquidGlassNavHighlight(useLiquidGlass, useDarkMode)}`}
           style={{
             left: `${highlightPos.left}px`,
             width: `${highlightPos.width}px`,
@@ -98,7 +103,7 @@ export function NavMenu({ useLiquidGlass }: NavMenuProps) {
           } ${
             !useLiquidGlass && item.path === location.pathname
               ? "text-green-600 font-bold"
-              : "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
+              : getLiquidGlassTextShadow(useLiquidGlass, useDarkMode)
           } transition-colors duration-300`}
           onMouseEnter={handleMouseEnter}
         >

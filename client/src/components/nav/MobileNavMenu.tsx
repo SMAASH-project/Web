@@ -12,31 +12,42 @@ import {
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { navItems } from "./navLogic/navItems";
+import {
+  getLiquidGlassClasses,
+  getLiquidGlassTextShadow,
+  getLiquidGlassNavHighlight,
+} from "@/lib/utils";
 
 interface MobileNavMenuProps {
   useLiquidGlass: boolean;
+  useDarkMode?: boolean;
   username: string;
   onLogout: () => Promise<void>;
 }
 
 export function MobileNavMenu({
   useLiquidGlass,
+  useDarkMode = false,
   username,
   onLogout,
 }: MobileNavMenuProps) {
   const location = useLocation();
   const [open, setOpen] = useState(false);
 
-  const glassClasses = useLiquidGlass
-    ? "bg-white/30 backdrop-blur-xl border-white/30 text-white [text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-    : "bg-linear-to-b from-gray-700 to-gray-500 text-white";
+  const glassClasses =
+    getLiquidGlassClasses(useLiquidGlass, useDarkMode) +
+    (useLiquidGlass
+      ? " text-white " + getLiquidGlassTextShadow(useLiquidGlass, useDarkMode)
+      : "");
 
-  const activeClass = useLiquidGlass
-    ? "bg-white/20 rounded-sm"
-    : "text-green-400 font-bold";
+  const activeClass =
+    getLiquidGlassNavHighlight(useLiquidGlass, useDarkMode) ||
+    (useLiquidGlass ? "bg-white/20 rounded-sm" : "text-green-400 font-bold");
 
   const hoverClass = useLiquidGlass
-    ? "hover:bg-white/15 rounded-sm"
+    ? useDarkMode
+      ? "hover:bg-black/15 rounded-sm"
+      : "hover:bg-white/15 rounded-sm"
     : "hover:text-green-400";
 
   return (
@@ -45,7 +56,7 @@ export function MobileNavMenu({
         <Button
           size="icon"
           variant="ghost"
-          className={`text-white cursor-pointer ${useLiquidGlass ? "hover:bg-white/20" : "hover:bg-gray-600"}`}
+          className={`text-white cursor-pointer ${useLiquidGlass ? (useDarkMode ? "hover:bg-black/20" : "hover:bg-white/20") : "hover:bg-gray-600"}`}
         >
           <Menu size={24} />
           <span className="sr-only">Open menu</span>
@@ -59,7 +70,7 @@ export function MobileNavMenu({
       >
         <SheetHeader className="p-4 pb-2">
           <SheetTitle
-            className={`text-white ${useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
+            className={`text-white ${getLiquidGlassTextShadow(useLiquidGlass, useDarkMode)}`}
           >
             Menu
           </SheetTitle>
@@ -84,7 +95,7 @@ export function MobileNavMenu({
         </nav>
 
         <Separator
-          className={`mx-3 ${useLiquidGlass ? "bg-white/20" : "bg-green-400/40"}`}
+          className={`mx-3 ${useLiquidGlass ? (useDarkMode ? "bg-black/20" : "bg-white/20") : "bg-green-400/40"}`}
         />
 
         {/* Account section */}
@@ -131,7 +142,7 @@ export function MobileNavMenu({
         {/* Footer: logged in + log out */}
         <div className="mt-auto px-3 pb-4">
           <Separator
-            className={`mb-3 ${useLiquidGlass ? "bg-white/20" : "bg-green-400/40"}`}
+            className={`mb-3 ${useLiquidGlass ? (useDarkMode ? "bg-black/20" : "bg-white/20") : "bg-green-400/40"}`}
           />
           <p
             className={`px-3 pb-2 text-xs ${useLiquidGlass ? "text-white/60" : "text-gray-400"}`}

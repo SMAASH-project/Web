@@ -9,6 +9,13 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import {
+  getLiquidGlassClasses,
+  getLiquidGlassControlClasses,
+  getLiquidGlassDialogClasses,
+  getLiquidGlassDialogFooterClasses,
+  getLiquidGlassTextShadow,
+} from "@/lib/utils";
+import {
   Accordion,
   AccordionContent,
   AccordionItem,
@@ -37,6 +44,10 @@ import { useNewsForm } from "./newsPageLogic/useNewsForm";
 
 export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
   const { settings } = useSettings();
+  const controlClasses = getLiquidGlassControlClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
 
   const {
     open,
@@ -74,18 +85,25 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30" : ""} cursor-pointer`}
+          className={`text-white ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} rounded-lg cursor-pointer`}
         >
           <MessageSquarePlus />
         </Button>
       </DialogTrigger>
       <DialogContent
-        className="w-full max-w-4xl! sm:max-w-4xl! overflow-visible"
+        className={`w-full max-w-4xl! sm:max-w-4xl! overflow-visible ${getLiquidGlassDialogClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Create new News Article</DialogTitle>
+          <DialogTitle
+            className={getLiquidGlassTextShadow(
+              settings.useLiquidGlass,
+              settings.useDarkMode,
+            )}
+          >
+            Create new News Article
+          </DialogTitle>
         </DialogHeader>
         <FieldGroup>
           <Field>
@@ -93,6 +111,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
             <Input
               value={title}
               onChange={(e) => setTitle((e.target as HTMLInputElement).value)}
+              className={controlClasses}
             />
           </Field>
           <Field>
@@ -174,7 +193,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                       onChange={(e) =>
                         setContent((e.target as HTMLTextAreaElement).value)
                       }
-                      className="w-full min-h-32 rounded-md bg-input px-3 py-2 text-sm"
+                      className={`w-full min-h-32 rounded-md px-3 py-2 text-sm ${controlClasses}`}
                     />
                     {content && (
                       <div className="mt-2 rounded-md border bg-gray-800/60 p-3 max-h-64 overflow-y-auto prose prose-sm prose-invert max-w-none">
@@ -261,7 +280,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                       onChange={(e) =>
                         setContent((e.target as HTMLTextAreaElement).value)
                       }
-                      className="w-full min-h-32 rounded-md bg-input px-3 py-2 text-sm"
+                      className={`w-full min-h-32 rounded-md px-3 py-2 text-sm ${controlClasses}`}
                     />
                     {content && (
                       <div className="mt-2 rounded-md border bg-gray-800/60 p-3 max-h-64 overflow-y-auto prose prose-sm prose-invert max-w-none">
@@ -277,13 +296,24 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
             </AccordionItem>
           </Accordion>
         )}
-        <DialogFooter>
+        <DialogFooter
+          className={getLiquidGlassDialogFooterClasses(
+            settings.useLiquidGlass,
+            settings.useDarkMode,
+          )}
+        >
           <DialogClose asChild>
-            <Button variant="outline" className="cursor-pointer">
+            <Button
+              variant="outline"
+              className={`cursor-pointer ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode, "input")} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+            >
               Cancel
             </Button>
           </DialogClose>
-          <Button onClick={handleSave} className="cursor-pointer">
+          <Button
+            onClick={handleSave}
+            className={`cursor-pointer ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+          >
             Create Article
           </Button>
         </DialogFooter>

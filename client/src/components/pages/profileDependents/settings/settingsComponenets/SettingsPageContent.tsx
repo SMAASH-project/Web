@@ -8,15 +8,15 @@ import { useSettings } from "../settingsLogic/SettingsContext";
 import { THEMES, applyTheme } from "../settingsLogic/Themes";
 import { SettingToggle } from "./SettingToggle";
 import { ThemePicker } from "./ThemePicker";
+import { getLiquidGlassClasses, getLiquidGlassTextShadow } from "@/lib/utils";
 
 export function SettingsPageContent() {
   const { settings } = useSettings();
   const context = useContext(ColorContext);
-  const liquidClass = settings.useLiquidGlass
-    ? settings.useDarkMode
-      ? "bg-black/30 backdrop-blur-lg border-black/40 shadow-sm shadow-black/40"
-      : "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20"
-    : "bg-gray-600 border-2 border-green-400";
+  const liquidClass = getLiquidGlassClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
 
   return (
     <Card
@@ -26,7 +26,7 @@ export function SettingsPageContent() {
       <div className="flex-1 flex items-center justify-center flex-col gap-6">
         <div className="z-1">
           <Label
-            className={`text-white ${settings.useLiquidGlass ? (settings.useDarkMode ? "[text-shadow:0_2px_4px_rgba(32,32,32,0.8)]" : "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]") : ""}`}
+            className={`text-white ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
           >
             Visual
           </Label>
@@ -40,7 +40,7 @@ export function SettingsPageContent() {
       <div className="flex-1 flex items-center justify-center flex-col gap-6">
         <div>
           <Label
-            className={`text-white ${settings.useLiquidGlass ? (settings.useDarkMode ? "[text-shadow:0_2px_4px_rgba(32,32,32,0.8)]" : "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]") : ""}`}
+            className={`text-white ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
           >
             Themes
           </Label>
@@ -48,7 +48,7 @@ export function SettingsPageContent() {
         <div className="flex items-center justify-center gap-2 flex-wrap">
           {THEMES.map((theme) => (
             <Button
-              className={`text-white cursor-pointer ${settings.useLiquidGlass ? (settings.useDarkMode ? "bg-black/30 backdrop-blur-lg border-black/30 shadow-sm shadow-black/30 [text-shadow:0_2px_4px_rgba(32,32,32,0.8)]" : "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20 [text-shadow:0_2px_4px_rgba(163,163,163,0.8)]") : ""}`}
+              className={`text-white cursor-pointer ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
               key={theme.name}
               onClick={() => applyTheme(theme, context)}
             >

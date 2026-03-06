@@ -3,6 +3,7 @@ import { useSettings } from "../../profileDependents/settings/settingsLogic/Sett
 import AppleLogo from "@/assets/osLogos/AppleLogoTransparent.svg?url";
 import AndroidLogo from "@/assets/osLogos/AndroidLogoTransparent.png";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { getLiquidGlassNavHighlight } from "@/lib/utils";
 
 const osLogos: Record<string, string> = {
   iOS: AppleLogo,
@@ -66,14 +67,16 @@ export function SelectOs({
       ref={containerRef}
       className={`relative flex flex-row gap-1 p-1 rounded-xl ${
         glass
-          ? "bg-white/15 backdrop-blur-lg border border-white/20"
+          ? settings.useDarkMode
+            ? "bg-black/15 backdrop-blur-lg border border-black/20"
+            : "bg-white/15 backdrop-blur-lg border border-white/20"
           : "bg-gray-700/60 border border-gray-600"
       }`}
       onMouseLeave={handleMouseLeave}
     >
       {glass && (
         <div
-          className="absolute bg-white/25 rounded-lg shadow-sm shadow-white/20 transition-all duration-300 ease-out pointer-events-none"
+          className={`absolute rounded-lg shadow-sm transition-all duration-300 ease-out pointer-events-none ${getLiquidGlassNavHighlight(glass, settings.useDarkMode)} ${glass ? (settings.useDarkMode ? "shadow-black/20" : "shadow-white/20") : ""}`}
           style={{
             left: `${highlightPos.left}px`,
             width: `${highlightPos.width}px`,
