@@ -15,7 +15,7 @@ alias c := clean
 
 all: build-fullstack test seed
 
-@build:
+@build: swagger
     echo "Building backend"
     @go build -v -o build/main cmd/api/main.go
 
