@@ -36,4 +36,3 @@ build/
 /internal/seeder/source/*
 
 .DS_Store
-/docs/swagger/

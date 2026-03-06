@@ -1,0 +1,1254 @@
+basePath: /api
+definitions:
+  dtos.CategoryCreateDTO:
+    properties:
+      name:
+        maxLength: 20
+        type: string
+    required:
+    - name
+    type: object
+  dtos.CategoryReadDTO:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  dtos.CategoryUpdateDTO:
+    properties:
+      id:
+        type: integer
+      name:
+        maxLength: 20
+        type: string
+    required:
+    - id
+    - name
+    type: object
+  dtos.ErrResp:
+    properties:
+      error:
+        type: string
+      path:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  dtos.LevelCreateDTO:
+    properties:
+      img_uri:
+        type: string
+      name:
+        maxLength: 20
+        type: string
+    required:
+    - img_uri
+    - name
+    type: object
+  dtos.LevelReadDTO:
+    properties:
+      id:
+        type: integer
+      img_uri:
+        type: string
+      name:
+        type: string
+    type: object
+  dtos.LevelUpdateDTO:
+    properties:
+      id:
+        type: integer
+      img_uri:
+        type: string
+      name:
+        maxLength: 20
+        type: string
+    required:
+    - id
+    - img_uri
+    - name
+    type: object
+  dtos.PlayerProfileAppendDTO:
+    properties:
+      display_name:
+        maxLength: 20
+        type: string
+    required:
+    - display_name
+    type: object
+  dtos.PlayerProfileCreateDTO:
+    properties:
+      display_name:
+        maxLength: 20
+        type: string
+      user_id:
+        type: integer
+    required:
+    - display_name
+    - user_id
+    type: object
+  dtos.PlayerProfileReadDTO:
+    properties:
+      coins:
+        type: integer
+      display_name:
+        type: string
+      id:
+        type: integer
+      last_login:
+        type: string
+    type: object
+  dtos.PlayerProfileUpdateDTO:
+    properties:
+      coins:
+        type: integer
+      display_name:
+        maxLength: 20
+        type: string
+      id:
+        type: integer
+    required:
+    - display_name
+    - id
+    type: object
+  dtos.RoleCreateDTO:
+    properties:
+      name:
+        maxLength: 7
+        type: string
+    required:
+    - name
+    type: object
+  dtos.RoleReadDTO:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  dtos.RoleUpdateDTO:
+    properties:
+      id:
+        type: integer
+      name:
+        maxLength: 7
+        type: string
+    required:
+    - id
+    - name
+    type: object
+  dtos.TokenRefreshRequest:
+    properties:
+      refreshToken:
+        type: string
+    required:
+    - refreshToken
+    type: object
+  dtos.UserCreateDTO:
+    properties:
+      email:
+        maxLength: 30
+        type: string
+      password:
+        maxLength: 50
+        minLength: 8
+        type: string
+      role_id:
+        type: integer
+      username:
+        maxLength: 20
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - role_id
+    - username
+    type: object
+  dtos.UserLoginDTO:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dtos.UserReadDTO:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      is_banned:
+        type: boolean
+      last_login:
+        type: string
+    type: object
+  dtos.UserUpdateDTO:
+    properties:
+      email:
+        maxLength: 30
+        type: string
+      id:
+        type: integer
+      role_id:
+        type: integer
+    required:
+    - email
+    - id
+    type: object
+info:
+  contact: {}
+  description: This site documents the endpoints for the smaash web app, allowing
+    easy testing
+  license:
+    name: MIT
+  termsOfService: http://swagger.io/terms/
+  title: SMAASH API documentation
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Logs in a user
+      parameters:
+      - description: dto for logging in a user
+        in: body
+        name: user_login_dto
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UserLoginDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: returns the id of the logged in user
+          schema:
+            type: int
+        "400":
+          description: request body in wrong format
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logs out a user
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: doesn't return anything
+          schema:
+            type: ""
+      tags:
+      - auth
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user
+      parameters:
+      - description: dto for creating a new user
+        in: body
+        name: user_create_dto
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UserCreateDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: returns newly created user
+          schema:
+            $ref: '#/definitions/dtos.UserReadDTO'
+        "400":
+          description: request body in wrong format
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "409":
+          description: unique key violation
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - auth
+  /categories:
+    get:
+      consumes:
+      - application/json
+      description: Reads categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: returns all categories
+          schema:
+            items:
+              $ref: '#/definitions/dtos.CategoryReadDTO'
+            type: array
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - categories
+    post:
+      consumes:
+      - application/json
+      description: Creates a new category
+      parameters:
+      - description: dto for creating a new category
+        in: body
+        name: category_create_dto
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CategoryCreateDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: returns newly created category
+          schema:
+            $ref: '#/definitions/dtos.CategoryReadDTO'
+        "400":
+          description: request body in wrong format
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "409":
+          description: unique key violation
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - categories
+  /categories/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a category with the given id
+      parameters:
+      - description: id of desired category
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: doesn't return anything
+          schema:
+            type: ""
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - categories
+    get:
+      consumes:
+      - application/json
+      description: Reads a category by it's id
+      parameters:
+      - description: the id of the desired category
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: returns the desired category
+          schema:
+            $ref: '#/definitions/dtos.CategoryReadDTO'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - categories
+    put:
+      consumes:
+      - application/json
+      description: Updates the category with the given id
+      parameters:
+      - description: dto for updating a category
+        in: body
+        name: category_update_dto
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CategoryUpdateDTO'
+      - description: id of desired category
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: doesn't return anything
+          schema:
+            type: ""
+        "400":
+          description: id from url and id from request body doesn't match
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "409":
+          description: unique key violation
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - categories
+  /game-login:
+    post:
+      consumes:
+      - application/json
+      description: Logs a user into the game
+      parameters:
+      - description: dto for logging in a user
+        in: body
+        name: user_login_dto
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UserLoginDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: returns the id of the logged in user
+          schema:
+            type: int
+        "400":
+          description: request body in wrong format
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - game-auth
+  /game-refresh:
+    post:
+      consumes:
+      - application/json
+      description: Asks for a refresh token
+      parameters:
+      - description: dto for asking fo a refresh token
+        in: body
+        name: user_login_dto
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.TokenRefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: returns the new access and refresh tokens
+          schema:
+            type: int
+        "400":
+          description: request body in wrong format
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - game-auth
+  /levels:
+    get:
+      consumes:
+      - application/json
+      description: Reads all levels
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: returns all levels
+          schema:
+            items:
+              $ref: '#/definitions/dtos.LevelReadDTO'
+            type: array
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - levels
+    post:
+      consumes:
+      - application/json
+      description: Creates a new level
+      parameters:
+      - description: dto for creating a new level
+        in: body
+        name: level_create_dto
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.LevelCreateDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: returns newly created level
+          schema:
+            $ref: '#/definitions/dtos.LevelReadDTO'
+        "400":
+          description: request body in wrong format
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "409":
+          description: unique key violation
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - levels
+  /levels/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a level with the given id
+      parameters:
+      - description: id of desired level
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: doesn't return anything
+          schema:
+            type: ""
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - levels
+    get:
+      consumes:
+      - application/json
+      description: Reads a level by it's id
+      parameters:
+      - description: the id of the desired level
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: returns the desired level
+          schema:
+            $ref: '#/definitions/dtos.LevelReadDTO'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - levels
+    put:
+      consumes:
+      - application/json
+      description: Updates the level with the given id
+      parameters:
+      - description: dto for updating a level
+        in: body
+        name: level_update_dto
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.LevelUpdateDTO'
+      - description: id of desired level
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: doesn't return anything
+          schema:
+            type: ""
+        "400":
+          description: id from url and id from request body doesn't match
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "409":
+          description: unique key violation
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - levels
+  /profiles:
+    get:
+      consumes:
+      - application/json
+      description: Reads all profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: returns all profiles
+          schema:
+            items:
+              $ref: '#/definitions/dtos.PlayerProfileReadDTO'
+            type: array
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - profiles
+    post:
+      consumes:
+      - application/json
+      description: Creates a new profile
+      parameters:
+      - description: dto for creating a new profile
+        in: body
+        name: profile_create_dto
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.PlayerProfileCreateDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: returns newly created profile
+          schema:
+            $ref: '#/definitions/dtos.PlayerProfileReadDTO'
+        "400":
+          description: request body in wrong format
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "409":
+          description: unique key violation
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - profiles
+  /profiles/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a profile with the given id
+      parameters:
+      - description: id of desired profile
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: doesn't return anything
+          schema:
+            type: ""
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - profiles
+    get:
+      consumes:
+      - application/json
+      description: Reads a user by it's id
+      parameters:
+      - description: the id of the desired profile
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: returns the desired profile
+          schema:
+            $ref: '#/definitions/dtos.PlayerProfileReadDTO'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - profiles
+    put:
+      consumes:
+      - application/json
+      description: Updates the profile with the given id
+      parameters:
+      - description: dto for updating a profile
+        in: body
+        name: profile_update_dto
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.PlayerProfileUpdateDTO'
+      - description: id of desired profile
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: doesn't return anything
+          schema:
+            type: ""
+        "400":
+          description: id from url and id from request body doesn't match
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "409":
+          description: unique key violation
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - profiles
+  /roles:
+    get:
+      consumes:
+      - application/json
+      description: Reads all roles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: returns all roles
+          schema:
+            items:
+              $ref: '#/definitions/dtos.RoleReadDTO'
+            type: array
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - roles
+    post:
+      consumes:
+      - application/json
+      description: Creates a new role
+      parameters:
+      - description: dto for creating a new role
+        in: body
+        name: role_create_dto
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.RoleCreateDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: returns newly created role
+          schema:
+            $ref: '#/definitions/dtos.RoleReadDTO'
+        "400":
+          description: request body in wrong format
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "409":
+          description: unique key violation
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - roles
+  /roles/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a role with the given id
+      parameters:
+      - description: id of desired role
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: doesn't return anything
+          schema:
+            type: ""
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - roles
+    get:
+      consumes:
+      - application/json
+      description: Reads a role by it's id
+      parameters:
+      - description: the id of the desired role
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: returns the desired role
+          schema:
+            $ref: '#/definitions/dtos.RoleReadDTO'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - roles
+    put:
+      consumes:
+      - application/json
+      description: Updates the role with the given id
+      parameters:
+      - description: dto for updating a role
+        in: body
+        name: role_update_dto
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.RoleUpdateDTO'
+      - description: id of desired role
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: doesn't return anything
+          schema:
+            type: ""
+        "400":
+          description: id from url and id from request body doesn't match
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "409":
+          description: unique key violation
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - roles
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Reads all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: returns all users
+          schema:
+            items:
+              $ref: '#/definitions/dtos.UserReadDTO'
+            type: array
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - users
+  /users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a user with the given id
+      parameters:
+      - description: id of desired user
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: doesn't return anything
+          schema:
+            type: ""
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - users
+    get:
+      consumes:
+      - application/json
+      description: Reads a user by id
+      parameters:
+      - description: ID of desired user
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: returns the user with the given id
+          schema:
+            $ref: '#/definitions/dtos.UserReadDTO'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: User with given ID not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Updates the user with the given id. (Cannot modify the users password)
+      parameters:
+      - description: dto for updating a user
+        in: body
+        name: user_update_dto
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UserUpdateDTO'
+      - description: id of desired user
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: doesn't return anything
+          schema:
+            type: ""
+        "400":
+          description: id from url and id from request body doesn't match
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "409":
+          description: unique key violation
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - users
+  /users/{id}/profiles:
+    get:
+      consumes:
+      - application/json
+      description: Reads all profiles of a given user
+      parameters:
+      - description: ID of the user whose profiles you attempt to fetch
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: returns profiles of the given user
+          schema:
+            items:
+              $ref: '#/definitions/dtos.PlayerProfileReadDTO'
+            type: array
+        "400":
+          description: request body in wrong format
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: user with given ID not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "409":
+          description: unique key violation
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Creates a new profile for a given user
+      parameters:
+      - description: dto for creating a new profile for a given user
+        in: body
+        name: profile_append_dto
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.PlayerProfileAppendDTO'
+      - description: ID of the user to whose profiles you attempt to append
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: returns newly created profile
+          schema:
+            $ref: '#/definitions/dtos.PlayerProfileReadDTO'
+        "400":
+          description: request body in wrong format
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "404":
+          description: user with given ID not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "409":
+          description: unique key violation
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - users
+swagger: "2.0"
