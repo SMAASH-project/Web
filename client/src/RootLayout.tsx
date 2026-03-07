@@ -9,6 +9,7 @@ import { NavbarProvider } from "./context/NavbarContext";
 import { ColorProvider } from "./components/pages/profileDependents/settings/settingsLogic/color/ColorProvider";
 import { ProfileProvider } from "@/components/forms/addNewProfile/ProfilesContext";
 import { Wrapper } from "./Wrapper";
+import { Suspense } from "react";
 
 /**
  * Create a single QueryClient instance for the entire app.
@@ -17,13 +18,16 @@ import { Wrapper } from "./Wrapper";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 2 * 60 * 1000, // 2 minutes (reduced from 5)
       gcTime: 10 * 60 * 1000, // 10 minutes (garbage collection)
       retry: 1,
       refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+      networkMode: "online",
     },
     mutations: {
       retry: 1,
+      networkMode: "online",
     },
   },
 });
@@ -52,7 +56,15 @@ export function RootLayout() {
             <ColorProvider>
               <ProfileProvider>
                 <Wrapper>
-                  <Outlet />
+                  <Suspense
+                    fallback={
+                      <div className="flex items-center justify-center min-h-screen">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+                      </div>
+                    }
+                  >
+                    <Outlet />
+                  </Suspense>
                 </Wrapper>
               </ProfileProvider>
             </ColorProvider>
