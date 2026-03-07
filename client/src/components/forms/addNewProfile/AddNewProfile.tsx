@@ -92,7 +92,9 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
           </DialogHeader>
           <FieldGroup>
             <Field>
-              <Label htmlFor="username-1">Username</Label>
+              <Label htmlFor="username-1" className="text-gray-900!">
+                Username
+              </Label>
               <Input
                 type="text"
                 id="username-1"
@@ -110,7 +112,9 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
               </div>
             ) : null}
             <Field>
-              <Label htmlFor="profile-picture-1">Profile Picture</Label>
+              <Label htmlFor="profile-picture-1" className="text-gray-900!">
+                Profile Picture
+              </Label>
               <Input
                 type="file"
                 id="profile-picture-1"

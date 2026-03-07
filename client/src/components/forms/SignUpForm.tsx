@@ -68,7 +68,9 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
         <form onSubmit={handleSubmit}>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="username">Username</FieldLabel>
+              <FieldLabel htmlFor="username" className="text-gray-900!">
+                Username
+              </FieldLabel>
               <Input
                 id="username"
                 type="text"
@@ -79,7 +81,9 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor="email">Email</FieldLabel>
+              <FieldLabel htmlFor="email" className="text-gray-900!">
+                Email
+              </FieldLabel>
               <Input
                 id="email"
                 type="email"
@@ -90,7 +94,9 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor="password">Password</FieldLabel>
+              <FieldLabel htmlFor="password" className="text-gray-900!">
+                Password
+              </FieldLabel>
               <Input
                 id="password"
                 type="password"
@@ -103,7 +109,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
               </FieldDescription>
             </Field>
             <Field>
-              <FieldLabel htmlFor="confirm-password">
+              <FieldLabel htmlFor="confirm-password" className="text-gray-900!">
                 Confirm Password
               </FieldLabel>
               <Input

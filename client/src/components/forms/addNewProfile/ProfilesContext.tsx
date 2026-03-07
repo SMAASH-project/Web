@@ -11,6 +11,7 @@ import {
   apiAddProfile,
   apiGetProfilesByUserId,
   apiDeleteProfile,
+  apiUpdateProfile,
 } from "@/hooks/useApi";
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
@@ -23,33 +24,54 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
 
   const { userId } = useContext(AuthContext);
 
-  console.warn("User: ", userId);
-  console.warn("Profiles: ", profiles);
-
   useEffect(() => {
+    let isActive = true;
+
     const fetchProfiles = async () => {
-      if (userId === null) return;
+      // No logged-in user: clear any profile data from a previous account.
+      if (userId === null) {
+        setProfiles([]);
+        setSelectedProfile(null);
+        return;
+      }
+
+      // Clear stale profiles immediately when switching accounts.
+      setProfiles([]);
+      setSelectedProfile(null);
 
       try {
         const { data, ok } = await apiGetProfilesByUserId(Number(userId));
 
-        if (!ok || !data) return;
+        if (!isActive) return;
+
+        if (!ok || !data) {
+          setProfiles([]);
+          setSelectedProfile(null);
+          return;
+        }
 
         const fetched: Profile[] = data.map((p) => ({
           id: p.id,
           name: p.display_name,
           avatar: "",
+          coins: p.coins,
         }));
 
         setProfiles(fetched);
-        if (fetched.length > 0) {
-          setSelectedProfile(fetched[0]);
-        }
+        setSelectedProfile(fetched.length > 0 ? fetched[0] : null);
       } catch (error) {
+        if (!isActive) return;
         console.error("Error fetching profiles:", error);
+        setProfiles([]);
+        setSelectedProfile(null);
       }
     };
+
     fetchProfiles();
+
+    return () => {
+      isActive = false;
+    };
   }, [userId]);
 
   // useEffect(() => {
@@ -72,10 +94,15 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
         throw new Error(`Failed to add profile: ${status}`);
       }
 
-      // The server may return the created profile with a `name` field.
-      // If it does, use it; otherwise fall back to the profile we sent.
-      const toAdd: Profile = data?.name
-        ? { name: data.name, avatar: data.avatar ?? profile.avatar }
+      // The server returns PlayerProfileReadDTO; keep the server id so deletion
+      // always targets the backend row.
+      const toAdd: Profile = data
+        ? {
+            id: data.id,
+            name: data.display_name,
+            avatar: profile.avatar,
+            coins: data.coins,
+          }
         : profile;
       setProfiles((prev) => [...prev, toAdd]);
     } catch (error) {
@@ -90,9 +117,25 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     const profile = profiles.find((p) => p.name === name);
     if (!profile) return;
 
-    // If the profile has a server-side id, delete it from the backend first.
+    // If the profile has a server-side id, rename it to a tombstone value first,
+    // then delete it. This avoids DB unique-name collisions with soft-deleted rows.
     if (profile.id != null) {
       try {
+        const tombstoneName =
+          `del_${profile.id}_${Date.now().toString(36)}`.slice(0, 20);
+
+        const renameResult = await apiUpdateProfile(profile.id, {
+          id: profile.id,
+          display_name: tombstoneName,
+          coins: profile.coins ?? 0,
+        });
+
+        if (!renameResult.ok) {
+          throw new Error(
+            `Failed to rename profile before delete: ${renameResult.status}`,
+          );
+        }
+
         const { ok, status } = await apiDeleteProfile(profile.id);
         if (!ok) {
           throw new Error(`Failed to delete profile: ${status}`);

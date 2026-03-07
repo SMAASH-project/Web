@@ -26,28 +26,53 @@ export function LoginForm({
 
   const navigate = useNavigate();
 
+  const parseUserId = (value: unknown): bigint | null => {
+    if (typeof value === "bigint") return value;
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return BigInt(Math.trunc(value));
+    }
+    if (typeof value === "string" && value.trim() !== "") {
+      try {
+        return BigInt(value);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
   // Calls the centralized login API; on success stores the user id in context.
   const Login = async () => {
     setError("");
+    // Reset stale auth state first so a previous account cannot leak through.
+    setIsLoggedIn(false);
+    setUserId(null);
+
     try {
       const { data, ok } = await apiLogin({ email, password });
 
       if (ok) {
-        console.log("Login successful");
-
-        if (data?.id !== undefined && data?.id !== null) {
-          setUserId(BigInt(data.id));
+        const parsedUserId = parseUserId(data?.id);
+        if (parsedUserId === null) {
+          setError("Login failed: invalid account response.");
+          setIsLoggedIn(false);
+          setUserId(null);
+          return;
         }
 
+        console.log("Login successful");
+        setUserId(parsedUserId);
         setIsLoggedIn(true);
       } else {
         setError("Login failed");
         setIsLoggedIn(false);
+        setUserId(null);
       }
     } catch (err) {
       console.error(err);
       setError("An error occurred");
       setIsLoggedIn(false);
+      setUserId(null);
     }
   };
 
@@ -75,7 +100,9 @@ export function LoginForm({
           <form onSubmit={handleSubmit}>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <FieldLabel htmlFor="email" className="text-gray-900!">
+                  Email
+                </FieldLabel>
                 <Input
                   id="email"
                   type="email"
@@ -87,7 +114,9 @@ export function LoginForm({
               </Field>
               <Field>
                 <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
+                  <FieldLabel htmlFor="password" className="text-gray-900!">
+                    Password
+                  </FieldLabel>
                   <Link
                     to="/app/reset-password"
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline"

@@ -15,7 +15,7 @@ export interface LoginPayload {
 
 /** Shape of the JSON the server sends back on a successful login. */
 export interface LoginResponse {
-  id?: number;
+  id?: number | string;
 }
 
 export interface SignupPayload {
@@ -36,8 +36,16 @@ export interface AddProfilePayload {
  * every field — callers should fall back to their own data when needed.
  */
 export interface AddProfileResponse {
-  name?: string;
-  avatar?: string;
+  id: number;
+  display_name: string;
+  coins: number;
+  last_login: string;
+}
+
+export interface UpdateProfilePayload {
+  id: number;
+  display_name: string;
+  coins: number;
 }
 
 /** Shape of a player profile as returned by the server (PlayerProfileReadDTO). */
@@ -118,6 +126,17 @@ export async function apiAddProfile(payload: AddProfilePayload) {
 export async function apiGetProfilesByUserId(userId: number) {
   return api<ProfileResponse[]>(`/api/users/${userId}/profiles`, {
     method: "GET",
+  });
+}
+
+/** PUT /api/profiles/:id — update a player profile by its server-side id. */
+export async function apiUpdateProfile(
+  profileId: number,
+  payload: UpdateProfilePayload,
+) {
+  return api<null>(`/api/profiles/${profileId}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
   });
 }
 
