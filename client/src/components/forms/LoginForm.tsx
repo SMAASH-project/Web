@@ -12,7 +12,7 @@ import { Input } from "../ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import React, { useEffect } from "react";
 import { AuthContext } from "@/context/AuthContext";
-import { apiLogin } from "@/hooks/useApi";
+import { useLoginMutation } from "@/hooks/useQueryHooks";
 
 export function LoginForm({
   className,
@@ -20,11 +20,11 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const [password, setPassword] = React.useState("");
   const [email, setEmail] = React.useState("");
-  const [error, setError] = React.useState("");
   const { isLoggedIn, setIsLoggedIn, setUserId } =
     React.useContext(AuthContext);
 
   const navigate = useNavigate();
+  const loginMutation = useLoginMutation();
 
   const parseUserId = (value: unknown): bigint | null => {
     if (typeof value === "bigint") return value;
@@ -41,44 +41,27 @@ export function LoginForm({
     return null;
   };
 
-  // Calls the centralized login API; on success stores the user id in context.
-  const Login = async () => {
-    setError("");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     // Reset stale auth state first so a previous account cannot leak through.
     setIsLoggedIn(false);
     setUserId(null);
 
     try {
-      const { data, ok } = await apiLogin({ email, password });
+      const response = await loginMutation.mutateAsync({ email, password });
 
-      if (ok) {
-        const parsedUserId = parseUserId(data?.id);
-        if (parsedUserId === null) {
-          setError("Login failed: invalid account response.");
-          setIsLoggedIn(false);
-          setUserId(null);
-          return;
-        }
-
-        console.log("Login successful");
-        setUserId(parsedUserId);
-        setIsLoggedIn(true);
-      } else {
-        setError("Login failed");
-        setIsLoggedIn(false);
-        setUserId(null);
+      const parsedUserId = parseUserId(response?.id);
+      if (parsedUserId === null) {
+        return;
       }
-    } catch (err) {
-      console.error(err);
-      setError("An error occurred");
-      setIsLoggedIn(false);
-      setUserId(null);
-    }
-  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await Login();
+      console.log("Login successful");
+      setUserId(parsedUserId);
+      setIsLoggedIn(true);
+    } catch {
+      // Error is handled by mutation state
+    }
   };
 
   useEffect(() => {
@@ -130,12 +113,23 @@ export function LoginForm({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  disabled={loginMutation.isPending}
                 />
               </Field>
-              {error && <p className="text-red-500">{error}</p>}
+              {loginMutation.isError && (
+                <p className="text-red-500">
+                  {String(loginMutation.error?.response?.data) ||
+                    "Login failed"}
+                </p>
+              )}
               <Field>
-                <Button type="submit" id="login-button" className="text-white">
-                  Login
+                <Button
+                  type="submit"
+                  id="login-button"
+                  className="text-white"
+                  disabled={loginMutation.isPending}
+                >
+                  {loginMutation.isPending ? "Logging in..." : "Login"}
                 </Button>
                 <FieldDescription className="text-center">
                   Don&apos;t have an account?{" "}

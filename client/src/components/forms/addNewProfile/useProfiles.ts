@@ -1,10 +1,6 @@
 import { useContext } from "react";
-import { ProfileContext } from "./ProfilesContext";
+import { ProfileContext } from "@/components/forms/addNewProfile/ProfilesContext";
 
 export function useProfiles() {
-  const context = useContext(ProfileContext);
-  if (!context) {
-    throw new Error("useProfiles must be used within ProfileProvider");
-  }
-  return context;
+  return useContext(ProfileContext);
 }

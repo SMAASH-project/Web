@@ -16,45 +16,53 @@ import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import React from "react";
 import { generateRandomUsername } from "@/lib/GenerateRandomUsername";
-import { apiSignup } from "@/hooks/useApi";
+import { useSignupMutation } from "@/hooks/useQueryHooks";
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [username, setUsername] = React.useState("");
   const [email, setEmail] = React.useState("");
-  const [error, setError] = React.useState("");
+  const [validationError, setValidationError] = React.useState("");
   const navigate = useNavigate();
   const randomUsername = generateRandomUsername();
-
-  // Calls the centralized signup API; navigates to login on success.
-  const signup = async () => {
-    try {
-      const { ok } = await apiSignup({ email, password, username });
-      if (ok) {
-        console.log("Signup successful");
-        navigate("/app/login");
-      } else {
-        setError("Signup failed");
-      }
-    } catch (err) {
-      console.error(err);
-      setError("An error occurred");
-    }
-  };
+  const signupMutation = useSignupMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate username length
+    if (username.length < 3) {
+      setValidationError("Username must be at least 3 characters long");
+      return;
+    }
+
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setValidationError("Passwords do not match");
       return;
     }
     if (password.length < 8) {
-      setError("Password must be at least 8 characters long");
+      setValidationError("Password must be at least 8 characters long");
       return;
     }
-    setError("");
-    await signup();
+    setValidationError("");
+
+    try {
+      await signupMutation.mutateAsync({ email, password, username });
+      console.log("Signup successful");
+      navigate("/app/login");
+    } catch (err) {
+      const error = err as { response?: { data?: string; status?: number } };
+      console.error("Signup error:", err);
+      console.error("Error response:", error?.response);
+      console.error("Error data:", error?.response?.data);
+      console.error("Error status:", error?.response?.status);
+
+      // Display backend error to user
+      if (error?.response?.data) {
+        setValidationError(error.response.data.toString());
+      }
+    }
   };
   return (
     <Card {...props} className="w-100">
@@ -77,8 +85,12 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                 placeholder={`${randomUsername.prefix}${randomUsername.suffix}`}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                disabled={signupMutation.isPending}
                 required
               />
+              <FieldDescription>
+                Must be at least 3 characters long.
+              </FieldDescription>
             </Field>
             <Field>
               <FieldLabel htmlFor="email" className="text-gray-900!">
@@ -90,6 +102,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                 placeholder="m@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={signupMutation.isPending}
                 required
               />
             </Field>
@@ -102,6 +115,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={signupMutation.isPending}
                 required
               />
               <FieldDescription>
@@ -117,14 +131,26 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                disabled={signupMutation.isPending}
                 required
               />
               <FieldDescription>Please confirm your password.</FieldDescription>
             </Field>
-            {error && <p className="text-red-500">{error}</p>}
+            {validationError && (
+              <p className="text-red-500">{validationError}</p>
+            )}
+            {signupMutation.isError && (
+              <p className="text-red-500">Signup failed</p>
+            )}
             <Field>
-              <Button type="submit" className="text-white">
-                Create Account
+              <Button
+                type="submit"
+                className="text-white"
+                disabled={signupMutation.isPending}
+              >
+                {signupMutation.isPending
+                  ? "Creating Account..."
+                  : "Create Account"}
               </Button>
               <FieldDescription className="px-6 text-center">
                 Already have an account? <Link to="/app/login">Sign in</Link>

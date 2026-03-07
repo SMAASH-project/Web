@@ -6,7 +6,7 @@ import { MobileNavMenu } from "./MobileNavMenu";
 import { useProfiles } from "../forms/addNewProfile/useProfiles";
 import { Link, useNavigate } from "react-router";
 import { useMediaQuery } from "./navLogic/useMediaQuery";
-import { apiLogout } from "@/hooks/useApi";
+import { useLogoutMutation } from "@/hooks/useQueryHooks";
 import { AuthContext } from "@/context/AuthContext";
 import {
   getBackgroundClasses,
@@ -22,6 +22,7 @@ const Navbar = () => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const navigate = useNavigate();
   const { setIsLoggedIn, setUserId } = useContext(AuthContext);
+  const logoutMutation = useLogoutMutation();
   const navBackground = getBackgroundClasses(
     settings.useLiquidGlass,
     settings.useDarkMode,
@@ -39,15 +40,11 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      const { ok } = await apiLogout();
-      if (ok) {
-        console.log("Logout successful");
-        setIsLoggedIn(false);
-        setUserId(null);
-        navigate("/app/login");
-      } else {
-        console.error("Logout failed");
-      }
+      await logoutMutation.mutateAsync();
+      console.log("Logout successful");
+      setIsLoggedIn(false);
+      setUserId(null);
+      navigate("/app/login");
     } catch (error) {
       console.error("Logout failed:", error);
     }

@@ -14,7 +14,7 @@ import { useContext } from "react";
 import { useNavbarContext } from "@/context/NavbarContextUtils";
 import { useSettings } from "../pages/profileDependents/settings/settingsLogic/SettingsContext";
 import { AuthContext } from "@/context/AuthContext";
-import { apiLogout } from "@/hooks/useApi";
+import { useLogoutMutation } from "@/hooks/useQueryHooks";
 import { m } from "motion/react";
 import {
   getBackgroundClasses,
@@ -28,6 +28,7 @@ export default function AccountMenu() {
   const { settings } = useSettings();
   const { setIsLoggedIn, setUserId } = useContext(AuthContext);
   const navigate = useNavigate();
+  const logoutMutation = useLogoutMutation();
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
   const subtextColor = getSubtextColor(
     settings.useLiquidGlass,
@@ -43,18 +44,14 @@ export default function AccountMenu() {
     "strong",
   );
 
-  // Calls the centralized logout API to end the session.
+  // Calls the React Query logout mutation to end the session and clear cache
   const logout = async () => {
     try {
-      const { ok } = await apiLogout();
-      if (ok) {
-        console.log("Logout successful");
-        setIsLoggedIn(false);
-        setUserId(null);
-        navigate("/app/login");
-      } else {
-        console.error("Logout failed");
-      }
+      await logoutMutation.mutateAsync();
+      console.log("Logout successful");
+      setIsLoggedIn(false);
+      setUserId(null);
+      navigate("/app/login");
     } catch (error) {
       console.error("Logout failed:", error);
     }
