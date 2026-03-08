@@ -63,4 +63,4 @@ build-fullstack: build-client build
 
 @swagger:
     echo "generating swagger docs..."
-    swag init -g ./cmd/api/main.go -o docs/swagge
+    swag init -g ./cmd/api/main.go -o docs/swagger
