@@ -18,10 +18,10 @@ export function DownloadReleaseButton({ version }: { version: string }) {
       className={`h-8 w-8 p-0 cursor-pointer ${subtextColor} ${
         glass
           ? settings.useDarkMode
-            ? "hover:bg-black/15 hover:text-white"
+            ? "hover:bg-black/15 hover:text-gray-100"
             : "hover:bg-white/15 hover:text-white"
           : settings.useDarkMode
-            ? "hover:bg-gray-600 hover:text-white"
+            ? "hover:bg-gray-600 hover:text-gray-100"
             : "hover:bg-gray-200 hover:text-gray-900"
       }`}
       onClick={() => {

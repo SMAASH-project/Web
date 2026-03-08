@@ -103,7 +103,7 @@ export default function AccountMenu() {
               asChild
               className={`px-3 py-2.5 rounded-md text-sm transition-all duration-150 ${
                 settings.useDarkMode
-                  ? "hover:bg-white/10 hover:text-white"
+                  ? "hover:bg-white/10 hover:text-gray-100"
                   : "hover:bg-gray-100 hover:text-gray-900"
               }`}
             >
@@ -113,7 +113,7 @@ export default function AccountMenu() {
               asChild
               className={`px-3 py-2.5 rounded-md text-sm transition-all duration-150 ${
                 settings.useDarkMode
-                  ? "hover:bg-white/10 hover:text-white"
+                  ? "hover:bg-white/10 hover:text-gray-100"
                   : "hover:bg-gray-100 hover:text-gray-900"
               }`}
             >
@@ -140,7 +140,7 @@ export default function AccountMenu() {
             asChild
             className={`px-3 py-2.5 rounded-md text-sm transition-all duration-150 ${
               settings.useDarkMode
-                ? "hover:bg-white/10 hover:text-white"
+                ? "hover:bg-white/10 hover:text-gray-100"
                 : "hover:bg-gray-100 hover:text-gray-900"
             }`}
           >

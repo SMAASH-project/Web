@@ -1,4 +1,8 @@
 # By default just runs the first recipe (aliases are not considered recipes)
+set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
+
+hello:
+  Write-Host "Hello, world!"
 
 alias r := run
 alias b := build
@@ -23,7 +27,7 @@ build-fullstack: build-client build
 
 @build-client:
     echo "Building client"
-    cd ./client && npm install && npm run build
+    cd ./client ; npm install ; npm run build
 
 # Run the application
 @run:

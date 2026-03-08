@@ -6,7 +6,7 @@ import { visualizer } from "rollup-plugin-visualizer";
 
 export default defineConfig({
   plugins: [
-    react({ babel: { plugins: [["babel-plugin-react-compiler"]] } }),
+    react(),
     tailwindcss(),
     visualizer({
       open: false,

@@ -28,7 +28,7 @@ export function FilterSelection({
 
   return (
     <FieldSet>
-      <FieldDescription>
+      <FieldDescription className={`${subtextColor}`}>
         Select which types of news posts you want to see.
       </FieldDescription>
       <FieldGroup className="gap-3">

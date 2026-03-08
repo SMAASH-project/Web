@@ -89,13 +89,13 @@ export function getButtonClasses(
   if (useLiquidGlass) {
     const classes = {
       primary: useDarkMode
-        ? "bg-black/30 backdrop-blur-lg border border-black/40 shadow-sm shadow-black/40 hover:bg-black/40 text-white"
+        ? "bg-black/30 backdrop-blur-lg border border-black/40 shadow-sm shadow-black/40 hover:bg-black/40 text-white hover:text-gray-100"
         : "bg-white/30 backdrop-blur-lg border border-white/30 shadow-sm shadow-white/20 hover:bg-white/40 text-white",
       secondary: useDarkMode
-        ? "bg-black/20 backdrop-blur-lg border border-black/30 shadow-sm shadow-black/30 hover:bg-black/30 text-white"
+        ? "bg-black/20 backdrop-blur-lg border border-black/30 shadow-sm shadow-black/30 hover:bg-black/30 text-white hover:text-gray-100"
         : "bg-white/20 backdrop-blur-lg border border-white/20 shadow-sm shadow-white/15 hover:bg-white/30 text-white",
       outline: useDarkMode
-        ? "bg-transparent border border-black/40 hover:bg-black/20 text-white"
+        ? "bg-transparent border border-black/40 hover:bg-black/20 text-white hover:text-gray-100"
         : "bg-transparent border border-white/40 hover:bg-white/20 text-white",
     };
     return classes[variant];
@@ -103,13 +103,13 @@ export function getButtonClasses(
 
   const classes = {
     primary: useDarkMode
-      ? "bg-gray-800 border border-gray-600 shadow-lg shadow-black/40 hover:bg-gray-700 hover:shadow-xl text-white"
+      ? "bg-gray-800 border border-gray-600 shadow-lg shadow-black/40 hover:bg-gray-700 hover:shadow-xl text-white hover:text-gray-100"
       : "bg-white border border-gray-300 shadow-lg shadow-gray-400/40 hover:bg-gray-50 hover:shadow-xl text-gray-900",
     secondary: useDarkMode
       ? "bg-gray-900 border border-gray-700 shadow-md shadow-black/30 hover:bg-gray-800 text-gray-200"
       : "bg-gray-100 border border-gray-200 shadow-md shadow-gray-300/30 hover:bg-gray-50 text-gray-700",
     outline: useDarkMode
-      ? "bg-gray-900 border border-gray-600 hover:bg-gray-800 shadow-sm shadow-black/20 text-white"
+      ? "bg-gray-900 border border-gray-600 hover:bg-gray-800 shadow-sm shadow-black/20 text-white hover:text-gray-100"
       : "bg-white border border-gray-400 hover:bg-gray-50 shadow-sm shadow-gray-300/20 text-gray-900",
   };
   return classes[variant];
