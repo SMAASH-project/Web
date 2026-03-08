@@ -1,8 +1,5 @@
 # By default just runs the first recipe (aliases are not considered recipes)
-set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
-
-hello:
-  Write-Host "Hello, world!"
+set windows-shell := ["cmd.exe", "/C"]
 
 alias r := run
 alias b := build
@@ -21,13 +18,13 @@ all: build-fullstack test seed
 
 @build:
     echo "Building backend"
-    @go build -v -o build/main cmd/api/main.go
+    @go build -v -o build/main.exe cmd/api/main.go
 
 build-fullstack: build-client build
 
 @build-client:
     echo "Building client"
-    cd ./client ; npm install ; npm run build
+    cd ./client && npm install && npm run build
 
 # Run the application
 @run:
