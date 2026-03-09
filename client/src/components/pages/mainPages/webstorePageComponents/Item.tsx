@@ -18,6 +18,8 @@ import {
   getTextShadow,
   getSubtextColor,
 } from "@/lib/utils";
+import { useContext } from "react";
+import { AuthContext } from "@/context/AuthContext";
 
 const RARITY_COLORS: Record<string, string> = {
   Common: "#9ca3af",
@@ -35,7 +37,7 @@ interface ItemProps {
 
 export function Item({ item, onDelete, onUnlock }: ItemProps) {
   const { settings } = useSettings();
-  const isAdmin = true;
+  const { isAdmin } = useContext(AuthContext);
   const rarityColor = RARITY_COLORS[item.rarity] ?? "#9ca3af";
 
   const bgClass = getBackgroundClasses(

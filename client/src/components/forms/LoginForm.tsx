@@ -20,7 +20,7 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const [password, setPassword] = React.useState("");
   const [email, setEmail] = React.useState("");
-  const { isLoggedIn, setIsLoggedIn, setUserId } =
+  const { isLoggedIn, setIsLoggedIn, setUserId, setIsAdmin } =
     React.useContext(AuthContext);
 
   const navigate = useNavigate();
@@ -41,12 +41,26 @@ export function LoginForm({
     return null;
   };
 
+  const parseRoleId = (value: unknown): number | null => {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return Math.trunc(value);
+    }
+    if (typeof value === "string" && value.trim() !== "") {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) {
+        return Math.trunc(parsed);
+      }
+    }
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Reset stale auth state first so a previous account cannot leak through.
     setIsLoggedIn(false);
     setUserId(null);
+    setIsAdmin(false);
 
     try {
       const response = await loginMutation.mutateAsync({ email, password });
@@ -56,8 +70,13 @@ export function LoginForm({
         return;
       }
 
+      const parsedRoleId = parseRoleId(
+        response?.role_id ?? response?.roleId ?? response?.role?.id,
+      );
+
       console.log("Login successful");
       setUserId(parsedUserId);
+      setIsAdmin(parsedRoleId === 1);
       setIsLoggedIn(true);
     } catch {
       // Error is handled by mutation state

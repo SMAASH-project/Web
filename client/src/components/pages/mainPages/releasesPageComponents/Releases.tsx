@@ -13,6 +13,8 @@ import { RemoveReleaseButton } from "./RemoveReleaseButton";
 import { DownloadReleaseButton } from "./DownloadReleaseButton";
 import type { Release } from "@/types/PageTypes";
 import { Package, Loader2 } from "lucide-react";
+import { useContext } from "react";
+import { AuthContext } from "@/context/AuthContext";
 
 const VERSION_TYPE_COLORS: Record<string, string> = {
   major: "#3b82f6",
@@ -47,7 +49,7 @@ export function Releases({
   handleRemove,
 }: ReleasesProps) {
   const { settings } = useSettings();
-  const IsAdmin = true; // Replace with actual admin check
+  const { isAdmin } = useContext(AuthContext);
   const glass = settings.useLiquidGlass;
   const bgClass = getBackgroundClasses(
     settings.useLiquidGlass,
@@ -146,7 +148,7 @@ export function Releases({
                 {/* Right: actions */}
                 <div className="flex items-center gap-1.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
                   <DownloadReleaseButton version={release.version} />
-                  {IsAdmin && (
+                  {isAdmin && (
                     <RemoveReleaseButton
                       onConfirm={() => handleRemove(release.id)}
                     />

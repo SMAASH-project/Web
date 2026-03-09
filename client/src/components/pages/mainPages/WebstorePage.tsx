@@ -13,10 +13,12 @@ import {
   getSubtextColor,
   getBackgroundClasses,
 } from "@/lib/utils";
+import { useContext } from "react";
+import { AuthContext } from "@/context/AuthContext";
 
 export function WebstorePage() {
   const { settings } = useSettings();
-  const isAdmin = true;
+  const { isAdmin } = useContext(AuthContext);
   const userCoins = 5000; // Replace with actual coin balance from API
 
   const {

@@ -21,7 +21,7 @@ const Navbar = () => {
   const username = selectedProfile?.name ?? "PlaceholderUserName";
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const navigate = useNavigate();
-  const { setIsLoggedIn, setUserId } = useContext(AuthContext);
+  const { setIsLoggedIn, setUserId, setIsAdmin } = useContext(AuthContext);
   const logoutMutation = useLogoutMutation();
   const navBackground = getBackgroundClasses(
     settings.useLiquidGlass,
@@ -44,6 +44,7 @@ const Navbar = () => {
       console.log("Logout successful");
       setIsLoggedIn(false);
       setUserId(null);
+      setIsAdmin(false);
       navigate("/app/login");
     } catch (error) {
       console.error("Logout failed:", error);

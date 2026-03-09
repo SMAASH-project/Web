@@ -21,6 +21,11 @@ export interface LoginPayload {
 
 export interface LoginResponse {
   id?: number | string;
+  role_id?: number | string;
+  roleId?: number | string;
+  role?: {
+    id?: number | string;
+  };
 }
 
 export interface SignupPayload {

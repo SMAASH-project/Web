@@ -7,11 +7,13 @@ import { AddRelease } from "./releasesPageComponents/AddRelease";
 import { SearchRelease } from "./releasesPageComponents/SearchRelease";
 import { useReleases } from "./releasesPageComponents/releasesPageLogic/useReleases";
 import { getTextColor, getTextShadow, getSubtextColor } from "@/lib/utils";
+import { useContext } from "react";
+import { AuthContext } from "@/context/AuthContext";
 
 export function ReleasesPage() {
   const { settings } = useSettings();
   const [selectedOs, setSelectedOs] = useState("iOS");
-  const IsAdmin = true; // Replace with actual admin check
+  const { isAdmin } = useContext(AuthContext);
 
   const {
     allReleases,
@@ -61,7 +63,7 @@ export function ReleasesPage() {
             <div className="flex-1">
               <SearchRelease onSearch={handleSearch} />
             </div>
-            {IsAdmin && (
+            {isAdmin && (
               <AddRelease onCreate={handleCreate} allReleases={allReleases} />
             )}
           </div>

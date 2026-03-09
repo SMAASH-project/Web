@@ -26,7 +26,7 @@ import {
 export default function AccountMenu() {
   const { setIsDropdownHovering, setIsDropdownOpen } = useNavbarContext();
   const { settings } = useSettings();
-  const { setIsLoggedIn, setUserId } = useContext(AuthContext);
+  const { setIsLoggedIn, setUserId, setIsAdmin } = useContext(AuthContext);
   const navigate = useNavigate();
   const logoutMutation = useLogoutMutation();
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
@@ -51,6 +51,7 @@ export default function AccountMenu() {
       console.log("Logout successful");
       setIsLoggedIn(false);
       setUserId(null);
+      setIsAdmin(false);
       navigate("/app/login");
     } catch (error) {
       console.error("Logout failed:", error);

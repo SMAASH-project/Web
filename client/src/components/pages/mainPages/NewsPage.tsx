@@ -22,10 +22,12 @@ import { useNewsCategoryFilter } from "@/components/pages/mainPages/newsPageComp
 import { LoadPost } from "@/lib/pageAnimations/newsPageAnimations/LoadPost";
 import { FilterSelect } from "./newsPageComponents/Filter";
 import { CategoryBadge } from "./newsPageComponents/CategoryBadge";
+import { useContext } from "react";
+import { AuthContext } from "@/context/AuthContext";
 
 export function NewsPage() {
   const { settings } = useSettings();
-  const IsAdmin = true; // Replace with actual admin check
+  const { isAdmin } = useContext(AuthContext);
   const { selectedByCategory, selectedCategories, setCategorySelected } =
     useNewsCategoryFilter();
 
@@ -61,7 +63,7 @@ export function NewsPage() {
             orientation="horizontal"
             className={`${buttonClass} rounded-lg`}
           >
-            {IsAdmin ? (
+            {isAdmin ? (
               <>
                 <AddNews onCreate={handleCreate} />
                 <Search onSearch={handleSearch} />
@@ -102,7 +104,7 @@ export function NewsPage() {
                       >
                         {formatDateTime(post.createdAt)}
                       </Label>
-                      {IsAdmin ? (
+                      {isAdmin ? (
                         <ButtonGroup>
                           <EditButton post={post} onUpdate={handleUpdate} />
                           <RemoveButton
