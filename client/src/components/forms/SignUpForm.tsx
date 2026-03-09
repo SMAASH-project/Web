@@ -17,12 +17,19 @@ import { Link, useNavigate } from "react-router-dom";
 import React from "react";
 import { generateRandomUsername } from "@/lib/GenerateRandomUsername";
 import { useSignupMutation } from "@/hooks/useQueryHooks";
+import {
+  GoogleReCaptcha,
+  GoogleReCaptchaProvider,
+} from "react-google-recaptcha-v3";
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
+  const recaptchaSiteKey = "6LeA2IQsAAAAAAK7ljf7tDqBjwR_rm5uDAzGbr8S";
+  const captchaEnabled = recaptchaSiteKey.trim().length > 0;
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [username, setUsername] = React.useState("");
   const [email, setEmail] = React.useState("");
+  const [captchaToken, setCaptchaToken] = React.useState<string | null>(null);
   const [validationError, setValidationError] = React.useState("");
   const navigate = useNavigate();
   const randomUsername = generateRandomUsername();
@@ -43,6 +50,10 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
     }
     if (password.length < 8) {
       setValidationError("Password must be at least 8 characters long");
+      return;
+    }
+    if (captchaEnabled && !captchaToken) {
+      setValidationError("Captcha verification failed. Please try again.");
       return;
     }
     setValidationError("");
@@ -143,14 +154,36 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
               <p className="text-red-500">Signup failed</p>
             )}
             <Field>
+              {captchaEnabled ? (
+                <GoogleReCaptchaProvider reCaptchaKey={recaptchaSiteKey}>
+                  <GoogleReCaptcha
+                    onVerify={(token) => {
+                      setCaptchaToken(token);
+                    }}
+                  />
+                  <FieldDescription>
+                    {captchaToken ? "Captcha verified" : "Verifying captcha..."}
+                  </FieldDescription>
+                </GoogleReCaptchaProvider>
+              ) : (
+                <FieldDescription>
+                  Captcha key is empty. Captcha is currently disabled.
+                </FieldDescription>
+              )}
+            </Field>
+            <Field>
               <Button
                 type="submit"
                 className="text-white"
-                disabled={signupMutation.isPending}
+                disabled={
+                  signupMutation.isPending || (captchaEnabled && !captchaToken)
+                }
               >
                 {signupMutation.isPending
                   ? "Creating Account..."
-                  : "Create Account"}
+                  : captchaEnabled && !captchaToken
+                    ? "Waiting for Captcha..."
+                    : "Create Account"}
               </Button>
               <FieldDescription className="px-6 text-center">
                 Already have an account? <Link to="/app/login">Sign in</Link>
