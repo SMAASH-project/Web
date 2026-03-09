@@ -16,8 +16,8 @@ export function PasswordResetForm({
   ...props
 }: React.ComponentProps<"div">) {
   return (
-    <div className={cn("w-100 flex flex-col gap-6", className)} {...props}>
-      <Card>
+    <div className={cn("w-full max-w-md px-4 sm:px-0", className)} {...props}>
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>Recover your account</CardTitle>
           <CardDescription>

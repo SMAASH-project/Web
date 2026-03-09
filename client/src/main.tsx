@@ -62,11 +62,11 @@ const router = createBrowserRouter([
     element: <RootLayout />,
     children: [
       { path: "/app", element: <App /> },
-      { path: "/app/login", element: <LoginForm className="w-100" /> },
-      { path: "/app/signup", element: <SignupForm className="w-100" /> },
+      { path: "/app/login", element: <LoginForm /> },
+      { path: "/app/signup", element: <SignupForm /> },
       {
         path: "/app/reset-password",
-        element: <PasswordResetForm className="w-100" />,
+        element: <PasswordResetForm />,
       },
       { path: "/app/about", element: <AboutPage /> },
       { path: "/app/gallery", element: <GalleryPage /> },
