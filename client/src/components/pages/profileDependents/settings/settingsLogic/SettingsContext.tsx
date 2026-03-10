@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-interface SettingsState {
+export interface SettingsState {
   useAnimations: boolean;
   useLiquidGlass: boolean;
   useDarkMode: boolean;

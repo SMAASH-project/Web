@@ -4,6 +4,7 @@ import {
   getLiquidGlassTextShadow,
 } from "@/lib/utils";
 import { useSettings } from "../pages/profileDependents/settings/settingsLogic/SettingsContext";
+import type { SettingsState } from "../pages/profileDependents/settings/settingsLogic/SettingsContext";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Label } from "../ui/label";
 import { Plus, Trash2, Play } from "lucide-react";
@@ -22,7 +23,7 @@ const ProfileAvatar = memo(function ProfileAvatar({
 }: {
   profile: { name: string; avatar: string };
   isManaging: boolean;
-  settings: any;
+  settings: SettingsState;
   onProfileClick: (name: string) => void;
 }) {
   return (
@@ -62,7 +63,7 @@ const ProfileAvatar = memo(function ProfileAvatar({
           </AvatarFallback>
         </Avatar>
         <span
-          className={`text-white ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+          className={`block text-center text-white ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
         >
           {profile.name}
         </span>
