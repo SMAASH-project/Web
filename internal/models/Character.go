@@ -11,3 +11,7 @@ type Character struct {
 func (c Character) GetID() uint {
 	return c.ID
 }
+
+func (c Character) SetURIField(target string) {
+	c.ImgUri = target
+}

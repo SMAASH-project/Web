@@ -9,6 +9,7 @@ import (
 type UserReadDTO struct {
 	ID        uint   `json:"id"`
 	Email     string `json:"email"`
+	Role      string `json:"role"`
 	IsBanned  bool   `json:"is_banned"`
 	LastLogin string `json:"last_login"`
 }
@@ -35,6 +36,7 @@ func UserToDTO(user models.User) UserReadDTO {
 	return UserReadDTO{
 		ID:        user.ID,
 		Email:     user.Email,
+		Role:      user.Role.Name,
 		IsBanned:  user.IsBanned,
 		LastLogin: user.LastLogin.Format("2006-01-02"),
 	}

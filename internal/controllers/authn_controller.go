@@ -66,7 +66,7 @@ func (a AuthnController) Login(c *gin.Context) {
 		return
 	}
 
-	token, id, err := a.authService.Login(c.Request.Context(), dtos.LoginDTOToUser(&body))
+	token, user, err := a.authService.Login(c.Request.Context(), dtos.LoginDTOToUser(&body))
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -93,7 +93,8 @@ func (a AuthnController) Login(c *gin.Context) {
 	)
 
 	c.JSON(http.StatusOK, gin.H{
-		"id": id,
+		"id":   user.ID,
+		"role": user.Role.Name,
 	})
 }
 

@@ -16,3 +16,7 @@ type Item struct {
 func (i Item) GetID() uint {
 	return i.ID
 }
+
+func (i Item) SetURIField(target string) {
+	i.ImgUri = target
+}
