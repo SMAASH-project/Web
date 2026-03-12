@@ -38,6 +38,7 @@ export interface SignupPayload {
 export interface AddProfilePayload {
   display_name: string;
   user_id: number;
+  profile_picture?: File | null;
 }
 
 export interface AddProfileResponse {
@@ -58,6 +59,18 @@ export interface ProfileResponse {
   display_name: string;
   coins: number;
   last_login: string;
+  avatar_url?: string;
+}
+
+function getProfilePictureUrl(profileId: number, versionSeed: number) {
+  return `/api/profiles/${profileId}/pfp?v=${versionSeed}`;
+}
+
+async function uploadProfilePicture(profileId: number, file: File) {
+  const formData = new FormData();
+  formData.append("profilePicture", file);
+
+  await apiClient.post(`/profiles/${profileId}/pfp`, formData);
 }
 
 function clampDisplayName(name: string) {
@@ -70,13 +83,6 @@ function withUniqueSuffix(base: string) {
   const maxBaseLength = 20 - (seed.length + 1);
   const safeBase = cleanBase.slice(0, Math.max(1, maxBaseLength));
   return `${safeBase}-${seed}`;
-}
-
-interface ProfileRollbackContext {
-  snapshots: Array<{
-    queryKey: readonly unknown[];
-    previousData: ProfileResponse[] | undefined;
-  }>;
 }
 
 // ─── Auth Mutations ──────────────────────────────────────────────────────────
@@ -128,7 +134,12 @@ export function useProfilesQuery(userId: number | null) {
       const { data } = await apiClient.get<ProfileResponse[]>(
         `/users/${userId}/profiles`,
       );
-      return data;
+
+      const versionSeed = Date.now();
+      return data.map((profile) => ({
+        ...profile,
+        avatar_url: getProfilePictureUrl(profile.id, versionSeed),
+      }));
     },
     enabled: !!userId,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -143,7 +154,7 @@ export function useAddProfileMutation() {
 
   return useMutation<AddProfileResponse, AxiosError, AddProfilePayload>({
     mutationFn: async (payload) => {
-      const { user_id, ...body } = payload;
+      const { user_id, profile_picture, ...body } = payload;
       let candidateName = clampDisplayName(body.display_name);
 
       for (let attempt = 0; attempt < 4; attempt++) {
@@ -152,6 +163,18 @@ export function useAddProfileMutation() {
             `/users/${user_id}/profiles`,
             { display_name: candidateName },
           );
+
+          if (profile_picture) {
+            try {
+              await uploadProfilePicture(data.id, profile_picture);
+            } catch (uploadError) {
+              console.error(
+                "Profile created but picture upload failed:",
+                uploadError,
+              );
+            }
+          }
+
           return data;
         } catch (error) {
           const axiosError = error as AxiosError;
@@ -168,56 +191,36 @@ export function useAddProfileMutation() {
 
       throw new Error("Failed to create profile");
     },
-    onMutate: async (variables) => {
-      // Optimistically add the profile to the cache for instant UI feedback
+    onSuccess: async (_data, variables) => {
       const requestedUserId = variables.user_id;
       if (!requestedUserId) {
-        return undefined;
+        return;
       }
 
-      await queryClient.cancelQueries({
-        queryKey: queryKeys.profiles.byUserId(requestedUserId),
-      });
-
-      const previousProfiles = queryClient.getQueryData(
-        queryKeys.profiles.byUserId(requestedUserId),
-      );
-
-      // Create a temporary profile with the new data
-      const tempProfile: ProfileResponse = {
-        id: Date.now(), // Temporary ID
-        display_name: variables.display_name,
-        coins: 0,
-        last_login: new Date().toISOString(),
-      };
-
-      queryClient.setQueryData(
-        queryKeys.profiles.byUserId(requestedUserId),
-        (old: ProfileResponse[] | undefined) => [...(old || []), tempProfile],
-      );
-
-      return { previousProfiles, userId: requestedUserId };
-    },
-    onError: (_error, _variables, context) => {
-      // Rollback on error
-      const rollbackContext = context as
-        | { previousProfiles: ProfileResponse[]; userId: number }
-        | undefined;
-      if (rollbackContext?.previousProfiles && rollbackContext.userId) {
-        queryClient.setQueryData(
-          queryKeys.profiles.byUserId(rollbackContext.userId),
-          rollbackContext.previousProfiles,
-        );
-      }
-    },
-    onSuccess: async (_data, variables) => {
-      // Immediately refetch profiles list after adding
-      const requestedUserId = variables.user_id;
-      if (requestedUserId) {
+      // Always refetch after adding a profile to ensure fresh list
+      try {
         await queryClient.refetchQueries({
           queryKey: queryKeys.profiles.byUserId(requestedUserId),
+          type: "active",
         });
+      } catch (err) {
+        console.error("Failed to refetch profiles after add:", err);
       }
+    },
+  });
+}
+
+export function useUploadProfilePictureMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, AxiosError, { profileId: number; file: File }>({
+    mutationFn: async ({ profileId, file }) => {
+      await uploadProfilePicture(profileId, file);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.profiles.all,
+      });
     },
   });
 }
@@ -271,47 +274,54 @@ export function useUpdateProfileMutation() {
 export function useDeleteProfileMutation() {
   const queryClient = useQueryClient();
 
-  return useMutation<void, AxiosError, number, ProfileRollbackContext>({
-    mutationFn: async (profileId) => {
+  return useMutation<void, AxiosError, { profileId: number; userId: number }>({
+    mutationFn: async ({ profileId }) => {
       await apiClient.delete(`/profiles/${profileId}`);
     },
-    onMutate: async (profileId) => {
-      // Optimistically remove the profile from cache immediately
-      // so the tombstone name never appears in the UI
-      const snapshots: ProfileRollbackContext["snapshots"] = [];
-      const profileQueries = queryClient
-        .getQueryCache()
-        .findAll({ queryKey: queryKeys.profiles.all });
+    onMutate: async ({ profileId, userId }) => {
+      // Cancel any in-flight queries
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.profiles.byUserId(userId),
+      });
 
-      profileQueries.forEach((query) => {
-        const previousData = queryClient.getQueryData<ProfileResponse[]>(
-          query.queryKey,
-        );
-        snapshots.push({
-          queryKey: query.queryKey,
-          previousData,
-        });
+      // Snapshot previous data
+      const previousData = queryClient.getQueryData<ProfileResponse[]>(
+        queryKeys.profiles.byUserId(userId),
+      );
 
-        queryClient.setQueryData<ProfileResponse[]>(query.queryKey, (old) => {
+      // Optimistically remove from cache
+      queryClient.setQueryData<ProfileResponse[]>(
+        queryKeys.profiles.byUserId(userId),
+        (old) => {
           if (!old) return old;
           return old.filter((p) => p.id !== profileId);
-        });
-      });
+        },
+      );
 
-      return { snapshots };
+      return { previousData, userId };
     },
     onError: (_error, _variables, context) => {
-      if (!context?.snapshots) return;
-
-      context.snapshots.forEach(({ queryKey, previousData }) => {
-        queryClient.setQueryData(queryKey, previousData);
-      });
+      // Rollback on error
+      const rollbackContext = context as
+        | { previousData: ProfileResponse[] | undefined; userId: number }
+        | undefined;
+      if (rollbackContext?.previousData !== undefined) {
+        queryClient.setQueryData(
+          queryKeys.profiles.byUserId(rollbackContext.userId),
+          rollbackContext.previousData,
+        );
+      }
     },
-    onSettled: () => {
-      // Invalidate all profile queries to ensure consistency
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.profiles.all,
-      });
+    onSuccess: async (_data, variables) => {
+      // Refetch after deleting to ensure fresh list
+      try {
+        await queryClient.refetchQueries({
+          queryKey: queryKeys.profiles.byUserId(variables.userId),
+          type: "active",
+        });
+      } catch (err) {
+        console.error("Failed to refetch profiles after delete:", err);
+      }
     },
   });
 }
