@@ -14,13 +14,13 @@ type PlayerProfileReadDTO struct {
 	LastLogin   string `json:"last_login"`
 }
 
-type PlayerProfileCreateDto struct {
+type PlayerProfileCreateDTO struct {
 	DisplayName string `json:"display_name" binding:"required,max=20"`
 	UserID      uint   `json:"user_id" binding:"required"`
 }
 
 // TODO: handle profile pictures
-type PlayerProfileUpdateDto struct {
+type PlayerProfileUpdateDTO struct {
 	ID          uint   `json:"id" binding:"required"`
 	DisplayName string `json:"display_name" binding:"required,max=20"`
 	Coins       uint   `json:"coins"`
@@ -39,7 +39,7 @@ func PlayerProfileToReadDTO(profile models.PlayerProfile) PlayerProfileReadDTO {
 	}
 }
 
-func CreateDTOToPlayerProfile(p PlayerProfileCreateDto) models.PlayerProfile {
+func CreateDTOToPlayerProfile(p PlayerProfileCreateDTO) models.PlayerProfile {
 	return models.PlayerProfile{
 		DisplayName: p.DisplayName,
 		UserID:      p.UserID,
@@ -48,7 +48,7 @@ func CreateDTOToPlayerProfile(p PlayerProfileCreateDto) models.PlayerProfile {
 	}
 }
 
-func UpdateDTOToPlayerProfile(p PlayerProfileUpdateDto) models.PlayerProfile {
+func UpdateDTOToPlayerProfile(p PlayerProfileUpdateDTO) models.PlayerProfile {
 	return models.PlayerProfile{
 		Model:       gorm.Model{ID: p.ID},
 		DisplayName: p.DisplayName,

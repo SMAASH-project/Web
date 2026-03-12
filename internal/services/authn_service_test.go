@@ -52,26 +52,26 @@ func TestLogin(t *testing.T) {
 		Email:        "doesnt@exist.com",
 		PasswordHash: "secure123",
 	}
-	token, id, err := authService.Login(context.Background(), &phonyUser)
+	token, user, err := authService.Login(context.Background(), &phonyUser)
 
 	assert.Nil(t, token, "Non-existing user shouldn't recieve a token")
-	assert.Equal(t, uint(0), id, "Non-existing user shouldn't have a valid id")
+	assert.Nil(t, user, "Logging in non-existing user should return a nil user")
 	assert.NotNil(t, err, "Logging in non-existing user should produce an error")
 
 	correctPass := "password1234"
 	correctUser, err := authService.SignUp(context.Background(), &models.User{Email: "test@test.com", PasswordHash: correctPass})
 
 	// Wrong password
-	token, id, err = authService.Login(context.Background(), &models.User{Email: correctUser.Email, PasswordHash: "wrongpass1234"})
+	token, user, err = authService.Login(context.Background(), &models.User{Email: correctUser.Email, PasswordHash: "wrongpass1234"})
 	assert.Nil(t, token, "Attempting login with wrong password shouldn't yield a token")
-	assert.Equal(t, uint(0), id, "Attempting login with wrong password should return a 0 id")
+	assert.Nil(t, user, "Attempting login with wrong password should return a nil user")
 	assert.NotNil(t, err, "Attempting login with wring password sould produce an error")
 
 	// Correct login
-	token, id, err = authService.Login(context.Background(), &models.User{Email: correctUser.Email, PasswordHash: correctPass})
+	token, user, err = authService.Login(context.Background(), &models.User{Email: correctUser.Email, PasswordHash: correctPass})
 	assert.NotNil(t, token, "Successful login should produce a token")
-	assert.NotEqual(t, 0, id, "Successful login should return a valid id")
-	assert.Equal(t, utils.Must(mockUserRepo.ReadByEmail(context.Background(), correctUser.Email)).ID, id, "Successful login should return the correct id")
+	assert.NotEqual(t, 0, user.ID, "Successful login should return a valid id")
+	assert.Equal(t, utils.Must(mockUserRepo.ReadByEmail(context.Background(), correctUser.Email)).ID, user.ID, "Successful login should return the correct id")
 	assert.Nil(t, err, "Successful login shouldn't produce an error")
 
 	parsedToken, err := jwt.Parse(*token, func(token *jwt.Token) (any, error) {
@@ -80,7 +80,7 @@ func TestLogin(t *testing.T) {
 
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 
-	assert.Equal(t, id, uint(claims["sub"].(float64)), "Successful login should return a token with the logged is user's id in the sub field")
+	assert.Equal(t, user.ID, uint(claims["sub"].(float64)), "Successful login should return a token with the logged is user's id in the sub field")
 	assert.True(t, ok, "Successful login should return a token in valid format")
 	assert.True(t, parsedToken.Valid, "Successful login should return a valid token")
 }

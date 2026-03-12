@@ -8,9 +8,11 @@ import (
 
 type Purchase struct {
 	gorm.Model
-	PlayerProfileID uint      `gorm:"not null"`
+	PlayerProfileID uint `gorm:"not null"`
+	ItemID          uint `gorm:"not null"`
+	Item            Item
+	Count           int       `gorm:"not null"`
 	Date            time.Time `gorm:"not null"`
-	Items           []*Item   `gorm:"many2many:purchase_items"`
 }
 
 func (p Purchase) GetID() uint {

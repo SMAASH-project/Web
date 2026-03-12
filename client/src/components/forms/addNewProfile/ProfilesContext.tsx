@@ -1,4 +1,10 @@
-import React, { createContext, useContext } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  // useCallback,
+} from "react";
 import type { Profile, ProfileContextType } from "./ProfilesTypes";
 import { AuthContext } from "@/context/AuthContext";
 import {
@@ -22,51 +28,45 @@ const ProfileContext = createContext<ProfileContextType>(defaultProfileContext);
 export { ProfileContext };
 
 export function ProfileProvider({ children }: { children: React.ReactNode }) {
-  const authContext = useContext(AuthContext);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
 
-  const userId = authContext?.userId;
-  const parsedUserId = userId ? Number(userId) : null;
-  const numUserId =
-    typeof parsedUserId === "number" && Number.isFinite(parsedUserId)
-      ? parsedUserId
-      : null;
+  const { userId } = useContext(AuthContext);
 
-  // Query for fetching profiles
-  const { data: profileResponses } = useProfilesQuery(numUserId);
+  console.warn("User: ", userId);
+  console.warn("Profiles: ", profiles);
 
-  // Mutations for profile operations
-  const addProfileMutation = useAddProfileMutation();
-  const updateProfileMutation = useUpdateProfileMutation();
-  const deleteProfileMutation = useDeleteProfileMutation();
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      if (userId === null) return;
 
-  // Transform ProfileResponse[] to Profile[]
-  const profiles: Profile[] = (profileResponses || []).map(
-    (pr: ProfileResponse) => ({
-      id: pr.id,
-      name: pr.display_name,
-      avatar: "", // Backend doesn't return avatar, use empty string
-      coins: pr.coins,
-    }),
-  );
+      try {
+        const { data, ok } = await apiGetProfilesByUserId(Number(userId));
 
-  // Local state for selected profile (UI state, not server state)
-  const [selectedProfile, setSelectedProfile] = React.useState<Profile | null>(
-    null,
-  );
+        if (!ok || !data) return;
 
-  // Sync selected profile when profiles list changes
-  React.useEffect(() => {
-    if (profiles.length === 0) {
-      setSelectedProfile(null);
-    } else if (
-      !selectedProfile ||
-      !profiles.find((p) => p.id === selectedProfile.id)
-    ) {
-      // Re-select first profile if current selection is invalid
-      setSelectedProfile(profiles[0] || null);
+        const fetched: Profile[] = data.map((p) => ({
+          id: p.id,
+          name: p.display_name,
+          avatar: "",
+        }));
+
+        setProfiles(fetched);
+        if (fetched.length > 0) {
+          setSelectedProfile(fetched[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching profiles:", error);
+      }
     }
-  }, [profiles, selectedProfile]);
+    fetchProfiles();
+  }, [userId]);
 
+  // useEffect(() => {
+  //   fetchProfiles();
+  // }, [fetchProfiles]);
+
+  // Posts to the server via the centralized API, then updates local state on success.
   const addProfile = async (profile: Profile) => {
     if (!numUserId) {
       throw new Error("User is not logged in");
