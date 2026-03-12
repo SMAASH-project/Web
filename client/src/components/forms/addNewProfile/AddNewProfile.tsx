@@ -14,7 +14,6 @@ import { Label } from "@/components/ui/label";
 import { generateRandomUsername } from "@/lib/GenerateRandomUsername";
 import { useProfiles } from "./useProfiles";
 import { useEffect, useState } from "react";
-import SlimeArt from "../../../assets/SlimeArt.png";
 
 interface AddNewProfileProps {
   open: boolean;
@@ -54,7 +53,7 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
-  const [profilePicture, setProfilePicture] = useState(SlimeArt);
+  const [profilePicture, setProfilePicture] = useState<File | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,11 +83,15 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
     try {
       setIsSubmitting(true);
       setError(null);
-      await addProfile({ name: normalizedUsername, avatar: profilePicture });
+      await addProfile({
+        name: normalizedUsername,
+        avatar: "",
+        avatarFile: profilePicture,
+      });
       onOpenChange(false);
       // Prepare a fresh suggestion for the next time the dialog opens.
       setUsername("");
-      setProfilePicture(SlimeArt);
+      setProfilePicture(null);
     } catch (err) {
       console.error("Failed to add profile:", err);
       setError("Failed to save profile. Please try again.");
@@ -141,7 +144,7 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
                 onChange={(e) => {
                   if (e.target.files) {
                     const file = e.target.files[0];
-                    setProfilePicture(URL.createObjectURL(file));
+                    setProfilePicture(file ?? null);
                   }
                 }}
               />

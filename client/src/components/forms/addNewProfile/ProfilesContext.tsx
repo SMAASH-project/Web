@@ -10,7 +10,6 @@ import { AuthContext } from "@/context/AuthContext";
 import {
   useProfilesQuery,
   useAddProfileMutation,
-  useUpdateProfileMutation,
   useDeleteProfileMutation,
   type ProfileResponse,
 } from "@/hooks/useQueryHooks";
@@ -37,7 +36,6 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
 
   const { data: fetchedProfiles = [] } = useProfilesQuery(numUserId);
   const addProfileMutation = useAddProfileMutation();
-  const updateProfileMutation = useUpdateProfileMutation();
   const deleteProfileMutation = useDeleteProfileMutation();
 
   const profiles = useMemo<Profile[]>(
@@ -45,7 +43,7 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
       fetchedProfiles.map((p: ProfileResponse) => ({
         id: p.id,
         name: p.display_name,
-        avatar: "",
+        avatar: p.avatar_url ?? `/api/profiles/${p.id}/pfp`,
         coins: p.coins,
       })),
     [fetchedProfiles],
@@ -63,9 +61,6 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     return profiles.find((p) => p.id === selectedProfileId) ?? profiles[0];
   }, [profiles, selectedProfileId]);
 
-  console.warn("User: ", userId);
-  console.warn("Profiles: ", profiles);
-
   // useEffect(() => {
   //   fetchProfiles();
   // }, [fetchProfiles]);
@@ -79,6 +74,7 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     await addProfileMutation.mutateAsync({
       display_name: profile.name,
       user_id: numUserId,
+      profile_picture: profile.avatarFile ?? null,
     });
 
     // No return needed - mutations handle cache invalidation
@@ -86,26 +82,13 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
 
   const removeProfile = async (name: string) => {
     const profile = profiles.find((p) => p.name === name);
-    if (!profile || !profile.id) return;
+    if (!profile || !profile.id || !numUserId) return;
 
     try {
-      // Rename to tombstone first (without optimistic rename in UI),
-      // then delete optimistically so tombstone text never flashes.
-      const tombstoneName =
-        `del_${profile.id}_${Date.now().toString(36)}`.slice(0, 20);
-
-      await updateProfileMutation.mutateAsync({
+      await deleteProfileMutation.mutateAsync({
         profileId: profile.id,
-        payload: {
-          id: profile.id,
-          display_name: tombstoneName,
-          coins: profile.coins ?? 0,
-        },
-        optimistic: false,
-        invalidateAfterSuccess: false,
+        userId: numUserId,
       });
-
-      await deleteProfileMutation.mutateAsync(profile.id);
     } catch (error) {
       console.error("Error deleting profile:", error);
       throw error;

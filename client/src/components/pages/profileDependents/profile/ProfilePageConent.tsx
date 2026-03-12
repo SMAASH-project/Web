@@ -14,10 +14,12 @@ import {
   getTextColor,
 } from "@/lib/utils";
 import { useProfiles } from "@/components/forms/addNewProfile/useProfiles";
+import { useUploadProfilePictureMutation } from "@/hooks/useQueryHooks";
 
 export function ProfilePageContent() {
   const pfpinputRef = useRef<HTMLInputElement>(null);
   const { selectedProfile } = useProfiles();
+  const uploadProfilePictureMutation = useUploadProfilePictureMutation();
   // local avatarSrc is only used when the user picks a local file (blob)
   // otherwise we display the selectedProfile.avatar
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
@@ -31,14 +33,28 @@ export function ProfilePageContent() {
     };
   }, [avatarSrc]);
 
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (!selectedProfile?.id) {
+      return;
+    }
+
     const url = URL.createObjectURL(file);
     setAvatarSrc((prev) => {
       if (prev && prev.startsWith("blob:")) URL.revokeObjectURL(prev);
       return url;
     });
+
+    try {
+      await uploadProfilePictureMutation.mutateAsync({
+        profileId: selectedProfile.id,
+        file,
+      });
+    } catch (error) {
+      console.error("Failed to upload profile picture:", error);
+    }
   };
 
   const bgClass = getBackgroundClasses(
