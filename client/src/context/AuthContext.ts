@@ -10,8 +10,8 @@ export const AuthContext = createContext<{
 }>({
   isLoggedIn: false,
   userId: null,
-  setUserId: () => {},
-  setIsLoggedIn: () => {},
+  setUserId: () => { },
+  setIsLoggedIn: () => { },
   isAdmin: false,
-  setIsAdmin: () => {},
+  setIsAdmin: () => { },
 });

@@ -27,6 +27,16 @@ func NewGameAuthController(
 	}
 }
 
+// @description Logs a user into the game
+// @tags game-auth
+// @accept json
+// @produce json
+// @param user_login_dto body dtos.UserLoginDTO true "dto for logging in a user"
+// @success 200 {int} int "returns the id of the logged in user"
+// @failure 400 {object} dtos.ErrResp "request body in wrong format"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /game-login [post]
 func (g GameAuthController) GameLogin(c *gin.Context) {
 	var body dtos.UserLoginDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -76,6 +86,16 @@ func (g GameAuthController) GameLogin(c *gin.Context) {
 	})
 }
 
+// @description Asks for a refresh token
+// @tags game-auth
+// @accept json
+// @produce json
+// @param user_login_dto body dtos.TokenRefreshRequest true "dto for asking fo a refresh token"
+// @success 200 {int} int "returns the new access and refresh tokens"
+// @failure 400 {object} dtos.ErrResp "request body in wrong format"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /game-refresh [post]
 func (g GameAuthController) Refresh(c *gin.Context) {
 	var body dtos.TokenRefreshRequest
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -152,11 +172,11 @@ func (g GameAuthController) issueGameTokens(userID uint, email string) (string, 
 	now := time.Now()
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userID": userID,
-		"email":  email,
-		"type":   "access",
-		"iat":    now.Unix(),
-		"exp":    now.Add(15 * time.Minute).Unix(),
+		"sub":   userID,
+		"email": email,
+		"type":  "access",
+		"iat":   now.Unix(),
+		"exp":   now.Add(15 * time.Minute).Unix(),
 	})
 
 	accessTokenString, err := accessToken.SignedString([]byte(secret))
@@ -165,11 +185,11 @@ func (g GameAuthController) issueGameTokens(userID uint, email string) (string, 
 	}
 
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userID": userID,
-		"email":  email,
-		"type":   "refresh",
-		"iat":    now.Unix(),
-		"exp":    now.Add(7 * 24 * time.Hour).Unix(),
+		"sub":   userID,
+		"email": email,
+		"type":  "refresh",
+		"iat":   now.Unix(),
+		"exp":   now.Add(7 * 24 * time.Hour).Unix(),
 	})
 
 	refreshTokenString, err := refreshToken.SignedString([]byte(secret))

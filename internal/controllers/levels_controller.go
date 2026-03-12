@@ -21,6 +21,17 @@ func NewLevelsController(levelsBaseRepo repository.BaseRepository[models.Level])
 	return &LevelsController{levelsBaseRepo: levelsBaseRepo}
 }
 
+// @description Creates a new level
+// @tags levels
+// @accept json
+// @produce json
+// @param level_create_dto body dtos.LevelCreateDTO true "dto for creating a new level"
+// @success 201 {object} dtos.LevelReadDTO "returns newly created level"
+// @failure 400 {object} dtos.ErrResp "request body in wrong format"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 409 {object} dtos.ErrResp "unique key violation"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /levels [post]
 func (lc *LevelsController) Create(c *gin.Context) {
 	var body dtos.LevelCreateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -41,6 +52,14 @@ func (lc *LevelsController) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, dtos.LevelToDTO(*newLevel))
 }
 
+// @description Reads all levels
+// @tags levels
+// @accept json
+// @produce json
+// @success 200 {array} dtos.LevelReadDTO "returns all levels"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /levels [get]
 func (lc *LevelsController) ReadAll(c *gin.Context) {
 	levels, err := lc.levelsBaseRepo.ReadAll(c.Request.Context())
 	if err != nil {
@@ -50,6 +69,16 @@ func (lc *LevelsController) ReadAll(c *gin.Context) {
 	c.JSON(http.StatusOK, utils.Map(levels, dtos.LevelToDTO))
 }
 
+// @description Reads a level by it's id
+// @tags levels
+// @accept json
+// @produce json
+// @param id path int true "the id of the desired level"
+// @success 200 {object} dtos.LevelReadDTO "returns the desired level"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /levels/{id} [get]
 func (lc *LevelsController) ReadByID(c *gin.Context) {
 	id, _ := c.Get("id")
 
@@ -65,6 +94,20 @@ func (lc *LevelsController) ReadByID(c *gin.Context) {
 	c.JSON(http.StatusOK, dtos.LevelToDTO(level))
 }
 
+// @description Updates the level with the given id
+// @tags levels
+// @accept json
+// @produce json
+// @param level_update_dto body dtos.LevelUpdateDTO true "dto for updating a level"
+// @param id path int true "id of desired level"
+// @success 204 {} nil "doesn't return anything"
+// @failure 400 {object} dtos.ErrResp "request body in wrong format"
+// @failure 400 {object} dtos.ErrResp "id from url and id from request body doesn't match"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 409 {object} dtos.ErrResp "unique key violation"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /levels/{id} [put]
 func (lc *LevelsController) Update(c *gin.Context) {
 	id, _ := c.Get("id")
 
@@ -95,6 +138,16 @@ func (lc *LevelsController) Update(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// @description Deletes a level with the given id
+// @tags levels
+// @accept json
+// @produce json
+// @param id path int true "id of desired level"
+// @success 204 {} nil "doesn't return anything"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /levels/{id} [delete]
 func (lc *LevelsController) Delete(c *gin.Context) {
 	id, _ := c.Get("id")
 

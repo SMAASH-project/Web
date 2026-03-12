@@ -11,3 +11,7 @@ type Level struct {
 func (l Level) GetID() uint {
 	return l.ID
 }
+
+func (l Level) SetURIField(target string) {
+	l.ImgURI = target
+}
