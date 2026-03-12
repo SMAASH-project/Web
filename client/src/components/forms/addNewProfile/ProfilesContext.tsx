@@ -1,8 +1,8 @@
 import React, {
   createContext,
   useContext,
+  useMemo,
   useState,
-  useEffect,
   // useCallback,
 } from "react";
 import type { Profile, ProfileContextType } from "./ProfilesTypes";
@@ -28,39 +28,43 @@ const ProfileContext = createContext<ProfileContextType>(defaultProfileContext);
 export { ProfileContext };
 
 export function ProfileProvider({ children }: { children: React.ReactNode }) {
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
+  const [selectedProfileId, setSelectedProfileId] = useState<number | null>(
+    null,
+  );
 
   const { userId } = useContext(AuthContext);
+  const numUserId = userId !== null ? Number(userId) : null;
+
+  const { data: fetchedProfiles = [] } = useProfilesQuery(numUserId);
+  const addProfileMutation = useAddProfileMutation();
+  const updateProfileMutation = useUpdateProfileMutation();
+  const deleteProfileMutation = useDeleteProfileMutation();
+
+  const profiles = useMemo<Profile[]>(
+    () =>
+      fetchedProfiles.map((p: ProfileResponse) => ({
+        id: p.id,
+        name: p.display_name,
+        avatar: "",
+        coins: p.coins,
+      })),
+    [fetchedProfiles],
+  );
+
+  const selectedProfile = useMemo<Profile | null>(() => {
+    if (profiles.length === 0) {
+      return null;
+    }
+
+    if (selectedProfileId === null) {
+      return profiles[0];
+    }
+
+    return profiles.find((p) => p.id === selectedProfileId) ?? profiles[0];
+  }, [profiles, selectedProfileId]);
 
   console.warn("User: ", userId);
   console.warn("Profiles: ", profiles);
-
-  useEffect(() => {
-    const fetchProfiles = async () => {
-      if (userId === null) return;
-
-      try {
-        const { data, ok } = await apiGetProfilesByUserId(Number(userId));
-
-        if (!ok || !data) return;
-
-        const fetched: Profile[] = data.map((p) => ({
-          id: p.id,
-          name: p.display_name,
-          avatar: "",
-        }));
-
-        setProfiles(fetched);
-        if (fetched.length > 0) {
-          setSelectedProfile(fetched[0]);
-        }
-      } catch (error) {
-        console.error("Error fetching profiles:", error);
-      }
-    }
-    fetchProfiles();
-  }, [userId]);
 
   // useEffect(() => {
   //   fetchProfiles();
@@ -110,7 +114,7 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
 
   const selectProfile = (name: string) => {
     const found = profiles.find((p) => p.name === name) || null;
-    setSelectedProfile(found);
+    setSelectedProfileId(found?.id ?? null);
   };
 
   return (
