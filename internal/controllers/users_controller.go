@@ -220,6 +220,22 @@ func (uc *UserController) ReadUsersProfiles(c *gin.Context) {
 	c.JSON(http.StatusOK, utils.Map(profiles, dtos.PlayerProfileToReadDTO))
 }
 
+func (uc UserController) WhoAmI(c *gin.Context) {
+	caller_id, _ := c.Get("caller_id")
+	user, err := uc.userRepo.ReadByID(c.Request.Context(), caller_id.(uint), "Role")
+	path := c.Request.URL.Path
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("user with id provided in token doesn't exist", path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	c.JSON(http.StatusOK, dtos.UserToDTO(user))
+}
+
 func (uc UserController) MountRoutes(apiGroup *gin.RouterGroup) {
 	users := apiGroup.Group("/users")
 	users.Use(middlewares.Authorize)
@@ -230,5 +246,6 @@ func (uc UserController) MountRoutes(apiGroup *gin.RouterGroup) {
 		users.DELETE("/:id", middlewares.ValidateUrl, uc.Delete)
 		users.POST("/:id/profiles", middlewares.ValidateUrl, uc.AddProfileToUser)
 		users.GET("/:id/profiles", middlewares.ValidateUrl, uc.ReadUsersProfiles)
+		users.GET("/whoami", uc.WhoAmI)
 	}
 }

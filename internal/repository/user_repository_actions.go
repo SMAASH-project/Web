@@ -9,7 +9,7 @@ import (
 
 type UserRepository interface {
 	BaseRepository[models.User]
-	ReadByEmail(context.Context, string) (models.User, error)
+	ReadByEmail(context.Context, string, ...string) (models.User, error)
 	ReadUsersProfiles(c context.Context, userID uint) ([]models.PlayerProfile, error)
 }
 
@@ -25,8 +25,12 @@ func NewUserRepositoryActions(conn *gorm.DB) UserRepository {
 	}
 }
 
-func (ura UserRepositoryActions) ReadByEmail(c context.Context, email string) (models.User, error) {
-	return gorm.G[models.User](ura.conn).Where("email = ?", email).First(c)
+func (ura UserRepositoryActions) ReadByEmail(c context.Context, email string, preloads ...string) (models.User, error) {
+	query := gorm.G[models.User](ura.conn).Where("email = ?", email)
+	for _, preload := range preloads {
+		query = query.Preload(preload, nil)
+	}
+	return query.First(c)
 }
 
 func (ura UserRepositoryActions) ReadUsersProfiles(c context.Context, userID uint) ([]models.PlayerProfile, error) {

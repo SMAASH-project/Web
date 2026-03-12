@@ -2,7 +2,7 @@ package server
 
 import (
 	"net/http"
-	"smaash-web/docs"
+	"smaash-web/docs/swagger"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -29,7 +29,7 @@ func (s *Server) MountRoutes() *Server {
 		c.MountRoutes(api)
 	}
 
-	docs.SwaggerInfo.BasePath = "/api"
+	swagger.SwaggerInfo.BasePath = "/api"
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	// SPA fallback

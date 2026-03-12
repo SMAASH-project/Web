@@ -78,7 +78,7 @@ func (pc PlayerProfileController) ReadByID(c *gin.Context) {
 // @router /profiles [post]
 func (pc PlayerProfileController) Create(c *gin.Context) {
 	path := c.Request.URL.Path
-	var body dtos.PlayerProfileCreateDto
+	var body dtos.PlayerProfileCreateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), path))
 	}
@@ -114,7 +114,7 @@ func (pc PlayerProfileController) Update(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
 
-	var body dtos.PlayerProfileUpdateDto
+	var body dtos.PlayerProfileUpdateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), path))
 		return
@@ -167,6 +167,51 @@ func (pc PlayerProfileController) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+func (pc PlayerProfileController) UploadPFP(c *gin.Context) {
+	path := c.Request.URL.Path
+	id, _ := c.Get("id")
+
+	file, err := c.FormFile("profilePicture")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dtos.NewErrResp("No file uploaded", path))
+		return
+	}
+
+	uri, err := utils.SaveFileToDisc(c, file)
+	if err != nil {
+		if errors.Is(err, utils.ErrUnsupportedMediaType) {
+			c.JSON(http.StatusUnsupportedMediaType, dtos.NewErrResp(err.Error(), path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	if err := pc.profilesBaseRepo.UpdateOne(c.Request.Context(), id.(uint), "pfp_uri", uri); err != nil {
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	c.String(http.StatusCreated, "uri")
+}
+
+func (pc PlayerProfileController) GetPFP(c *gin.Context) {
+	path := c.Request.URL.Path
+	id, _ := c.Get("id")
+
+	profile, err := pc.profilesBaseRepo.ReadByID(c.Request.Context(), id.(uint))
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("Profile with given if not found", path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	c.File(profile.PfpUri)
+}
+
 func (pc PlayerProfileController) MountRoutes(apiGroup *gin.RouterGroup) {
 	profiles := apiGroup.Group("/profiles")
 	profiles.Use(middlewares.Authorize)
@@ -175,4 +220,6 @@ func (pc PlayerProfileController) MountRoutes(apiGroup *gin.RouterGroup) {
 	profiles.POST("", pc.Create)
 	profiles.PUT("/:id", middlewares.ValidateUrl, pc.Update)
 	profiles.DELETE("/:id", middlewares.ValidateUrl, pc.Delete)
+	profiles.POST("/:id/pfp", middlewares.ValidateUrl, pc.UploadPFP)
+	profiles.GET("/:id/pfp", middlewares.ValidateUrl, pc.GetPFP)
 }

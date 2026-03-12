@@ -21,3 +21,7 @@ type PlayerProfile struct {
 func (pp PlayerProfile) GetID() uint {
 	return pp.ID
 }
+
+func (pp PlayerProfile) SetURIField(target string) {
+	pp.PfpUri = target
+}
