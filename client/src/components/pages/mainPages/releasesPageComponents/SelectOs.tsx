@@ -3,6 +3,11 @@ import { useSettings } from "../../profileDependents/settings/settingsLogic/Sett
 import AppleLogo from "@/assets/osLogos/AppleLogoTransparent.svg?url";
 import AndroidLogo from "@/assets/osLogos/AndroidLogoTransparent.png";
 import { useState, useEffect, useRef, useCallback } from "react";
+import {
+  getLiquidGlassNavHighlight,
+  getBackgroundClasses,
+  getTextColor,
+} from "@/lib/utils";
 
 const osLogos: Record<string, string> = {
   iOS: AppleLogo,
@@ -18,6 +23,12 @@ export function SelectOs({
 }) {
   const { settings } = useSettings();
   const glass = settings.useLiquidGlass;
+  const bgClass = getBackgroundClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+    "light",
+  );
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
   const containerRef = useRef<HTMLDivElement>(null);
   const [highlightPos, setHighlightPos] = useState({ left: 0, width: 0 });
   const [isHovering, setIsHovering] = useState(false);
@@ -64,16 +75,18 @@ export function SelectOs({
   return (
     <div
       ref={containerRef}
-      className={`relative flex flex-row gap-1 p-1 rounded-xl ${
+      className={`relative flex flex-row gap-1 p-1 rounded-xl ${bgClass} border ${
         glass
-          ? "bg-white/15 backdrop-blur-lg border border-white/20"
-          : "bg-gray-700/60 border border-gray-600"
+          ? settings.useDarkMode
+            ? "border-black/20"
+            : "border-white/20"
+          : "border-gray-600"
       }`}
       onMouseLeave={handleMouseLeave}
     >
       {glass && (
         <div
-          className="absolute bg-white/25 rounded-lg shadow-sm shadow-white/20 transition-all duration-300 ease-out pointer-events-none"
+          className={`absolute rounded-lg shadow-sm transition-all duration-300 ease-out pointer-events-none ${getLiquidGlassNavHighlight(glass, settings.useDarkMode)} ${glass ? (settings.useDarkMode ? "shadow-black/20" : "shadow-white/20") : ""}`}
           style={{
             left: `${highlightPos.left}px`,
             width: `${highlightPos.width}px`,
@@ -94,7 +107,7 @@ export function SelectOs({
             className={`relative z-10 flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition-colors duration-200 ${
               !glass
                 ? isSelected
-                  ? "bg-green-600 shadow-md"
+                  ? "bg-(--theme-accent) hover:bg-(--theme-accent-hover) shadow-md"
                   : "hover:bg-gray-600"
                 : ""
             }`}
@@ -105,7 +118,7 @@ export function SelectOs({
               className="w-5 h-5 object-contain pointer-events-none select-none"
             />
             <span
-              className={`text-sm font-medium text-white transition-opacity ${
+              className={`text-sm font-medium ${textColor} transition-opacity ${
                 isSelected && !isHovering
                   ? "opacity-100"
                   : isHovering

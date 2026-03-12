@@ -11,35 +11,66 @@ import {
 } from "@/components/ui/dialog";
 import { Trash2 } from "lucide-react";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
+import {
+  getButtonClasses,
+  getDialogClasses,
+  getDialogFooterClasses,
+  getTextShadow,
+  getSubtextColor,
+} from "@/lib/utils";
 
 export function RemoveButton({ onConfirm }: { onConfirm?: () => void }) {
   const { settings } = useSettings();
+  const buttonClass = getButtonClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+    "primary",
+  );
+  const dialogClass = getDialogClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const footerClass = getDialogFooterClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const subtextColor = getSubtextColor(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
 
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button
-          className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30" : ""} cursor-pointer`}
+          className={`${buttonClass} ${textShadow} rounded-lg cursor-pointer`}
         >
           <Trash2 />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className={`${dialogClass} ${textShadow}`}>
         <DialogHeader>
-          <DialogTitle>Confirm Action</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className={textShadow}>Confirm Action</DialogTitle>
+          <DialogDescription className={subtextColor}>
             Are you sure you want to perform this action?
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter>
+        <DialogFooter className={footerClass}>
           <DialogClose asChild>
-            <Button variant="outline" className="cursor-pointer">
+            <Button
+              variant="outline"
+              className={`cursor-pointer ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "outline")} ${textShadow}`}
+            >
               Cancel
             </Button>
           </DialogClose>
           <DialogClose asChild>
             <Button
-              className="cursor-pointer"
+              className={`cursor-pointer ${textShadow}`}
               variant="destructive"
               onClick={() => {
                 onConfirm?.();

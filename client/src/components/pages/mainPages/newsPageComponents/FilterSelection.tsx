@@ -8,6 +8,8 @@ import {
 } from "@/components/ui/field";
 import type { NewsPost } from "@/types/PageTypes";
 import { NEWS_FILTER_OPTIONS } from "./newsPageLogic/useNewsCategoryFilter";
+import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
+import { getSubtextColor } from "@/lib/utils";
 
 interface FilterSelectionProps {
   selectedByCategory: Record<NewsPost["category"], boolean>;
@@ -18,9 +20,15 @@ export function FilterSelection({
   selectedByCategory,
   onCategoryChange,
 }: FilterSelectionProps) {
+  const { settings } = useSettings();
+  const subtextColor = getSubtextColor(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+
   return (
     <FieldSet>
-      <FieldDescription>
+      <FieldDescription className={`${subtextColor}`}>
         Select which types of news posts you want to see.
       </FieldDescription>
       <FieldGroup className="gap-3">
@@ -43,7 +51,7 @@ export function FilterSelection({
               >
                 {option.label}
                 {option.description ? (
-                  <span className="text-xs text-muted-foreground">
+                  <span className={`text-xs ${subtextColor}`}>
                     ({option.description})
                   </span>
                 ) : null}

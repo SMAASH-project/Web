@@ -1,12 +1,20 @@
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { formatDateTime } from "@/lib/utils";
+import {
+  formatDateTime,
+  getBackgroundClasses,
+  getTextShadow,
+  getTextColor,
+  getSubtextColor,
+} from "@/lib/utils";
 import { LoadPost } from "@/lib/pageAnimations/newsPageAnimations/LoadPost";
 import { RemoveReleaseButton } from "./RemoveReleaseButton";
 import { DownloadReleaseButton } from "./DownloadReleaseButton";
 import type { Release } from "@/types/PageTypes";
 import { Package, Loader2 } from "lucide-react";
+import { useContext } from "react";
+import { AuthContext } from "@/context/AuthContext";
 
 const VERSION_TYPE_COLORS: Record<string, string> = {
   major: "#3b82f6",
@@ -41,19 +49,29 @@ export function Releases({
   handleRemove,
 }: ReleasesProps) {
   const { settings } = useSettings();
-  const IsAdmin = true; // Replace with actual admin check
+  const { isAdmin } = useContext(AuthContext);
   const glass = settings.useLiquidGlass;
+  const bgClass = getBackgroundClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+    "light",
+  );
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const subtextColor = getSubtextColor(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
 
   return (
     <div className="flex flex-col gap-3 w-full" ref={containerRef}>
       {visibleReleases.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 mt-16 opacity-60">
-          <Package className="w-12 h-12 text-white/40" />
-          <p
-            className={`text-white/60 text-base ${
-              glass ? "[text-shadow:0_1px_3px_rgba(163,163,163,0.3)]" : ""
-            }`}
-          >
+          <Package className={`w-12 h-12 ${subtextColor}`} />
+          <p className={`${subtextColor} text-base ${textShadow}`}>
             No releases found for {selectedOs}.
           </p>
         </div>
@@ -64,10 +82,12 @@ export function Releases({
 
           const cardContent = (
             <Card
-              className={`group relative overflow-hidden p-0 transition-all duration-200 ${
+              className={`group relative overflow-hidden p-0 transition-all duration-200 ${bgClass} border shadow-lg ${
                 glass
-                  ? "bg-white/10 backdrop-blur-lg border border-white/15 shadow-lg shadow-black/5 hover:bg-white/15 hover:border-white/25"
-                  : "bg-gray-800/80 border border-gray-700 hover:border-gray-600 hover:bg-gray-800"
+                  ? settings.useDarkMode
+                    ? "border-black/15 shadow-black/20 hover:border-black/25"
+                    : "border-white/15 shadow-black/5 hover:border-white/25"
+                  : "border-gray-700 hover:border-gray-600"
               }`}
             >
               {/* Accent bar on left */}
@@ -81,19 +101,19 @@ export function Releases({
                 <div className="flex items-center gap-4 min-w-0">
                   <div
                     className={`flex items-center justify-center w-10 h-10 rounded-lg shrink-0 ${
-                      glass ? "bg-white/10" : "bg-gray-700/60"
+                      glass
+                        ? settings.useDarkMode
+                          ? "bg-black/10"
+                          : "bg-white/10"
+                        : "bg-gray-700/60"
                     }`}
                   >
-                    <Package className="w-5 h-5 text-white/70" />
+                    <Package className={`w-5 h-5 ${subtextColor}`} />
                   </div>
                   <div className="flex flex-col gap-1 min-w-0">
                     <div className="flex items-center gap-2.5">
                       <span
-                        className={`text-base font-semibold text-white tracking-tight ${
-                          glass
-                            ? "[text-shadow:0_1px_4px_rgba(163,163,163,0.4)]"
-                            : ""
-                        }`}
+                        className={`text-base font-semibold ${textColor} tracking-tight ${textShadow}`}
                       >
                         v{release.version}
                       </span>
@@ -112,19 +132,13 @@ export function Releases({
                       {release.supports.map((os) => (
                         <span
                           key={os}
-                          className="text-xs text-white/40 font-medium"
+                          className={`text-xs ${subtextColor} font-medium`}
                         >
                           {os}
                         </span>
                       ))}
-                      <span className="text-xs text-white/25">·</span>
-                      <span
-                        className={`text-xs text-white/40 ${
-                          glass
-                            ? "[text-shadow:0_1px_2px_rgba(163,163,163,0.2)]"
-                            : ""
-                        }`}
-                      >
+                      <span className={`text-xs ${subtextColor}`}>·</span>
+                      <span className={`text-xs ${subtextColor} ${textShadow}`}>
                         {formatDateTime(release.createdAt)}
                       </span>
                     </div>
@@ -134,7 +148,7 @@ export function Releases({
                 {/* Right: actions */}
                 <div className="flex items-center gap-1.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
                   <DownloadReleaseButton version={release.version} />
-                  {IsAdmin && (
+                  {isAdmin && (
                     <RemoveReleaseButton
                       onConfirm={() => handleRemove(release.id)}
                     />
@@ -160,7 +174,7 @@ export function Releases({
           className="flex items-center justify-center py-4 w-full shrink-0"
         >
           {isLoading && (
-            <Loader2 className="w-5 h-5 text-white/40 animate-spin" />
+            <Loader2 className={`w-5 h-5 ${subtextColor} animate-spin`} />
           )}
         </div>
       )}

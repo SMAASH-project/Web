@@ -15,10 +15,45 @@ import { Label } from "@/components/ui/label";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
 import { Search as SearchIcon } from "lucide-react";
 import { useState } from "react";
+import {
+  getButtonClasses,
+  getInputClasses,
+  getDialogClasses,
+  getDialogFooterClasses,
+  getTextShadow,
+  getSubtextColor,
+  getTextColor,
+} from "@/lib/utils";
 
 export function Search({ onSearch }: { onSearch: (query: string) => void }) {
   const { settings } = useSettings();
   const [query, setQuery] = useState("");
+  const buttonClass = getButtonClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+    "primary",
+  );
+  const inputClass = getInputClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const dialogClass = getDialogClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const footerClass = getDialogFooterClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const subtextColor = getSubtextColor(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
 
   const handleSearch = () => {
     onSearch(query);
@@ -28,15 +63,17 @@ export function Search({ onSearch }: { onSearch: (query: string) => void }) {
     <Dialog>
       <DialogTrigger asChild>
         <Button
-          className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30" : ""} cursor-pointer`}
+          className={`${buttonClass} ${textShadow} rounded-lg cursor-pointer`}
         >
           <SearchIcon />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className={`${dialogClass} ${textShadow}`}>
         <DialogHeader>
-          <DialogTitle>Search News</DialogTitle>
-          <DialogDescription>Type to search posts by title</DialogDescription>
+          <DialogTitle className={textColor}>Search News</DialogTitle>
+          <DialogDescription className={subtextColor}>
+            Type to search posts by title
+          </DialogDescription>
         </DialogHeader>
         <FieldGroup>
           <Field>
@@ -45,19 +82,23 @@ export function Search({ onSearch }: { onSearch: (query: string) => void }) {
               placeholder="Search posts..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              className={inputClass}
             />
           </Field>
         </FieldGroup>
-        <DialogFooter>
+        <DialogFooter className={footerClass}>
           <Button
             variant="outline"
-            className="cursor-pointer"
+            className={`cursor-pointer ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "outline")} ${textShadow}`}
             onClick={handleSearch}
           >
             Search
           </Button>
           <DialogClose asChild>
-            <Button variant="outline" className="cursor-pointer">
+            <Button
+              variant="outline"
+              className={`cursor-pointer ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "outline")} ${textShadow}`}
+            >
               Close
             </Button>
           </DialogClose>

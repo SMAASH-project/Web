@@ -12,6 +12,14 @@ import {
   Paintbrush,
 } from "lucide-react";
 import { RemoveItemButton } from "./RemoveItemButton";
+import {
+  getBackgroundClasses,
+  getTextColor,
+  getTextShadow,
+  getSubtextColor,
+} from "@/lib/utils";
+import { useContext } from "react";
+import { AuthContext } from "@/context/AuthContext";
 
 const RARITY_COLORS: Record<string, string> = {
   Common: "#9ca3af",
@@ -29,9 +37,23 @@ interface ItemProps {
 
 export function Item({ item, onDelete, onUnlock }: ItemProps) {
   const { settings } = useSettings();
-  const isAdmin = true;
-  const glass = settings.useLiquidGlass;
+  const { isAdmin } = useContext(AuthContext);
   const rarityColor = RARITY_COLORS[item.rarity] ?? "#9ca3af";
+
+  const bgClass = getBackgroundClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+    "light",
+  );
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const subtextColor = getSubtextColor(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
 
   const handleUnlock = () => {
     onUnlock?.(item.id);
@@ -39,11 +61,14 @@ export function Item({ item, onDelete, onUnlock }: ItemProps) {
 
   return (
     <Card
-      className={`group relative overflow-hidden p-0 transition-all duration-200 h-full ${
-        glass
-          ? "bg-white/10 backdrop-blur-lg border border-white/15 shadow-lg shadow-black/5 hover:bg-white/15 hover:border-white/25 hover:shadow-xl hover:shadow-black/10"
-          : "bg-gray-800/80 border border-gray-700 hover:border-gray-600 hover:bg-gray-800"
-      } ${item.owned ? "ring-1 ring-green-500/30" : ""}`}
+      className={`group relative overflow-hidden p-0 transition-all duration-200 h-full ${bgClass} hover:shadow-xl`}
+      style={
+        item.owned
+          ? {
+              boxShadow: "inset 0 0 0 1px var(--theme-accent-soft)",
+            }
+          : undefined
+      }
     >
       {/* Admin delete button */}
       {isAdmin && onDelete && (
@@ -66,9 +91,7 @@ export function Item({ item, onDelete, onUnlock }: ItemProps) {
           }`}
         >
           <h3
-            className={`text-sm font-semibold text-white leading-tight ${
-              glass ? "[text-shadow:0_1px_4px_rgba(163,163,163,0.4)]" : ""
-            }`}
+            className={`text-sm font-semibold ${textColor} leading-tight ${textShadow}`}
           >
             {item.name}
           </h3>
@@ -86,15 +109,23 @@ export function Item({ item, onDelete, onUnlock }: ItemProps) {
 
         {/* Description */}
         <p
-          className={`text-xs text-white/50 leading-relaxed line-clamp-2 min-h-10 ${
-            glass ? "[text-shadow:0_1px_2px_rgba(163,163,163,0.2)]" : ""
-          }`}
+          className={`text-xs ${subtextColor} leading-relaxed line-clamp-2 min-h-10`}
         >
           {item.description}
         </p>
 
         {/* Footer: kind / combat type + price */}
-        <div className="flex items-center justify-between mt-auto pt-2 border-t border-white/10">
+        <div
+          className={`flex items-center justify-between mt-auto pt-2 border-t ${
+            settings.useLiquidGlass
+              ? settings.useDarkMode
+                ? "border-black/10"
+                : "border-white/10"
+              : settings.useDarkMode
+                ? "border-gray-700/50"
+                : "border-gray-300/50"
+          }`}
+        >
           <div className="flex items-center gap-1.5">
             {item.kind === "Character" ? (
               item.combatType === "Melee" ? (
@@ -106,22 +137,14 @@ export function Item({ item, onDelete, onUnlock }: ItemProps) {
               <Paintbrush className="w-3 h-3 text-pink-400/70" />
             )}
             <span
-              className={`text-[10px] uppercase tracking-wider font-medium ${
-                glass ? "text-white/40" : "text-gray-400"
-              }`}
+              className={`text-[10px] uppercase tracking-wider font-medium ${subtextColor}`}
             >
               {item.kind === "Character" ? item.combatType : "Skin"}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <Coins className="w-3.5 h-3.5 text-amber-400/80" />
-            <span
-              className={`text-sm font-bold ${
-                glass
-                  ? "text-white [text-shadow:0_1px_3px_rgba(163,163,163,0.3)]"
-                  : "text-green-400"
-              }`}
-            >
+            <span className={`text-sm font-bold text-amber-400 ${textShadow}`}>
               {item.price.toLocaleString()}
             </span>
           </div>
@@ -131,11 +154,12 @@ export function Item({ item, onDelete, onUnlock }: ItemProps) {
         <div className="pt-1">
           {item.owned ? (
             <div
-              className={`flex items-center justify-center gap-1.5 h-7 rounded-md text-xs font-medium ${
-                glass
-                  ? "bg-green-500/15 text-green-300 border border-green-500/20"
-                  : "bg-green-900/30 text-green-400 border border-green-700/40"
-              }`}
+              className="flex items-center justify-center gap-1.5 h-7 rounded-md text-xs font-medium border"
+              style={{
+                backgroundColor: "var(--theme-accent-soft)",
+                borderColor: "var(--theme-accent)",
+                color: settings.useDarkMode ? "#ffffff" : "var(--theme-accent)",
+              }}
             >
               <CheckCircle className="w-3 h-3" />
               Owned

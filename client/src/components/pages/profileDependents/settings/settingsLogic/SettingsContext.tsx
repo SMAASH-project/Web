@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-interface SettingsState {
+export interface SettingsState {
   useAnimations: boolean;
   useLiquidGlass: boolean;
+  useDarkMode: boolean;
 }
 
 interface SettingsContextType {
@@ -34,6 +35,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       : {
           useAnimations: true,
           useLiquidGlass: true,
+          useDarkMode: false,
         };
   });
 

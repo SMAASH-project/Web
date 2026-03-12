@@ -25,6 +25,7 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
   const { addProfile, profiles } = useProfiles();
   const [username, setUsername] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Generate a username that's not already in `profiles`.
   const generateUniqueUsername = () => {
@@ -57,8 +58,21 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
+    const normalizedUsername = username.trim();
+    if (!normalizedUsername) {
+      setError("Username is required.");
+      return;
+    }
+
+    if (normalizedUsername.length > 20) {
+      setError("Username must be 20 characters or less.");
+      return;
+    }
+
     // Validate uniqueness on submit
-    if (profiles.some((p) => p.name === username)) {
+    if (profiles.some((p) => p.name === normalizedUsername)) {
       setError(
         "That username is already in use. Please choose a different one.",
       );
@@ -66,9 +80,11 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
       setUsername(generateUniqueUsername());
       return;
     }
+
     try {
+      setIsSubmitting(true);
       setError(null);
-      await addProfile({ name: username, avatar: profilePicture });
+      await addProfile({ name: normalizedUsername, avatar: profilePicture });
       onOpenChange(false);
       // Prepare a fresh suggestion for the next time the dialog opens.
       setUsername("");
@@ -76,6 +92,8 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
     } catch (err) {
       console.error("Failed to add profile:", err);
       setError("Failed to save profile. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -92,12 +110,15 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
           </DialogHeader>
           <FieldGroup>
             <Field>
-              <Label htmlFor="username-1">Username</Label>
+              <Label htmlFor="username-1" className="text-gray-900!">
+                Username
+              </Label>
               <Input
                 type="text"
                 id="username-1"
                 name="username"
                 value={username}
+                maxLength={20}
                 onChange={(e) => {
                   setUsername(e.target.value);
                   if (error) setError(null);
@@ -110,7 +131,9 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
               </div>
             ) : null}
             <Field>
-              <Label htmlFor="profile-picture-1">Profile Picture</Label>
+              <Label htmlFor="profile-picture-1" className="text-gray-900!">
+                Profile Picture
+              </Label>
               <Input
                 type="file"
                 id="profile-picture-1"
@@ -126,9 +149,13 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
           </FieldGroup>
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline" disabled={isSubmitting}>
+                Cancel
+              </Button>
             </DialogClose>
-            <Button type="submit">Save changes</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save changes"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

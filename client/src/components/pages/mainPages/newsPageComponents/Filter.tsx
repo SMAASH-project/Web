@@ -10,6 +10,12 @@ import { EllipsisVertical } from "lucide-react";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
 import { FilterSelection } from "./FilterSelection";
 import type { NewsPost } from "@/types/PageTypes";
+import {
+  getButtonClasses,
+  getTextShadow,
+  getBackgroundClasses,
+  getTextColor,
+} from "@/lib/utils";
 
 interface FilterSelectProps {
   selectedByCategory: Record<NewsPost["category"], boolean>;
@@ -21,22 +27,32 @@ export function FilterSelect({
   onCategoryChange,
 }: FilterSelectProps) {
   const { settings } = useSettings();
+  const buttonClass = getButtonClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+    "primary",
+  );
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const bgClass = getBackgroundClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          className={`text-white ${
-            settings.useLiquidGlass
-              ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30"
-              : ""
-          } cursor-pointer`}
+          className={`${buttonClass} ${textShadow} rounded-lg cursor-pointer`}
         >
           <EllipsisVertical />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start">
+      <PopoverContent align="start" className={bgClass}>
         <PopoverHeader>
-          <PopoverTitle>Select Filters</PopoverTitle>
+          <PopoverTitle className={textColor}>Select Filters</PopoverTitle>
         </PopoverHeader>
         <FilterSelection
           selectedByCategory={selectedByCategory}

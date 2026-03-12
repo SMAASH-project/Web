@@ -19,6 +19,15 @@ import { DateTime } from "luxon";
 import type { Release } from "@/types/PageTypes";
 import { OsTypes } from "@/types/OsTypes";
 import { useState, useMemo } from "react";
+import {
+  getButtonClasses,
+  getInputClasses,
+  getDialogClasses,
+  getDialogFooterClasses,
+  getTextShadow,
+  getSubtextColor,
+  getTextColor,
+} from "@/lib/utils";
 
 type ReleaseType = "Major" | "Minor" | "Patch";
 
@@ -70,12 +79,32 @@ export function AddRelease({
   const [releaseType, setReleaseType] = useState<ReleaseType>("Patch");
   const [autoName, setAutoName] = useState(false);
   const [fileName, setFileName] = useState("");
-  const glass = settings.useLiquidGlass;
 
   const autoVersion = useMemo(
     () => computeNextVersion(allReleases, releaseType),
     [allReleases, releaseType],
   );
+  const inputClass = getInputClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const dialogClass = getDialogClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const footerClass = getDialogFooterClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const subtextColor = getSubtextColor(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
 
   const effectiveVersion = autoName ? autoVersion : version;
 
@@ -124,22 +153,19 @@ export function AddRelease({
       <DialogTrigger asChild>
         <Button
           size="sm"
-          className={`cursor-pointer gap-2 ${
-            glass
-              ? "bg-white/20 backdrop-blur-lg border border-white/25 text-white hover:bg-white/30"
-              : "bg-green-600 hover:bg-green-700 text-white"
-          }`}
+          className={`cursor-pointer gap-2 ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "primary")} ${textShadow}`}
         >
           <FilePlusCorner className="w-4 h-4" />
           <span className="text-sm font-medium">New Release</span>
         </Button>
       </DialogTrigger>
       <DialogContent
+        className={`${dialogClass} ${textShadow}`}
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Upload New Release</DialogTitle>
+          <DialogTitle className={textColor}>Upload New Release</DialogTitle>
         </DialogHeader>
         <FieldGroup>
           <Field>
@@ -162,8 +188,12 @@ export function AddRelease({
                       key={type}
                       className={`flex items-center gap-2.5 p-3 rounded-lg border cursor-pointer transition-all duration-150 ${
                         isSelected
-                          ? "bg-muted/60 border-border"
-                          : "border-border/50 hover:bg-muted/30"
+                          ? settings.useDarkMode
+                            ? "bg-black/35 border-black/35"
+                            : "bg-white/35 border-white/35"
+                          : settings.useDarkMode
+                            ? "border-black/35 hover:bg-black/20"
+                            : "border-white/35 hover:bg-white/20"
                       }`}
                       style={{
                         borderLeftColor: color,
@@ -195,9 +225,7 @@ export function AddRelease({
                         )}
                       </span>
                       <span
-                        className={`text-sm font-medium ${
-                          isSelected ? "text-black" : "text-black"
-                        }`}
+                        className={`text-sm font-medium ${textColor} ${textShadow}`}
                       >
                         {type}
                       </span>
@@ -215,7 +243,7 @@ export function AddRelease({
                   checked={autoName}
                   onCheckedChange={(checked) => setAutoName(checked === true)}
                 />
-                <span className="text-sm text-muted-foreground">Auto-name</span>
+                <span className={`text-sm ${subtextColor}`}>Auto-name</span>
               </label>
             </div>
             <Input
@@ -223,10 +251,10 @@ export function AddRelease({
               value={effectiveVersion}
               onChange={(e) => setVersion((e.target as HTMLInputElement).value)}
               disabled={autoName}
-              className={autoName ? "opacity-60" : ""}
+              className={`${inputClass} ${autoName ? "opacity-60" : ""}`}
             />
             {autoName && (
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className={`text-xs ${subtextColor} mt-1`}>
                 Auto-generated based on {releaseType.toLowerCase()} bump:{" "}
                 <span className="font-mono font-semibold">{autoVersion}</span>
               </p>
@@ -234,9 +262,13 @@ export function AddRelease({
           </Field>
           <Field>
             <Label>Release File</Label>
-            <Input type="file" onChange={handleFileChange} />
+            <Input
+              type="file"
+              onChange={handleFileChange}
+              className={inputClass}
+            />
             {fileName && (
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className={`text-xs ${subtextColor} mt-1`}>
                 Selected: {fileName}
               </p>
             )}
@@ -247,7 +279,7 @@ export function AddRelease({
               {OsTypes.map((os) => (
                 <label
                   key={os.id}
-                  className="flex items-center gap-2 cursor-pointer"
+                  className={`flex items-center gap-2 cursor-pointer ${textColor}`}
                 >
                   <Checkbox
                     checked={supports.includes(os.name)}
@@ -259,10 +291,10 @@ export function AddRelease({
             </div>
           </Field>
         </FieldGroup>
-        <DialogFooter>
+        <DialogFooter className={footerClass}>
           <Button
             variant="outline"
-            className="cursor-pointer"
+            className={`cursor-pointer ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "outline")} ${textShadow}`}
             onClick={handleSave}
             disabled={!effectiveVersion.trim() || supports.length === 0}
           >
@@ -271,7 +303,7 @@ export function AddRelease({
           <DialogClose asChild>
             <Button
               variant="outline"
-              className="cursor-pointer"
+              className={`cursor-pointer ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "outline")} ${textShadow}`}
               onClick={resetForm}
             >
               Cancel

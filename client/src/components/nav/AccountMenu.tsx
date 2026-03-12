@@ -14,29 +14,45 @@ import { useContext } from "react";
 import { useNavbarContext } from "@/context/NavbarContextUtils";
 import { useSettings } from "../pages/profileDependents/settings/settingsLogic/SettingsContext";
 import { AuthContext } from "@/context/AuthContext";
-import { apiLogout } from "@/hooks/useApi";
+import { useLogoutMutation } from "@/hooks/useQueryHooks";
 import { m } from "motion/react";
+import {
+  getBackgroundClasses,
+  getSubtextColor,
+  getTextColor,
+  getTextShadow,
+} from "@/lib/utils";
 
 export default function AccountMenu() {
   const { setIsDropdownHovering, setIsDropdownOpen } = useNavbarContext();
   const { settings } = useSettings();
-  const { setIsLoggedIn, setUserId } = useContext(AuthContext);
+  const { setIsLoggedIn, setUserId, setIsAdmin } = useContext(AuthContext);
   const navigate = useNavigate();
-  // placeholder flag to toggle dark styling; replace with real theme flag as needed
-  const isDark = false;
+  const logoutMutation = useLogoutMutation();
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const subtextColor = getSubtextColor(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const dropdownBackground = getBackgroundClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+    "strong",
+  );
 
-  // Calls the centralized logout API to end the session.
+  // Calls the React Query logout mutation to end the session and clear cache
   const logout = async () => {
     try {
-      const { ok } = await apiLogout();
-      if (ok) {
-        console.log("Logout successful");
-        setIsLoggedIn(false);
-        setUserId(null);
-        navigate("/app/login");
-      } else {
-        console.error("Logout failed");
-      }
+      await logoutMutation.mutateAsync();
+      console.log("Logout successful");
+      setIsLoggedIn(false);
+      setUserId(null);
+      setIsAdmin(false);
+      navigate("/app/login");
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -51,15 +67,15 @@ export default function AccountMenu() {
         <m.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
           <Button
             size="icon"
-            className={`transition-colors duration-150 ${
+            className={`transition-colors duration-150 rounded-full cursor-pointer shadow-sm p-2 ${textColor} ${textShadow} ${
               settings.useLiquidGlass
-                ? isDark
-                  ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-full bg-white/20 text-white hover:bg-white/30"
-                  : "rounded-full bg-white/90 hover:bg-white text-gray-800"
-                : isDark
-                  ? "rounded-full bg-white/5 hover:bg-white/10 text-white"
-                  : "rounded-full bg-white/90 hover:bg-white text-gray-800"
-            } cursor-pointer shadow-sm p-2`}
+                ? settings.useDarkMode
+                  ? "bg-black/20 hover:bg-black/30"
+                  : "bg-white/20 hover:bg-white/30"
+                : settings.useDarkMode
+                  ? "bg-gray-800/80 hover:bg-gray-700/90"
+                  : "bg-white/90 hover:bg-white"
+            }`}
             aria-label="Account menu"
           >
             <User size={16} />
@@ -73,28 +89,22 @@ export default function AccountMenu() {
         transition={{ duration: 0.15 }}
       >
         <DropdownMenuContent
-          className={`w-48 z-9999 rounded-xl p-2 shadow-xl backdrop-blur-md border ${
-            isDark
-              ? "bg-black/80 border-white/10 text-white"
-              : "bg-white/95 border-gray-200 text-gray-900"
-          }`}
+          className={`w-48 z-9999 rounded-xl p-2 shadow-xl backdrop-blur-md border ${dropdownBackground} ${textColor}`}
           align="end"
           onMouseEnter={() => setIsDropdownHovering(true)}
           onMouseLeave={() => setIsDropdownHovering(false)}
         >
           <DropdownMenuGroup>
             <DropdownMenuLabel
-              className={`px-3 py-2 text-xs font-semibold uppercase tracking-wider ${
-                isDark ? "text-white/70" : "text-gray-600"
-              }`}
+              className={`px-3 py-2 text-xs font-semibold uppercase tracking-wider ${subtextColor}`}
             >
               My Account
             </DropdownMenuLabel>
             <DropdownMenuItem
               asChild
               className={`px-3 py-2.5 rounded-md text-sm transition-all duration-150 ${
-                isDark
-                  ? "hover:bg-white/10 hover:text-white"
+                settings.useDarkMode
+                  ? "hover:bg-white/10 hover:text-gray-100"
                   : "hover:bg-gray-100 hover:text-gray-900"
               }`}
             >
@@ -103,8 +113,8 @@ export default function AccountMenu() {
             <DropdownMenuItem
               asChild
               className={`px-3 py-2.5 rounded-md text-sm transition-all duration-150 ${
-                isDark
-                  ? "hover:bg-white/10 hover:text-white"
+                settings.useDarkMode
+                  ? "hover:bg-white/10 hover:text-gray-100"
                   : "hover:bg-gray-100 hover:text-gray-900"
               }`}
             >
@@ -112,38 +122,38 @@ export default function AccountMenu() {
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator
-            className={`my-2 ${isDark ? "bg-white/10" : "bg-gray-200"}`}
+            className={`my-2 ${settings.useDarkMode ? "bg-white/10" : "bg-gray-200"}`}
           />
           <DropdownMenuGroup>
             <DropdownMenuItem
               disabled
               className={`px-3 py-2 text-sm rounded-md ${
-                isDark ? "text-white/30" : "text-gray-400"
+                settings.useDarkMode ? "text-white/30" : "text-gray-400"
               }`}
             >
               Support
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator
-            className={`my-2 ${isDark ? "bg-white/10" : "bg-gray-200"}`}
+            className={`my-2 ${settings.useDarkMode ? "bg-white/10" : "bg-gray-200"}`}
           />
           <DropdownMenuItem
             asChild
             className={`px-3 py-2.5 rounded-md text-sm transition-all duration-150 ${
-              isDark
-                ? "hover:bg-white/10 hover:text-white"
+              settings.useDarkMode
+                ? "hover:bg-white/10 hover:text-gray-100"
                 : "hover:bg-gray-100 hover:text-gray-900"
             }`}
           >
             <Link to="/app/profile-selector">Change Profile</Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator
-            className={`my-2 ${isDark ? "bg-white/10" : "bg-gray-200"}`}
+            className={`my-2 ${settings.useDarkMode ? "bg-white/10" : "bg-gray-200"}`}
           />
           <DropdownMenuGroup>
             <DropdownMenuItem
               className={`px-3 py-2.5 rounded-md text-sm transition-all duration-150 ${
-                isDark
+                settings.useDarkMode
                   ? "hover:bg-red-600/80 hover:text-white"
                   : "hover:bg-red-50 hover:text-red-700"
               }`}

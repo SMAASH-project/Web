@@ -1,32 +1,72 @@
-import { StrictMode } from "react";
+import { StrictMode, lazy } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { PasswordResetForm } from "./components/forms/PasswordResetForm.tsx";
-import { ReleasesPage } from "./components/pages/mainPages/ReleasesPage.tsx";
-import { AboutPage } from "./components/pages/mainPages/AboutPage.tsx";
-import { GalleryPage } from "./components/pages/mainPages/GalleryPage.tsx";
-import { WebstorePage } from "./components/pages/mainPages/WebstorePage.tsx";
-import { NewsPage } from "./components/pages/mainPages/NewsPage.tsx";
-import { NotFoundPage } from "./components/pages/mainPages/NotFoundPage.tsx";
-import { ProfilePage } from "./components/pages/profileDependents/profile/ProfilePage.tsx";
-import { ProfileSelectorForm } from "./components/forms/ProfileSelectorForm.tsx";
+import { RootLayout } from "./RootLayout.tsx";
+
+// Eager load auth forms for better UX
 import { LoginForm } from "./components/forms/LoginForm.tsx";
 import { SignupForm } from "./components/forms/SignUpForm.tsx";
-import { SettingsPage } from "./components/pages/profileDependents/settings/SettingsPage.tsx";
-import { RootLayout } from "./RootLayout.tsx";
+import { PasswordResetForm } from "./components/forms/PasswordResetForm.tsx";
+
+// Lazy load heavy pages
+const ReleasesPage = lazy(() =>
+  import("./components/pages/mainPages/ReleasesPage.tsx").then((m) => ({
+    default: m.ReleasesPage,
+  })),
+);
+const AboutPage = lazy(() =>
+  import("./components/pages/mainPages/AboutPage.tsx").then((m) => ({
+    default: m.AboutPage,
+  })),
+);
+const GalleryPage = lazy(() =>
+  import("./components/pages/mainPages/GalleryPage.tsx").then((m) => ({
+    default: m.GalleryPage,
+  })),
+);
+const WebstorePage = lazy(() =>
+  import("./components/pages/mainPages/WebstorePage.tsx").then((m) => ({
+    default: m.WebstorePage,
+  })),
+);
+const NewsPage = lazy(() =>
+  import("./components/pages/mainPages/NewsPage.tsx").then((m) => ({
+    default: m.NewsPage,
+  })),
+);
+const NotFoundPage = lazy(() =>
+  import("./components/pages/mainPages/NotFoundPage.tsx").then((m) => ({
+    default: m.NotFoundPage,
+  })),
+);
+const ProfilePage = lazy(() =>
+  import("./components/pages/profileDependents/profile/ProfilePage.tsx").then(
+    (m) => ({ default: m.ProfilePage }),
+  ),
+);
+const ProfileSelectorForm = lazy(() =>
+  import("./components/forms/ProfileSelectorForm.tsx").then((m) => ({
+    default: m.ProfileSelectorForm,
+  })),
+);
+const SettingsPage = lazy(() =>
+  import("./components/pages/profileDependents/settings/SettingsPage.tsx").then(
+    (m) => ({ default: m.SettingsPage }),
+  ),
+);
 
 const router = createBrowserRouter([
   {
     element: <RootLayout />,
     children: [
       { path: "/app", element: <App /> },
-      { path: "/app/login", element: <LoginForm className="w-100" /> },
-      { path: "/app/signup", element: <SignupForm className="w-100" /> },
+      { path: "/app/login", element: <LoginForm /> },
+      { path: "/app/signup", element: <SignupForm /> },
       {
         path: "/app/reset-password",
-        element: <PasswordResetForm className="w-100" />,
+        element: <PasswordResetForm />,
       },
       { path: "/app/about", element: <AboutPage /> },
       { path: "/app/gallery", element: <GalleryPage /> },

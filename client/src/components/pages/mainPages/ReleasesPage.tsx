@@ -6,11 +6,14 @@ import { Releases } from "./releasesPageComponents/Releases";
 import { AddRelease } from "./releasesPageComponents/AddRelease";
 import { SearchRelease } from "./releasesPageComponents/SearchRelease";
 import { useReleases } from "./releasesPageComponents/releasesPageLogic/useReleases";
+import { getTextColor, getTextShadow, getSubtextColor } from "@/lib/utils";
+import { useContext } from "react";
+import { AuthContext } from "@/context/AuthContext";
 
 export function ReleasesPage() {
   const { settings } = useSettings();
   const [selectedOs, setSelectedOs] = useState("iOS");
-  const IsAdmin = true; // Replace with actual admin check
+  const { isAdmin } = useContext(AuthContext);
 
   const {
     allReleases,
@@ -24,7 +27,15 @@ export function ReleasesPage() {
     handleSearch,
   } = useReleases(selectedOs);
 
-  const glass = settings.useLiquidGlass;
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const subtextColor = getSubtextColor(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
 
   return (
     <div className="p-4 min-h-screen w-full self-start flex flex-col">
@@ -36,17 +47,11 @@ export function ReleasesPage() {
           <div className="flex items-center justify-between w-full">
             <div className="flex flex-col gap-1">
               <h1
-                className={`text-2xl font-bold text-white tracking-tight ${
-                  glass ? "[text-shadow:0_2px_8px_rgba(163,163,163,0.5)]" : ""
-                }`}
+                className={`text-2xl font-bold ${textColor} tracking-tight ${textShadow}`}
               >
                 Releases
               </h1>
-              <p
-                className={`text-sm text-white/60 ${
-                  glass ? "[text-shadow:0_1px_3px_rgba(163,163,163,0.3)]" : ""
-                }`}
-              >
+              <p className={`text-sm ${subtextColor}`}>
                 Browse and manage app releases
               </p>
             </div>
@@ -58,7 +63,7 @@ export function ReleasesPage() {
             <div className="flex-1">
               <SearchRelease onSearch={handleSearch} />
             </div>
-            {IsAdmin && (
+            {isAdmin && (
               <AddRelease onCreate={handleCreate} allReleases={allReleases} />
             )}
           </div>

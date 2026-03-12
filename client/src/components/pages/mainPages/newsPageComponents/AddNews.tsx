@@ -9,6 +9,16 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import {
+  getButtonClasses,
+  getInputClasses,
+  getDialogClasses,
+  getDialogFooterClasses,
+  getTextShadow,
+  getSubtextColor,
+  getBackgroundClasses,
+  getTextColor,
+} from "@/lib/utils";
+import {
   Accordion,
   AccordionContent,
   AccordionItem,
@@ -37,6 +47,37 @@ import { useNewsForm } from "./newsPageLogic/useNewsForm";
 
 export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
   const { settings } = useSettings();
+  const buttonClass = getButtonClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+    "primary",
+  );
+  const inputClass = getInputClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const dialogClass = getDialogClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const footerClass = getDialogFooterClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const subtextColor = getSubtextColor(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const bgClass = getBackgroundClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+    "light",
+  );
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
 
   const {
     open,
@@ -74,18 +115,20 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30" : ""} cursor-pointer`}
+          className={`${buttonClass} ${textShadow} rounded-lg cursor-pointer`}
         >
           <MessageSquarePlus />
         </Button>
       </DialogTrigger>
       <DialogContent
-        className="w-full max-w-4xl! sm:max-w-4xl! overflow-visible"
+        className={`w-full max-w-4xl! sm:max-w-4xl! overflow-visible ${dialogClass} ${textShadow}`}
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Create new News Article</DialogTitle>
+          <DialogTitle className={textColor}>
+            Create new News Article
+          </DialogTitle>
         </DialogHeader>
         <FieldGroup>
           <Field>
@@ -93,6 +136,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
             <Input
               value={title}
               onChange={(e) => setTitle((e.target as HTMLInputElement).value)}
+              className={inputClass}
             />
           </Field>
           <Field>
@@ -107,13 +151,13 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
             className="w-full"
           >
             <AnimatedAccordionItem value="image">
-              <AnimatedAccordionTrigger>
+              <AnimatedAccordionTrigger className={textColor}>
                 Image Settings
               </AnimatedAccordionTrigger>
               <AnimatedAccordionContent>
                 <FieldGroup>
                   <Field>
-                    <Label className="text-sm text-muted-foreground">
+                    <Label className={`text-sm ${subtextColor}`}>
                       Image Position
                     </Label>
                     <div className="flex flex-row gap-4 items-start">
@@ -162,11 +206,13 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
               </AnimatedAccordionContent>
             </AnimatedAccordionItem>
             <AnimatedAccordionItem value="content">
-              <AnimatedAccordionTrigger>Content</AnimatedAccordionTrigger>
+              <AnimatedAccordionTrigger className={textColor}>
+                Content
+              </AnimatedAccordionTrigger>
               <AnimatedAccordionContent>
                 <FieldGroup>
                   <Field>
-                    <Label className="text-sm text-muted-foreground">
+                    <Label className={`text-sm ${subtextColor}`}>
                       Markdown supported
                     </Label>
                     <textarea
@@ -174,10 +220,12 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                       onChange={(e) =>
                         setContent((e.target as HTMLTextAreaElement).value)
                       }
-                      className="w-full min-h-32 rounded-md bg-input px-3 py-2 text-sm"
+                      className={`w-full min-h-32 rounded-md px-3 py-2 text-sm ${inputClass}`}
                     />
                     {content && (
-                      <div className="mt-2 rounded-md border bg-gray-800/60 p-3 max-h-64 overflow-y-auto prose prose-sm prose-invert max-w-none">
+                      <div
+                        className={`mt-2 rounded-md border ${bgClass} p-3 max-h-64 overflow-y-auto prose prose-sm prose-invert max-w-none`}
+                      >
                         <Label className="text-xs mb-1">Preview Text</Label>
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {content}
@@ -196,11 +244,13 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
             className="w-full"
           >
             <AccordionItem value="image">
-              <AccordionTrigger>Image Settings</AccordionTrigger>
+              <AccordionTrigger className={textColor}>
+                Image Settings
+              </AccordionTrigger>
               <AccordionContent>
                 <FieldGroup>
                   <Field>
-                    <Label className="text-sm text-muted-foreground">
+                    <Label className={`text-sm ${subtextColor}`}>
                       Image Position
                     </Label>
                     <div className="flex flex-row gap-4 items-start">
@@ -221,7 +271,9 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                         />
                         {imageAlt && (
                           <div className="flex items-center gap-1">
-                            <span className="text-xs text-muted-foreground truncate">
+                            <span
+                              className={`text-xs ${subtextColor} truncate`}
+                            >
                               Current: {imageAlt}
                             </span>
                             <button
@@ -249,11 +301,11 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="content">
-              <AccordionTrigger>Content</AccordionTrigger>
+              <AccordionTrigger className={textColor}>Content</AccordionTrigger>
               <AccordionContent>
                 <FieldGroup>
                   <Field>
-                    <Label className="text-sm text-muted-foreground">
+                    <Label className={`text-sm ${subtextColor}`}>
                       Markdown supported
                     </Label>
                     <textarea
@@ -261,10 +313,12 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                       onChange={(e) =>
                         setContent((e.target as HTMLTextAreaElement).value)
                       }
-                      className="w-full min-h-32 rounded-md bg-input px-3 py-2 text-sm"
+                      className={`w-full min-h-32 rounded-md px-3 py-2 text-sm ${inputClass}`}
                     />
                     {content && (
-                      <div className="mt-2 rounded-md border bg-gray-800/60 p-3 max-h-64 overflow-y-auto prose prose-sm prose-invert max-w-none">
+                      <div
+                        className={`mt-2 rounded-md border ${bgClass} p-3 max-h-64 overflow-y-auto prose prose-sm prose-invert max-w-none`}
+                      >
                         <Label className="text-xs mb-1">Preview Text</Label>
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {content}
@@ -277,13 +331,19 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
             </AccordionItem>
           </Accordion>
         )}
-        <DialogFooter>
+        <DialogFooter className={footerClass}>
           <DialogClose asChild>
-            <Button variant="outline" className="cursor-pointer">
+            <Button
+              variant="outline"
+              className={`cursor-pointer ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "outline")} ${textShadow}`}
+            >
               Cancel
             </Button>
           </DialogClose>
-          <Button onClick={handleSave} className="cursor-pointer">
+          <Button
+            onClick={handleSave}
+            className={`cursor-pointer ${buttonClass} ${textShadow}`}
+          >
             Create Article
           </Button>
         </DialogFooter>

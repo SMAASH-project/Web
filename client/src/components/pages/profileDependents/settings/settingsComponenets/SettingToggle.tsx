@@ -8,23 +8,30 @@ import {
 } from "@/components/ui/field";
 import { Switch } from "@/components/ui/switch";
 import { useSettings } from "@/components/pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { getTextColor, getTextShadow, getSubtextColor } from "@/lib/utils";
 
 export function SettingToggle() {
   const { settings, updateSetting } = useSettings();
+
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const subtextColor = getSubtextColor(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
 
   return (
     <FieldGroup className="w-full max-w-md">
       <FieldLabel>
         <Field orientation="horizontal">
           <FieldContent>
-            <FieldTitle
-              className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
-            >
+            <FieldTitle className={`${textColor} ${textShadow}`}>
               Use animations
             </FieldTitle>
-            <FieldDescription
-              className={`text-neutral-400 ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(255,255,255,0.2)]" : ""}`}
-            >
+            <FieldDescription className={subtextColor}>
               Choose to enable or disable animations in the app. Disabling
               animations may improve performance on older devices.
             </FieldDescription>
@@ -41,14 +48,10 @@ export function SettingToggle() {
       <FieldLabel>
         <Field orientation="horizontal">
           <FieldContent>
-            <FieldTitle
-              className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
-            >
+            <FieldTitle className={`${textColor} ${textShadow}`}>
               Enable "Liquid Glass"
             </FieldTitle>
-            <FieldDescription
-              className={`text-neutral-400 ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(255,255,255,0.2)]" : ""}`}
-            >
+            <FieldDescription className={subtextColor}>
               Toggle the "Liquid Glass" effect, which adds a glossy, translucent
               layer to the interface for a sleek, modern look. This may impact
               performance on some devices.
@@ -60,6 +63,24 @@ export function SettingToggle() {
             onCheckedChange={(checked) =>
               updateSetting("useLiquidGlass", checked)
             }
+          />
+        </Field>
+      </FieldLabel>
+      <FieldLabel>
+        <Field orientation="horizontal">
+          <FieldContent>
+            <FieldTitle className={`${textColor} ${textShadow}`}>
+              Toggle Dark Mode
+            </FieldTitle>
+            <FieldDescription className={subtextColor}>
+              Enable a dark theme for the interface, which may be easier on the
+              eyes in low-light environments.
+            </FieldDescription>
+          </FieldContent>
+          <Switch
+            id="switch-dark-mode"
+            checked={settings.useDarkMode}
+            onCheckedChange={(checked) => updateSetting("useDarkMode", checked)}
           />
         </Field>
       </FieldLabel>

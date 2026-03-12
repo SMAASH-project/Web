@@ -8,12 +8,22 @@ import React, {
 import type { Profile, ProfileContextType } from "./ProfilesTypes";
 import { AuthContext } from "@/context/AuthContext";
 import {
-  apiAddProfile,
-  apiGetProfilesByUserId,
-  apiDeleteProfile,
-} from "@/hooks/useApi";
+  useProfilesQuery,
+  useAddProfileMutation,
+  useUpdateProfileMutation,
+  useDeleteProfileMutation,
+  type ProfileResponse,
+} from "@/hooks/useQueryHooks";
 
-const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
+const defaultProfileContext: ProfileContextType = {
+  profiles: [],
+  addProfile: async () => {},
+  removeProfile: async () => {},
+  selectedProfile: null,
+  selectProfile: () => {},
+};
+
+const ProfileContext = createContext<ProfileContextType>(defaultProfileContext);
 
 export { ProfileContext };
 
@@ -58,55 +68,43 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
 
   // Posts to the server via the centralized API, then updates local state on success.
   const addProfile = async (profile: Profile) => {
-    try {
-      if (userId === null) {
-        throw new Error("User is not logged in");
-      }
-
-      const { data, ok, status } = await apiAddProfile({
-        display_name: profile.name,
-        user_id: Number(userId),
-      });
-
-      if (!ok) {
-        throw new Error(`Failed to add profile: ${status}`);
-      }
-
-      // The server may return the created profile with a `name` field.
-      // If it does, use it; otherwise fall back to the profile we sent.
-      const toAdd: Profile = data?.name
-        ? { name: data.name, avatar: data.avatar ?? profile.avatar }
-        : profile;
-      setProfiles((prev) => [...prev, toAdd]);
-    } catch (error) {
-      console.error("Error adding profile:", error);
-      // Keep UI stable; do not optimistic-update. Optionally, surface error to caller by rethrowing.
-      // Rethrow so callers can react if they awaited addProfile.
-      throw error;
+    if (!numUserId) {
+      throw new Error("User is not logged in");
     }
+
+    await addProfileMutation.mutateAsync({
+      display_name: profile.name,
+      user_id: numUserId,
+    });
+
+    // No return needed - mutations handle cache invalidation
   };
 
   const removeProfile = async (name: string) => {
     const profile = profiles.find((p) => p.name === name);
-    if (!profile) return;
+    if (!profile || !profile.id) return;
 
-    // If the profile has a server-side id, delete it from the backend first.
-    if (profile.id != null) {
-      try {
-        const { ok, status } = await apiDeleteProfile(profile.id);
-        if (!ok) {
-          throw new Error(`Failed to delete profile: ${status}`);
-        }
-      } catch (error) {
-        console.error("Error deleting profile:", error);
-        throw error;
-      }
-    }
+    try {
+      // Rename to tombstone first (without optimistic rename in UI),
+      // then delete optimistically so tombstone text never flashes.
+      const tombstoneName =
+        `del_${profile.id}_${Date.now().toString(36)}`.slice(0, 20);
 
-    setProfiles((prev) => prev.filter((p) => p.name !== name));
-    // If the deleted profile was selected, clear the selection.
-    if (selectedProfile?.name === name) {
-      setSelectedProfile(null);
+      await updateProfileMutation.mutateAsync({
+        profileId: profile.id,
+        payload: {
+          id: profile.id,
+          display_name: tombstoneName,
+          coins: profile.coins ?? 0,
+        },
+        optimistic: false,
+        invalidateAfterSuccess: false,
+      });
+
+      await deleteProfileMutation.mutateAsync(profile.id);
+    } catch (error) {
+      console.error("Error deleting profile:", error);
+      throw error;
     }
   };
 

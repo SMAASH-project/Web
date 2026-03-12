@@ -1,28 +1,23 @@
-import { cn } from "@/lib/utils"
-import { Button } from "../ui/button"
+import { cn } from "@/lib/utils";
+import { Button } from "../ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../ui/card"
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from "../ui/field"
-import { Input } from "../ui/input"
-import { Link } from "react-router-dom"
+} from "../ui/card";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "../ui/field";
+import { Input } from "../ui/input";
+import { Link } from "react-router-dom";
 
 export function PasswordResetForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   return (
-    <div className={cn("w-100 flex flex-col gap-6", className)} {...props}>
-      <Card>
+    <div className={cn("w-full max-w-md px-4 sm:px-0", className)} {...props}>
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>Recover your account</CardTitle>
           <CardDescription>
@@ -33,7 +28,9 @@ export function PasswordResetForm({
           <form>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <FieldLabel htmlFor="email" className="text-gray-900!">
+                  Email
+                </FieldLabel>
                 <Input
                   id="email"
                   type="email"
@@ -42,9 +39,12 @@ export function PasswordResetForm({
                 />
               </Field>
               <Field>
-                <Button type="submit" className="text-white">Reset Password</Button>
+                <Button type="submit" className="text-white">
+                  Reset Password
+                </Button>
                 <FieldDescription className="text-center">
-                  Don&apos;t have an account? <Link to="/app/signup">Sign up</Link>
+                  Don&apos;t have an account?{" "}
+                  <Link to="/app/signup">Sign up</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>
@@ -52,5 +52,5 @@ export function PasswordResetForm({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

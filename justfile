@@ -1,4 +1,5 @@
 # By default just runs the first recipe (aliases are not considered recipes)
+set windows-shell := ["cmd.exe", "/C"]
 
 alias r := run
 alias b := build
@@ -17,7 +18,7 @@ all: build-fullstack test seed
 
 @build:
     echo "Building backend"
-    @go build -v -o build/main cmd/api/main.go
+    @go build -v -o build/main.exe cmd/api/main.go
 
 build-fullstack: build-client build
 

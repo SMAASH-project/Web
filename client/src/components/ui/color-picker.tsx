@@ -1,6 +1,10 @@
 import { forwardRef, useMemo, useState } from "react";
 import { HexColorPicker } from "react-colorful";
-import { cn } from "@/lib/utils";
+import {
+  cn,
+  getLiquidGlassDialogClasses,
+  getLiquidGlassControlClasses,
+} from "@/lib/utils";
 import { useForwardedRef } from "@/lib/use-forwarded-ref";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import {
@@ -9,6 +13,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
+import { useSettings } from "@/components/pages/profileDependents/settings/settingsLogic/SettingsContext";
 
 interface ColorPickerProps {
   value: string;
@@ -26,17 +31,33 @@ const ColorPicker = forwardRef<
   ) => {
     const ref = useForwardedRef(forwardedRef);
     const [open, setOpen] = useState(false);
+    const { settings } = useSettings();
 
     const parsedValue = useMemo(() => {
       return value || "#FFFFFF";
     }, [value]);
+
+    const dialogClasses = getLiquidGlassDialogClasses(
+      settings.useLiquidGlass,
+      settings.useDarkMode,
+    );
+    const controlClasses = getLiquidGlassControlClasses(
+      settings.useLiquidGlass,
+      settings.useDarkMode,
+    );
+
+    const borderClass = settings.useLiquidGlass
+      ? settings.useDarkMode
+        ? "border-black/60 shadow-sm shadow-black/40"
+        : "border-white/60 shadow-sm shadow-white/40"
+      : "";
 
     return (
       <Popover onOpenChange={setOpen} open={open}>
         <PopoverTrigger asChild disabled={disabled} onBlur={onBlur}>
           <Button
             {...props}
-            className={cn("block", className)}
+            className={cn("block", borderClass, className)}
             name={name}
             onClick={() => {
               setOpen(true);
@@ -50,9 +71,10 @@ const ColorPicker = forwardRef<
             <div />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full">
+        <PopoverContent className={cn("w-full", dialogClasses)}>
           <HexColorPicker color={parsedValue} onChange={onChange} />
           <Input
+            className={controlClasses}
             maxLength={7}
             onChange={(e) => {
               onChange(e?.currentTarget?.value);

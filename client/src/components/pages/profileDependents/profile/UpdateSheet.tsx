@@ -15,6 +15,14 @@ import {
 } from "@/components/ui/sheet";
 import React from "react";
 import { useSettings } from "../settings/settingsLogic/SettingsContext";
+import {
+  getBackgroundClasses,
+  getButtonClasses,
+  getInputClasses,
+  getTextColor,
+  getTextShadow,
+  getSubtextColor,
+} from "@/lib/utils";
 
 const Username = "placeholder";
 const Email = "lorem@ipsum.com";
@@ -23,40 +31,43 @@ const Password = "password";
 export function UpdateSheet() {
   const { settings } = useSettings();
   const [showPassword, setShowPassword] = React.useState(false);
+
+  const bgClass = getBackgroundClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const buttonClass = getButtonClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const inputClass = getInputClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const subtextColor = getSubtextColor(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+
   return (
     <div className="z-101">
       <Sheet>
         <SheetTrigger asChild>
-          <Button
-            className={`text-white cursor-pointer ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
-          >
+          <Button className={`cursor-pointer ${buttonClass} ${textShadow}`}>
             Edit
           </Button>
         </SheetTrigger>
-        <SheetContent
-          className={`${
-            settings.useLiquidGlass
-              ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20"
-              : ""
-          }`}
-        >
+        <SheetContent className={bgClass}>
           <SheetHeader>
-            <SheetTitle
-              className={`text-white text-lg ${
-                settings.useLiquidGlass
-                  ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                  : ""
-              }`}
-            >
+            <SheetTitle className={`text-lg ${textColor} ${textShadow}`}>
               Edit profile
             </SheetTitle>
-            <SheetDescription
-              className={`text-white text-sm ${
-                settings.useLiquidGlass
-                  ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                  : ""
-              }`}
-            >
+            <SheetDescription className={`text-sm ${subtextColor}`}>
               Make changes to your profile here. <br />
               Click save when you&apos;re done.
             </SheetDescription>
@@ -65,35 +76,27 @@ export function UpdateSheet() {
             <div className="grid gap-3">
               <Label
                 htmlFor="sheet-username"
-                className={`text-white text-md ${
-                  settings.useLiquidGlass
-                    ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                    : ""
-                }`}
+                className={`text-md ${textColor} ${textShadow}`}
               >
                 Username
               </Label>
               <Input
                 id="sheet-name"
-                className={`text-white cursor-pointer ${settings.useLiquidGlass ? "bg-white/20 backdrop-blur-xl border border-white/30 shadow-lg shadow-white/10 ring-1 ring-white/20 [text-shadow:0_2px_4px_rgba(163,163,163,0.8)] placeholder:text-white/50" : ""}`}
+                className={`cursor-pointer ${inputClass}`}
                 defaultValue={Username}
               />
             </div>
             <div className="grid gap-3">
               <Label
                 htmlFor="sheet-email"
-                className={`text-white text-md ${
-                  settings.useLiquidGlass
-                    ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                    : ""
-                }`}
+                className={`text-md ${textColor} ${textShadow}`}
               >
                 Email Address
               </Label>
               <Input
                 id="sheet-email"
                 type="email"
-                className={`text-white cursor-pointer ${settings.useLiquidGlass ? "bg-white/20 backdrop-blur-xl border border-white/30 shadow-lg shadow-white/10 ring-1 ring-white/20 [text-shadow:0_2px_4px_rgba(163,163,163,0.8)] placeholder:text-white/50" : ""}`}
+                className={`cursor-pointer ${inputClass}`}
                 defaultValue={Email}
               />
             </div>
@@ -101,11 +104,7 @@ export function UpdateSheet() {
               <div className="flex items-center space-x-2">
                 <Label
                   htmlFor="sheet-username"
-                  className={`cursor-pointer text-white text-md ${
-                    settings.useLiquidGlass
-                      ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                      : ""
-                  }`}
+                  className={`cursor-pointer text-md ${textColor} ${textShadow}`}
                 >
                   Password
                 </Label>
@@ -115,8 +114,8 @@ export function UpdateSheet() {
                     <div className="flex items-center gap-2">
                       <span className="flex flex-row items-center gap-1">
                         <Checkbox
-                          className={`cursor-pointer rounded-sm lg-inner ${settings.useLiquidGlass ? "bg-white/20 backdrop-blur-xl border border-white/30 shadow-lg shadow-white/10 ring-1 ring-white/20" : ""}`}
-                          id="show-password-check" // Add an ID
+                          className={`cursor-pointer rounded-sm lg-inner ${inputClass}`}
+                          id="show-password-check"
                           checked={showPassword}
                           onCheckedChange={(checked) => {
                             setShowPassword(
@@ -125,12 +124,8 @@ export function UpdateSheet() {
                           }}
                         />
                         <FieldLabel
-                          htmlFor="show-password-check" // Link to checkbox ID
-                          className={`text-white/50 text-xs cursor-pointer ${
-                            settings.useLiquidGlass
-                              ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                              : ""
-                          }`}
+                          htmlFor="show-password-check"
+                          className={`text-xs cursor-pointer ${subtextColor}`}
                         >
                           Show password
                         </FieldLabel>
@@ -141,8 +136,7 @@ export function UpdateSheet() {
               </div>
               <Input
                 id="sheet-password"
-                className={`text-white cursor-pointer ${settings.useLiquidGlass ? "bg-white/20 backdrop-blur-xl border border-white/30 shadow-lg shadow-white/10 ring-1 ring-white/20 [text-shadow:0_2px_4px_rgba(163,163,163,0.8)] placeholder:text-white/50" : ""}`}
-                // 2. Change type dynamically based on state
+                className={`cursor-pointer ${inputClass}`}
                 type={showPassword ? "text" : "password"}
                 defaultValue={Password}
               />
@@ -151,14 +145,12 @@ export function UpdateSheet() {
           <SheetFooter>
             <Button
               type="submit"
-              className={`text-white cursor-pointer ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
+              className={`cursor-pointer ${buttonClass} ${textShadow}`}
             >
               Save changes
             </Button>
             <SheetClose asChild>
-              <Button
-                className={`text-white cursor-pointer ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
-              >
+              <Button className={`cursor-pointer ${buttonClass} ${textShadow}`}>
                 Close
               </Button>
             </SheetClose>

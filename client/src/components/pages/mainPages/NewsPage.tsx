@@ -1,4 +1,10 @@
-import { formatDateTime } from "@/lib/utils";
+import {
+  formatDateTime,
+  getBackgroundClasses,
+  getTextColor,
+  getTextShadow,
+  getButtonClasses,
+} from "@/lib/utils";
 import Navbar from "../../nav/Navbar";
 import { Card } from "@/components/ui/card";
 import { useSettings } from "../profileDependents/settings/settingsLogic/SettingsContext";
@@ -16,10 +22,12 @@ import { useNewsCategoryFilter } from "@/components/pages/mainPages/newsPageComp
 import { LoadPost } from "@/lib/pageAnimations/newsPageAnimations/LoadPost";
 import { FilterSelect } from "./newsPageComponents/Filter";
 import { CategoryBadge } from "./newsPageComponents/CategoryBadge";
+import { useContext } from "react";
+import { AuthContext } from "@/context/AuthContext";
 
 export function NewsPage() {
   const { settings } = useSettings();
-  const IsAdmin = true; // Replace with actual admin check
+  const { isAdmin } = useContext(AuthContext);
   const { selectedByCategory, selectedCategories, setCategorySelected } =
     useNewsCategoryFilter();
 
@@ -32,6 +40,20 @@ export function NewsPage() {
     handleSearch,
   } = useNewsPosts(selectedCategories);
 
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const bgClass = getBackgroundClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const buttonClass = getButtonClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+
   return (
     <div className="p-4 h-screen overflow-y-auto" ref={containerRef}>
       <Navbar />
@@ -39,13 +61,9 @@ export function NewsPage() {
         <span className="flex flex-row w-full justify-between">
           <ButtonGroup
             orientation="horizontal"
-            className={`text-white ${
-              settings.useLiquidGlass
-                ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)] rounded-lg bg-white/30"
-                : ""
-            }`}
+            className={`${buttonClass} rounded-lg`}
           >
-            {IsAdmin ? (
+            {isAdmin ? (
               <>
                 <AddNews onCreate={handleCreate} />
                 <Search onSearch={handleSearch} />
@@ -55,13 +73,7 @@ export function NewsPage() {
             )}
           </ButtonGroup>
           <span className="flex flex-row items-center gap-2">
-            <Label
-              className={`text-white text-lg ${
-                settings.useLiquidGlass
-                  ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                  : ""
-              } text-center`}
-            >
+            <Label className={`text-lg ${textColor} ${textShadow} text-center`}>
               Latest News
             </Label>
             <FilterSelect
@@ -74,21 +86,13 @@ export function NewsPage() {
           {visiblePosts.map((post: NewsPost, index: number) => {
             const cardContent = (
               <Card
-                className={`z-0 flex flex-row p-10 mb-5 max-w-full ${
-                  settings.useLiquidGlass
-                    ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20"
-                    : "bg-gray-600 border-2 border-green-400"
-                }`}
+                className={`z-0 flex flex-row p-10 mb-5 max-w-full ${bgClass}`}
               >
                 <li className="flex flex-col gap-2 w-full">
                   <span className="flex flex-row w-full items-start justify-between gap-4">
                     <div className="flex flex-col gap-2 flex-1">
                       <Label
-                        className={`text-white text-lg ${
-                          settings.useLiquidGlass
-                            ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                            : ""
-                        } text-left`}
+                        className={`text-lg ${textColor} ${textShadow} text-left`}
                       >
                         {post.title}
                       </Label>
@@ -96,15 +100,11 @@ export function NewsPage() {
                     </div>
                     <div className="flex flex-col items-end gap-2 shrink-0">
                       <Label
-                        className={`text-white text-lg ${
-                          settings.useLiquidGlass
-                            ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                            : ""
-                        } italic text-right`}
+                        className={`text-lg ${textColor} ${textShadow} italic text-right`}
                       >
                         {formatDateTime(post.createdAt)}
                       </Label>
-                      {IsAdmin ? (
+                      {isAdmin ? (
                         <ButtonGroup>
                           <EditButton post={post} onUpdate={handleUpdate} />
                           <RemoveButton
@@ -127,11 +127,7 @@ export function NewsPage() {
                         />
                       )}
                       <div
-                        className={`text-white text-sm ${
-                          settings.useLiquidGlass
-                            ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                            : ""
-                        } text-justify prose prose-sm prose-invert max-w-none`}
+                        className={`text-sm ${textColor} ${textShadow} text-justify prose prose-sm prose-invert max-w-none`}
                       >
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {post.content}
@@ -141,11 +137,7 @@ export function NewsPage() {
                   ) : (
                     <div className="flex flex-row gap-4 w-full">
                       <div
-                        className={`text-white text-sm ${
-                          settings.useLiquidGlass
-                            ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-                            : ""
-                        } text-justify prose prose-sm prose-invert max-w-none`}
+                        className={`text-sm ${textColor} ${textShadow} text-justify prose prose-sm prose-invert max-w-none`}
                         style={{ width: `${100 - (post.imageSize ?? 0)}%` }}
                       >
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>

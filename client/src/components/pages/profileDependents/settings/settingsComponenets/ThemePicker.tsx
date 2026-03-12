@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useSettings } from "../settingsLogic/SettingsContext";
 import { ColorPicker } from "@/components/ui/color-picker";
+import { getTextColor, getTextShadow, getButtonClasses } from "@/lib/utils";
 
 export const ThemePicker = () => {
   const context = useContext(ColorContext);
@@ -44,13 +45,19 @@ export const ThemePicker = () => {
     setPendingColorRight(null);
   };
 
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const textShadow = getTextShadow(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+  const buttonClass = getButtonClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+  );
+
   return (
     <div className="w-full flex items-center justify-center gap-2 flex-wrap">
-      <Label
-        className={`text-white p-1.5 ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
-      >
-        Custom Theme
-      </Label>
+      <Label className={`${textColor} p-1.5 ${textShadow}`}>Custom Theme</Label>
       <ColorPicker
         className="w-10 cursor-pointer"
         onChange={(v) => {
@@ -73,7 +80,7 @@ export const ThemePicker = () => {
         value={displayColorRight}
       />
       <Button
-        className={`text-white cursor-pointer ${settings.useLiquidGlass ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
+        className={`cursor-pointer ${buttonClass} ${textShadow}`}
         onClick={handleApplyChanges}
       >
         Apply changes
