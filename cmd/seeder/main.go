@@ -22,6 +22,7 @@ func main() {
 		seeder.WithContext(ctx),
 		seeder.WithSeeder(seeder.NewRoleSeeder()),
 		seeder.WithSeeder(seeder.NewUserSeeder()),
+		seeder.WithSeeder(seeder.NewRaritySeeder()),
 	)
 
 	go func() {

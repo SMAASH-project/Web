@@ -186,6 +186,8 @@ definitions:
         type: boolean
       last_login:
         type: string
+      role:
+        type: string
     type: object
   dtos.UserUpdateDTO:
     properties:
@@ -856,6 +858,65 @@ paths:
             $ref: '#/definitions/dtos.ErrResp'
         "409":
           description: unique key violation
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - profiles
+  /profiles/{id}/pfp:
+    get:
+      consumes:
+      - application/json
+      description: Returns an uploaded profile picture
+      parameters:
+      - description: id of desired profile
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - multipart/form-data
+      responses:
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+      tags:
+      - profiles
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads a profile picture
+      parameters:
+      - description: id of desired profile
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: returns newly created profile picture's URI
+          schema:
+            type: string
+        "400":
+          description: no file sent
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/dtos.ErrResp'
+        "415":
+          description: invalid media type
           schema:
             $ref: '#/definitions/dtos.ErrResp'
         "500":

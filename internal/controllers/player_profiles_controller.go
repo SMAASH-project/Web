@@ -167,6 +167,17 @@ func (pc PlayerProfileController) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// @description Uploads a profile picture
+// @tags profiles
+// @accept mpfd
+// @produce json
+// @param id path int true "id of desired profile"
+// @success 201 {object} string "returns newly created profile picture's URI"
+// @failure 400 {object} dtos.ErrResp "no file sent"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 415 {object} dtos.ErrResp "invalid media type"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /profiles/{id}/pfp [post]
 func (pc PlayerProfileController) UploadPFP(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
@@ -195,6 +206,14 @@ func (pc PlayerProfileController) UploadPFP(c *gin.Context) {
 	c.String(http.StatusCreated, "uri")
 }
 
+// @description Returns an uploaded profile picture
+// @tags profiles
+// @accept json
+// @produce mpfd
+// @param id path int true "id of desired profile"
+// @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /profiles/{id}/pfp [get]
 func (pc PlayerProfileController) GetPFP(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")

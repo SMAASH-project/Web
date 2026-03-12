@@ -7,6 +7,7 @@ type Item struct {
 	Name        string `gorm:"unique;not null;type:varchar(20)"`
 	Description string `gorm:"not null;type:varchar(50)"`
 	RarityID    uint   `gorm:"not null"`
+	Rarity      Rarity
 	Price       uint   `gorm:"not null"`
 	ImgUri      string `gorm:"not null"`
 	Purchases   []Purchase

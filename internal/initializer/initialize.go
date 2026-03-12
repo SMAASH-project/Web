@@ -14,6 +14,8 @@ func Initialize() *server.Server {
 	conn := database.NewGormDBConn()
 	userRepo := repository.NewUserRepositoryActions(conn)
 	profilesBaseRepo := repository.NewBaseRepositoryActions[models.PlayerProfile](conn)
+	rarityRepo := repository.NewRarityRepositoryActions(conn)
+	categoriesRepo := repository.NewCategoryRepositoryActions(conn)
 
 	authService := services.NewAuthenticationService(userRepo)
 
@@ -25,5 +27,6 @@ func Initialize() *server.Server {
 		AddController(controllers.NewLevelsController(repository.NewBaseRepositoryActions[models.Level](conn))).
 		AddController(controllers.NewPlayerProfileController(profilesBaseRepo)).
 		AddController(controllers.NewRolesController(repository.NewBaseRepositoryActions[models.Role](conn))).
-		AddController(controllers.NewCategoriesController(repository.NewBaseRepositoryActions[models.Category](conn)))
+		AddController(controllers.NewCategoriesController(categoriesRepo)).
+		AddController(controllers.NewItemsController(repository.NewBaseRepositoryActions[models.Item](conn), rarityRepo, categoriesRepo))
 }
