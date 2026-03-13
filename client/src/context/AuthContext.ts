@@ -2,6 +2,7 @@ import { createContext } from "react";
 
 export const AuthContext = createContext<{
   isLoggedIn: boolean;
+  isInitializing: boolean;
   userId: bigint | null;
   setUserId: (value: bigint | null) => void;
   setIsLoggedIn: (value: boolean) => void;
@@ -9,9 +10,10 @@ export const AuthContext = createContext<{
   setIsAdmin: (value: boolean) => void;
 }>({
   isLoggedIn: false,
+  isInitializing: true,
   userId: null,
-  setUserId: () => { },
-  setIsLoggedIn: () => { },
+  setUserId: () => {},
+  setIsLoggedIn: () => {},
   isAdmin: false,
-  setIsAdmin: () => { },
+  setIsAdmin: () => {},
 });

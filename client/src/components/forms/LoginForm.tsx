@@ -41,19 +41,6 @@ export function LoginForm({
     return null;
   };
 
-  const parseRoleId = (value: unknown): number | null => {
-    if (typeof value === "number" && Number.isFinite(value)) {
-      return Math.trunc(value);
-    }
-    if (typeof value === "string" && value.trim() !== "") {
-      const parsed = Number(value);
-      if (Number.isFinite(parsed)) {
-        return Math.trunc(parsed);
-      }
-    }
-    return null;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -70,13 +57,9 @@ export function LoginForm({
         return;
       }
 
-      const parsedRoleId = parseRoleId(
-        response?.role_id ?? response?.roleId ?? response?.role?.id,
-      );
-
-      console.log("Login successful");
+      // The server returns role as a string name (e.g. "admin"), not an id.
       setUserId(parsedUserId);
-      setIsAdmin(parsedRoleId === 1);
+      setIsAdmin(response?.role === "admin");
       setIsLoggedIn(true);
     } catch {
       // Error is handled by mutation state

@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient";
 import { AxiosError } from "axios";
 
@@ -8,12 +8,16 @@ export interface LoginPayload {
 }
 
 export interface LoginResponse {
-  id?: number | string;
-  role_id?: number | string;
-  roleId?: number | string;
-  role?: {
-    id?: number | string;
-  };
+  id: number;
+  role: string;
+}
+
+export interface WhoAmIResponse {
+  id: number;
+  email: string;
+  role: string;
+  is_banned: boolean;
+  last_login: string;
 }
 
 export interface SignupPayload {
@@ -23,7 +27,21 @@ export interface SignupPayload {
   role_id?: number;
 }
 
-// ─── Auth Mutations ──────────────────────────────────────────────────────────
+// ─── Auth Queries ─────────────────────────────────────────────────────────────
+
+export function useWhoAmIQuery() {
+  return useQuery<WhoAmIResponse, AxiosError>({
+    queryKey: ["auth", "whoami"],
+    queryFn: async () => {
+      const { data } = await apiClient.get<WhoAmIResponse>("/users/whoami");
+      return data;
+    },
+    retry: false,
+    staleTime: Infinity,
+  });
+}
+
+// ─── Auth Mutations ───────────────────────────────────────────────────────────
 
 export function useLoginMutation() {
   return useMutation<LoginResponse, AxiosError, LoginPayload>({
@@ -56,7 +74,7 @@ export function useLogoutMutation() {
       await apiClient.post("/auth/logout");
     },
     onSuccess: () => {
-      // Invalidate all queries on logout
+      queryClient.removeQueries({ queryKey: ["auth", "whoami"] });
       queryClient.invalidateQueries();
     },
   });
