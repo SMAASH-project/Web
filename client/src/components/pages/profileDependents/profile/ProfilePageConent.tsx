@@ -1,7 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-
 import { Label } from "@/components/ui/label";
 import { useSettings } from "../settings/settingsLogic/SettingsContext";
 import { UpdateSheet } from "./UpdateSheet";
@@ -20,40 +19,40 @@ export function ProfilePageContent() {
   const pfpinputRef = useRef<HTMLInputElement>(null);
   const { selectedProfile } = useProfiles();
   const uploadProfilePictureMutation = useUploadProfilePictureMutation();
-  // local avatarSrc is only used when the user picks a local file (blob)
-  // otherwise we display the selectedProfile.avatar
-  const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
+
+  // Local blob URL for an instant preview while the upload is in-flight.
+  // The shared cache is updated (with a versioned URL) by the mutation's onSuccess.
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
+
   const username = selectedProfile?.name ?? "PlaceholderUserName";
   const { settings } = useSettings();
 
+  // Revoke the blob URL when it changes or on unmount to avoid memory leaks.
   useEffect(() => {
     return () => {
-      if (avatarSrc && avatarSrc.startsWith("blob:"))
-        URL.revokeObjectURL(avatarSrc);
+      if (localPreview?.startsWith("blob:")) URL.revokeObjectURL(localPreview);
     };
-  }, [avatarSrc]);
+  }, [localPreview]);
 
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !selectedProfile?.id) return;
 
-    if (!selectedProfile?.id) {
-      return;
-    }
+    // Show a local preview immediately while the upload happens in the background.
+    const blobUrl = URL.createObjectURL(file);
+    setLocalPreview(blobUrl);
 
     try {
       await uploadProfilePictureMutation.mutateAsync({
         profileId: selectedProfile.id,
         file,
       });
-      const url = URL.createObjectURL(file);
-      setAvatarSrc((prev) => {
-        if (prev && prev.startsWith("blob:")) URL.revokeObjectURL(prev);
-        return url;
-      });
-
+      // On success the mutation's onSuccess updates the shared cache with a
+      // versioned URL — no manual cache manipulation needed here.
     } catch (error) {
       console.error("Failed to upload profile picture:", error);
+      // Revert the local preview if the upload failed.
+      setLocalPreview(null);
     }
   };
 
@@ -65,6 +64,10 @@ export function ProfilePageContent() {
   const cardClasses = settings.useLiquidGlass
     ? getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)
     : bgClass;
+
+  // Prefer the local blob preview while uploading; otherwise use the cached URL.
+  const avatarSrc =
+    localPreview ?? selectedProfile?.avatar ?? "./src/assets/SlimeArt.png";
 
   return (
     <Card
@@ -85,14 +88,7 @@ export function ProfilePageContent() {
               size="lg"
               className={`text-white cursor-pointer ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
             >
-              <AvatarImage
-                src={
-                  avatarSrc ??
-                  selectedProfile?.avatar ??
-                  "./src/assets/SlimeArt.png"
-                }
-                alt={username}
-              />
+              <AvatarImage src={avatarSrc} alt={username} />
               <span
                 aria-hidden
                 className={cn(
