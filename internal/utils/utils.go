@@ -59,7 +59,7 @@ func SaveFileToDisc(c *gin.Context, file *multipart.FileHeader) (*string, error)
 		return nil, ErrUnsupportedMediaType
 	}
 
-	uri := "./uploads/pfps" + uuid.NewString() + extension
+	uri := "./uploads/pfps/" + uuid.NewString() + extension
 
 	if err := c.SaveUploadedFile(file, uri); err != nil {
 		return nil, err

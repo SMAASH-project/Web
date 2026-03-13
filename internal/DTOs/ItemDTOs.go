@@ -30,7 +30,7 @@ type ItemUpdateDTO struct {
 	Name        string   `json:"name" binding:"required,max=20"`
 	Description string   `json:"description" binding:"required,max=50"`
 	Price       uint     `json:"price" binding:"required,gte=0"`
-	Rarity      string   `json:"rarity" binding:"required.max=9"`
+	Rarity      string   `json:"rarity" binding:"required,max=9"`
 	Categories  []string `json:"categories" binding:"required"`
 }
 

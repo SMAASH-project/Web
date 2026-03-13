@@ -228,6 +228,11 @@ func (pc PlayerProfileController) GetPFP(c *gin.Context) {
 		return
 	}
 
+	if profile.PfpUri == "" {
+		c.JSON(http.StatusNotFound, dtos.NewErrResp("Profile with given id has no uploaded pfp", path))
+		return
+	}
+
 	c.File(profile.PfpUri)
 }
 
