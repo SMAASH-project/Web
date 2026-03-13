@@ -37,7 +37,8 @@ export function useWhoAmIQuery() {
       return data;
     },
     retry: false,
-    staleTime: Infinity,
+    staleTime: 0, // always refetch on mount
+    gcTime: 0, // never write into the persisted localStorage cache
   });
 }
 
