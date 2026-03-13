@@ -41,17 +41,17 @@ export function ProfilePageContent() {
       return;
     }
 
-    const url = URL.createObjectURL(file);
-    setAvatarSrc((prev) => {
-      if (prev && prev.startsWith("blob:")) URL.revokeObjectURL(prev);
-      return url;
-    });
-
     try {
       await uploadProfilePictureMutation.mutateAsync({
         profileId: selectedProfile.id,
         file,
       });
+      const url = URL.createObjectURL(file);
+      setAvatarSrc((prev) => {
+        if (prev && prev.startsWith("blob:")) URL.revokeObjectURL(prev);
+        return url;
+      });
+
     } catch (error) {
       console.error("Failed to upload profile picture:", error);
     }

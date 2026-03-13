@@ -203,7 +203,7 @@ func (pc PlayerProfileController) UploadPFP(c *gin.Context) {
 		return
 	}
 
-	c.String(http.StatusCreated, "uri")
+	c.String(http.StatusCreated, *uri)
 }
 
 // @description Returns an uploaded profile picture
@@ -221,10 +221,15 @@ func (pc PlayerProfileController) GetPFP(c *gin.Context) {
 	profile, err := pc.profilesBaseRepo.ReadByID(c.Request.Context(), id.(uint))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, dtos.NewErrResp("Profile with given if not found", path))
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("Profile with given id not found", path))
 			return
 		}
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	if profile.PfpUri == "" {
+		c.JSON(http.StatusNotFound, dtos.NewErrResp("Given profile has no uploaded profile picture", path))
 		return
 	}
 
@@ -233,12 +238,12 @@ func (pc PlayerProfileController) GetPFP(c *gin.Context) {
 
 func (pc PlayerProfileController) MountRoutes(apiGroup *gin.RouterGroup) {
 	profiles := apiGroup.Group("/profiles")
-	profiles.Use(middlewares.Authorize)
+	// profiles.Use(middlewares.Authorize)
 	profiles.GET("", pc.ReadAll)
 	profiles.GET("/:id", middlewares.ValidateUrl, pc.ReadByID)
 	profiles.POST("", pc.Create)
 	profiles.PUT("/:id", middlewares.ValidateUrl, pc.Update)
 	profiles.DELETE("/:id", middlewares.ValidateUrl, pc.Delete)
-	profiles.POST("/:id/pfp", middlewares.ValidateUrl, pc.UploadPFP)
+	profiles.POST("/:id/pfpupload", middlewares.ValidateUrl, pc.UploadPFP)
 	profiles.GET("/:id/pfp", middlewares.ValidateUrl, pc.GetPFP)
 }
