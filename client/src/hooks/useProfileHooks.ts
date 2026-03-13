@@ -39,19 +39,12 @@ function getProfilePictureUrl(profileId: number) {
 async function uploadProfilePicture(profileId: number, file: File) {
   const formData = new FormData();
   formData.append("profilePicture", file);
+
   await apiClient.post(`/profiles/${profileId}/pfpupload`, formData);
 }
 
 function clampDisplayName(name: string) {
   return name.trim().slice(0, 20);
-}
-
-function withUniqueSuffix(base: string) {
-  const seed = Math.random().toString(36).slice(2, 6);
-  const cleanBase = clampDisplayName(base);
-  const maxBaseLength = 20 - (seed.length + 1);
-  const safeBase = cleanBase.slice(0, Math.max(1, maxBaseLength));
-  return `${safeBase}-${seed}`;
 }
 
 // ─── Profile Queries ─────────────────────────────────────────────────────────
@@ -71,8 +64,8 @@ export function useProfilesQuery(userId: number | null) {
       }));
     },
     enabled: !!userId,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
   });
 }
 
@@ -84,50 +77,44 @@ export function useAddProfileMutation() {
   return useMutation<AddProfileResponse, AxiosError, AddProfilePayload>({
     mutationFn: async (payload) => {
       const { user_id, profile_picture, ...body } = payload;
-      let candidateName = clampDisplayName(body.display_name);
+      const displayName = clampDisplayName(body.display_name);
 
-      for (let attempt = 0; attempt < 4; attempt++) {
+      const { data } = await apiClient.post<AddProfileResponse>(
+        `/users/${user_id}/profiles`,
+        { display_name: displayName },
+      );
+
+      if (profile_picture) {
         try {
-          const { data } = await apiClient.post<AddProfileResponse>(
-            `/users/${user_id}/profiles`,
-            { display_name: candidateName },
+          await uploadProfilePicture(data.id, profile_picture);
+        } catch (uploadError) {
+          console.error(
+            "Profile created but picture upload failed:",
+            uploadError,
           );
-
-          if (profile_picture) {
-            try {
-              await uploadProfilePicture(data.id, profile_picture);
-            } catch (uploadError) {
-              console.error(
-                "Profile created but picture upload failed:",
-                uploadError,
-              );
-            }
-          }
-
-          return data;
-        } catch (error) {
-          const axiosError = error as AxiosError;
-          const status = axiosError.response?.status;
-          const isLastAttempt = attempt === 3;
-
-          if (status !== 409 || isLastAttempt) {
-            throw error;
-          }
-
-          candidateName = withUniqueSuffix(candidateName);
         }
       }
 
-      throw new Error("Failed to create profile");
+      return data;
     },
-    onSuccess: (_data, variables) => {
-      if (!variables.user_id) return;
+    onSuccess: async (_data, variables) => {
+      const requestedUserId = variables.user_id;
+      if (!requestedUserId) {
+        return;
+      }
 
-      // invalidateQueries marks as stale AND triggers a background refetch
-      // for active subscribers — no need to also call refetchQueries separately.
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.profiles.byUserId(variables.user_id),
-      });
+      // Always invalidate + refetch after adding a profile to ensure fresh list
+      try {
+        await queryClient.invalidateQueries({
+          queryKey: queryKeys.profiles.byUserId(requestedUserId),
+        });
+
+        await queryClient.refetchQueries({
+          queryKey: queryKeys.profiles.byUserId(requestedUserId),
+        });
+      } catch (err) {
+        console.error("Failed to refetch profiles after add:", err);
+      }
     },
     onError: (error) => {
       const axiosError = error as AxiosError;
@@ -147,25 +134,34 @@ export function useUploadProfilePictureMutation() {
     mutationFn: async ({ profileId, file }) => {
       await uploadProfilePicture(profileId, file);
     },
-    onSuccess: (_data, variables) => {
-      // Use a versioned URL so the browser fetches the new image instead of
-      // serving a stale HTTP-cached response for the same plain URL.
-      const versionedUrl = `/api/profiles/${variables.profileId}/pfp?v=${Date.now()}`;
-
-      queryClient.setQueriesData<ProfileResponse[]>(
-        { queryKey: queryKeys.profiles.all },
-        (old) => {
-          if (!Array.isArray(old)) return old;
-          return old.map((p) =>
-            p.id === variables.profileId
-              ? { ...p, avatar_url: versionedUrl }
-              : p,
-          );
-        },
-      );
-
-      // Invalidate so any future navigation re-fetches fresh data.
+    onSuccess: async (_data, variables) => {
+      // Invalidate the generic profiles prefix so lists refetch
       queryClient.invalidateQueries({ queryKey: queryKeys.profiles.all });
+
+      // Also invalidate the specific profile entry to be safe
+      try {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.profiles.byId(variables.profileId),
+        });
+      } catch (err) {
+        // ignore
+      }
+      // Invalidate and refetch to ensure fresh data is loaded from the server
+      try {
+        await queryClient.invalidateQueries({
+          queryKey: queryKeys.profiles.all,
+        });
+        await queryClient.refetchQueries({ queryKey: queryKeys.profiles.all });
+
+        await queryClient.invalidateQueries({
+          queryKey: queryKeys.profiles.byId(variables.profileId),
+        });
+        await queryClient.refetchQueries({
+          queryKey: queryKeys.profiles.byId(variables.profileId),
+        });
+      } catch (err) {
+        // ignore
+      }
     },
   });
 }
@@ -187,7 +183,9 @@ export function useUpdateProfileMutation() {
       await apiClient.put(`/profiles/${profileId}`, payload);
     },
     onMutate: async ({ profileId, payload, optimistic }) => {
-      if (optimistic === false) return;
+      if (optimistic === false) {
+        return;
+      }
 
       queryClient.setQueriesData<ProfileResponse[]>(
         { queryKey: queryKeys.profiles.all },
@@ -202,8 +200,14 @@ export function useUpdateProfileMutation() {
       );
     },
     onSuccess: (_data, variables) => {
-      if (variables.invalidateAfterSuccess === false) return;
-      queryClient.invalidateQueries({ queryKey: queryKeys.profiles.all });
+      if (variables.invalidateAfterSuccess === false) {
+        return;
+      }
+
+      // Invalidate all profile queries to ensure consistency
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.profiles.all,
+      });
     },
   });
 }
@@ -216,18 +220,23 @@ export function useDeleteProfileMutation() {
       await apiClient.delete(`/profiles/${profileId}`);
     },
     onMutate: async ({ profileId, userId }) => {
+      // Cancel any in-flight queries
       await queryClient.cancelQueries({
         queryKey: queryKeys.profiles.byUserId(userId),
       });
 
+      // Snapshot previous data
       const previousData = queryClient.getQueryData<ProfileResponse[]>(
         queryKeys.profiles.byUserId(userId),
       );
 
-      // Optimistically remove from cache so the UI updates instantly.
+      // Optimistically remove from cache
       queryClient.setQueryData<ProfileResponse[]>(
         queryKeys.profiles.byUserId(userId),
-        (old) => old?.filter((p) => p.id !== profileId),
+        (old) => {
+          if (!old) return old;
+          return old.filter((p) => p.id !== profileId);
+        },
       );
 
       return { previousData, userId };
@@ -239,23 +248,30 @@ export function useDeleteProfileMutation() {
         axiosError.response?.status,
         axiosError.response?.data ?? axiosError.message,
       );
-
-      // Roll back optimistic update on failure.
-      const ctx = context as
+      // Rollback on error
+      const rollbackContext = context as
         | { previousData: ProfileResponse[] | undefined; userId: number }
         | undefined;
-      if (ctx?.previousData !== undefined) {
+      if (rollbackContext?.previousData !== undefined) {
         queryClient.setQueryData(
-          queryKeys.profiles.byUserId(ctx.userId),
-          ctx.previousData,
+          queryKeys.profiles.byUserId(rollbackContext.userId),
+          rollbackContext.previousData,
         );
       }
     },
-    onSuccess: (_data, variables) => {
-      // Confirm the list against the server after the delete completes.
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.profiles.byUserId(variables.userId),
-      });
+    onSuccess: async (_data, variables) => {
+      // Invalidate + refetch after deleting to ensure fresh list
+      try {
+        await queryClient.invalidateQueries({
+          queryKey: queryKeys.profiles.byUserId(variables.userId),
+        });
+
+        await queryClient.refetchQueries({
+          queryKey: queryKeys.profiles.byUserId(variables.userId),
+        });
+      } catch (err) {
+        console.error("Failed to refetch profiles after delete:", err);
+      }
     },
   });
 }
