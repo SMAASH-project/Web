@@ -7,10 +7,28 @@ import axios from "axios";
 
 const apiClient = axios.create({
   baseURL: "/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
   withCredentials: true, // Include cookies in requests
+});
+
+apiClient.interceptors.request.use((config) => {
+  const isFormData =
+    typeof FormData !== "undefined" && config.data instanceof FormData;
+
+  // Let the browser set multipart boundaries for FormData automatically.
+  if (isFormData) {
+    if (config.headers && "Content-Type" in config.headers) {
+      delete (config.headers as Record<string, unknown>)["Content-Type"];
+    }
+    return config;
+  }
+
+  config.headers = config.headers ?? {};
+  if (!("Content-Type" in config.headers)) {
+    (config.headers as Record<string, unknown>)["Content-Type"] =
+      "application/json";
+  }
+
+  return config;
 });
 
 /**

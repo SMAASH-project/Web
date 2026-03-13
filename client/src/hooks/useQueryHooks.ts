@@ -197,11 +197,14 @@ export function useAddProfileMutation() {
         return;
       }
 
-      // Always refetch after adding a profile to ensure fresh list
+      // Always invalidate + refetch after adding a profile to ensure fresh list
       try {
+        await queryClient.invalidateQueries({
+          queryKey: queryKeys.profiles.byUserId(requestedUserId),
+        });
+
         await queryClient.refetchQueries({
           queryKey: queryKeys.profiles.byUserId(requestedUserId),
-          type: "active",
         });
       } catch (err) {
         console.error("Failed to refetch profiles after add:", err);
@@ -313,11 +316,14 @@ export function useDeleteProfileMutation() {
       }
     },
     onSuccess: async (_data, variables) => {
-      // Refetch after deleting to ensure fresh list
+      // Invalidate + refetch after deleting to ensure fresh list
       try {
+        await queryClient.invalidateQueries({
+          queryKey: queryKeys.profiles.byUserId(variables.userId),
+        });
+
         await queryClient.refetchQueries({
           queryKey: queryKeys.profiles.byUserId(variables.userId),
-          type: "active",
         });
       } catch (err) {
         console.error("Failed to refetch profiles after delete:", err);
