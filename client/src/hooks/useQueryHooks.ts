@@ -63,14 +63,15 @@ export interface ProfileResponse {
 }
 
 function getProfilePictureUrl(profileId: number, versionSeed: number) {
-  return `/api/profiles/${profileId}/pfp?v=${versionSeed}`;
+  // return `/api/profiles/${profileId}/pfp?v=${versionSeed}`;
+  return `/api/profiles/${profileId}/pfp`;
 }
 
 async function uploadProfilePicture(profileId: number, file: File) {
   const formData = new FormData();
   formData.append("profilePicture", file);
 
-  await apiClient.post(`/profiles/${profileId}/pfp`, formData);
+  await apiClient.post(`/profiles/${profileId}/pfpupload`, formData);
 }
 
 function clampDisplayName(name: string) {
