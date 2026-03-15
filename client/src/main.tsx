@@ -56,6 +56,13 @@ const SettingsPage = lazy(() =>
     (m) => ({ default: m.SettingsPage }),
   ),
 );
+const AdminPage = lazy(() =>
+  import("./components/pages/profileDependents/admin/AdminPage.tsx").then(
+    (m) => ({
+      default: m.AdminPage,
+    }),
+  ),
+);
 
 const router = createBrowserRouter([
   {
@@ -80,6 +87,7 @@ const router = createBrowserRouter([
         element: <ProfileSelectorForm />,
       },
       { path: "*", element: <NotFoundPage /> },
+      { path: "/app/admin", element: <AdminPage /> },
     ],
   },
 ]);

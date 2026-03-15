@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, User, Settings, ArrowLeftRight, LogOut } from "lucide-react";
+import {
+  Menu,
+  User,
+  Settings,
+  ArrowLeftRight,
+  LogOut,
+  ShieldAlert,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -25,6 +32,7 @@ interface MobileNavMenuProps {
   useDarkMode?: boolean;
   username: string;
   onLogout: () => Promise<void>;
+  isAdmin?: boolean;
 }
 
 export function MobileNavMenu({
@@ -32,6 +40,7 @@ export function MobileNavMenu({
   useDarkMode = false,
   username,
   onLogout,
+  isAdmin = false,
 }: MobileNavMenuProps) {
   const location = useLocation();
   const [open, setOpen] = useState(false);
@@ -141,6 +150,18 @@ export function MobileNavMenu({
               <span>Change Profile</span>
             </Link>
           </SheetClose>
+
+          {isAdmin && (
+            <SheetClose asChild>
+              <Link
+                to="/app/admin"
+                className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors duration-200 no-underline ${textColor} ${hoverClass}`}
+              >
+                <ShieldAlert size={16} />
+                <span>Admin Panel</span>
+              </Link>
+            </SheetClose>
+          )}
         </div>
 
         {/* Footer: logged in + log out */}

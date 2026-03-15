@@ -4,12 +4,14 @@ import { NavMenu } from "./NavMenu";
 import AccountMenu from "./AccountMenu";
 import { MobileNavMenu } from "./MobileNavMenu";
 import { useProfiles } from "../forms/addNewProfile/useProfiles";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { useMediaQuery } from "./navLogic/useMediaQuery";
 import { useLogoutMutation } from "@/hooks/useQueryHooks";
 import { AuthContext } from "@/context/AuthContext";
+import { ShieldAlert } from "lucide-react";
 import {
   getBackgroundClasses,
+  getButtonClasses,
   getSubtextColor,
   getTextColor,
   getTextShadow,
@@ -21,7 +23,8 @@ const Navbar = () => {
   const username = selectedProfile?.name ?? "PlaceholderUserName";
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const navigate = useNavigate();
-  const { setIsLoggedIn, setUserId, setIsAdmin } = useContext(AuthContext);
+  const { setIsLoggedIn, setUserId, setIsAdmin, isAdmin } =
+    useContext(AuthContext);
   const logoutMutation = useLogoutMutation();
   const navBackground = getBackgroundClasses(
     settings.useLiquidGlass,
@@ -62,7 +65,18 @@ const Navbar = () => {
       {isDesktop ? (
         <>
           {/* Desktop layout — left/right have equal min-width so center stays centered */}
-          <div className="flex-1 min-w-0"></div>
+          <div className="flex-1 min-w-0 flex items-center">
+            {isAdmin && (
+              <Link
+                to="/app/admin"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 no-underline ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "secondary")} ${textColor}`}
+                title="Admin Panel"
+              >
+                <ShieldAlert size={14} />
+                <span className="hidden lg:inline">Admin</span>
+              </Link>
+            )}
+          </div>
           <div className="shrink-0">
             <NavMenu
               useLiquidGlass={settings.useLiquidGlass}
@@ -93,6 +107,7 @@ const Navbar = () => {
             useDarkMode={settings.useDarkMode}
             username={username}
             onLogout={handleLogout}
+            isAdmin={isAdmin}
           />
           <span
             className={`text-sm truncate max-w-[50vw] ${textColor} ${textShadow}`}

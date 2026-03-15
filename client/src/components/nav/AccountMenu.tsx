@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User } from "lucide-react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { useNavbarContext } from "@/context/NavbarContextUtils";
 import { useSettings } from "../pages/profileDependents/settings/settingsLogic/SettingsContext";
