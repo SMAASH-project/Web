@@ -119,10 +119,9 @@ func (rc RaritiesController) Delete(c *gin.Context) {
 
 func (rc RaritiesController) MountRoutes(apiGroup *gin.RouterGroup) {
 	rarities := apiGroup.Group("/rarities")
-	rarities.Use(middlewares.Authorize)
-	rarities.POST("", rc.Create)
-	rarities.GET("", rc.ReadAll)
-	rarities.GET("/:id", middlewares.ValidateUrl, rc.ReadByID)
-	rarities.PUT("/:id", middlewares.ValidateUrl, rc.Update)
-	rarities.DELETE("/:id", middlewares.ValidateUrl, rc.Delete)
+	rarities.POST("", middlewares.Authorize(middlewares.ADMIN), rc.Create)
+	rarities.GET("", middlewares.Authorize(middlewares.ANY), rc.ReadAll)
+	rarities.GET("/:id", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, rc.ReadByID)
+	rarities.PUT("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, rc.Update)
+	rarities.DELETE("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, rc.Delete)
 }

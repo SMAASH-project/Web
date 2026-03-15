@@ -238,14 +238,12 @@ func (uc UserController) WhoAmI(c *gin.Context) {
 
 func (uc UserController) MountRoutes(apiGroup *gin.RouterGroup) {
 	users := apiGroup.Group("/users")
-	users.Use(middlewares.Authorize)
-	{ // no creation, that happens on /auth/signup. No updating password either.
-		users.GET("", uc.ReadAll)
-		users.GET("/:id", middlewares.ValidateUrl, uc.ReadByID)
-		users.PUT("/:id", middlewares.ValidateUrl, uc.Update)
-		users.DELETE("/:id", middlewares.ValidateUrl, uc.Delete)
-		users.POST("/:id/profiles", middlewares.ValidateUrl, uc.AddProfileToUser)
-		users.GET("/:id/profiles", middlewares.ValidateUrl, uc.ReadUsersProfiles)
-		users.GET("/whoami", uc.WhoAmI)
-	}
+	// no creation, that happens on /auth/signup. No updating password either.
+	users.GET("", middlewares.Authorize(middlewares.ADMIN), uc.ReadAll)
+	users.GET("/:id", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, uc.ReadByID)
+	users.PUT("/:id", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, uc.Update)
+	users.DELETE("/:id", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, uc.Delete)
+	users.POST("/:id/profiles", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, uc.AddProfileToUser)
+	users.GET("/:id/profiles", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, uc.ReadUsersProfiles)
+	users.GET("/whoami", middlewares.Authorize(middlewares.ANY), uc.WhoAmI)
 }

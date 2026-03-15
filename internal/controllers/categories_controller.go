@@ -173,11 +173,10 @@ func (cc CategoriesController) Delete(c *gin.Context) {
 }
 
 func (cc CategoriesController) MountRoutes(apiGroup *gin.RouterGroup) {
-	cat := apiGroup.Group("/categories")
-	cat.Use(middlewares.Authorize)
-	cat.POST("", cc.Create)
-	cat.GET("", cc.ReadAll)
-	cat.GET("/:id", middlewares.ValidateUrl, cc.ReadByID)
-	cat.PUT("/:id", middlewares.ValidateUrl, cc.Update)
-	cat.DELETE("/:id", middlewares.ValidateUrl, cc.Delete)
+	categories := apiGroup.Group("/categories")
+	categories.POST("", middlewares.Authorize(middlewares.ADMIN), cc.Create)
+	categories.GET("", middlewares.Authorize(middlewares.ANY), cc.ReadAll)
+	categories.GET("/:id", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, cc.ReadByID)
+	categories.PUT("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, cc.Update)
+	categories.DELETE("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, cc.Delete)
 }

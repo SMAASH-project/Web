@@ -51,8 +51,9 @@ func (a AuthenticationService) Login(c context.Context, u *models.User) (*string
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": user.ID,
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
+		"sub":  user.ID,
+		"exp":  time.Now().Add(time.Hour * 24).Unix(),
+		"role": user.Role.Name,
 	})
 
 	key := os.Getenv("SECRET_KEY")

@@ -129,10 +129,9 @@ func (pc PurchasesController) Delete(c *gin.Context) {
 
 func (pc PurchasesController) MountRoutes(apiGroup *gin.RouterGroup) {
 	purchases := apiGroup.Group("/purchases")
-	purchases.Use(middlewares.Authorize)
-	purchases.POST("", pc.Create)
-	purchases.GET("", pc.ReadAll)
-	purchases.GET("/:id", middlewares.ValidateUrl, pc.ReadByID)
-	purchases.PUT("/:id", middlewares.ValidateUrl, pc.Update)
-	purchases.DELETE("/:id", middlewares.ValidateUrl, pc.Delete)
+	purchases.POST("", middlewares.Authorize(middlewares.ANY), pc.Create)
+	purchases.GET("", middlewares.Authorize(middlewares.ADMIN), pc.ReadAll)
+	purchases.GET("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, pc.ReadByID)
+	purchases.PUT("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, pc.Update)
+	purchases.DELETE("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, pc.Delete)
 }

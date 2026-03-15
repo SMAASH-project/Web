@@ -174,12 +174,10 @@ func (rc RolesController) Delete(c *gin.Context) {
 
 func (rc RolesController) MountRoutes(apiGroup *gin.RouterGroup) {
 	roles := apiGroup.Group("/roles")
-	roles.Use(middlewares.Authorize)
-	{
-		roles.POST("", rc.Create)
-		roles.GET("", rc.ReadAll)
-		roles.GET("/:id", middlewares.ValidateUrl, rc.ReadByID)
-		roles.PUT("/:id", middlewares.ValidateUrl, rc.Update)
-		roles.DELETE("/:id", middlewares.ValidateUrl, rc.Delete)
-	}
+	roles.Use(middlewares.Authorize(middlewares.ADMIN))
+	roles.POST("", rc.Create)
+	roles.GET("", rc.ReadAll)
+	roles.GET("/:id", middlewares.ValidateUrl, rc.ReadByID)
+	roles.PUT("/:id", middlewares.ValidateUrl, rc.Update)
+	roles.DELETE("/:id", middlewares.ValidateUrl, rc.Delete)
 }
