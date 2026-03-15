@@ -1,6 +1,5 @@
 import React from "react";
 import { Search, Shield } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import UserListItem from "./UserListItem";
 import type { AdminPageLogic } from "@/components/pages/profileDependents/admin/adminLogic/useAdminPageLogic";

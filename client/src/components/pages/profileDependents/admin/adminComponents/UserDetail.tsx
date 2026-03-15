@@ -1,9 +1,61 @@
 import React from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Mail, Clock, ShieldCheck, Ban } from "lucide-react";
+import {
+  Mail,
+  Clock,
+  ShieldCheck,
+  Ban,
+  Shield,
+  Users,
+  HeadphonesIcon,
+} from "lucide-react";
 import type { AdminPageLogic } from "@/components/pages/profileDependents/admin/adminLogic/useAdminPageLogic";
 import { getButtonClasses } from "@/lib/utils";
+
+// ─── Role config ──────────────────────────────────────────────────────────────
+// Backend roles (Role.Name, varchar(7)): "admin" | "support" | "user"
+// Colours are purely semantic and intentionally fixed regardless of theme mode.
+
+interface RoleConfig {
+  label: string;
+  icon: React.ReactNode;
+  /** Tailwind classes for the badge pill */
+  badgeClass: string;
+  /** Tailwind classes for the larger stat-card value */
+  statClass: string;
+}
+
+function getRoleConfig(role: string): RoleConfig {
+  switch (role) {
+    case "admin":
+      return {
+        label: "Admin",
+        icon: <Shield size={10} />,
+        badgeClass:
+          "bg-purple-500/20 text-purple-300 border border-purple-500/30",
+        statClass: "text-purple-400",
+      };
+    case "support":
+      return {
+        label: "Support",
+        icon: <HeadphonesIcon size={10} />,
+        badgeClass: "bg-sky-500/20 text-sky-300 border border-sky-500/30",
+        statClass: "text-sky-400",
+      };
+    case "user":
+    default:
+      return {
+        label: role.charAt(0).toUpperCase() + role.slice(1) || "User",
+        icon: <Users size={10} />,
+        // Neutral — uses no semantic colour, falls through to a muted pill
+        badgeClass: "bg-gray-500/15 text-gray-300 border border-gray-500/25",
+        statClass: "text-gray-400",
+      };
+  }
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
   const {
@@ -14,7 +66,6 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
     textShadow,
     subtextColor,
     unbanMutation,
-    banMutation,
     handleUnban,
     setBanDialogOpen,
   } = logic;
@@ -29,8 +80,16 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
     );
   }
 
+  const roleConfig = getRoleConfig(selectedUser.role);
+  const avatarFallbackClass = getButtonClasses(
+    logic.useLiquidGlass,
+    logic.useDarkMode,
+    "secondary",
+  );
+
   return (
     <>
+      {/* ── User header card ──────────────────────────────────────────── */}
       <div className={`rounded-xl p-4 flex items-center gap-4 ${panelBg}`}>
         <Avatar size="lg">
           <AvatarImage
@@ -42,7 +101,7 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
             alt={selectedUser.username || selectedUser.email}
           />
           <AvatarFallback
-            className={`text-lg font-bold ${useLiquidFallbackClass(logic)}`}
+            className={`text-lg font-bold ${avatarFallbackClass}`}
           >
             {(selectedUser.username || selectedUser.email)
               .slice(0, 2)
@@ -62,20 +121,18 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
             <Mail size={12} />
             {selectedUser.email}
           </p>
-          <div className="flex items-center gap-2 mt-1 flex-wrap">
+
+          {/* Role + ban badges */}
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            {/* Role badge — styled per backend role */}
             <span
-              className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                selectedUser.role === "admin"
-                  ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
-                  : getButtonClasses(
-                      logic.useLiquidGlass,
-                      logic.useDarkMode,
-                      "secondary",
-                    )
-              }`}
+              className={`text-xs px-2 py-0.5 rounded-full font-medium flex items-center gap-1 ${roleConfig.badgeClass}`}
             >
-              {selectedUser.role}
+              {roleConfig.icon}
+              {roleConfig.label}
             </span>
+
+            {/* Ban badge */}
             {selectedUser.is_banned && (
               <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-red-500/20 text-red-400 border border-red-500/30 flex items-center gap-1">
                 <Ban size={10} />
@@ -88,6 +145,7 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
           </div>
         </div>
 
+        {/* Ban / unban action */}
         <div className="flex flex-col gap-2 shrink-0">
           {selectedUser.is_banned ? (
             <Button
@@ -112,6 +170,7 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
         </div>
       </div>
 
+      {/* ── Account details card ──────────────────────────────────────── */}
       <div className={`rounded-xl p-4 flex flex-col gap-3 ${panelBg}`}>
         <p
           className={`text-xs font-semibold uppercase tracking-wider ${subtextColor}`}
@@ -125,6 +184,7 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
               #{selectedUser.id}
             </p>
           </div>
+
           <div className={logic.statCard}>
             <p className={`text-xs ${subtextColor}`}>Last Login</p>
             <p
@@ -134,12 +194,18 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
               {selectedUser.last_login || "Never"}
             </p>
           </div>
+
+          {/* Role stat — shows badge inline so it matches the header */}
           <div className={logic.statCard}>
             <p className={`text-xs ${subtextColor}`}>Role</p>
-            <p className={`text-sm font-semibold capitalize ${textColor}`}>
-              {selectedUser.role}
-            </p>
+            <span
+              className={`text-xs px-2 py-0.5 rounded-full font-medium flex items-center gap-1 w-fit mt-0.5 ${roleConfig.badgeClass}`}
+            >
+              {roleConfig.icon}
+              {roleConfig.label}
+            </span>
           </div>
+
           <div className={logic.statCard}>
             <p className={`text-xs ${subtextColor}`}>Status</p>
             <p
@@ -152,8 +218,4 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
       </div>
     </>
   );
-}
-
-function useLiquidFallbackClass(logic: AdminPageLogic) {
-  return getButtonClasses(logic.useLiquidGlass, logic.useDarkMode, "secondary");
 }

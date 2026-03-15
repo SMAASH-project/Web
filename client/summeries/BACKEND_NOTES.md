@@ -1,130 +1,174 @@
-# Backend Requirements for Admin Page
+# Backend Requirements for Admin Panel
 
-## Overview
-
-The admin page frontend is fully wired up. The following backend endpoints need to be created or extended to support it.
+All frontend hooks are wired and waiting. Every item below is marked with a
+`// TODO: BACKEND` comment in `src/hooks/useAdminHooks.ts`. Once implemented
+the frontend will work without any further client changes.
 
 ---
 
-## 1. List All Users (with search/pagination)
+## 1. Fix Role Not Loading (CRITICAL — breaks role display right now)
 
-**Current state:** `GET /api/users` exists and returns all users (array of `UserReadDTO`).
+**File:** `controllers/users_controller.go`
 
-**Needed changes:**
+Both `ReadAll` and `ReadByID` call the repository without passing `"Role"` as a
+preload, so `user.Role.Name` is always `""` and the frontend receives `role: ""`
+for every user. See `notestobackend.md` for full details.
 
-- Add query parameter support: `?search=<string>` to filter by username/email
-- Add pagination: `?page=<int>&limit=<int>`
-- Return **username** (display name / first profile name) in the DTO — right now `UserReadDTO` only has `email`, `role`, `is_banned`, `last_login`. We need a `username` field so the search-by-name feature works.
-- Return `ban_until` (nullable datetime string) so the frontend can show current ban status.
+```go
+// ReadAll — add "Role" preload
+users, err := uc.userRepo.ReadAll(c.Request.Context(), "Role")
 
-**Suggested extended DTO:**
+// ReadByID — add "Role" preload
+user, err := uc.userRepo.ReadByID(c.Request.Context(), id.(uint), "Role")
+```
+
+---
+
+## 2. Extend `UserReadDTO`
+
+The frontend `AdminUserDTO` expects two fields that the current DTO does not
+return. Until these are added, username shows as `"—"` and ban expiry cannot
+be displayed.
 
 ```go
 type UserReadDTO struct {
-  ID        uint    `json:"id"`
-  Email     string  `json:"email"`
-  Username  string  `json:"username"`   // NEW: pulled from first profile display_name or signup username
-  Role      string  `json:"role"`
-  IsBanned  bool    `json:"is_banned"`
-  BanUntil  *string `json:"ban_until"`  // NEW: ISO datetime string, null if not banned
-  LastLogin string  `json:"last_login"`
+    ID        uint    `json:"id"`
+    Email     string  `json:"email"`
+    Username  string  `json:"username"`   // NEW: first profile display_name, or signup username
+    Role      string  `json:"role"`
+    IsBanned  bool    `json:"is_banned"`
+    BanUntil  *string `json:"ban_until"`  // NEW: ISO 8601 datetime or null
+    LastLogin string  `json:"last_login"`
 }
 ```
 
+`Username` should be populated from the user's first `PlayerProfile.DisplayName`,
+or fall back to the username supplied at signup if no profiles exist.
+
 ---
 
-## 2. Ban a User
-
-**Current state:** No ban endpoint exists. `IsBanned` is a field on the User model but there is no mechanism to set it with an expiry.
-
-**Needed:**
-
-### 2a. Add `BanUntil` to the User model
+## 3. Add `BanUntil` to the User Model
 
 ```go
-// In models/User.go (or wherever User struct is)
+// models/User.go
 BanUntil *time.Time `gorm:"column:ban_until"`
 ```
 
-### 2b. Add a ban endpoint
+Run a migration after adding this field.
+
+---
+
+## 4. Ban Endpoint
 
 ```
 POST /api/admin/users/:id/ban
 ```
 
-**Request body:**
+**Auth:** Admin-only middleware (see §6).
 
+**Request body:**
 ```json
 {
-  "ban_type": "permanent" | "temporary",
-  "ban_until": "2025-12-31T23:59:59Z"  // only required when ban_type is "temporary"
+  "ban_type": "permanent",
+  "ban_until": null,
+  "reason": "Cheating / Hacking"
+}
+```
+```json
+{
+  "ban_type": "temporary",
+  "ban_until": "2026-06-15T14:00:00Z",
+  "reason": "Toxic Behaviour"
 }
 ```
 
-**Response:** `204 No Content` on success.
-
 **Logic:**
+- `permanent` → `is_banned = true`, `ban_until = NULL`
+- `temporary` → `is_banned = true`, `ban_until = <provided datetime>`
+- `reason` is optional — store it if you want an audit log, ignore if not.
 
-- If `ban_type == "permanent"`: set `is_banned = true`, `ban_until = null`
-- If `ban_type == "temporary"`: set `is_banned = true`, `ban_until = <provided datetime>`
-- This route must be protected by an **admin-only** middleware
+**Response:** `204 No Content`
 
-### 2c. Add an unban endpoint
+---
+
+## 5. Unban Endpoint
 
 ```
 POST /api/admin/users/:id/unban
 ```
 
-**Response:** `204 No Content`. Sets `is_banned = false`, `ban_until = null`.
+**Auth:** Admin-only middleware (see §6).
 
-### 2d. Add a background job / middleware check for expired bans
+**Logic:** `is_banned = false`, `ban_until = NULL`
 
-- On user login (or `whoami`), check if `ban_until` is in the past — if so, automatically lift the ban.
-
----
-
-## 3. Get User Profiles (already exists, minor addition)
-
-**Current:** `GET /api/users/:id/profiles` returns `[]PlayerProfileReadDTO`.
-
-**Needed:** Ensure avatar URLs are returned (they seem to already be handled via `/api/profiles/:id/pfp`). No changes required if the existing implementation covers this.
+**Response:** `204 No Content`
 
 ---
 
-## 4. Admin-Only Middleware
+## 6. Admin-Only Middleware
 
-Create a middleware that checks `caller_id`'s role equals `"admin"` (similar to `Authorize` but also checks role).
+Create a middleware that sits between `Authorize` and the handler, verifying the
+caller is an admin. Apply it to all `/api/admin/...` routes.
 
 ```go
 func AdminOnly(c *gin.Context) {
     callerID, _ := c.Get("caller_id")
-    user, err := userRepo.ReadByID(ctx, callerID.(uint), "Role")
+    user, err := userRepo.ReadByID(c.Request.Context(), callerID.(uint), "Role")
     if err != nil || user.Role.Name != "admin" {
-        c.AbortWithStatusJSON(http.StatusForbidden, dtos.NewErrResp("forbidden", c.Request.URL.Path))
+        c.AbortWithStatusJSON(
+            http.StatusForbidden,
+            dtos.NewErrResp("forbidden", c.Request.URL.Path),
+        )
         return
     }
     c.Next()
 }
 ```
 
-Apply this to all `/api/admin/...` routes.
+---
+
+## 7. Auto-Lift Expired Bans
+
+On `WhoAmI` (and optionally on login), check whether `ban_until` is in the past.
+If so, automatically set `is_banned = false` and `ban_until = NULL`.
+
+```go
+if user.BanUntil != nil && user.BanUntil.Before(time.Now()) {
+    uc.userRepo.UpdateOne(ctx, user.ID, "is_banned", false)
+    uc.userRepo.UpdateOne(ctx, user.ID, "ban_until", nil)
+}
+```
 
 ---
 
-## 5. Route Group Summary
+## 8. Search & Pagination on `GET /api/users`
+
+The frontend currently does client-side filtering because the endpoint returns
+all users with no filter support. Add these query parameters:
+
+| Param | Type | Description |
+|-------|------|-------------|
+| `search` | string | Filter by username or email (case-insensitive LIKE) |
+| `page` | int | 1-based page number (default 1) |
+| `limit` | int | Results per page (default 50, max 200) |
+
+Once added, update `useAdminHooks.ts` `useAdminUsersQuery` — the `// TODO: BACKEND`
+comment there shows exactly where to pass the `search` param.
+
+---
+
+## 9. Route Group Summary
 
 ```
-GET    /api/users                    (extend with ?search=&page=&limit=)
-GET    /api/users/:id                (extend DTO with username + ban_until)
-POST   /api/admin/users/:id/ban      (NEW — admin only)
-POST   /api/admin/users/:id/unban    (NEW — admin only)
+GET    /api/users                       — add "Role" preload, ?search=, pagination
+GET    /api/users/:id                   — add "Role" preload, return extended DTO
+POST   /api/admin/users/:id/ban         — NEW, admin only
+POST   /api/admin/users/:id/unban       — NEW, admin only
 ```
 
 ---
 
-## Frontend Hook Locations
+## Frontend Hook Reference
 
-All frontend hooks that need backend implementation are in:
-`src/hooks/useAdminHooks.ts`
-
-Look for comments marked `// TODO: BACKEND` in that file.
+`src/hooks/useAdminHooks.ts` — all hooks, every unimplemented endpoint has a
+`// TODO: BACKEND` comment with the expected route and body shape.
