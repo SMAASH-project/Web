@@ -64,8 +64,8 @@ export function useProfilesQuery(userId: number | null) {
       }));
     },
     enabled: !!userId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+    staleTime: 0, // always treat as stale so refetches triggered by mutations go through immediately
+    gcTime: 10 * 60 * 1000,
   });
 }
 
@@ -204,8 +204,12 @@ export function useUpdateProfileMutation() {
         return;
       }
 
-      // Invalidate all profile queries to ensure consistency
+      // Invalidate marks as stale; refetch ensures the fresh data is actually
+      // pulled from the server immediately (not deferred by staleTime).
       queryClient.invalidateQueries({
+        queryKey: queryKeys.profiles.all,
+      });
+      queryClient.refetchQueries({
         queryKey: queryKeys.profiles.all,
       });
     },

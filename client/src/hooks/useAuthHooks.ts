@@ -80,3 +80,36 @@ export function useLogoutMutation() {
     },
   });
 }
+
+/**
+ * Update the logged-in user's email address.
+ *
+ * Endpoint: PUT /api/users/:id
+ * Body:     { id, email, role_id }
+ *
+ * NOTE: role_id is intentionally sent as 0. GORM's Updates() call in
+ * BaseRepositoryActions skips zero-value struct fields, so the role is
+ * preserved unchanged on the backend.
+ *
+ * TODO: BACKEND — Password cannot be changed here. The backend explicitly
+ * excludes password from UserUpdateDTO. A separate PUT /api/auth/change-password
+ * (or similar) endpoint needs to be created for that. See the PasswordResetForm
+ * page for the existing reset flow.
+ */
+export function useUpdateUserEmailMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, AxiosError, { userId: number; email: string }>({
+    mutationFn: async ({ userId, email }) => {
+      await apiClient.put(`/users/${userId}`, {
+        id: userId,
+        email,
+        role_id: 0, // zero → skipped by GORM Updates, role stays unchanged
+      });
+    },
+    onSuccess: () => {
+      // Invalidate whoami so the navbar/profile reflect the new email immediately
+      queryClient.invalidateQueries({ queryKey: ["auth", "whoami"] });
+    },
+  });
+}
