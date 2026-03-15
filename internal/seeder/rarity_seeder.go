@@ -8,7 +8,7 @@ import (
 	"os"
 	"smaash-web/internal/models"
 
-	"gorm.io/driver/sqlite"
+	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -45,10 +45,10 @@ func (rs RaritySeeder) Seed(c context.Context, data_root_path string, db_url str
 			if !errors.Is(err, gorm.ErrDuplicatedKey) {
 				errStream <- err
 			} else {
-				log.Println("Skipped creating role with name: ", val.Name)
+				log.Println("Skipped creating rarity with name: ", val.Name)
 			}
 		} else {
-			log.Println("Created role with name: ", val.Name)
+			log.Println("Created rarity with name: ", val.Name)
 		}
 	}
 }

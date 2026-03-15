@@ -23,6 +23,7 @@ func main() {
 		seeder.WithSeeder(seeder.NewRoleSeeder()),
 		seeder.WithSeeder(seeder.NewUserSeeder()),
 		seeder.WithSeeder(seeder.NewRaritySeeder()),
+		seeder.WithSeeder(seeder.NewCategorySeeder()),
 	)
 
 	go func() {
