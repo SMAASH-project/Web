@@ -22,10 +22,15 @@ type Server struct {
 }
 
 func NewServer() *Server {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8000"
+	}
+
 	return &Server{
 		gracePeriod: 5 * time.Second,
 		srv: &http.Server{
-			Addr:              fmt.Sprintf(":%v", os.Getenv("PORT")),
+			Addr:              fmt.Sprintf(":%v", port),
 			IdleTimeout:       time.Minute,
 			ReadHeaderTimeout: 10 * time.Second,
 			WriteTimeout:      30 * time.Second,

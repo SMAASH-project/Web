@@ -55,7 +55,11 @@ func (a AuthenticationService) Login(c context.Context, u *models.User) (*string
 		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	})
 
-	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET_KEY")))
+	key := os.Getenv("SECRET_KEY")
+	if key == "" {
+		key = "super_secret_key"
+	}
+	tokenString, err := token.SignedString([]byte(key))
 	if err != nil {
 		return nil, nil, err
 	}

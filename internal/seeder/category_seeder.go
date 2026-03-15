@@ -8,7 +8,6 @@ import (
 	"os"
 	"smaash-web/internal/models"
 
-	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -23,12 +22,8 @@ type CategoryDataFormat struct {
 	Name string
 }
 
-func (rs CategorySeeder) Seed(c context.Context, data_root_path string, db_url string, errStream chan error, logger logger.Interface) {
+func (rs CategorySeeder) Seed(c context.Context, data_root_path string, db *gorm.DB, errStream chan error, logger logger.Interface) {
 	log.Println("Starting categories seeder")
-	db, err := gorm.Open(sqlite.Open(db_url), &gorm.Config{TranslateError: true, Logger: logger})
-	if err != nil {
-		errStream <- err
-	}
 
 	raw, err := os.ReadFile(data_root_path + "/categories.json")
 	if err != nil {

@@ -12,7 +12,7 @@ This section details how to get the source of project on your local machine to d
 ### Prerequisites
 > You'll need the following tooling to be able to contribute:
   - Go tooling: Needed to run and compile the backend server. Find installation instructions for your OS [here](https://go.dev/doc/install).
-  - A C compiler: Needed for compiling SQLite, our database of choice. On MacOS clang, and on any Linux distribution, gcc (both C compilers) is installed by default, no need to download it separately. On Windows, if you have Visual Studio installed, you have the MSVC compiler on your system, no further configuration needed. If you're not using VS, we recommend downloading MinGW (a runtime for gcc and LLVM) by runnung `choco install mingw`. If you don't have the chocolatey package manager for Windows (Which we recommend) you can install MinGW by following [their instructions](https://www.mingw-w64.org/getting-started/msys2/).
+  - gcc: a C compiler needed to compile the CGO utility, which is used as a pseudo FFI between Go and C. Only needed if you decide to use a CGO based SQLite driver, which we no longer do, so this dependency is obsolete in the later releases. It stays in this document though so that testers choosing to switch database drivers don't accidentally miss this (like we did)
   - npm (Node Package Manager): Needed for running and building the website, which serves as the frontend of the application.
   
   ### Optional tools
@@ -25,6 +25,14 @@ This section details how to get the source of project on your local machine to d
   - Go Air: a daemon that watches for changes and dynamically recompiles your Go projects while they're running, so for example, you don't have to restart the backend server when you make a change. Air is started by running `just watch`, which, if you don't have air installed, will ask you if you want to install it on your system, making installation a breeze.
 ***
 
+### Environment variables
+The app depends on the following environment variables:
+- PORT (default: 8000)
+- DB_URL (default: test.db)
+- SEED_DATA_URI (default: ./internal/seeder/test_source)
+- SECRET_KEY (default: super_secret_key)
+
+### Setting up the project
 1 - Clone the repo:
 ```bash
 git clone https://github.com/SMAASH-project/Web.git

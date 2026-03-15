@@ -14,7 +14,7 @@ import (
 )
 
 type Seeder interface {
-	Seed(ctx context.Context, seed_data_root string, db_url string, errStream chan error, logger logger.Interface)
+	Seed(ctx context.Context, seed_data_root string, conn *gorm.DB, errStream chan error, logger logger.Interface)
 }
 
 type SeederManager struct {
@@ -64,7 +64,10 @@ func (sm *SeederManager) Seed() {
 	if os.Getenv("SQLITE_MODE") == "memory" {
 		sm.db_url = "file::memory:?cache=shared"
 	}
-	conn, err := gorm.Open(sqlite.Open(sm.db_url))
+	if os.Getenv(sm.db_url) == "" {
+		sm.db_url = "test.db"
+	}
+	conn, err := gorm.Open(sqlite.Open(sm.db_url), &gorm.Config{Logger: sm.logger, TranslateError: true})
 	if err != nil {
 		log.Panicf("Could not connect to db. Error: %v", err)
 	}
@@ -79,7 +82,7 @@ func (sm *SeederManager) Seed() {
 
 	for _, seeder := range sm.seeders {
 		wg.Go(func() {
-			seeder.Seed(sm.ctx, sm.seed_data_root, sm.db_url, sm.errStream, sm.logger)
+			seeder.Seed(sm.ctx, sm.seed_data_root, conn, sm.errStream, sm.logger)
 		})
 	}
 
