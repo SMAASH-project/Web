@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useSettings } from "../settings/settingsLogic/SettingsContext";
 import { UpdateSheet } from "./UpdateSheet";
+import { useTranslation } from "react-i18next";
 import {
   ExternalLink,
   Coins,
@@ -73,6 +74,7 @@ export function ProfilePageContent() {
   const { selectedProfile } = useProfiles();
   const uploadProfilePictureMutation = useUploadProfilePictureMutation();
   const [localPreview, setLocalPreview] = useState<string | null>(null);
+  const { t } = useTranslation("profile");
 
   const username = selectedProfile?.name ?? "—";
   const { settings } = useSettings();
@@ -215,14 +217,14 @@ export function ProfilePageContent() {
             subtextColor,
           )}
         >
-          Stats
+          {t("page.stats")}
         </p>
 
         {/* Live stats — data we already have */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <StatCard
             icon={<Coins size={11} />}
-            label="Coins"
+            label={t("stats.coins")}
             value={coins}
             panelBg={panelBg}
             textColor={textColor}
@@ -230,7 +232,7 @@ export function ProfilePageContent() {
           />
           <StatCard
             icon={<Clock size={11} />}
-            label="Last Seen"
+            label={t("stats.lastSeen")}
             value={lastSeen}
             panelBg={panelBg}
             textColor={textColor}
@@ -238,7 +240,7 @@ export function ProfilePageContent() {
           />
           <StatCard
             icon={<Hash size={11} />}
-            label="Profile ID"
+            label={t("stats.profileId")}
             value={profileId}
             panelBg={panelBg}
             textColor={textColor}
@@ -264,7 +266,7 @@ export function ProfilePageContent() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <StatCard
             icon={<Trophy size={11} />}
-            label="Wins"
+            label={t("stats.wins")}
             value="—"
             dimmed
             panelBg={panelBg}
@@ -273,7 +275,7 @@ export function ProfilePageContent() {
           />
           <StatCard
             icon={<Swords size={11} />}
-            label="Losses"
+            label={t("stats.losses")}
             value="—"
             dimmed
             panelBg={panelBg}
@@ -282,7 +284,7 @@ export function ProfilePageContent() {
           />
           <StatCard
             icon={<TrendingUp size={11} />}
-            label="Win Rate"
+            label={t("stats.winRate")}
             value="—"
             dimmed
             panelBg={panelBg}
@@ -291,7 +293,7 @@ export function ProfilePageContent() {
           />
           <StatCard
             icon={<History size={11} />}
-            label="Matches"
+            label={t("stats.matches")}
             value="—"
             dimmed
             panelBg={panelBg}
@@ -316,7 +318,7 @@ export function ProfilePageContent() {
             subtextColor,
           )}
         >
-          Match History
+          {t("page.matchHistory")}
         </p>
 
         {/*
@@ -332,7 +334,7 @@ export function ProfilePageContent() {
         >
           <Swords size={28} className={cn("opacity-25", subtextColor)} />
           <p className={cn("text-sm font-medium opacity-50", subtextColor)}>
-            No matches yet
+            {t("page.noMatches")}
           </p>
           <p
             className={cn(
@@ -340,7 +342,7 @@ export function ProfilePageContent() {
               subtextColor,
             )}
           >
-            Match history will appear here once available
+            {t("page.noMatchesSubtext")}
           </p>
         </div>
       </div>

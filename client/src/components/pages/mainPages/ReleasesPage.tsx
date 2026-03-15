@@ -9,11 +9,13 @@ import { useReleases } from "./releasesPageComponents/releasesPageLogic/useRelea
 import { getTextColor, getTextShadow, getSubtextColor } from "@/lib/utils";
 import { useContext } from "react";
 import { AuthContext } from "@/context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 export function ReleasesPage() {
   const { settings } = useSettings();
   const [selectedOs, setSelectedOs] = useState("iOS");
   const { isAdmin } = useContext(AuthContext);
+  const { t } = useTranslation("releases");
 
   const {
     allReleases,

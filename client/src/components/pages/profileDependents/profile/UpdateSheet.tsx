@@ -13,6 +13,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useSettings } from "../settings/settingsLogic/SettingsContext";
+import { useTranslation } from "react-i18next";
 import {
   getBackgroundClasses,
   getButtonClasses,
@@ -36,6 +37,7 @@ import { CheckCircle2, AlertCircle, Loader2, Lock } from "lucide-react";
 
 export function UpdateSheet() {
   const { settings } = useSettings();
+  const { t } = useTranslation("profile");
   const { userId } = useContext(AuthContext);
   const numUserId = userId !== null ? Number(userId) : null;
 
@@ -119,10 +121,7 @@ export function UpdateSheet() {
     } catch (err: unknown) {
       setSaveStatus("error");
       const axiosErr = err as { response?: { data?: { message?: string } } };
-      setErrorMsg(
-        axiosErr?.response?.data?.message ??
-          "Something went wrong. Please try again.",
-      );
+      setErrorMsg(axiosErr?.response?.data?.message ?? t("sheet.error"));
     }
   };
 
@@ -147,17 +146,17 @@ export function UpdateSheet() {
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <Button className={`cursor-pointer ${buttonClass} ${textShadow}`}>
-            Edit
+            {t("sheet.title")}
           </Button>
         </SheetTrigger>
 
         <SheetContent className={cn(sheetBg, textColor, "flex flex-col gap-0")}>
           <SheetHeader className="px-6 pt-6 pb-4">
             <SheetTitle className={cn("text-lg", textColor, textShadow)}>
-              Edit profile
+              {t("sheet.title")}
             </SheetTitle>
             <SheetDescription className={cn("text-sm", subtextColor)}>
-              Changes are saved immediately. Email changes affect your login.
+              {t("sheet.description")}
             </SheetDescription>
           </SheetHeader>
 
@@ -168,7 +167,7 @@ export function UpdateSheet() {
                 htmlFor="sheet-displayname"
                 className={cn("text-sm font-medium", textColor, textShadow)}
               >
-                Display Name
+                {t("sheet.displayName")}
               </Label>
               <Input
                 id="sheet-displayname"
@@ -177,10 +176,10 @@ export function UpdateSheet() {
                 onChange={(e) => setDisplayName(e.target.value)}
                 maxLength={20}
                 disabled={isSaving}
-                placeholder="Your display name"
+                placeholder={t("sheet.displayNamePlaceholder")}
               />
               <p className={cn("text-xs", subtextColor)}>
-                Max 20 characters. Shown on your profile and in-game.
+                {t("sheet.displayNameHint")}
               </p>
             </div>
 
@@ -190,7 +189,7 @@ export function UpdateSheet() {
                 htmlFor="sheet-email"
                 className={cn("text-sm font-medium", textColor, textShadow)}
               >
-                Email Address
+                {t("sheet.email")}
               </Label>
               <Input
                 id="sheet-email"
@@ -200,10 +199,10 @@ export function UpdateSheet() {
                 onChange={(e) => setEmail(e.target.value)}
                 maxLength={30}
                 disabled={isSaving}
-                placeholder="your@email.com"
+                placeholder={t("sheet.emailPlaceholder")}
               />
               <p className={cn("text-xs", subtextColor)}>
-                Max 30 characters. Used to log in.
+                {t("sheet.emailHint")}
               </p>
             </div>
 
@@ -218,7 +217,7 @@ export function UpdateSheet() {
                 )}
               >
                 <Lock size={13} />
-                Password
+                {t("sheet.password")}
               </Label>
               {/*
                * TODO: BACKEND — Password change is not supported by PUT /api/users/:id.
@@ -237,19 +236,19 @@ export function UpdateSheet() {
                 id="sheet-password"
                 type="password"
                 className={disabledInputClass}
-                placeholder="Password change coming soon"
+                placeholder={t("sheet.passwordPlaceholder")}
                 disabled
                 readOnly
               />
               <p className={cn("text-xs", subtextColor)}>
-                Password changes are not yet available here.{" "}
+                {t("sheet.passwordHint")}{" "}
                 <span
                   className={cn(
                     "underline underline-offset-2 cursor-default",
                     subtextColor,
                   )}
                 >
-                  Use the reset password page.
+                  {t("sheet.passwordReset")}
                 </span>
               </p>
             </div>
@@ -292,7 +291,7 @@ export function UpdateSheet() {
               >
                 <CheckCircle2 size={15} className="text-green-400 shrink-0" />
                 <span className="text-green-400 text-xs">
-                  Saved successfully!
+                  {t("sheet.saved")}
                 </span>
               </div>
             )}
@@ -305,7 +304,7 @@ export function UpdateSheet() {
                 className={cn(buttonClass, textColor)}
                 disabled={isSaving}
               >
-                Cancel
+                {t("sheet.cancel")}
               </Button>
             </SheetClose>
             <Button
@@ -322,10 +321,10 @@ export function UpdateSheet() {
               {isSaving ? (
                 <span className="flex items-center gap-2">
                   <Loader2 size={14} className="animate-spin" />
-                  Saving…
+                  {t("sheet.saving")}
                 </span>
               ) : (
-                "Save changes"
+                t("sheet.save")
               )}
             </Button>
           </SheetFooter>

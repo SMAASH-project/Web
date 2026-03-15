@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -5,6 +6,7 @@ import type { AdminPageLogic } from "@/components/pages/profileDependents/admin/
 import { getButtonClasses } from "@/lib/utils";
 
 export default function ProfilesPanel({ logic }: { logic: AdminPageLogic }) {
+  const { t } = useTranslation("admin");
   const {
     profiles,
     profilesLoading,

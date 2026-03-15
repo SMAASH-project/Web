@@ -9,9 +9,11 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useSettings } from "@/components/pages/profileDependents/settings/settingsLogic/SettingsContext";
 import { getTextColor, getTextShadow, getSubtextColor } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export function SettingToggle() {
   const { settings, updateSetting } = useSettings();
+  const { t } = useTranslation("settings");
 
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
   const textShadow = getTextShadow(
@@ -29,11 +31,10 @@ export function SettingToggle() {
         <Field orientation="horizontal">
           <FieldContent>
             <FieldTitle className={`${textColor} ${textShadow}`}>
-              Use animations
+              {t("visual.animations.title")}
             </FieldTitle>
             <FieldDescription className={subtextColor}>
-              Choose to enable or disable animations in the app. Disabling
-              animations may improve performance on older devices.
+              {t("visual.animations.description")}
             </FieldDescription>
           </FieldContent>
           <Switch
@@ -49,12 +50,10 @@ export function SettingToggle() {
         <Field orientation="horizontal">
           <FieldContent>
             <FieldTitle className={`${textColor} ${textShadow}`}>
-              Enable "Liquid Glass"
+              {t("visual.liquidGlass.title")}
             </FieldTitle>
             <FieldDescription className={subtextColor}>
-              Toggle the "Liquid Glass" effect, which adds a glossy, translucent
-              layer to the interface for a sleek, modern look. This may impact
-              performance on some devices.
+              {t("visual.liquidGlass.description")}
             </FieldDescription>
           </FieldContent>
           <Switch
@@ -70,11 +69,10 @@ export function SettingToggle() {
         <Field orientation="horizontal">
           <FieldContent>
             <FieldTitle className={`${textColor} ${textShadow}`}>
-              Toggle Dark Mode
+              {t("visual.darkMode.title")}
             </FieldTitle>
             <FieldDescription className={subtextColor}>
-              Enable a dark theme for the interface, which may be easier on the
-              eyes in low-light environments.
+              {t("visual.darkMode.description")}
             </FieldDescription>
           </FieldContent>
           <Switch

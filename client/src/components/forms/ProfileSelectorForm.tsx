@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   cn,
   getLiquidGlassClasses,
@@ -75,6 +76,7 @@ const ProfileAvatar = memo(function ProfileAvatar({
 export function ProfileSelectorForm() {
   const { settings } = useSettings();
   const { profiles, removeProfile, selectProfile } = useProfiles();
+  const { t } = useTranslation("profile");
   const profileCount = profiles.length;
   const [showAddProfile, setShowAddProfile] = useState(false);
   const [isManaging, setIsManaging] = useState(false);
@@ -102,7 +104,7 @@ export function ProfileSelectorForm() {
         <Label
           className={`text-white ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
         >
-          Select a Profile
+          {t("selector.title")}
         </Label>
         <div className="text-sm text-white/80 mt-1">
           {profileCount} profile{profileCount === 1 ? "" : "s"} available
@@ -148,7 +150,7 @@ export function ProfileSelectorForm() {
               onClick={() => setIsManaging((prev) => !prev)}
               className={`text-white ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} rounded-lg cursor-pointer`}
             >
-              {isManaging ? "Done" : "Manage Profiles"}
+              {isManaging ? t("selector.done") : t("selector.manage")}
             </Button>
           </motion.div>
         </div>

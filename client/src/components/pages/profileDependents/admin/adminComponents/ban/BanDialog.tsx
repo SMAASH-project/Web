@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import * as React from "react";
 import { Ban, MessageSquare } from "lucide-react";
 import {
@@ -26,16 +27,16 @@ import { useBanDialogLogic } from "@/components/pages/profileDependents/admin/ad
 
 // ─── Preset reasons ───────────────────────────────────────────────────────────
 
-const PRESET_REASONS = [
-  "Cheating / Hacking",
-  "Harassment",
-  "Hate Speech",
-  "Spam",
-  "Exploiting Bugs",
-  "Toxic Behaviour",
-  "Impersonation",
-  "NSFW Content",
-];
+const PRESET_REASONS_KEYS = [
+  "presetReasons.cheating",
+  "presetReasons.harassment",
+  "presetReasons.hateSpeech",
+  "presetReasons.spam",
+  "presetReasons.exploiting",
+  "presetReasons.toxic",
+  "presetReasons.impersonation",
+  "presetReasons.nsfw",
+] as const;
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -62,8 +63,12 @@ export default function BanDialog({
 }: BanDialogProps) {
   const { settings } = useSettings();
   const { useLiquidGlass, useDarkMode } = settings;
+  const { t } = useTranslation("admin");
 
   const logic = useBanDialogLogic(open);
+
+  // Translated reason chips — derived inside component so t() is available
+  const PRESET_REASONS = PRESET_REASONS_KEYS.map((key) => t(`ban.${key}`));
 
   React.useEffect(() => {
     if (open) logic.reset();
@@ -142,11 +147,11 @@ export default function BanDialog({
           >
             <span className="flex items-center gap-2">
               <Ban size={16} className="text-red-400" />
-              Ban User — {user.username || user.email}
+              {t("ban.title", { name: user.username || user.email })}
             </span>
           </DialogTitle>
           <p className={cn("text-xs mt-1", subtextColor)}>
-            Select a preset ban length or configure a custom date range below.
+            {t("ban.description")}
           </p>
         </DialogHeader>
 
@@ -181,10 +186,10 @@ export default function BanDialog({
                 <Ban size={16} className="text-red-400 shrink-0" />
                 <div className="text-left">
                   <p className={cn("text-sm font-medium", textColor)}>
-                    Permanent Ban
+                    {t("ban.permanentLabel")}
                   </p>
                   <p className={cn("text-xs", subtextColor)}>
-                    No expiry — manual unban required
+                    {t("ban.permanentDescription")}
                   </p>
                 </div>
               </div>
@@ -198,15 +203,15 @@ export default function BanDialog({
                   subtextColor,
                 )}
               >
-                Timeouts
+                {t("ban.timeouts")}
               </p>
               <div className="grid grid-cols-3 gap-2">
                 {timeouts.map((preset) => (
                   <BanPresetCard
                     key={preset.id}
                     id={preset.id}
-                    label={preset.description}
-                    description={preset.label.replace(" Timeout", "")}
+                    label={t(`ban.presets.${preset.id}`)}
+                    description={t(`ban.presets.${preset.id}`)}
                     selected={logic.selectedPreset === preset.id}
                     onClick={() => logic.handlePresetSelect(preset)}
                   />
@@ -222,15 +227,15 @@ export default function BanDialog({
                   subtextColor,
                 )}
               >
-                Timed Bans
+                {t("ban.timedBans")}
               </p>
               <div className="grid grid-cols-3 gap-2">
                 {timedBans.map((preset) => (
                   <BanPresetCard
                     key={preset.id}
                     id={preset.id}
-                    label={preset.description}
-                    description={preset.label.replace(" Ban", "")}
+                    label={t(`ban.presets.${preset.id}`)}
+                    description={t(`ban.presets.${preset.id}`)}
                     selected={logic.selectedPreset === preset.id}
                     onClick={() => logic.handlePresetSelect(preset)}
                   />
@@ -281,7 +286,7 @@ export default function BanDialog({
                   </label>
                   <textarea
                     rows={3}
-                    placeholder="Optional — describe the reason for this ban…"
+                    placeholder={t("ban.customMessagePlaceholder")}
                     value={logic.banReason}
                     onChange={(e) => logic.setBanReason(e.target.value)}
                     className={cn(
@@ -336,7 +341,7 @@ export default function BanDialog({
               disabled={!logic.canConfirm || isLoading}
               className={cn("transition-all duration-200", confirmClass)}
             >
-              {isLoading ? "Applying…" : "Confirm Ban"}
+              {isLoading ? t("ban.confirming") : t("ban.confirm")}
             </Button>
           </div>
         </div>

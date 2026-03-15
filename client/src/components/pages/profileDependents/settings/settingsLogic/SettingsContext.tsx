@@ -1,9 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import i18n from "@/lib/i18n";
+
+export type Language = "en" | "hu";
 
 export interface SettingsState {
   useAnimations: boolean;
   useLiquidGlass: boolean;
   useDarkMode: boolean;
+  language: Language;
 }
 
 interface SettingsContextType {
@@ -30,18 +34,26 @@ export function useSettings() {
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<SettingsState>(() => {
     const saved = localStorage.getItem("settings");
-    return saved
-      ? JSON.parse(saved)
-      : {
-          useAnimations: true,
-          useLiquidGlass: true,
-          useDarkMode: false,
-        };
+    const parsed = saved ? JSON.parse(saved) : null;
+    return {
+      useAnimations: parsed?.useAnimations ?? true,
+      useLiquidGlass: parsed?.useLiquidGlass ?? true,
+      useDarkMode: parsed?.useDarkMode ?? false,
+      language: parsed?.language ?? "en",
+    };
   });
 
+  // Persist to localStorage whenever settings change
   useEffect(() => {
     localStorage.setItem("settings", JSON.stringify(settings));
   }, [settings]);
+
+  // Keep i18next in sync with the stored language on mount and on change
+  useEffect(() => {
+    if (i18n.language !== settings.language) {
+      i18n.changeLanguage(settings.language);
+    }
+  }, [settings.language]);
 
   const updateSetting = <K extends keyof SettingsState>(
     key: K,

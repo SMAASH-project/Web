@@ -22,6 +22,9 @@ import {
   GoogleReCaptcha,
   GoogleReCaptchaProvider,
 } from "react-google-recaptcha-v3";
+import { useTranslation } from "react-i18next";
+import { useSettings } from "@/components/pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { LanguageToggle } from "@/components/ui/LanguageToggle";
 
 export function SignupForm({
   className,
@@ -38,62 +41,58 @@ export function SignupForm({
   const navigate = useNavigate();
   const randomUsername = generateRandomUsername();
   const signupMutation = useSignupMutation();
+  const { t } = useTranslation("auth");
+  const { settings, updateSetting } = useSettings();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validate username length
     if (username.length < 3) {
-      setValidationError("Username must be at least 3 characters long");
+      setValidationError(t("signup.errorUsernameShort"));
       return;
     }
-
     if (password !== confirmPassword) {
-      setValidationError("Passwords do not match");
+      setValidationError(t("signup.errorPasswordMismatch"));
       return;
     }
     if (password.length < 8) {
-      setValidationError("Password must be at least 8 characters long");
+      setValidationError(t("signup.errorPasswordShort"));
       return;
     }
     if (captchaEnabled && !captchaToken) {
-      setValidationError("Captcha verification failed. Please try again.");
+      setValidationError(t("signup.errorCaptcha"));
       return;
     }
     setValidationError("");
-
     try {
       await signupMutation.mutateAsync({ email, password, username });
-      console.log("Signup successful");
       navigate("/app/login");
     } catch (err) {
-      const error = err as { response?: { data?: string; status?: number } };
-      console.error("Signup error:", err);
-      console.error("Error response:", error?.response);
-      console.error("Error data:", error?.response?.data);
-      console.error("Error status:", error?.response?.status);
-
-      // Display backend error to user
+      const error = err as { response?: { data?: string } };
       if (error?.response?.data) {
         setValidationError(error.response.data.toString());
       }
     }
   };
+
   return (
     <div className={cn("w-full max-w-md px-4 sm:px-0", className)} {...props}>
+      <div className="flex justify-end mb-2">
+        <LanguageToggle
+          language={settings.language}
+          onChange={(lang) => updateSetting("language", lang)}
+        />
+      </div>
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Create an account</CardTitle>
-          <CardDescription>
-            Enter your information below to create your account
-          </CardDescription>
+          <CardTitle>{t("signup.title")}</CardTitle>
+          <CardDescription>{t("signup.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="username" className="text-gray-900!">
-                  Username
+                  {t("signup.username")}
                 </FieldLabel>
                 <Input
                   id="username"
@@ -104,13 +103,11 @@ export function SignupForm({
                   disabled={signupMutation.isPending}
                   required
                 />
-                <FieldDescription>
-                  Must be at least 3 characters long.
-                </FieldDescription>
+                <FieldDescription>{t("signup.usernameHint")}</FieldDescription>
               </Field>
               <Field>
                 <FieldLabel htmlFor="email" className="text-gray-900!">
-                  Email
+                  {t("signup.email")}
                 </FieldLabel>
                 <Input
                   id="email"
@@ -124,7 +121,7 @@ export function SignupForm({
               </Field>
               <Field>
                 <FieldLabel htmlFor="password" className="text-gray-900!">
-                  Password
+                  {t("signup.password")}
                 </FieldLabel>
                 <Input
                   id="password"
@@ -134,16 +131,14 @@ export function SignupForm({
                   disabled={signupMutation.isPending}
                   required
                 />
-                <FieldDescription>
-                  Must be at least 8 characters long.
-                </FieldDescription>
+                <FieldDescription>{t("signup.passwordHint")}</FieldDescription>
               </Field>
               <Field>
                 <FieldLabel
                   htmlFor="confirm-password"
                   className="text-gray-900!"
                 >
-                  Confirm Password
+                  {t("signup.confirmPassword")}
                 </FieldLabel>
                 <Input
                   id="confirm-password"
@@ -153,29 +148,31 @@ export function SignupForm({
                   disabled={signupMutation.isPending}
                   required
                 />
-                <FieldDescription>Please confirm your password.</FieldDescription>
+                <FieldDescription>
+                  {t("signup.confirmPasswordHint")}
+                </FieldDescription>
               </Field>
-              {validationError && <p className="text-red-500">{validationError}</p>}
+              {validationError && (
+                <p className="text-red-500">{validationError}</p>
+              )}
               {signupMutation.isError && (
-                <p className="text-red-500">Signup failed</p>
+                <p className="text-red-500">{t("signup.failed")}</p>
               )}
               <Field>
                 {captchaEnabled ? (
                   <GoogleReCaptchaProvider reCaptchaKey={recaptchaSiteKey}>
                     <GoogleReCaptcha
-                      onVerify={(token) => {
-                        setCaptchaToken(token);
-                      }}
+                      onVerify={(token) => setCaptchaToken(token)}
                     />
                     <FieldDescription>
                       {captchaToken
-                        ? "Captcha verified"
-                        : "Verifying captcha..."}
+                        ? t("signup.captchaVerified")
+                        : t("signup.captchaVerifying")}
                     </FieldDescription>
                   </GoogleReCaptchaProvider>
                 ) : (
                   <FieldDescription>
-                    Captcha key is empty. Captcha is currently disabled.
+                    {t("signup.captchaDisabled")}
                   </FieldDescription>
                 )}
               </Field>
@@ -184,17 +181,19 @@ export function SignupForm({
                   type="submit"
                   className="text-white"
                   disabled={
-                    signupMutation.isPending || (captchaEnabled && !captchaToken)
+                    signupMutation.isPending ||
+                    (captchaEnabled && !captchaToken)
                   }
                 >
                   {signupMutation.isPending
-                    ? "Creating Account..."
+                    ? t("signup.submitting")
                     : captchaEnabled && !captchaToken
-                      ? "Waiting for Captcha..."
-                      : "Create Account"}
+                      ? t("signup.waitingCaptcha")
+                      : t("signup.submit")}
                 </Button>
                 <FieldDescription className="px-6 text-center">
-                  Already have an account? <Link to="/app/login">Sign in</Link>
+                  {t("signup.hasAccount")}{" "}
+                  <Link to="/app/login">{t("signup.signIn")}</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

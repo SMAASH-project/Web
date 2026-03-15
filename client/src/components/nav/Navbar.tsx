@@ -9,6 +9,7 @@ import { useMediaQuery } from "./navLogic/useMediaQuery";
 import { useLogoutMutation } from "@/hooks/useQueryHooks";
 import { AuthContext } from "@/context/AuthContext";
 import { ShieldAlert } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {
   getBackgroundClasses,
   getButtonClasses,
@@ -26,6 +27,7 @@ const Navbar = () => {
   const { setIsLoggedIn, setUserId, setIsAdmin, isAdmin } =
     useContext(AuthContext);
   const logoutMutation = useLogoutMutation();
+  const { t } = useTranslation("nav");
   const navBackground = getBackgroundClasses(
     settings.useLiquidGlass,
     settings.useDarkMode,
@@ -70,10 +72,12 @@ const Navbar = () => {
               <Link
                 to="/app/admin"
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 no-underline ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "secondary")} ${textColor}`}
-                title="Admin Panel"
+                title={t("account.adminPanel")}
               >
                 <ShieldAlert size={14} />
-                <span className="hidden lg:inline">Admin</span>
+                <span className="hidden lg:inline">
+                  {t("account.adminPanel")}
+                </span>
               </Link>
             )}
           </div>
@@ -88,7 +92,7 @@ const Navbar = () => {
               className={`whitespace-nowrap truncate ${textColor} ${textShadow}`}
             >
               <span className={`hidden xl:inline ${subtextColor}`}>
-                Logged in as{" "}
+                {t("loggedInAs")}{" "}
               </span>
               <Link to="/app/profile/" className="hidden lg:inline">
                 {username}

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   DialogTrigger,
@@ -21,6 +22,7 @@ import {
 
 export function RemoveButton({ onConfirm }: { onConfirm?: () => void }) {
   const { settings } = useSettings();
+  const { t } = useTranslation("news");
   const buttonClass = getButtonClasses(
     settings.useLiquidGlass,
     settings.useDarkMode,
@@ -54,9 +56,11 @@ export function RemoveButton({ onConfirm }: { onConfirm?: () => void }) {
       </DialogTrigger>
       <DialogContent className={`${dialogClass} ${textShadow}`}>
         <DialogHeader>
-          <DialogTitle className={textShadow}>Confirm Action</DialogTitle>
+          <DialogTitle className={textShadow}>
+            {t("delete.confirm")}
+          </DialogTitle>
           <DialogDescription className={subtextColor}>
-            Are you sure you want to perform this action?
+            {t("delete.description")}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className={footerClass}>

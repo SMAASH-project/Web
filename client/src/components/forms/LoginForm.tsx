@@ -13,6 +13,9 @@ import { Link, useNavigate } from "react-router-dom";
 import React, { useEffect } from "react";
 import { AuthContext } from "@/context/AuthContext";
 import { useLoginMutation } from "@/hooks/useQueryHooks";
+import { useTranslation } from "react-i18next";
+import { useSettings } from "@/components/pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { LanguageToggle } from "@/components/ui/LanguageToggle";
 
 export function LoginForm({
   className,
@@ -25,6 +28,8 @@ export function LoginForm({
 
   const navigate = useNavigate();
   const loginMutation = useLoginMutation();
+  const { t } = useTranslation("auth");
+  const { settings, updateSetting } = useSettings();
 
   const parseUserId = (value: unknown): bigint | null => {
     if (typeof value === "bigint") return value;
@@ -43,50 +48,44 @@ export function LoginForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Reset stale auth state first so a previous account cannot leak through.
     setIsLoggedIn(false);
     setUserId(null);
     setIsAdmin(false);
-
     try {
       const response = await loginMutation.mutateAsync({ email, password });
-
       const parsedUserId = parseUserId(response?.id);
-      if (parsedUserId === null) {
-        return;
-      }
-
-      // The server returns role as a string name (e.g. "admin"), not an id.
+      if (parsedUserId === null) return;
       setUserId(parsedUserId);
       setIsAdmin(response?.role === "admin");
       setIsLoggedIn(true);
     } catch {
-      // Error is handled by mutation state
+      // handled by mutation state
     }
   };
 
   useEffect(() => {
-    if (isLoggedIn) {
-      navigate("/app/profile-selector");
-    }
+    if (isLoggedIn) navigate("/app/profile-selector");
   }, [navigate, isLoggedIn]);
 
   return (
     <div className={cn("w-full max-w-md px-4 sm:px-0", className)} {...props}>
+      <div className="flex justify-end mb-2">
+        <LanguageToggle
+          language={settings.language}
+          onChange={(lang) => updateSetting("language", lang)}
+        />
+      </div>
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
-          </CardDescription>
+          <CardTitle>{t("login.title")}</CardTitle>
+          <CardDescription>{t("login.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="email" className="text-gray-900!">
-                  Email
+                  {t("login.email")}
                 </FieldLabel>
                 <Input
                   id="email"
@@ -100,13 +99,13 @@ export function LoginForm({
               <Field>
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password" className="text-gray-900!">
-                    Password
+                    {t("login.password")}
                   </FieldLabel>
                   <Link
                     to="/app/reset-password"
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                   >
-                    Forgot your password?
+                    {t("login.forgotPassword")}
                   </Link>
                 </div>
                 <Input
@@ -121,7 +120,7 @@ export function LoginForm({
               {loginMutation.isError && (
                 <p className="text-red-500">
                   {String(loginMutation.error?.response?.data) ||
-                    "Login failed"}
+                    t("login.failed")}
                 </p>
               )}
               <Field>
@@ -131,11 +130,13 @@ export function LoginForm({
                   className="text-white"
                   disabled={loginMutation.isPending}
                 >
-                  {loginMutation.isPending ? "Logging in..." : "Login"}
+                  {loginMutation.isPending
+                    ? t("login.submitting")
+                    : t("login.submit")}
                 </Button>
                 <FieldDescription className="text-center">
-                  Don&apos;t have an account?{" "}
-                  <Link to="/app/signup">Sign up</Link>
+                  {t("login.noAccount")}{" "}
+                  <Link to="/app/signup">{t("login.signUp")}</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

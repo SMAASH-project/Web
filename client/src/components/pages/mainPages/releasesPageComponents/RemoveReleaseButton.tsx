@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,6 +23,7 @@ import {
 
 export function RemoveReleaseButton({ onConfirm }: { onConfirm?: () => void }) {
   const { settings } = useSettings();
+  const { t } = useTranslation("releases");
   const glass = settings.useLiquidGlass;
   const dialogClass = getDialogClasses(
     settings.useLiquidGlass,
@@ -56,7 +58,9 @@ export function RemoveReleaseButton({ onConfirm }: { onConfirm?: () => void }) {
       </DialogTrigger>
       <DialogContent className={`${dialogClass} ${textShadow}`}>
         <DialogHeader>
-          <DialogTitle className={textShadow}>Confirm Deletion</DialogTitle>
+          <DialogTitle className={textShadow}>
+            {t("delete.confirm")}
+          </DialogTitle>
           <DialogDescription className={subtextColor}>
             Are you sure you want to delete this release? This action cannot be
             undone.

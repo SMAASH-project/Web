@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useCallback, useState } from "react";
 import { Calendar, type DateRange } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
@@ -264,6 +265,7 @@ export default function BanCustomRange({
   hideCalendar = false,
 }: Props) {
   const { settings } = useSettings();
+  const { t } = useTranslation("admin");
   const { useLiquidGlass, useDarkMode } = settings;
 
   const textColor = getTextColor(useLiquidGlass, useDarkMode);
@@ -318,7 +320,7 @@ export default function BanCustomRange({
             className={cn("flex items-center gap-1.5 text-xs", subtextColor)}
           >
             <CalendarIcon size={11} />
-            <span>Starts</span>
+            <span>{t("ban.starts")}</span>
           </div>
           <div className="flex items-center gap-2">
             <span
@@ -342,7 +344,7 @@ export default function BanCustomRange({
             inputClass={inputClass}
             textColor={textColor}
             subtextColor={subtextColor}
-            label="Start time"
+            label={t("ban.startTime")}
           />
         </div>
 
@@ -355,7 +357,7 @@ export default function BanCustomRange({
             className={cn("flex items-center gap-1.5 text-xs", subtextColor)}
           >
             <CalendarIcon size={11} />
-            <span>Ends</span>
+            <span>{t("ban.ends")}</span>
           </div>
           {to ? (
             <>
@@ -381,12 +383,12 @@ export default function BanCustomRange({
                 inputClass={inputClass}
                 textColor={textColor}
                 subtextColor={subtextColor}
-                label="End time"
+                label={t("ban.endTime")}
               />
             </>
           ) : (
             <p className={cn("text-xs italic mt-1", subtextColor)}>
-              Click a date on the calendar to set the end
+              {t("ban.endPlaceholder")}
             </p>
           )}
         </div>
@@ -400,7 +402,9 @@ export default function BanCustomRange({
           )}
         >
           <Clock size={12} className={subtextColor} />
-          <span className={cn("text-xs", subtextColor)}>Ban active until</span>
+          <span className={cn("text-xs", subtextColor)}>
+            {t("ban.banActiveUntil")}
+          </span>
           <span className={cn("text-xs font-semibold ml-auto", textColor)}>
             {to.toLocaleString(undefined, {
               month: "short",

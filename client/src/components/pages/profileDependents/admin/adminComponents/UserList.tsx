@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Search, Shield } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -5,6 +6,7 @@ import UserListItem from "./UserListItem";
 import type { AdminPageLogic } from "@/components/pages/profileDependents/admin/adminLogic/useAdminPageLogic";
 
 export default function UserList({ logic }: { logic: AdminPageLogic }) {
+  const { t } = useTranslation("admin");
   const {
     useLiquidGlass,
     useDarkMode,
@@ -43,7 +45,7 @@ export default function UserList({ logic }: { logic: AdminPageLogic }) {
         />
         <input
           type="text"
-          placeholder="Search by name or email…"
+          placeholder={t("users.searchPlaceholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className={`w-full pl-8 pr-3 py-2 text-sm rounded-xl ${inputClass}`}

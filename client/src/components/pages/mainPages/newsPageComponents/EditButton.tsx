@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   DialogTrigger,
@@ -52,6 +53,7 @@ export function EditButton({
   onUpdate?: (p: NewsPost) => void;
 }) {
   const { settings } = useSettings();
+  const { t } = useTranslation("news");
   const buttonClass = getButtonClasses(
     settings.useLiquidGlass,
     settings.useDarkMode,
@@ -134,7 +136,7 @@ export function EditButton({
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle className={textColor}>Edit News Article</DialogTitle>
+          <DialogTitle className={textColor}>{t("edit")}</DialogTitle>
         </DialogHeader>
         <FieldGroup>
           <Field>

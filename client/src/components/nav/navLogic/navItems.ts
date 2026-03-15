@@ -1,7 +1,9 @@
+// Labels are now translation keys resolved in NavMenu and MobileNavMenu.
+// The `labelKey` maps to nav.items.* in the translation files.
 export const navItems = [
-  { label: "About Us", path: "/app/about" },
-  { label: "Gallery", path: "/app/gallery" },
-  { label: "Releases", path: "/app/releases" },
-  { label: "Webstore", path: "/app/webstore" },
-  { label: "News", path: "/app/news" },
+  { labelKey: "items.aboutUs", path: "/app/about" },
+  { labelKey: "items.gallery", path: "/app/gallery" },
+  { labelKey: "items.releases", path: "/app/releases" },
+  { labelKey: "items.webstore", path: "/app/webstore" },
+  { labelKey: "items.news", path: "/app/news" },
 ];

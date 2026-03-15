@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import {
   Ban,
   Shield,
   Users,
-  HeadphonesIcon,
+  Headphones,
 } from "lucide-react";
 import type { AdminPageLogic } from "@/components/pages/profileDependents/admin/adminLogic/useAdminPageLogic";
 import { getButtonClasses } from "@/lib/utils";
@@ -26,11 +27,11 @@ interface RoleConfig {
   statClass: string;
 }
 
-function getRoleConfig(role: string): RoleConfig {
+function getRoleConfig(role: string, t: (k: string) => string): RoleConfig {
   switch (role) {
     case "admin":
       return {
-        label: "Admin",
+        label: t("roles.admin"),
         icon: <Shield size={10} />,
         badgeClass:
           "bg-purple-500/20 text-purple-300 border border-purple-500/30",
@@ -38,15 +39,15 @@ function getRoleConfig(role: string): RoleConfig {
       };
     case "support":
       return {
-        label: "Support",
-        icon: <HeadphonesIcon size={10} />,
+        label: t("roles.support"),
+        icon: <Headphones size={10} />,
         badgeClass: "bg-sky-500/20 text-sky-300 border border-sky-500/30",
         statClass: "text-sky-400",
       };
     case "user":
     default:
       return {
-        label: role.charAt(0).toUpperCase() + role.slice(1) || "User",
+        label: t("roles.user"),
         icon: <Users size={10} />,
         // Neutral — uses no semantic colour, falls through to a muted pill
         badgeClass: "bg-gray-500/15 text-gray-300 border border-gray-500/25",
@@ -58,6 +59,7 @@ function getRoleConfig(role: string): RoleConfig {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
+  const { t } = useTranslation("admin");
   const {
     selectedUser,
     selectedProfile,
@@ -74,13 +76,15 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-75">
         <div className="text-center flex flex-col items-center gap-3 opacity-50">
-          <div className={`text-lg ${subtextColor}`}>No user selected</div>
+          <div className={`text-lg ${subtextColor}`}>
+            {t("users.noSelected")}
+          </div>
         </div>
       </div>
     );
   }
 
-  const roleConfig = getRoleConfig(selectedUser.role);
+  const roleConfig = getRoleConfig(selectedUser.role, t);
   const avatarFallbackClass = getButtonClasses(
     logic.useLiquidGlass,
     logic.useDarkMode,
@@ -136,10 +140,13 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
             {selectedUser.is_banned && (
               <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-red-500/20 text-red-400 border border-red-500/30 flex items-center gap-1">
                 <Ban size={10} />
-                Banned
                 {selectedUser.ban_until
-                  ? ` until ${new Date(selectedUser.ban_until).toLocaleDateString()}`
-                  : " (permanent)"}
+                  ? t("detail.bannedUntil", {
+                      date: new Date(
+                        selectedUser.ban_until,
+                      ).toLocaleDateString(),
+                    })
+                  : t("detail.bannedPermanent")}
               </span>
             )}
           </div>
@@ -155,7 +162,9 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
               className="text-xs flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white border-green-700"
             >
               <ShieldCheck size={13} />
-              {unbanMutation.isPending ? "Unbanning…" : "Unban"}
+              {unbanMutation.isPending
+                ? t("detail.unbanning")
+                : t("detail.unban")}
             </Button>
           ) : (
             <Button
@@ -179,25 +188,25 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className={logic.statCard}>
-            <p className={`text-xs ${subtextColor}`}>User ID</p>
+            <p className={`text-xs ${subtextColor}`}>{t("detail.userId")}</p>
             <p className={`text-sm font-semibold font-mono ${textColor}`}>
               #{selectedUser.id}
             </p>
           </div>
 
           <div className={logic.statCard}>
-            <p className={`text-xs ${subtextColor}`}>Last Login</p>
+            <p className={`text-xs ${subtextColor}`}>{t("detail.lastLogin")}</p>
             <p
               className={`text-sm font-semibold flex items-center gap-1 ${textColor}`}
             >
               <Clock size={12} />
-              {selectedUser.last_login || "Never"}
+              {selectedUser.last_login || t("detail.never")}
             </p>
           </div>
 
           {/* Role stat — shows badge inline so it matches the header */}
           <div className={logic.statCard}>
-            <p className={`text-xs ${subtextColor}`}>Role</p>
+            <p className={`text-xs ${subtextColor}`}>{t("detail.role")}</p>
             <span
               className={`text-xs px-2 py-0.5 rounded-full font-medium flex items-center gap-1 w-fit mt-0.5 ${roleConfig.badgeClass}`}
             >
@@ -207,11 +216,11 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
           </div>
 
           <div className={logic.statCard}>
-            <p className={`text-xs ${subtextColor}`}>Status</p>
+            <p className={`text-xs ${subtextColor}`}>{t("detail.status")}</p>
             <p
               className={`text-sm font-semibold ${selectedUser.is_banned ? "text-red-400" : "text-green-400"}`}
             >
-              {selectedUser.is_banned ? "Banned" : "Active"}
+              {selectedUser.is_banned ? t("detail.banned") : t("detail.active")}
             </p>
           </div>
         </div>
