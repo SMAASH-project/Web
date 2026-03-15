@@ -4,6 +4,7 @@ export interface Profile {
   avatar: string;
   avatarFile?: File | null;
   coins?: number;
+  last_login?: string;
 }
 
 export interface ProfileContextType {

@@ -2,7 +2,7 @@ import Navbar from "@/components/nav/Navbar";
 // import { WithOnloadAnimation } from "@/lib/miscAnimations/OnloadAnimationNavbar";
 import CardAnimation from "@/lib/miscAnimations/OnloadAnimationCard";
 import { useSettings } from "../settings/settingsLogic/SettingsContext";
-import { ProfilePageContent } from "./ProfilePageConent";
+import { ProfilePageContent } from "./ProfilePageContent";
 import { getTextColor } from "@/lib/utils";
 
 export function ProfilePage() {

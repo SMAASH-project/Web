@@ -45,6 +45,7 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
         name: p.display_name,
         avatar: p.avatar_url ?? `/api/profiles/${p.id}/pfp`,
         coins: p.coins,
+        last_login: p.last_login,
       })),
     [fetchedProfiles],
   );

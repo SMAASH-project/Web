@@ -1,0 +1,349 @@
+import { useRef, useState, useEffect } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { useSettings } from "../settings/settingsLogic/SettingsContext";
+import { UpdateSheet } from "./UpdateSheet";
+import {
+  ExternalLink,
+  Coins,
+  Clock,
+  Hash,
+  Swords,
+  Trophy,
+  TrendingUp,
+  History,
+} from "lucide-react";
+import {
+  cn,
+  getLiquidGlassClasses,
+  getLiquidGlassTextShadow,
+  getBackgroundClasses,
+  getTextColor,
+  getSubtextColor,
+  getTextShadow,
+} from "@/lib/utils";
+import { useProfiles } from "@/components/forms/addNewProfile/useProfiles";
+import { useUploadProfilePictureMutation } from "@/hooks/useQueryHooks";
+
+// ─── Stat card ────────────────────────────────────────────────────────────────
+
+function StatCard({
+  icon,
+  label,
+  value,
+  valueClass,
+  dimmed,
+  panelBg,
+  textColor,
+  subtextColor,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  valueClass?: string;
+  dimmed?: boolean;
+  panelBg: string;
+  textColor: string;
+  subtextColor: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-xl p-3 flex flex-col gap-1",
+        panelBg,
+        dimmed && "opacity-40",
+      )}
+    >
+      <p className={cn("text-xs flex items-center gap-1", subtextColor)}>
+        {icon}
+        {label}
+      </p>
+      <p className={cn("text-sm font-semibold", valueClass ?? textColor)}>
+        {value}
+      </p>
+    </div>
+  );
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export function ProfilePageContent() {
+  const pfpinputRef = useRef<HTMLInputElement>(null);
+  const { selectedProfile } = useProfiles();
+  const uploadProfilePictureMutation = useUploadProfilePictureMutation();
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
+
+  const username = selectedProfile?.name ?? "—";
+  const { settings } = useSettings();
+  const { useLiquidGlass, useDarkMode } = settings;
+
+  useEffect(() => {
+    return () => {
+      if (localPreview?.startsWith("blob:")) URL.revokeObjectURL(localPreview);
+    };
+  }, [localPreview]);
+
+  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedProfile?.id) return;
+    const blobUrl = URL.createObjectURL(file);
+    setLocalPreview(blobUrl);
+    try {
+      await uploadProfilePictureMutation.mutateAsync({
+        profileId: selectedProfile.id,
+        file,
+      });
+    } catch (error) {
+      console.error("Failed to upload profile picture:", error);
+      setLocalPreview(null);
+    }
+  };
+
+  // ─── Theming ────────────────────────────────────────────────────────────────
+
+  const cardBg = useLiquidGlass
+    ? getLiquidGlassClasses(useLiquidGlass, useDarkMode)
+    : getBackgroundClasses(useLiquidGlass, useDarkMode);
+
+  const panelBg = getBackgroundClasses(useLiquidGlass, useDarkMode, "light");
+  const textColor = getTextColor(useLiquidGlass, useDarkMode);
+  const subtextColor = getSubtextColor(useLiquidGlass, useDarkMode);
+  const textShadow = getTextShadow(useLiquidGlass, useDarkMode);
+
+  const sepClass = useLiquidGlass
+    ? useDarkMode
+      ? "bg-white/10"
+      : "bg-black/10"
+    : useDarkMode
+      ? "bg-gray-700"
+      : "bg-gray-200";
+
+  const avatarSrc =
+    localPreview ?? selectedProfile?.avatar ?? "./src/assets/SlimeArt.png";
+
+  // ─── Derived stats ───────────────────────────────────────────────────────
+  const coins = selectedProfile?.coins?.toLocaleString() ?? "—";
+  const lastLogin = selectedProfile?.last_login
+    ? new Date(selectedProfile.last_login).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : "—";
+  const profileId = selectedProfile?.id ? `#${selectedProfile.id}` : "—";
+
+  return (
+    <Card
+      className={cn(
+        "z-0 flex flex-col lg:flex-row w-full max-w-6xl",
+        "p-6 sm:p-8 lg:p-10 gap-6 lg:gap-8",
+        cardBg,
+      )}
+    >
+      {/* ═══ Left — avatar + name + edit ═══════════════════════════════════ */}
+      <div className="flex flex-col items-center justify-center gap-5 lg:w-52 lg:shrink-0">
+        <div>
+          <input
+            type="file"
+            ref={pfpinputRef}
+            hidden
+            accept="image/*"
+            onChange={onFileChange}
+          />
+          <div onClick={() => pfpinputRef.current?.click()}>
+            <Avatar
+              size="lg"
+              className={cn(
+                "text-white cursor-pointer",
+                getLiquidGlassClasses(useLiquidGlass, useDarkMode),
+                getLiquidGlassTextShadow(useLiquidGlass, useDarkMode),
+              )}
+            >
+              <AvatarImage src={avatarSrc} alt={username} />
+              <span
+                aria-hidden
+                className="absolute inset-0 flex items-center justify-center rounded-full bg-gray-700/70 opacity-0 transition-opacity duration-150 pointer-events-none group-hover/avatar:opacity-100"
+              >
+                <ExternalLink className="size-4 text-white opacity-100" />
+              </span>
+              <AvatarFallback>
+                {username.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+        </div>
+
+        <div className="text-center">
+          <p
+            className={cn(
+              "font-semibold text-lg leading-tight",
+              textColor,
+              textShadow,
+            )}
+          >
+            {username}
+          </p>
+          {selectedProfile?.coins !== undefined && (
+            <p
+              className={cn(
+                "text-xs mt-1 flex items-center justify-center gap-1",
+                subtextColor,
+              )}
+            >
+              <Coins size={11} />
+              {coins} coins
+            </p>
+          )}
+        </div>
+
+        <UpdateSheet />
+      </div>
+
+      {/* Vertical divider (desktop) / horizontal (mobile) */}
+      <Separator
+        orientation="vertical"
+        className={cn("hidden lg:block self-stretch w-px", sepClass)}
+      />
+      <Separator className={cn("block lg:hidden", sepClass)} />
+
+      {/* ═══ Center — stats ════════════════════════════════════════════════ */}
+      <div className="flex-1 flex flex-col gap-4">
+        <p
+          className={cn(
+            "text-xs font-semibold uppercase tracking-wider",
+            subtextColor,
+          )}
+        >
+          Stats
+        </p>
+
+        {/* Live stats — data we already have */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <StatCard
+            icon={<Coins size={11} />}
+            label="Coins"
+            value={coins}
+            panelBg={panelBg}
+            textColor={textColor}
+            subtextColor={subtextColor}
+          />
+          <StatCard
+            icon={<Clock size={11} />}
+            label="Last Login"
+            value={lastLogin}
+            panelBg={panelBg}
+            textColor={textColor}
+            subtextColor={subtextColor}
+          />
+          <StatCard
+            icon={<Hash size={11} />}
+            label="Profile ID"
+            value={profileId}
+            panelBg={panelBg}
+            textColor={textColor}
+            subtextColor={subtextColor}
+          />
+        </div>
+
+        {/*
+         * TODO: BACKEND — The following stats require a match history endpoint.
+         * The Match, MatchParticipation, and Character models exist in the backend
+         * but there is no controller or API route for them.
+         *
+         * Needed: GET /api/profiles/:id/matches
+         * Returns: array of { match_id, level_name, result, character_name,
+         *          started_at, ended_at, network_status }
+         *
+         * Once the endpoint exists:
+         *   1. Add useProfileMatchesQuery(profileId) to useProfileHooks.ts
+         *   2. Derive wins, losses, win rate, and total matches from the response
+         *   3. Replace the dimmed placeholder cards below with real values
+         *   4. Populate the Match History section on the right
+         */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <StatCard
+            icon={<Trophy size={11} />}
+            label="Wins"
+            value="—"
+            dimmed
+            panelBg={panelBg}
+            textColor={textColor}
+            subtextColor={subtextColor}
+          />
+          <StatCard
+            icon={<Swords size={11} />}
+            label="Losses"
+            value="—"
+            dimmed
+            panelBg={panelBg}
+            textColor={textColor}
+            subtextColor={subtextColor}
+          />
+          <StatCard
+            icon={<TrendingUp size={11} />}
+            label="Win Rate"
+            value="—"
+            dimmed
+            panelBg={panelBg}
+            textColor={textColor}
+            subtextColor={subtextColor}
+          />
+          <StatCard
+            icon={<History size={11} />}
+            label="Matches"
+            value="—"
+            dimmed
+            panelBg={panelBg}
+            textColor={textColor}
+            subtextColor={subtextColor}
+          />
+        </div>
+      </div>
+
+      {/* Vertical divider (desktop) */}
+      <Separator
+        orientation="vertical"
+        className={cn("hidden lg:block self-stretch w-px", sepClass)}
+      />
+      <Separator className={cn("block lg:hidden", sepClass)} />
+
+      {/* ═══ Right — match history ══════════════════════════════════════════ */}
+      <div className="flex-1 flex flex-col gap-4 min-w-0">
+        <p
+          className={cn(
+            "text-xs font-semibold uppercase tracking-wider",
+            subtextColor,
+          )}
+        >
+          Match History
+        </p>
+
+        {/*
+         * TODO: BACKEND — Match history requires GET /api/profiles/:id/matches
+         * See the TODO comment in the Stats section above for the full spec.
+         * Replace the empty state below with a mapped list of match rows.
+         */}
+        <div
+          className={cn(
+            "flex-1 rounded-xl flex flex-col items-center justify-center gap-3 py-10",
+            panelBg,
+          )}
+        >
+          <Swords size={28} className={cn("opacity-25", subtextColor)} />
+          <p className={cn("text-sm font-medium opacity-50", subtextColor)}>
+            No matches yet
+          </p>
+          <p
+            className={cn(
+              "text-xs text-center max-w-45 opacity-40",
+              subtextColor,
+            )}
+          >
+            Match history will appear here once available
+          </p>
+        </div>
+      </div>
+    </Card>
+  );
+}
