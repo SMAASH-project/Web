@@ -103,3 +103,27 @@ dropped when mapping into the context.
 
 Added `last_login: p.last_login` to the profile mapping so the timestamp
 flows through to all consumers.
+
+---
+
+## Filename correction
+
+The component file was renamed from `ProfilePageConent.tsx` (typo) to
+`ProfilePageContent.tsx`. The import in `ProfilePage.tsx` was updated
+accordingly:
+
+```ts
+// Before
+import { ProfilePageContent } from "./ProfilePageConent";
+
+// After
+import { ProfilePageContent } from "./ProfilePageContent";
+```
+
+## Last Login → Last Seen
+
+The "Last Login" stat card label was changed to **"Last Seen"** as it better
+describes the data. The underlying field is still `last_login` from the API —
+it is not a creation/join date. If a true "Member Since" join date is ever
+needed, `created_at` needs to be added to `PlayerProfileReadDTO` on the backend
+(the field exists on `gorm.Model`, it just isn't serialised).

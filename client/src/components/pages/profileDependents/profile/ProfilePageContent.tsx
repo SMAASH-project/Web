@@ -124,7 +124,7 @@ export function ProfilePageContent() {
 
   // ─── Derived stats ───────────────────────────────────────────────────────
   const coins = selectedProfile?.coins?.toLocaleString() ?? "—";
-  const lastLogin = selectedProfile?.last_login
+  const lastSeen = selectedProfile?.last_login
     ? new Date(selectedProfile.last_login).toLocaleDateString(undefined, {
         year: "numeric",
         month: "short",
@@ -230,8 +230,8 @@ export function ProfilePageContent() {
           />
           <StatCard
             icon={<Clock size={11} />}
-            label="Last Login"
-            value={lastLogin}
+            label="Last Seen"
+            value={lastSeen}
             panelBg={panelBg}
             textColor={textColor}
             subtextColor={subtextColor}
