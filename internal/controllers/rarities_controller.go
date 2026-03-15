@@ -123,6 +123,6 @@ func (rc RaritiesController) MountRoutes(apiGroup *gin.RouterGroup) {
 	rarities.POST("", rc.Create)
 	rarities.GET("", rc.ReadAll)
 	rarities.GET("/:id", middlewares.ValidateUrl, rc.ReadByID)
-	rarities.PUT(":/id", middlewares.ValidateUrl, rc.Update)
+	rarities.PUT("/:id", middlewares.ValidateUrl, rc.Update)
 	rarities.DELETE("/:id", middlewares.ValidateUrl, rc.Delete)
 }
