@@ -15,11 +15,16 @@ import {
 } from "@/lib/utils";
 import { useContext } from "react";
 import { AuthContext } from "@/context/AuthContext";
+import { useProfiles } from "@/components/forms/addNewProfile/useProfiles";
 
 export function WebstorePage() {
   const { settings } = useSettings();
   const { isAdmin } = useContext(AuthContext);
-  const userCoins = 5000; // Replace with actual coin balance from API
+  const { selectedProfile } = useProfiles();
+
+  // Coins come from the selected profile returned by GET /api/users/:id/profiles.
+  // Falls back to 0 while the profile is loading or if none is selected.
+  const userCoins = selectedProfile?.coins ?? 0;
 
   const {
     visibleItems,
