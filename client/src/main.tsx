@@ -1,6 +1,7 @@
 import { StrictMode, lazy } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
+import "@/lib/i18n"; // must be imported before any component that calls useTranslation
 import App from "./App.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { RootLayout } from "./RootLayout.tsx";

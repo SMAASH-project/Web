@@ -1,0 +1,20 @@
+{
+  "items": {
+    "aboutUs": "About Us",
+    "gallery": "Gallery",
+    "releases": "Releases",
+    "webstore": "Webstore",
+    "news": "News"
+  },
+  "loggedInAs": "Logged in as",
+  "menu": "Menu",
+  "account": {
+    "title": "My Account",
+    "profile": "Profile",
+    "settings": "Settings",
+    "support": "Support",
+    "changeProfile": "Change Profile",
+    "adminPanel": "Admin Panel",
+    "logout": "Log out"
+  }
+}

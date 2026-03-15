@@ -1,0 +1,36 @@
+{
+  "title": "Webáruház",
+  "subtitle": "Karakterek és kinézetek feloldása",
+  "searchPlaceholder": "Keresés tárgy neve alapján…",
+  "noResults": "Nem található tárgy.",
+  "filters": {
+    "type": "Típus",
+    "rarity": "Ritkaság",
+    "combat": "Harci stílus",
+    "ownership": "Tulajdon",
+    "all": "Összes",
+    "owned": "Saját",
+    "unowned": "Nem saját",
+    "melee": "Közelharci",
+    "ranged": "Távolsági",
+    "character": "Karakter",
+    "skin": "Kinézet"
+  },
+  "rarity": {
+    "common": "Közönséges",
+    "uncommon": "Ritka",
+    "rare": "Különleges",
+    "epic": "Epikus",
+    "legendary": "Legendás"
+  },
+  "item": {
+    "unlock": "Feloldás",
+    "owned": "Megvan"
+  },
+  "delete": {
+    "confirm": "Törlés megerősítése",
+    "description": "Biztosan törölni szeretnéd ezt a tárgyat? Ez a művelet nem vonható vissza.",
+    "cancel": "Mégse",
+    "confirm_action": "Megerősítés"
+  }
+}

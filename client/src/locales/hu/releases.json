@@ -1,0 +1,21 @@
+{
+  "title": "Kiadások",
+  "subtitle": "Alkalmazás kiadások böngészése és kezelése",
+  "searchPlaceholder": "Keresés verzió alapján…",
+  "noResults": "Nem található kiadás.",
+  "download": "Letöltés",
+  "delete": {
+    "confirm": "Törlés megerősítése",
+    "description": "Biztosan törölni szeretnéd ezt a kiadást? Ez a művelet nem vonható vissza.",
+    "cancel": "Mégse",
+    "confirm_action": "Megerősítés"
+  },
+  "add": {
+    "button": "Kiadás hozzáadása",
+    "title": "Új kiadás hozzáadása"
+  },
+  "os": {
+    "ios": "iOS",
+    "android": "Android"
+  }
+}

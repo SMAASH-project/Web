@@ -1,0 +1,24 @@
+{
+  "title": "Legújabb hírek",
+  "search": {
+    "title": "Hírek keresése",
+    "description": "Írj a cikkek cím szerinti kereséséhez",
+    "label": "Keresés",
+    "placeholder": "Bejegyzések keresése...",
+    "submit": "Keresés",
+    "close": "Bezárás"
+  },
+  "add": {
+    "title": "Új híroldal cikk létrehozása",
+    "cancel": "Mégse",
+    "submit": "Cikk létrehozása"
+  },
+  "noResults": "Nem található bejegyzés.",
+  "edit": "Szerkesztés",
+  "delete": {
+    "confirm": "Törlés megerősítése",
+    "description": "Biztosan törölni szeretnéd ezt a bejegyzést? Ez a művelet nem vonható vissza.",
+    "cancel": "Mégse",
+    "confirm_action": "Megerősítés"
+  }
+}
