@@ -69,16 +69,20 @@ func (a AuthnController) Login(c *gin.Context) {
 	token, user, err := a.authService.Login(c.Request.Context(), dtos.LoginDTOToUser(&body))
 
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		switch {
+		case errors.Is(err, gorm.ErrRecordNotFound):
 			c.JSON(http.StatusUnauthorized, dtos.NewErrResp("User doesn't exist", c.Request.URL.Path))
 			return
-		}
-		if errors.Is(err, services.ErrPasswordComparisonFailed) {
+		case errors.Is(err, services.ErrPasswordComparisonFailed):
 			c.JSON(http.StatusUnauthorized, dtos.NewErrResp("Incorrect password", c.Request.URL.Path))
 			return
+		case errors.Is(err, services.ErrUserBanned):
+			c.JSON(http.StatusUnauthorized, dtos.NewErrResp("User is banned", c.Request.URL.Path))
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+			return
 		}
-		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
-		return
 	}
 
 	c.SetSameSite(http.SameSiteLaxMode)

@@ -238,12 +238,11 @@ func (pc PlayerProfileController) GetPFP(c *gin.Context) {
 
 func (pc PlayerProfileController) MountRoutes(apiGroup *gin.RouterGroup) {
 	profiles := apiGroup.Group("/profiles")
-	// profiles.Use(middlewares.Authorize)
-	profiles.GET("", pc.ReadAll)
-	profiles.GET("/:id", middlewares.ValidateUrl, pc.ReadByID)
-	profiles.POST("", pc.Create)
-	profiles.PUT("/:id", middlewares.ValidateUrl, pc.Update)
-	profiles.DELETE("/:id", middlewares.ValidateUrl, pc.Delete)
-	profiles.POST("/:id/pfpupload", middlewares.ValidateUrl, pc.UploadPFP)
-	profiles.GET("/:id/pfp", middlewares.ValidateUrl, pc.GetPFP)
+	profiles.GET("", middlewares.Authorize(middlewares.ADMIN), pc.ReadAll)
+	profiles.GET("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, pc.ReadByID)
+	profiles.POST("", middlewares.Authorize(middlewares.ANY), pc.Create)
+	profiles.PUT("/:id", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.Update)
+	profiles.DELETE("/:id", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.Delete)
+	profiles.POST("/:id/pfp", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.UploadPFP)
+	profiles.GET("/:id/pfp", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.GetPFP)
 }

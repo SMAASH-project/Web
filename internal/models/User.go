@@ -12,7 +12,8 @@ type User struct {
 	PasswordHash   string `gorm:"not null;type type:varchar(50)"`
 	RoleID         uint   `gorm:"not null"`
 	Role           Role
-	IsBanned       bool      `gorm:"not null"`
+	IsBanned       bool `gorm:"not null"`
+	BannedUntil    *time.Time
 	LastLogin      time.Time `gorm:"not null"`
 	PlayerProfiles []PlayerProfile
 }

@@ -23,12 +23,8 @@ type RarityDataFormat struct {
 	Name string
 }
 
-func (rs RaritySeeder) Seed(c context.Context, data_root_path string, db_url string, errStream chan error, logger logger.Interface) {
+func (rs RaritySeeder) Seed(c context.Context, data_root_path string, db *gorm.DB, errStream chan error, logger logger.Interface) {
 	log.Println("Starting rarities seeder")
-	db, err := gorm.Open(sqlite.Open(db_url), &gorm.Config{TranslateError: true, Logger: logger})
-	if err != nil {
-		errStream <- err
-	}
 
 	raw, err := os.ReadFile(data_root_path + "/rarities.json")
 	if err != nil {
@@ -45,10 +41,10 @@ func (rs RaritySeeder) Seed(c context.Context, data_root_path string, db_url str
 			if !errors.Is(err, gorm.ErrDuplicatedKey) {
 				errStream <- err
 			} else {
-				log.Println("Skipped creating role with name: ", val.Name)
+				log.Println("Skipped creating rarity with name: ", val.Name)
 			}
 		} else {
-			log.Println("Created role with name: ", val.Name)
+			log.Println("Created rarity with name: ", val.Name)
 		}
 	}
 }

@@ -142,10 +142,9 @@ func (ic ItemsController) Delete(c *gin.Context) {
 
 func (ic ItemsController) MountRoutes(apiGroup *gin.RouterGroup) {
 	items := apiGroup.Group("/items")
-	items.Use(middlewares.Authorize)
-	items.POST("", ic.Create)
-	items.GET("", ic.ReadAll)
-	items.GET("/:id", middlewares.ValidateUrl, ic.ReadByID)
-	items.PUT("/:id", middlewares.ValidateUrl, ic.Update)
-	items.DELETE("/:id", middlewares.ValidateUrl, ic.Delete)
+	items.POST("", middlewares.Authorize(middlewares.ADMIN), ic.Create)
+	items.GET("", middlewares.Authorize(middlewares.ANY), ic.ReadAll)
+	items.GET("/:id", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, ic.ReadByID)
+	items.PUT("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, ic.Update)
+	items.DELETE("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, ic.Delete)
 }

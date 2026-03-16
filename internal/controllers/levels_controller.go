@@ -165,10 +165,9 @@ func (lc *LevelsController) Delete(c *gin.Context) {
 
 func (lc LevelsController) MountRoutes(apiGroup *gin.RouterGroup) {
 	levels := apiGroup.Group("/levels")
-	levels.Use(middlewares.Authorize)
-	levels.POST("", lc.Create)
-	levels.GET("", lc.ReadAll)
-	levels.GET("/:id", middlewares.ValidateUrl, lc.ReadByID)
-	levels.PUT("/:id", middlewares.ValidateUrl, lc.Update)
-	levels.DELETE("/:id", middlewares.ValidateUrl, lc.Delete)
+	levels.POST("", middlewares.Authorize(middlewares.ADMIN), lc.Create)
+	levels.GET("", middlewares.Authorize(middlewares.ANY), lc.ReadAll)
+	levels.GET("/:id", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, lc.ReadByID)
+	levels.PUT("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, lc.Update)
+	levels.DELETE("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, lc.Delete)
 }

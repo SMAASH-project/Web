@@ -28,5 +28,6 @@ func Initialize() *server.Server {
 		AddController(controllers.NewPlayerProfileController(profilesBaseRepo)).
 		AddController(controllers.NewRolesController(repository.NewBaseRepositoryActions[models.Role](conn))).
 		AddController(controllers.NewCategoriesController(categoriesRepo)).
-		AddController(controllers.NewItemsController(repository.NewBaseRepositoryActions[models.Item](conn), rarityRepo, categoriesRepo))
+		AddController(controllers.NewItemsController(repository.NewBaseRepositoryActions[models.Item](conn), rarityRepo, categoriesRepo)).
+		AddController(controllers.NewRaritiesController(rarityRepo))
 }

@@ -27,12 +27,8 @@ type UserDataFormat struct {
 	RoleID   int
 }
 
-func (us UserSeeder) Seed(c context.Context, data_root_path string, db_url string, errStream chan error, logger logger.Interface) {
+func (us UserSeeder) Seed(c context.Context, data_root_path string, db *gorm.DB, errStream chan error, logger logger.Interface) {
 	log.Println("Starting user seeder")
-	db, err := gorm.Open(sqlite.Open(db_url), &gorm.Config{TranslateError: true, Logger: logger})
-	if err != nil {
-		errStream <- err
-	}
 
 	raw, err := os.ReadFile(data_root_path + "/users.json")
 	if err != nil {
