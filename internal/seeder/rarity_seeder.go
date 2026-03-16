@@ -8,7 +8,6 @@ import (
 	"os"
 	"smaash-web/internal/models"
 
-	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
