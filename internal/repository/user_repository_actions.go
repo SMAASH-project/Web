@@ -11,6 +11,7 @@ type UserRepository interface {
 	BaseRepository[models.User]
 	ReadByEmail(context.Context, string, ...string) (models.User, error)
 	ReadUsersProfiles(c context.Context, userID uint) ([]models.PlayerProfile, error)
+	Unban(c context.Context, userID uint) error
 }
 
 type UserRepositoryActions struct {
@@ -35,4 +36,11 @@ func (ura UserRepositoryActions) ReadByEmail(c context.Context, email string, pr
 
 func (ura UserRepositoryActions) ReadUsersProfiles(c context.Context, userID uint) ([]models.PlayerProfile, error) {
 	return gorm.G[models.PlayerProfile](ura.conn).Where("user_id = ?", userID).Find(c)
+}
+
+func (ura UserRepositoryActions) Unban(c context.Context, userID uint) error {
+	return ura.conn.Model(&models.User{}).Where("id = ?", userID).Updates(map[string]any{
+		"is_banned":    false,
+		"banned_until": nil,
+	}).Error
 }
