@@ -11,6 +11,7 @@ type PlayerProfileReadDTO struct {
 	ID          uint   `json:"id"`
 	DisplayName string `json:"display_name"`
 	Coins       int64  `json:"coins"`
+	PfpUri      string `json:"pfp_uri"`
 	LastLogin   string `json:"last_login"`
 }
 
@@ -35,6 +36,7 @@ func PlayerProfileToReadDTO(profile models.PlayerProfile) PlayerProfileReadDTO {
 		ID:          profile.ID,
 		DisplayName: profile.DisplayName,
 		Coins:       profile.Coins,
+		PfpUri:      profile.PfpUri,
 		LastLogin:   profile.LastLogin.Format("2006-01-02 15:04:05"),
 	}
 }
