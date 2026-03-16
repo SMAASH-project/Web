@@ -8,6 +8,7 @@ import (
 	"smaash-web/internal/models"
 	"smaash-web/internal/repository"
 	"smaash-web/internal/utils"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -236,6 +237,58 @@ func (uc UserController) WhoAmI(c *gin.Context) {
 	c.JSON(http.StatusOK, dtos.UserToDTO(user))
 }
 
+func (uc UserController) Ban(c *gin.Context) {
+	path := c.Request.URL.Path
+	id, _ := c.Get("id")
+
+	var body dtos.UserBanDTO
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	if id.(uint) != body.ID {
+		c.JSON(http.StatusBadRequest, dtos.NewErrResp("Id from url doesn't match id from request body", path))
+		return
+	}
+
+	bannedUntil := time.Now().Add(time.Duration(body.Period) * time.Minute)
+	if err := uc.userRepo.Update(c.Request.Context(), models.User{
+		Model:       gorm.Model{ID: body.ID},
+		IsBanned:    true,
+		BannedUntil: &bannedUntil,
+	}); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("User with given id not found", path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
+func (uc UserController) Unban(c *gin.Context) {
+	path := c.Request.URL.Path
+	id, _ := c.Get("id")
+
+	if err := uc.userRepo.Update(c.Request.Context(), models.User{
+		Model:       gorm.Model{ID: id.(uint)},
+		IsBanned:    false,
+		BannedUntil: nil,
+	}); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("User with given id not found", path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
 func (uc UserController) MountRoutes(apiGroup *gin.RouterGroup) {
 	users := apiGroup.Group("/users")
 	// no creation, that happens on /auth/signup. No updating password either.
@@ -246,4 +299,6 @@ func (uc UserController) MountRoutes(apiGroup *gin.RouterGroup) {
 	users.POST("/:id/profiles", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, uc.AddProfileToUser)
 	users.GET("/:id/profiles", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, uc.ReadUsersProfiles)
 	users.GET("/whoami", middlewares.Authorize(middlewares.ANY), uc.WhoAmI)
+	users.POST("/:id/ban", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, uc.Ban)
+	users.POST("/:id/unban", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, uc.Unban)
 }

@@ -7,11 +7,12 @@ import (
 )
 
 type UserReadDTO struct {
-	ID        uint   `json:"id"`
-	Email     string `json:"email"`
-	Role      string `json:"role"`
-	IsBanned  bool   `json:"is_banned"`
-	LastLogin string `json:"last_login"`
+	ID          uint   `json:"id"`
+	Email       string `json:"email"`
+	Role        string `json:"role"`
+	IsBanned    bool   `json:"is_banned"`
+	BannedUntil string `json:"banned_until"`
+	LastLogin   string `json:"last_login"`
 }
 
 type UserCreateDTO struct {
@@ -32,14 +33,25 @@ type UserLoginDTO struct {
 	Password string `json:"password" binding:"required"`
 }
 
+type UserBanDTO struct {
+	ID     uint `json:"id" binding:"required"`
+	Period uint `json:"period" binding:"required"` // in minutes
+}
+
 func UserToDTO(user models.User) UserReadDTO {
-	return UserReadDTO{
+	dto := UserReadDTO{
 		ID:        user.ID,
 		Email:     user.Email,
 		Role:      user.Role.Name,
 		IsBanned:  user.IsBanned,
-		LastLogin: user.LastLogin.Format("2006-01-02"),
+		LastLogin: user.LastLogin.Format(DateFormat),
 	}
+
+	if user.BannedUntil != nil {
+		dto.BannedUntil = user.BannedUntil.Format(DateFormat)
+	}
+
+	return dto
 }
 
 func CreateDTOToUser(dto *UserCreateDTO) *models.User {

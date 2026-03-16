@@ -27,6 +27,7 @@ func NewAuthenticationService(userRepo repository.UserRepository) Authentication
 
 var (
 	ErrPasswordComparisonFailed = errors.New("Password incorrect")
+	ErrUserBanned               = errors.New("User is banned")
 )
 
 func (a AuthenticationService) SignUp(c context.Context, u *models.User) (*models.User, error) {
@@ -43,6 +44,10 @@ func (a AuthenticationService) Login(c context.Context, u *models.User) (*string
 	user, err := a.userRepo.ReadByEmail(c, u.Email, "Role")
 	if err != nil {
 		return nil, nil, err
+	}
+
+	if user.IsBanned {
+		return nil, nil, ErrUserBanned
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(u.PasswordHash))
@@ -62,6 +67,10 @@ func (a AuthenticationService) Login(c context.Context, u *models.User) (*string
 	}
 	tokenString, err := token.SignedString([]byte(key))
 	if err != nil {
+		return nil, nil, err
+	}
+
+	if err := a.userRepo.UpdateOne(c, user.ID, "LastLogin", time.Now()); err != nil {
 		return nil, nil, err
 	}
 

@@ -2,7 +2,6 @@ package dtos
 
 import (
 	"smaash-web/internal/models"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -12,7 +11,6 @@ type PlayerProfileReadDTO struct {
 	DisplayName string `json:"display_name"`
 	Coins       int64  `json:"coins"`
 	PfpUri      string `json:"pfp_uri"`
-	LastLogin   string `json:"last_login"`
 }
 
 type PlayerProfileCreateDTO struct {
@@ -37,7 +35,6 @@ func PlayerProfileToReadDTO(profile models.PlayerProfile) PlayerProfileReadDTO {
 		DisplayName: profile.DisplayName,
 		Coins:       profile.Coins,
 		PfpUri:      profile.PfpUri,
-		LastLogin:   profile.LastLogin.Format("2006-01-02 15:04:05"),
 	}
 }
 
@@ -46,7 +43,6 @@ func CreateDTOToPlayerProfile(p PlayerProfileCreateDTO) models.PlayerProfile {
 		DisplayName: p.DisplayName,
 		UserID:      p.UserID,
 		Coins:       1000,
-		LastLogin:   time.Now(),
 	}
 }
 
@@ -62,6 +58,5 @@ func AppendDTOToPlayerProfile(p PlayerProfileAppendDTO) models.PlayerProfile {
 	return models.PlayerProfile{
 		DisplayName: p.DisplayName,
 		Coins:       1000,
-		LastLogin:   time.Now(),
 	}
 }

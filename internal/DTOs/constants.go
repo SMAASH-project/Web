@@ -2,10 +2,11 @@ package dtos
 
 import (
 	"fmt"
+	"time"
 )
 
 const (
-	DateFormat = "2006-01-02"
+	DateFormat = time.RFC822
 )
 
 var (
