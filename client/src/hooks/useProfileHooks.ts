@@ -32,8 +32,40 @@ export interface ProfileResponse {
 
 // ─── Private Utilities ───────────────────────────────────────────────────────
 
-function getProfilePictureUrl(profileId: number) {
-  return `/api/profiles/${profileId}/pfp`;
+// Cache-bust tracker: persisted across component remounts via sessionStorage.
+// After a successful upload the version changes, forcing <img> to re-request
+// the new file even when the URL path stays the same.
+const PFP_VERSION_KEY = "pfp_versions";
+
+function loadPfpVersions(): Map<number, number> {
+  try {
+    const raw = sessionStorage.getItem(PFP_VERSION_KEY);
+    if (raw) {
+      const obj = JSON.parse(raw) as Record<string, number>;
+      return new Map(Object.entries(obj).map(([k, v]) => [Number(k), v]));
+    }
+  } catch {
+    // ignore — fresh map is fine
+  }
+  return new Map();
+}
+
+function savePfpVersions(map: Map<number, number>): void {
+  try {
+    sessionStorage.setItem(
+      PFP_VERSION_KEY,
+      JSON.stringify(Object.fromEntries(map)),
+    );
+  } catch {
+    // ignore — cache-busting degrades gracefully if storage is unavailable
+  }
+}
+
+const pfpVersions = loadPfpVersions();
+
+function getProfilePictureUrl(profileId: number): string {
+  const version = pfpVersions.get(profileId);
+  return `/api/profiles/${profileId}/pfp${version ? `?v=${version}` : ""}`;
 }
 
 async function uploadProfilePicture(profileId: number, file: File) {
@@ -135,32 +167,21 @@ export function useUploadProfilePictureMutation() {
       await uploadProfilePicture(profileId, file);
     },
     onSuccess: async (_data, variables) => {
-      // Invalidate the generic profiles prefix so lists refetch
-      queryClient.invalidateQueries({ queryKey: queryKeys.profiles.all });
+      // Stamp a new version for this profile BEFORE refetching so that when
+      // useProfilesQuery runs getProfilePictureUrl it produces a fresh URL
+      // with ?v=<timestamp>, bypassing any browser cache of the old image.
+      pfpVersions.set(variables.profileId, Date.now());
+      savePfpVersions(pfpVersions);
 
-      // Also invalidate the specific profile entry to be safe
-      try {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.profiles.byId(variables.profileId),
-        });
-      } catch (err) {
-        // ignore
-      }
-      // Invalidate and refetch to ensure fresh data is loaded from the server
+      // Invalidate and refetch so every subscriber (Navbar, ProfileContext)
+      // immediately picks up the new cache-busted avatar URL.
       try {
         await queryClient.invalidateQueries({
           queryKey: queryKeys.profiles.all,
         });
         await queryClient.refetchQueries({ queryKey: queryKeys.profiles.all });
-
-        await queryClient.invalidateQueries({
-          queryKey: queryKeys.profiles.byId(variables.profileId),
-        });
-        await queryClient.refetchQueries({
-          queryKey: queryKeys.profiles.byId(variables.profileId),
-        });
       } catch (err) {
-        // ignore
+        // ignore — localPreview already shows the new image in the current session
       }
     },
   });

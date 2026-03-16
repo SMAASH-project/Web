@@ -89,6 +89,10 @@ export function ProfilePageContent() {
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !selectedProfile?.id) return;
+
+    // Reset value immediately so selecting the same file again fires onChange.
+    e.target.value = "";
+
     const blobUrl = URL.createObjectURL(file);
     setLocalPreview(blobUrl);
     try {
