@@ -14,12 +14,19 @@ import {
   getBackgroundClasses,
 } from "@/lib/utils";
 import { useContext } from "react";
+import { useTranslation } from "react-i18next";
 import { AuthContext } from "@/context/AuthContext";
+import { useProfiles } from "@/components/forms/addNewProfile/useProfiles";
 
 export function WebstorePage() {
   const { settings } = useSettings();
   const { isAdmin } = useContext(AuthContext);
-  const userCoins = 5000; // Replace with actual coin balance from API
+  const { t } = useTranslation("webstore");
+  const { selectedProfile } = useProfiles();
+
+  // Coins come from the selected profile returned by GET /api/users/:id/profiles.
+  // Falls back to 0 while the profile is loading or if none is selected.
+  const userCoins = selectedProfile?.coins ?? 0;
 
   const {
     visibleItems,
@@ -121,20 +128,20 @@ export function WebstorePage() {
           {/* Filters */}
           <div className="flex flex-wrap gap-4 justify-center">
             <ItemFilters
-              label="Type"
+              label={t("filters.type")}
               options={kinds}
               selected={selectedKind}
               onSelect={handleKindChange}
             />
             <ItemFilters
-              label="Rarity"
+              label={t("filters.rarity")}
               options={rarities}
               selected={selectedRarity}
               onSelect={handleRarityChange}
             />
             {showCombatTypeFilter && (
               <ItemFilters
-                label="Combat"
+                label={t("filters.combat")}
                 options={combatTypes}
                 selected={selectedCombatType}
                 onSelect={handleCombatTypeChange}
@@ -142,7 +149,7 @@ export function WebstorePage() {
             )}
             {showOwnershipFilter && (
               <ItemFilters
-                label="Ownership"
+                label={t("filters.ownership")}
                 options={ownershipOptions}
                 selected={selectedOwnership}
                 onSelect={handleOwnershipChange}
@@ -156,7 +163,7 @@ export function WebstorePage() {
           {visibleItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-3 mt-16 opacity-60">
               <ShoppingBag className={`w-12 h-12 ${subtextColor}`} />
-              <p className={`text-base ${subtextColor}`}>No items found.</p>
+              <p className={`text-base ${subtextColor}`}>{t("noResults")}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

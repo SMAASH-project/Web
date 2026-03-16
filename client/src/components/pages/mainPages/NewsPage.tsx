@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   formatDateTime,
   getBackgroundClasses,
@@ -27,6 +28,7 @@ import { AuthContext } from "@/context/AuthContext";
 
 export function NewsPage() {
   const { settings } = useSettings();
+  const { t } = useTranslation("news");
   const { isAdmin } = useContext(AuthContext);
   const { selectedByCategory, selectedCategories, setCategorySelected } =
     useNewsCategoryFilter();

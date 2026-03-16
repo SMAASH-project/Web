@@ -1,0 +1,18 @@
+{
+  "notFound": {
+    "title": "404 - Az oldal nem található",
+    "description": "Sajnáljuk, a keresett oldal nem létezik.",
+    "back": "Vissza az előző oldalra"
+  },
+  "common": {
+    "edit": "Szerkesztés",
+    "delete": "Törlés",
+    "cancel": "Mégse",
+    "confirm": "Megerősítés",
+    "save": "Mentés",
+    "close": "Bezárás",
+    "search": "Keresés",
+    "loading": "Betöltés...",
+    "coins": "érme"
+  }
+}

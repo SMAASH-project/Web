@@ -1,0 +1,76 @@
+{
+  "users": {
+    "title": "Felhasználók",
+    "searchPlaceholder": "Keresés név vagy email alapján…",
+    "noResults": "Nem található felhasználó",
+    "noSelected": "Nincs kiválasztott felhasználó",
+    "selectPrompt": "Válassz ki egy felhasználót a részletek megtekintéséhez"
+  },
+  "profiles": {
+    "title": "Profilok",
+    "noSelected": "Nincs kiválasztott felhasználó",
+    "noProfiles": "Nincsenek profilok"
+  },
+  "detail": {
+    "accountDetails": "Fiók adatok",
+    "userId": "Felhasználó azonosító",
+    "lastLogin": "Utolsó bejelentkezés",
+    "never": "Soha",
+    "role": "Szerep",
+    "status": "Státusz",
+    "active": "Aktív",
+    "banned": "Tiltva",
+    "bannedUntil": "Tiltva {{date}}-ig",
+    "bannedPermanent": "Tiltva (végleges)",
+    "banUser": "Felhasználó tiltása",
+    "unban": "Tiltás feloldása",
+    "unbanning": "Feloldás…"
+  },
+  "roles": {
+    "admin": "Admin",
+    "support": "Támogató",
+    "user": "Felhasználó"
+  },
+  "ban": {
+    "title": "Felhasználó tiltása — {{name}}",
+    "description": "Válassz egy előre beállított tiltási időt, vagy állíts be egyéni dátumtartományt.",
+    "permanent": "Végleges",
+    "permanentLabel": "Végleges tiltás",
+    "permanentDescription": "Nincs lejárat — kézi feloldás szükséges",
+    "timeouts": "Időleges kizárás",
+    "timedBans": "Időzített tiltás",
+    "customRange": "Egyéni tartomány",
+    "reason": "Indok",
+    "reasonOptional": "(opcionális)",
+    "customMessage": "Egyéni üzenet",
+    "customMessagePlaceholder": "Opcionális — írd le a tiltás okát…",
+    "presetReasons": {
+      "cheating": "Csalás / Hackelés",
+      "harassment": "Zaklatás",
+      "hateSpeech": "Gyűlöletbeszéd",
+      "spam": "Spam",
+      "exploiting": "Hibák kihasználása",
+      "toxic": "Toxikus viselkedés",
+      "impersonation": "Személyeskedés",
+      "nsfw": "NSFW tartalom"
+    },
+    "starts": "Kezdete",
+    "ends": "Vége",
+    "endPlaceholder": "Kattints egy dátumra a naptárban a vég beállításához",
+    "startTime": "Kezdési idő",
+    "endTime": "Befejezési idő",
+    "preview": "Előnézet",
+    "banActiveUntil": "Tiltás aktív eddig",
+    "cancel": "Mégse",
+    "confirm": "Tiltás megerősítése",
+    "confirming": "Alkalmazás…",
+    "presets": {
+      "1h": "1 óra",
+      "12h": "12 óra",
+      "24h": "24 óra",
+      "7d": "7 nap",
+      "31d": "31 nap",
+      "365d": "1 év"
+    }
+  }
+}

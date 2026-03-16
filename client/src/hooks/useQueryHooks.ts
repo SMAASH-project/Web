@@ -1,6 +1,7 @@
 /**
- * React Query hooks for all API operations.
- * Replaces manual useEffect + useState data fetching patterns.
+ * Barrel re-export of all React Query hooks.
+ * Import directly from the domain-specific hook files for better tree-shaking,
+ * or import from here for convenience — both styles work.
  */
 
 import {
@@ -440,3 +441,6 @@ export function useNewsInfiniteQuery(
     gcTime: 20 * 60 * 1000,
   });
 }
+export * from "./useAuthHooks";
+export * from "./useProfileHooks";
+export * from "./useContentHooks";

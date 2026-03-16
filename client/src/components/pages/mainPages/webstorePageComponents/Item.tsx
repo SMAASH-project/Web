@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { WebstoreItem } from "@/types/PageTypes";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
 import { Card } from "@/components/ui/card";
@@ -37,6 +38,7 @@ interface ItemProps {
 
 export function Item({ item, onDelete, onUnlock }: ItemProps) {
   const { settings } = useSettings();
+  const { t } = useTranslation("webstore");
   const { isAdmin } = useContext(AuthContext);
   const rarityColor = RARITY_COLORS[item.rarity] ?? "#9ca3af";
 

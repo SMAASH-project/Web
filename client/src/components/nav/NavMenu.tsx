@@ -9,6 +9,7 @@ import {
   getTextColor,
   getTextShadow,
 } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface NavMenuProps {
   useLiquidGlass: boolean;
@@ -17,6 +18,7 @@ interface NavMenuProps {
 
 export function NavMenu({ useLiquidGlass, useDarkMode = false }: NavMenuProps) {
   const location = useLocation();
+  const { t } = useTranslation("nav");
   const [highlightPos, setHighlightPos] = useState({ left: 0, width: 0 });
   const [isHovering, setIsHovering] = useState(false);
   const ulRef = useRef<HTMLUListElement>(null);
@@ -119,7 +121,7 @@ export function NavMenu({ useLiquidGlass, useDarkMode = false }: NavMenuProps) {
           onMouseEnter={handleMouseEnter}
         >
           <Link to={item.path}>
-            <Label className="px-1 lg:px-2">{item.label}</Label>
+            <Label className="px-1 lg:px-2">{t(item.labelKey)}</Label>
           </Link>
         </li>
       ))}
