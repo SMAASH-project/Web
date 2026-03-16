@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, User, Settings, ArrowLeftRight, LogOut } from "lucide-react";
+import {
+  Menu,
+  User,
+  Settings,
+  ArrowLeftRight,
+  LogOut,
+  ShieldAlert,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -19,12 +26,14 @@ import {
   getTextColor,
   getTextShadow,
 } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface MobileNavMenuProps {
   useLiquidGlass: boolean;
   useDarkMode?: boolean;
   username: string;
   onLogout: () => Promise<void>;
+  isAdmin?: boolean;
 }
 
 export function MobileNavMenu({
@@ -32,9 +41,11 @@ export function MobileNavMenu({
   useDarkMode = false,
   username,
   onLogout,
+  isAdmin = false,
 }: MobileNavMenuProps) {
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation("nav");
   const textColor = getTextColor(useLiquidGlass, useDarkMode);
   const subtextColor = getSubtextColor(useLiquidGlass, useDarkMode);
   const textShadow = getTextShadow(useLiquidGlass, useDarkMode);
@@ -69,7 +80,7 @@ export function MobileNavMenu({
           }`}
         >
           <Menu size={24} />
-          <span className="sr-only">Open menu</span>
+          <span className="sr-only">{t("menu")}</span>
         </Button>
       </SheetTrigger>
 
@@ -79,7 +90,9 @@ export function MobileNavMenu({
         className={`${sheetClass} ${textColor} ${textShadow} p-0`}
       >
         <SheetHeader className="p-4 pb-2">
-          <SheetTitle className={`${textColor} ${textShadow}`}>Menu</SheetTitle>
+          <SheetTitle className={`${textColor} ${textShadow}`}>
+            {t("menu")}
+          </SheetTitle>
         </SheetHeader>
 
         <nav className="flex flex-col gap-1 px-3">
@@ -93,7 +106,7 @@ export function MobileNavMenu({
                     isActive ? activeClass : hoverClass
                   }`}
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                 </Link>
               </SheetClose>
             );
@@ -109,7 +122,7 @@ export function MobileNavMenu({
           <p
             className={`px-3 py-1 text-xs font-semibold uppercase tracking-wider ${subtextColor}`}
           >
-            Account
+            {t("account.title")}
           </p>
 
           <SheetClose asChild>
@@ -118,7 +131,7 @@ export function MobileNavMenu({
               className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors duration-200 no-underline ${textColor} ${hoverClass}`}
             >
               <User size={16} />
-              <span>Profile</span>
+              <span>{t("account.profile")}</span>
             </Link>
           </SheetClose>
 
@@ -128,7 +141,7 @@ export function MobileNavMenu({
               className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors duration-200 no-underline ${textColor} ${hoverClass}`}
             >
               <Settings size={16} />
-              <span>Settings</span>
+              <span>{t("account.settings")}</span>
             </Link>
           </SheetClose>
 
@@ -138,9 +151,21 @@ export function MobileNavMenu({
               className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors duration-200 no-underline ${textColor} ${hoverClass}`}
             >
               <ArrowLeftRight size={16} />
-              <span>Change Profile</span>
+              <span>{t("account.changeProfile")}</span>
             </Link>
           </SheetClose>
+
+          {isAdmin && (
+            <SheetClose asChild>
+              <Link
+                to="/app/admin"
+                className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors duration-200 no-underline ${textColor} ${hoverClass}`}
+              >
+                <ShieldAlert size={16} />
+                <span>{t("account.adminPanel")}</span>
+              </Link>
+            </SheetClose>
+          )}
         </div>
 
         {/* Footer: logged in + log out */}
@@ -149,7 +174,7 @@ export function MobileNavMenu({
             className={`mb-3 ${useLiquidGlass ? (useDarkMode ? "bg-black/20" : "bg-white/20") : "bg-(--theme-accent-soft)"}`}
           />
           <p className={`px-3 pb-2 text-xs ${subtextColor}`}>
-            Logged in as{" "}
+            {t("loggedInAs")}{" "}
             <SheetClose asChild>
               <Link
                 to="/app/profile/"
@@ -167,7 +192,7 @@ export function MobileNavMenu({
             className={`flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors duration-200 ${textColor} cursor-pointer bg-transparent border-none ${hoverClass}`}
           >
             <LogOut size={16} />
-            <span>Log out</span>
+            <span>{t("account.logout")}</span>
           </button>
         </div>
       </SheetContent>

@@ -1,9 +1,9 @@
 import React, {
   createContext,
   useContext,
+  useCallback,
   useMemo,
   useState,
-  // useCallback,
 } from "react";
 import type { Profile, ProfileContextType } from "./ProfilesTypes";
 import { AuthContext } from "@/context/AuthContext";
@@ -45,60 +45,50 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
         name: p.display_name,
         avatar: p.avatar_url ?? `/api/profiles/${p.id}/pfp`,
         coins: p.coins,
+        last_login: p.last_login,
       })),
     [fetchedProfiles],
   );
 
   const selectedProfile = useMemo<Profile | null>(() => {
-    if (profiles.length === 0) {
-      return null;
-    }
-
-    if (selectedProfileId === null) {
-      return profiles[0];
-    }
-
+    if (profiles.length === 0) return null;
+    if (selectedProfileId === null) return profiles[0];
     return profiles.find((p) => p.id === selectedProfileId) ?? profiles[0];
   }, [profiles, selectedProfileId]);
 
-  // useEffect(() => {
-  //   fetchProfiles();
-  // }, [fetchProfiles]);
+  const addProfile = useCallback(
+    async (profile: Profile) => {
+      if (!numUserId) throw new Error("User is not logged in");
 
-  // Posts to the server via the centralized API, then updates local state on success.
-  const addProfile = async (profile: Profile) => {
-    if (!numUserId) {
-      throw new Error("User is not logged in");
-    }
+      await addProfileMutation.mutateAsync({
+        display_name: profile.name,
+        user_id: numUserId,
+        profile_picture: profile.avatarFile ?? null,
+      });
+    },
+    [addProfileMutation, numUserId],
+  );
 
-    await addProfileMutation.mutateAsync({
-      display_name: profile.name,
-      user_id: numUserId,
-      profile_picture: profile.avatarFile ?? null,
-    });
+  const removeProfile = useCallback(
+    async (name: string) => {
+      const profile = profiles.find((p) => p.name === name);
+      if (!profile?.id || !numUserId) return;
 
-    // No return needed - mutations handle cache invalidation
-  };
-
-  const removeProfile = async (name: string) => {
-    const profile = profiles.find((p) => p.name === name);
-    if (!profile || !profile.id || !numUserId) return;
-
-    try {
       await deleteProfileMutation.mutateAsync({
         profileId: profile.id,
         userId: numUserId,
       });
-    } catch (error) {
-      console.error("Error deleting profile:", error);
-      throw error;
-    }
-  };
+    },
+    [deleteProfileMutation, numUserId, profiles],
+  );
 
-  const selectProfile = (name: string) => {
-    const found = profiles.find((p) => p.name === name) || null;
-    setSelectedProfileId(found?.id ?? null);
-  };
+  const selectProfile = useCallback(
+    (name: string) => {
+      const found = profiles.find((p) => p.name === name) || null;
+      setSelectedProfileId(found?.id ?? null);
+    },
+    [profiles],
+  );
 
   return (
     <ProfileContext.Provider

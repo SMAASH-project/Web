@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
 import { getInputClasses, getSubtextColor } from "@/lib/utils";
@@ -10,6 +11,7 @@ export function SearchRelease({
   onSearch: (query: string) => void;
 }) {
   const { settings } = useSettings();
+  const { t } = useTranslation("releases");
   const [query, setQuery] = useState("");
   const inputClass = getInputClasses(
     settings.useLiquidGlass,
@@ -36,7 +38,7 @@ export function SearchRelease({
         className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${subtextColor} pointer-events-none`}
       />
       <Input
-        placeholder="Search by version…"
+        placeholder={t("searchPlaceholder")}
         value={query}
         onChange={(e) => handleChange((e.target as HTMLInputElement).value)}
         className={`${inputClass} pl-9 pr-9 h-10`}

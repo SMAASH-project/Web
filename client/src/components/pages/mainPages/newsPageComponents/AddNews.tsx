@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -47,6 +48,7 @@ import { useNewsForm } from "./newsPageLogic/useNewsForm";
 
 export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
   const { settings } = useSettings();
+  const { t } = useTranslation("news");
   const buttonClass = getButtonClasses(
     settings.useLiquidGlass,
     settings.useDarkMode,

@@ -9,6 +9,7 @@ import (
 	"smaash-web/internal/models"
 	"time"
 
+	"github.com/glebarez/sqlite"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"

@@ -1,6 +1,5 @@
+import React, { useState, useEffect, useContext } from "react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { FieldGroup, Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -13,8 +12,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import React from "react";
 import { useSettings } from "../settings/settingsLogic/SettingsContext";
+import { useTranslation } from "react-i18next";
 import {
   getBackgroundClasses,
   getButtonClasses,
@@ -22,138 +21,312 @@ import {
   getTextColor,
   getTextShadow,
   getSubtextColor,
+  getDialogClasses,
+  cn,
 } from "@/lib/utils";
-
-const Username = "placeholder";
-const Email = "lorem@ipsum.com";
-const Password = "password";
+import { AuthContext } from "@/context/AuthContext";
+import { useProfiles } from "@/components/forms/addNewProfile/useProfiles";
+import {
+  useWhoAmIQuery,
+  useUpdateUserEmailMutation,
+  useUpdateProfileMutation,
+} from "@/hooks/useQueryHooks";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/queryKeys";
+import { CheckCircle2, AlertCircle, Loader2, Lock } from "lucide-react";
 
 export function UpdateSheet() {
   const { settings } = useSettings();
-  const [showPassword, setShowPassword] = React.useState(false);
+  const { t } = useTranslation("profile");
+  const { userId } = useContext(AuthContext);
+  const numUserId = userId !== null ? Number(userId) : null;
 
-  const bgClass = getBackgroundClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const buttonClass = getButtonClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const inputClass = getInputClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
-  const textShadow = getTextShadow(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const subtextColor = getSubtextColor(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
+  const { selectedProfile } = useProfiles();
+  const { data: whoAmI } = useWhoAmIQuery();
+
+  const updateEmailMutation = useUpdateUserEmailMutation();
+  const updateProfileMutation = useUpdateProfileMutation();
+  const queryClient = useQueryClient();
+
+  // ─── Controlled field state (initialised from live data) ─────────────────
+  const [displayName, setDisplayName] = useState("");
+  const [email, setEmail] = useState("");
+  const [open, setOpen] = useState(false);
+
+  // Feedback state
+  const [saveStatus, setSaveStatus] = useState<
+    "idle" | "saving" | "success" | "error"
+  >("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  // Sync fields from real data every time the sheet opens
+  useEffect(() => {
+    if (open) {
+      setDisplayName(selectedProfile?.name ?? "");
+      setEmail(whoAmI?.email ?? "");
+      setSaveStatus("idle");
+      setErrorMsg("");
+    }
+  }, [open, selectedProfile?.name, whoAmI?.email]);
+
+  // ─── Save handler ─────────────────────────────────────────────────────────
+  const handleSave = async () => {
+    if (!selectedProfile?.id || !numUserId) return;
+
+    setSaveStatus("saving");
+    setErrorMsg("");
+
+    const displayNameChanged =
+      displayName.trim() !== (selectedProfile?.name ?? "");
+    const emailChanged = email.trim() !== (whoAmI?.email ?? "");
+
+    try {
+      // Run changed fields in parallel
+      await Promise.all([
+        displayNameChanged
+          ? updateProfileMutation.mutateAsync({
+              profileId: selectedProfile.id,
+              payload: {
+                id: selectedProfile.id,
+                display_name: displayName.trim(),
+                coins: selectedProfile.coins ?? 0,
+              },
+              // Don't rely on the mutation's own invalidation — we do it
+              // explicitly below so we can also write the cache directly.
+              invalidateAfterSuccess: false,
+            })
+          : Promise.resolve(),
+
+        emailChanged
+          ? updateEmailMutation.mutateAsync({
+              userId: numUserId,
+              email: email.trim(),
+            })
+          : Promise.resolve(),
+      ]);
+
+      // mutateAsync has already confirmed the server persisted the change.
+      // Refetch the profiles query directly — this is what React Query
+      // subscribers (Navbar, ProfileContext) react to automatically.
+      if (numUserId) {
+        await queryClient.refetchQueries({
+          queryKey: queryKeys.profiles.byUserId(numUserId),
+          type: "active",
+        });
+      }
+
+      setSaveStatus("success");
+      // Auto-close after a short success flash
+      setTimeout(() => setOpen(false), 900);
+    } catch (err: unknown) {
+      setSaveStatus("error");
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      setErrorMsg(axiosErr?.response?.data?.message ?? t("sheet.error"));
+    }
+  };
+
+  // ─── Theming ──────────────────────────────────────────────────────────────
+  const { useLiquidGlass, useDarkMode } = settings;
+  const sheetBg = getDialogClasses(useLiquidGlass, useDarkMode);
+  const buttonClass = getButtonClasses(useLiquidGlass, useDarkMode);
+  const inputClass = getInputClasses(useLiquidGlass, useDarkMode);
+  const textColor = getTextColor(useLiquidGlass, useDarkMode);
+  const textShadow = getTextShadow(useLiquidGlass, useDarkMode);
+  const subtextColor = getSubtextColor(useLiquidGlass, useDarkMode);
+
+  const disabledInputClass = cn(inputClass, "opacity-50 cursor-not-allowed");
+
+  const isSaving = saveStatus === "saving";
+  const hasChanged =
+    displayName.trim() !== (selectedProfile?.name ?? "") ||
+    email.trim() !== (whoAmI?.email ?? "");
 
   return (
     <div className="z-101">
-      <Sheet>
+      <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <Button className={`cursor-pointer ${buttonClass} ${textShadow}`}>
-            Edit
+            {t("sheet.title")}
           </Button>
         </SheetTrigger>
-        <SheetContent className={bgClass}>
-          <SheetHeader>
-            <SheetTitle className={`text-lg ${textColor} ${textShadow}`}>
-              Edit profile
+
+        <SheetContent className={cn(sheetBg, textColor, "flex flex-col gap-0")}>
+          <SheetHeader className="px-6 pt-6 pb-4">
+            <SheetTitle className={cn("text-lg", textColor, textShadow)}>
+              {t("sheet.title")}
             </SheetTitle>
-            <SheetDescription className={`text-sm ${subtextColor}`}>
-              Make changes to your profile here. <br />
-              Click save when you&apos;re done.
+            <SheetDescription className={cn("text-sm", subtextColor)}>
+              {t("sheet.description")}
             </SheetDescription>
           </SheetHeader>
-          <div className="grid flex-1 auto-rows-min gap-6 px-4">
-            <div className="grid gap-3">
+
+          <div className="flex-1 flex flex-col gap-6 px-6 overflow-y-auto">
+            {/* Display name */}
+            <div className="flex flex-col gap-2">
               <Label
-                htmlFor="sheet-username"
-                className={`text-md ${textColor} ${textShadow}`}
+                htmlFor="sheet-displayname"
+                className={cn("text-sm font-medium", textColor, textShadow)}
               >
-                Username
+                {t("sheet.displayName")}
               </Label>
               <Input
-                id="sheet-name"
-                className={`cursor-pointer ${inputClass}`}
-                defaultValue={Username}
+                id="sheet-displayname"
+                className={cn("cursor-text", inputClass)}
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                maxLength={20}
+                disabled={isSaving}
+                placeholder={t("sheet.displayNamePlaceholder")}
               />
+              <p className={cn("text-xs", subtextColor)}>
+                {t("sheet.displayNameHint")}
+              </p>
             </div>
-            <div className="grid gap-3">
+
+            {/* Email */}
+            <div className="flex flex-col gap-2">
               <Label
                 htmlFor="sheet-email"
-                className={`text-md ${textColor} ${textShadow}`}
+                className={cn("text-sm font-medium", textColor, textShadow)}
               >
-                Email Address
+                {t("sheet.email")}
               </Label>
               <Input
                 id="sheet-email"
                 type="email"
-                className={`cursor-pointer ${inputClass}`}
-                defaultValue={Email}
+                className={cn("cursor-text", inputClass)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                maxLength={30}
+                disabled={isSaving}
+                placeholder={t("sheet.emailPlaceholder")}
               />
+              <p className={cn("text-xs", subtextColor)}>
+                {t("sheet.emailHint")}
+              </p>
             </div>
-            <div className="grid gap-3">
-              <div className="flex items-center space-x-2">
-                <Label
-                  htmlFor="sheet-username"
-                  className={`cursor-pointer text-md ${textColor} ${textShadow}`}
-                >
-                  Password
-                </Label>
-                <FieldGroup>
-                  <Field>
-                    {/* Container to align checkbox and label horizontally */}
-                    <div className="flex items-center gap-2">
-                      <span className="flex flex-row items-center gap-1">
-                        <Checkbox
-                          className={`cursor-pointer rounded-sm lg-inner ${inputClass}`}
-                          id="show-password-check"
-                          checked={showPassword}
-                          onCheckedChange={(checked) => {
-                            setShowPassword(
-                              checked === "indeterminate" ? true : checked,
-                            );
-                          }}
-                        />
-                        <FieldLabel
-                          htmlFor="show-password-check"
-                          className={`text-xs cursor-pointer ${subtextColor}`}
-                        >
-                          Show password
-                        </FieldLabel>
-                      </span>
-                    </div>
-                  </Field>
-                </FieldGroup>
-              </div>
+
+            {/* Password — disabled, TODO wired when backend supports it */}
+            <div className="flex flex-col gap-2">
+              <Label
+                htmlFor="sheet-password"
+                className={cn(
+                  "text-sm font-medium flex items-center gap-1.5",
+                  textColor,
+                  textShadow,
+                )}
+              >
+                <Lock size={13} />
+                {t("sheet.password")}
+              </Label>
+              {/*
+               * TODO: BACKEND — Password change is not supported by PUT /api/users/:id.
+               * The UserUpdateDTO explicitly excludes password ("You can't change the
+               * password here, that requires separate functionality" — users_controller.go).
+               *
+               * To enable this field:
+               *   1. Add POST /api/auth/change-password endpoint on the backend.
+               *   2. Body: { current_password: string, new_password: string }
+               *   3. Add useChangePasswordMutation to useAuthHooks.ts.
+               *   4. Replace the disabled input below with a real one.
+               *
+               * The existing /app/reset-password page handles the separate reset flow.
+               */}
               <Input
                 id="sheet-password"
-                className={`cursor-pointer ${inputClass}`}
-                type={showPassword ? "text" : "password"}
-                defaultValue={Password}
+                type="password"
+                className={disabledInputClass}
+                placeholder={t("sheet.passwordPlaceholder")}
+                disabled
+                readOnly
               />
+              <p className={cn("text-xs", subtextColor)}>
+                {t("sheet.passwordHint")}{" "}
+                <span
+                  className={cn(
+                    "underline underline-offset-2 cursor-default",
+                    subtextColor,
+                  )}
+                >
+                  {t("sheet.passwordReset")}
+                </span>
+              </p>
             </div>
+
+            {/* Error feedback */}
+            {saveStatus === "error" && (
+              <div
+                className={cn(
+                  "flex items-start gap-2 rounded-xl px-3 py-2.5 text-sm",
+                  useLiquidGlass
+                    ? useDarkMode
+                      ? "bg-red-500/15 border border-red-500/25"
+                      : "bg-red-500/10 border border-red-500/20"
+                    : useDarkMode
+                      ? "bg-red-950 border border-red-800"
+                      : "bg-red-50 border border-red-200",
+                )}
+              >
+                <AlertCircle
+                  size={15}
+                  className="text-red-400 shrink-0 mt-0.5"
+                />
+                <span className="text-red-400 text-xs">{errorMsg}</span>
+              </div>
+            )}
+
+            {/* Success feedback */}
+            {saveStatus === "success" && (
+              <div
+                className={cn(
+                  "flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm",
+                  useLiquidGlass
+                    ? useDarkMode
+                      ? "bg-green-500/15 border border-green-500/25"
+                      : "bg-green-500/10 border border-green-500/20"
+                    : useDarkMode
+                      ? "bg-green-950 border border-green-800"
+                      : "bg-green-50 border border-green-200",
+                )}
+              >
+                <CheckCircle2 size={15} className="text-green-400 shrink-0" />
+                <span className="text-green-400 text-xs">
+                  {t("sheet.saved")}
+                </span>
+              </div>
+            )}
           </div>
-          <SheetFooter>
-            <Button
-              type="submit"
-              className={`cursor-pointer ${buttonClass} ${textShadow}`}
-            >
-              Save changes
-            </Button>
+
+          <SheetFooter className="px-6 py-4 flex flex-row gap-2 justify-end">
             <SheetClose asChild>
-              <Button className={`cursor-pointer ${buttonClass} ${textShadow}`}>
-                Close
+              <Button
+                variant="outline"
+                className={cn(buttonClass, textColor)}
+                disabled={isSaving}
+              >
+                {t("sheet.cancel")}
               </Button>
             </SheetClose>
+            <Button
+              onClick={handleSave}
+              disabled={!hasChanged || isSaving}
+              className={cn(
+                "transition-all duration-200",
+                hasChanged && !isSaving
+                  ? buttonClass
+                  : cn(buttonClass, "opacity-40 cursor-not-allowed"),
+                textColor,
+              )}
+            >
+              {isSaving ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 size={14} className="animate-spin" />
+                  {t("sheet.saving")}
+                </span>
+              ) : (
+                t("sheet.save")
+              )}
+            </Button>
           </SheetFooter>
         </SheetContent>
       </Sheet>

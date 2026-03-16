@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   DialogTrigger,
@@ -27,6 +28,7 @@ import {
 
 export function Search({ onSearch }: { onSearch: (query: string) => void }) {
   const { settings } = useSettings();
+  const { t } = useTranslation("news");
   const [query, setQuery] = useState("");
   const buttonClass = getButtonClasses(
     settings.useLiquidGlass,
@@ -70,16 +72,16 @@ export function Search({ onSearch }: { onSearch: (query: string) => void }) {
       </DialogTrigger>
       <DialogContent className={`${dialogClass} ${textShadow}`}>
         <DialogHeader>
-          <DialogTitle className={textColor}>Search News</DialogTitle>
+          <DialogTitle className={textColor}>{t("search.title")}</DialogTitle>
           <DialogDescription className={subtextColor}>
-            Type to search posts by title
+            {t("search.description")}
           </DialogDescription>
         </DialogHeader>
         <FieldGroup>
           <Field>
-            <Label>Search</Label>
+            <Label>{t("search.label")}</Label>
             <Input
-              placeholder="Search posts..."
+              placeholder={t("search.placeholder")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className={inputClass}
@@ -92,14 +94,14 @@ export function Search({ onSearch }: { onSearch: (query: string) => void }) {
             className={`cursor-pointer ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "outline")} ${textShadow}`}
             onClick={handleSearch}
           >
-            Search
+            {t("search.submit")}
           </Button>
           <DialogClose asChild>
             <Button
               variant="outline"
               className={`cursor-pointer ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "outline")} ${textShadow}`}
             >
-              Close
+              {t("search.close")}
             </Button>
           </DialogClose>
         </DialogFooter>

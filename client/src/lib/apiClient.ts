@@ -7,15 +7,38 @@ import axios from "axios";
 
 const apiClient = axios.create({
   baseURL: "/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
   withCredentials: true, // Include cookies in requests
+});
+
+apiClient.interceptors.request.use((config) => {
+  const isFormData =
+    typeof FormData !== "undefined" && config.data instanceof FormData;
+
+  // Let the browser set multipart boundaries for FormData automatically.
+  if (isFormData) {
+    if (config.headers && "Content-Type" in config.headers) {
+      delete (config.headers as Record<string, unknown>)["Content-Type"];
+    }
+    return config;
+  }
+
+  config.headers = config.headers ?? {};
+  if (!("Content-Type" in config.headers)) {
+    (config.headers as Record<string, unknown>)["Content-Type"] =
+      "application/json";
+  }
+
+  return config;
 });
 
 /**
  * Response interceptor for consistent error handling.
  * All responses are normalized to { data, status, ok }.
+ *
+ * 401 handling: any 401 that is NOT from an auth endpoint (login, signup,
+ * logout) means the session cookie has expired mid-session. We hard-redirect
+ * to the login page; the full page reload clears all in-memory React state
+ * automatically so there's nothing else to tear down.
  */
 apiClient.interceptors.response.use(
   (response) => response,
@@ -23,6 +46,19 @@ apiClient.interceptors.response.use(
     // Pass through network errors without modification
     if (!error.response) {
       return Promise.reject(error);
+    }
+
+    // Session expiry: redirect to login.
+    // Auth endpoints are excluded to avoid a redirect loop when a user simply
+    // enters the wrong password (which also returns 401).
+    const requestUrl: string = error.config?.url ?? "";
+    const isAuthEndpoint =
+      requestUrl.includes("/auth/") || requestUrl.includes("/users/whoami");
+    if (error.response.status === 401 && !isAuthEndpoint) {
+      window.location.href = "/app/login";
+      // Return a promise that never resolves so no downstream error handler
+      // tries to render an error state on a page that's being navigated away.
+      return new Promise(() => {});
     }
 
     // Normalize API error responses

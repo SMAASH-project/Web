@@ -203,7 +203,7 @@ func (pc PlayerProfileController) UploadPFP(c *gin.Context) {
 		return
 	}
 
-	c.String(http.StatusCreated, "uri")
+	c.String(http.StatusCreated, *uri)
 }
 
 // @description Returns an uploaded profile picture
@@ -221,7 +221,7 @@ func (pc PlayerProfileController) GetPFP(c *gin.Context) {
 	profile, err := pc.profilesBaseRepo.ReadByID(c.Request.Context(), id.(uint))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, dtos.NewErrResp("Profile with given if not found", path))
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("Profile with given id not found", path))
 			return
 		}
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
@@ -229,7 +229,7 @@ func (pc PlayerProfileController) GetPFP(c *gin.Context) {
 	}
 
 	if profile.PfpUri == "" {
-		c.JSON(http.StatusNotFound, dtos.NewErrResp("Profile with given id has no uploaded pfp", path))
+		c.JSON(http.StatusNotFound, dtos.NewErrResp("Given profile has no uploaded profile picture", path))
 		return
 	}
 

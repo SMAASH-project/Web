@@ -1,6 +1,7 @@
 /**
- * React Query hooks for all API operations.
- * Replaces manual useEffect + useState data fetching patterns.
+ * Barrel re-export of all React Query hooks.
+ * Import directly from the domain-specific hook files for better tree-shaking,
+ * or import from here for convenience — both styles work.
  */
 
 import {
@@ -63,14 +64,15 @@ export interface ProfileResponse {
 }
 
 function getProfilePictureUrl(profileId: number, versionSeed: number) {
-  return `/api/profiles/${profileId}/pfp?v=${versionSeed}`;
+  // return `/api/profiles/${profileId}/pfp?v=${versionSeed}`;
+  return `/api/profiles/${profileId}/pfp`;
 }
 
 async function uploadProfilePicture(profileId: number, file: File) {
   const formData = new FormData();
   formData.append("profilePicture", file);
 
-  await apiClient.post(`/profiles/${profileId}/pfp`, formData);
+  await apiClient.post(`/profiles/${profileId}/pfpupload`, formData);
 }
 
 function clampDisplayName(name: string) {
@@ -439,3 +441,6 @@ export function useNewsInfiniteQuery(
     gcTime: 20 * 60 * 1000,
   });
 }
+export * from "./useAuthHooks";
+export * from "./useProfileHooks";
+export * from "./useContentHooks";

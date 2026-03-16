@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,6 +23,7 @@ interface AddNewProfileProps {
 
 export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
   const { addProfile, profiles } = useProfiles();
+  const { t } = useTranslation("profile");
   const [username, setUsername] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -105,11 +107,8 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
       <DialogContent className="sm:max-w-sm">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Create New Profile</DialogTitle>
-            <DialogDescription>
-              Add a new profile to your account. Click save when you&apos;re
-              done.
-            </DialogDescription>
+            <DialogTitle>{t("addProfile.title")}</DialogTitle>
+            <DialogDescription>{t("addProfile.description")}</DialogDescription>
           </DialogHeader>
           <FieldGroup>
             <Field>
@@ -157,7 +156,7 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
               </Button>
             </DialogClose>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Save changes"}
+              {isSubmitting ? t("addProfile.saving") : t("addProfile.save")}
             </Button>
           </DialogFooter>
         </form>

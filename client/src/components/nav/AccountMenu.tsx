@@ -9,10 +9,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User } from "lucide-react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { useNavbarContext } from "@/context/NavbarContextUtils";
 import { useSettings } from "../pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { useTranslation } from "react-i18next";
 import { AuthContext } from "@/context/AuthContext";
 import { useLogoutMutation } from "@/hooks/useQueryHooks";
 import { m } from "motion/react";
@@ -26,6 +27,7 @@ import {
 export default function AccountMenu() {
   const { setIsDropdownHovering, setIsDropdownOpen } = useNavbarContext();
   const { settings } = useSettings();
+  const { t } = useTranslation("nav");
   const { setIsLoggedIn, setUserId, setIsAdmin } = useContext(AuthContext);
   const navigate = useNavigate();
   const logoutMutation = useLogoutMutation();
@@ -98,7 +100,7 @@ export default function AccountMenu() {
             <DropdownMenuLabel
               className={`px-3 py-2 text-xs font-semibold uppercase tracking-wider ${subtextColor}`}
             >
-              My Account
+              {t("account.title")}
             </DropdownMenuLabel>
             <DropdownMenuItem
               asChild
@@ -108,7 +110,7 @@ export default function AccountMenu() {
                   : "hover:bg-gray-100 hover:text-gray-900"
               }`}
             >
-              <Link to="/app/profile">Profile</Link>
+              <Link to="/app/profile">{t("account.profile")}</Link>
             </DropdownMenuItem>
             <DropdownMenuItem
               asChild
@@ -118,7 +120,7 @@ export default function AccountMenu() {
                   : "hover:bg-gray-100 hover:text-gray-900"
               }`}
             >
-              <Link to="/app/settings">Settings</Link>
+              <Link to="/app/settings">{t("account.settings")}</Link>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator
@@ -131,7 +133,7 @@ export default function AccountMenu() {
                 settings.useDarkMode ? "text-white/30" : "text-gray-400"
               }`}
             >
-              Support
+              {t("account.support")}
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator
@@ -145,7 +147,7 @@ export default function AccountMenu() {
                 : "hover:bg-gray-100 hover:text-gray-900"
             }`}
           >
-            <Link to="/app/profile-selector">Change Profile</Link>
+            <Link to="/app/profile-selector">{t("account.changeProfile")}</Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator
             className={`my-2 ${settings.useDarkMode ? "bg-white/10" : "bg-gray-200"}`}
@@ -159,7 +161,7 @@ export default function AccountMenu() {
               }`}
               onClick={handleLogout}
             >
-              Log out
+              {t("account.logout")}
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>

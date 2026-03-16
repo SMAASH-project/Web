@@ -1,0 +1,25 @@
+{
+  "visual": {
+    "title": "Megjelenés",
+    "animations": {
+      "title": "Animációk használata",
+      "description": "Válaszd, hogy engedélyezed vagy letiltod az animációkat az alkalmazásban. Az animációk letiltása javíthatja a teljesítményt régebbi eszközökön."
+    },
+    "liquidGlass": {
+      "title": "\"Folyékony üveg\" engedélyezése",
+      "description": "Kapcsold be a \"Folyékony üveg\" effektet, amely egy fényes, áttetsző réteget ad a felülethez, modern megjelenést kölcsönözve. Ez egyes eszközökön befolyásolhatja a teljesítményt."
+    },
+    "darkMode": {
+      "title": "Sötét mód bekapcsolása",
+      "description": "Engedélyezz egy sötét témát a felülethez, amely kímélheti a szemet gyenge fényviszonyok között."
+    }
+  },
+  "themes": {
+    "title": "Témák"
+  },
+  "language": {
+    "title": "Nyelv",
+    "en": "English",
+    "hu": "Magyar"
+  }
+}

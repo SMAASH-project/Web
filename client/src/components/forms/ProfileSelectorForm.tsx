@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   cn,
   getLiquidGlassClasses,
@@ -9,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Label } from "../ui/label";
 import { Plus, Trash2, Play } from "lucide-react";
 import { Button } from "../ui/button";
-import { useState, useMemo, memo } from "react";
+import { useState, useCallback, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddNewProfile } from "./addNewProfile/AddNewProfile";
 import { useProfiles } from "./addNewProfile/useProfiles";
@@ -21,7 +22,7 @@ const ProfileAvatar = memo(function ProfileAvatar({
   settings,
   onProfileClick,
 }: {
-  profile: { name: string; avatar: string };
+  profile: { id?: number; name: string; avatar: string };
   isManaging: boolean;
   settings: SettingsState;
   onProfileClick: (name: string) => void;
@@ -75,13 +76,14 @@ const ProfileAvatar = memo(function ProfileAvatar({
 export function ProfileSelectorForm() {
   const { settings } = useSettings();
   const { profiles, removeProfile, selectProfile } = useProfiles();
+  const { t } = useTranslation("profile");
   const profileCount = profiles.length;
   const [showAddProfile, setShowAddProfile] = useState(false);
   const [isManaging, setIsManaging] = useState(false);
   const navigate = useNavigate();
 
-  const handleProfileClick = useMemo(
-    () => async (name: string) => {
+  const handleProfileClick = useCallback(
+    async (name: string) => {
       if (isManaging) {
         try {
           await removeProfile(name);
@@ -102,7 +104,7 @@ export function ProfileSelectorForm() {
         <Label
           className={`text-white ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
         >
-          Select a Profile
+          {t("selector.title")}
         </Label>
         <div className="text-sm text-white/80 mt-1">
           {profileCount} profile{profileCount === 1 ? "" : "s"} available
@@ -113,7 +115,7 @@ export function ProfileSelectorForm() {
           <div className="flex flex-row items-center gap-6">
             {profiles.map((p) => (
               <ProfileAvatar
-                key={p.name}
+                key={p.id}
                 profile={p}
                 isManaging={isManaging}
                 settings={settings}
@@ -132,7 +134,6 @@ export function ProfileSelectorForm() {
                   >
                     <Plus className="size-6 text-white" />
                   </button>
-
                   <span
                     className={`text-white text-sm ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
                   >
@@ -143,13 +144,13 @@ export function ProfileSelectorForm() {
             )}
           </div>
         </div>
-        <div className="mb-4 z-1 ">
+        <div className="mb-4 z-1">
           <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
             <Button
               onClick={() => setIsManaging((prev) => !prev)}
               className={`text-white ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} rounded-lg cursor-pointer`}
             >
-              {isManaging ? "Done" : "Manage Profiles"}
+              {isManaging ? t("selector.done") : t("selector.manage")}
             </Button>
           </motion.div>
         </div>
