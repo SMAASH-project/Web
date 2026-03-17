@@ -38,7 +38,7 @@ func NewUserController(
 func (uc *UserController) ReadAll(c *gin.Context) {
 	page, _ := c.Get("page")
 	size, _ := c.Get("size")
-	users, err := uc.userRepo.ReadAllPaginated(c.Request.Context(), page.(int), size.(int))
+	users, err := uc.userRepo.ReadAllPaginated(c.Request.Context(), page.(int), size.(int), "Role")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
@@ -58,7 +58,7 @@ func (uc *UserController) ReadAll(c *gin.Context) {
 // @router /users/{id} [get]
 func (uc *UserController) ReadByID(c *gin.Context) {
 	id, _ := c.Get("id")
-	user, err := uc.userRepo.ReadByID(c.Request.Context(), id.(uint))
+	user, err := uc.userRepo.ReadByID(c.Request.Context(), id.(uint), "Role")
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
