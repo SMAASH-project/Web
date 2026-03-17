@@ -68,7 +68,7 @@ async function uploadProfilePicture(profileId: number, file: File) {
   const formData = new FormData();
   formData.append("profilePicture", file);
 
-  await apiClient.post(`/profiles/${profileId}/pfpupload`, formData);
+  await apiClient.post(`/profiles/${profileId}/pfp`, formData);
 }
 
 function clampDisplayName(name: string) {
