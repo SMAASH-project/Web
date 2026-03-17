@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/webstradev/gin-pagination/v2/pkg/pagination"
 	"gorm.io/gorm"
 )
 
@@ -35,7 +36,9 @@ func NewUserController(
 // @failure 500 {object} dtos.ErrResp "internal server error"
 // @router /users [get]
 func (uc *UserController) ReadAll(c *gin.Context) {
-	users, err := uc.userRepo.ReadAll(c.Request.Context())
+	page, _ := c.Get("page")
+	size, _ := c.Get("size")
+	users, err := uc.userRepo.ReadAllPaginated(c.Request.Context(), page.(int), size.(int))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
@@ -292,7 +295,7 @@ func (uc UserController) Unban(c *gin.Context) {
 func (uc UserController) MountRoutes(apiGroup *gin.RouterGroup) {
 	users := apiGroup.Group("/users")
 	// no creation, that happens on /auth/signup. No updating password either.
-	users.GET("", middlewares.Authorize(middlewares.ADMIN), uc.ReadAll)
+	users.GET("", middlewares.Authorize(middlewares.ADMIN), pagination.New(), uc.ReadAll)
 	users.GET("/:id", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, uc.ReadByID)
 	users.PUT("/:id", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, uc.Update)
 	users.DELETE("/:id", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, uc.Delete)

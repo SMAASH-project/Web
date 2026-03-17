@@ -10,6 +10,7 @@ import (
 	"smaash-web/internal/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/webstradev/gin-pagination/v2/pkg/pagination"
 	"gorm.io/gorm"
 )
 
@@ -30,7 +31,9 @@ func NewPlayerProfileController(profilesBaseRepo repository.BaseRepository[model
 // @failure 500 {object} dtos.ErrResp "internal server error"
 // @router /profiles [get]
 func (pc PlayerProfileController) ReadAll(c *gin.Context) {
-	profiles, err := pc.profilesBaseRepo.ReadAll(c.Request.Context())
+	page, _ := c.Get("page")
+	size, _ := c.Get("size")
+	profiles, err := pc.profilesBaseRepo.ReadAllPaginated(c.Request.Context(), page.(int), size.(int))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
@@ -236,13 +239,31 @@ func (pc PlayerProfileController) GetPFP(c *gin.Context) {
 	c.File(profile.PfpUri)
 }
 
+func (pc PlayerProfileController) ReadPurchases(c *gin.Context) {
+	path := c.Request.URL.Path
+	id, _ := c.Get("id")
+
+	profile, err := pc.profilesBaseRepo.ReadByID(c.Request.Context(), id.(uint), "Purchases")
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("Profile with given id not found", path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	c.JSON(http.StatusOK, utils.Map(profile.Purchases, dtos.PurchaseToDTO))
+}
+
 func (pc PlayerProfileController) MountRoutes(apiGroup *gin.RouterGroup) {
 	profiles := apiGroup.Group("/profiles")
-	profiles.GET("", middlewares.Authorize(middlewares.ADMIN), pc.ReadAll)
+	profiles.GET("", middlewares.Authorize(middlewares.ADMIN), pagination.New(), pc.ReadAll)
 	profiles.GET("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, pc.ReadByID)
 	profiles.POST("", middlewares.Authorize(middlewares.ANY), pc.Create)
 	profiles.PUT("/:id", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.Update)
 	profiles.DELETE("/:id", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.Delete)
 	profiles.POST("/:id/pfp", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.UploadPFP)
 	profiles.GET("/:id/pfp", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.GetPFP)
+	profiles.GET("/:id/purchases", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.ReadPurchases)
 }
