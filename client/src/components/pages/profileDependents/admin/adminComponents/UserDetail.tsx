@@ -140,10 +140,10 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
             {selectedUser.is_banned && (
               <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-red-500/20 text-red-400 border border-red-500/30 flex items-center gap-1">
                 <Ban size={10} />
-                {selectedUser.ban_until
+                {selectedUser.banned_until
                   ? t("detail.bannedUntil", {
                       date: new Date(
-                        selectedUser.ban_until,
+                        selectedUser.banned_until,
                       ).toLocaleDateString(),
                     })
                   : t("detail.bannedPermanent")}
