@@ -21,12 +21,8 @@ export interface LoginPayload {
 }
 
 export interface LoginResponse {
-  id?: number | string;
-  role_id?: number | string;
-  roleId?: number | string;
-  role?: {
-    id?: number | string;
-  };
+  id: number;
+  role: string;
 }
 
 export interface SignupPayload {
@@ -72,7 +68,7 @@ async function uploadProfilePicture(profileId: number, file: File) {
   const formData = new FormData();
   formData.append("profilePicture", file);
 
-  await apiClient.post(`/profiles/${profileId}/pfpupload`, formData);
+  await apiClient.post(`/profiles/${profileId}/pfp`, formData);
 }
 
 function clampDisplayName(name: string) {
