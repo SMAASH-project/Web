@@ -46,6 +46,16 @@ func (a AuthenticationService) Login(c context.Context, u *models.User) (*string
 		return nil, nil, err
 	}
 
+	if user.BannedUntil != nil && user.BannedUntil.Before(time.Now()) {
+		if err := a.userRepo.Unban(c, user.ID); err != nil {
+			return nil, nil, err
+		}
+		user, err = a.userRepo.ReadByID(c, user.ID, "Role")
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
 	if user.IsBanned {
 		return nil, nil, ErrUserBanned
 	}

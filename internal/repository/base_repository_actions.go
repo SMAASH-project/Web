@@ -10,6 +10,7 @@ import (
 type BaseRepository[T models.Model] interface {
 	Create(context.Context, *T) error
 	ReadAll(context.Context, ...string) ([]T, error)
+	ReadAllPaginated(context.Context, int, int, ...string) ([]T, error)
 	ReadByID(context.Context, uint, ...string) (T, error)
 	Update(context.Context, T) error
 	UpdateOne(context.Context, uint, string, any) error
@@ -59,4 +60,20 @@ func (bra BaseRepositoryActions[T]) UpdateOne(c context.Context, id uint, field 
 func (bra BaseRepositoryActions[T]) Delete(c context.Context, id uint) error {
 	_, err := gorm.G[T](bra.conn).Where("id = ?", id).Delete(c)
 	return err
+}
+
+func (bra BaseRepositoryActions[T]) ReadAllPaginated(c context.Context, page int, pageSize int, preloads ...string) ([]T, error) {
+	var result []T
+	query := bra.conn.Model(new(T)).Scopes(Paginate(pageSize*(page-1), pageSize))
+	for _, preload := range preloads {
+		query = query.Preload(preload)
+	}
+	err := query.Find(&result).Error
+	return result, err
+}
+
+func Paginate(offset, limit int) func(*gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Offset(offset).Limit(limit)
+	}
 }

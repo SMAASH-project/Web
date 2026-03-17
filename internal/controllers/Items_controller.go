@@ -10,6 +10,7 @@ import (
 	"smaash-web/internal/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/webstradev/gin-pagination/v2/pkg/pagination"
 	"gorm.io/gorm"
 )
 
@@ -61,7 +62,9 @@ func (ic ItemsController) Create(c *gin.Context) {
 }
 
 func (ic ItemsController) ReadAll(c *gin.Context) {
-	items, err := ic.itemsBaseRepo.ReadAll(c.Request.Context(), "Rarity", "Categories")
+	page, _ := c.Get("page")
+	size, _ := c.Get("size")
+	items, err := ic.itemsBaseRepo.ReadAllPaginated(c.Request.Context(), page.(int), size.(int), "Rarity", "Categories")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
@@ -143,7 +146,7 @@ func (ic ItemsController) Delete(c *gin.Context) {
 func (ic ItemsController) MountRoutes(apiGroup *gin.RouterGroup) {
 	items := apiGroup.Group("/items")
 	items.POST("", middlewares.Authorize(middlewares.ADMIN), ic.Create)
-	items.GET("", middlewares.Authorize(middlewares.ANY), ic.ReadAll)
+	items.GET("", middlewares.Authorize(middlewares.ANY), pagination.New(), ic.ReadAll)
 	items.GET("/:id", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, ic.ReadByID)
 	items.PUT("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, ic.Update)
 	items.DELETE("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, ic.Delete)
