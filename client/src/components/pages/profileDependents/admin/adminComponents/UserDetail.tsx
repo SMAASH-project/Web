@@ -14,6 +14,35 @@ import {
 import type { AdminPageLogic } from "@/components/pages/profileDependents/admin/adminLogic/useAdminPageLogic";
 import { getButtonClasses } from "@/lib/utils";
 
+import { DateTime } from "luxon";
+
+// ─── Date helpers ─────────────────────────────────────────────────────────────
+
+/**
+ * Parses a backend RFC822Z date string and returns a localised date string.
+ *
+ * Go's time.RFC822Z format is "02 Jan 06 15:04 -0700" (2-digit year).
+ * Luxon's `yy` token uses a pivot-year cutoff (69–99 → 1969–1999), so "76"
+ * still resolves to 1976. Instead we extract the year token, unconditionally
+ * prepend "20" to get a 4-digit year, then parse with `yyyy` which is
+ * unambiguous. All backend-issued ban dates will be in the 2000s, so this is
+ * always correct.
+ */
+function formatBannedUntil(str: string): string {
+  if (!str) return "";
+  // RFC822Z example: "05 Mar 76 10:12 +0100"
+  const parts = str.trim().split(/\s+/);
+  if (parts.length >= 3) {
+    const yy = parseInt(parts[2], 10);
+    if (!isNaN(yy) && yy >= 0 && yy <= 99) {
+      parts[2] = String(2000 + yy); // "76" → "2076"
+    }
+  }
+  const dt = DateTime.fromFormat(parts.join(" "), "dd MMM yyyy HH:mm ZZZ");
+  if (!dt.isValid) return str; // fallback: show raw string
+  return dt.toLocaleString(DateTime.DATE_MED);
+}
+
 // ─── Role config ──────────────────────────────────────────────────────────────
 // Backend roles (Role.Name, varchar(7)): "admin" | "support" | "user"
 // Colours are purely semantic and intentionally fixed regardless of theme mode.
@@ -142,9 +171,7 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
                 <Ban size={10} />
                 {selectedUser.banned_until
                   ? t("detail.bannedUntil", {
-                      date: new Date(
-                        selectedUser.banned_until,
-                      ).toLocaleDateString(),
+                      date: formatBannedUntil(selectedUser.banned_until),
                     })
                   : t("detail.bannedPermanent")}
               </span>

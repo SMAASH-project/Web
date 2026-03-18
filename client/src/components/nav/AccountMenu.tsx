@@ -64,7 +64,10 @@ export default function AccountMenu() {
     await logout();
   };
   return (
-    <DropdownMenu onOpenChange={(open: boolean) => setIsDropdownOpen(open)}>
+    <DropdownMenu
+      modal={false}
+      onOpenChange={(open: boolean) => setIsDropdownOpen(open)}
+    >
       <DropdownMenuTrigger asChild>
         <m.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
           <Button

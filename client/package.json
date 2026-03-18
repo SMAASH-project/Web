@@ -33,7 +33,7 @@
     "i18next": "^25.8.18",
     "i18next-browser-languagedetector": "^8.2.1",
     "init": "^0.1.2",
-    "lucide-react": "^0.562.0",
+    "lucide-react": "^0.577.0",
     "luxon": "^3.7.2",
     "motion": "^12.34.0",
     "radix-ui": "^1.4.3",
