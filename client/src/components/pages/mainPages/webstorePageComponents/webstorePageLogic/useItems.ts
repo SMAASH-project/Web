@@ -1,12 +1,213 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { exampleItems } from "@/types/ExampleItems";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { DateTime } from "luxon";
+import apiClient from "@/lib/apiClient";
+import { queryKeys } from "@/lib/queryKeys";
 import type { WebstoreItem } from "@/types/PageTypes";
+import type { Rarity } from "@/types/PageTypes";
+import { useProfiles } from "@/components/forms/addNewProfile/useProfiles";
 
 const PAGE_SIZE = 12;
 const LOAD_DELAY_MS = 400;
 
+// ─── Backend DTOs ─────────────────────────────────────────────────────────────
+
+interface ItemReadDTO {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  rarity: string;
+  // Category names encode kind + combat type:
+  //   "Character" | "Skin"    → kind
+  //   "Melee"     | "Ranged"  → combatType (only when kind is Character)
+  categories: string[];
+}
+
+// Go's PurchaseReadDTO has no json tags so field names are PascalCase
+interface PurchaseReadDTO {
+  ID: number;
+  Item: string; // item name (unique, used to match ownership)
+  Count: number;
+  Total: number;
+  Profile: string;
+  Date: string;
+}
+
+// ─── Mapping helpers ──────────────────────────────────────────────────────────
+
+function itemDTOToWebstoreItem(dto: ItemReadDTO): WebstoreItem {
+  const kind: WebstoreItem["kind"] = dto.categories.includes("Character")
+    ? "Character"
+    : "Skin";
+
+  const combatType: WebstoreItem["combatType"] = dto.categories.includes(
+    "Melee",
+  )
+    ? "Melee"
+    : dto.categories.includes("Ranged")
+      ? "Ranged"
+      : undefined;
+
+  return {
+    id: String(dto.id),
+    name: dto.name,
+    description: dto.description,
+    price: dto.price,
+    rarity: dto.rarity as Rarity,
+    kind,
+    combatType,
+    owned: false, // will be overridden via ownedNames merge below
+    createdAt: DateTime.now(),
+  };
+}
+
+/**
+ * Format the current moment as RFC822Z ("02 Jan 06 15:04 -0700").
+ * The backend's PurchaseCreateDTO.Date field expects time.RFC822 format.
+ */
+function nowRFC822(): string {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  const day = pad(d.getDate());
+  const mon = months[d.getMonth()];
+  const yr = String(d.getFullYear()).slice(2); // 2-digit year
+  const hh = pad(d.getHours());
+  const mm = pad(d.getMinutes());
+  const tz = d.getTimezoneOffset();
+  const sign = tz <= 0 ? "+" : "-";
+  const absOff = Math.abs(tz);
+  const offH = pad(Math.floor(absOff / 60));
+  const offM = pad(absOff % 60);
+  return `${day} ${mon} ${yr} ${hh}:${mm} ${sign}${offH}${offM}`;
+}
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
+
 export function useItems() {
-  const [allItems, setAllItems] = useState<WebstoreItem[]>(exampleItems);
+  const queryClient = useQueryClient();
+  const { selectedProfile } = useProfiles();
+  const profileId = selectedProfile?.id ?? null;
+
+  // ── Fetch all items ──────────────────────────────────────────────────────
+  const { data: fetchedItems = [], isLoading: itemsLoading } = useQuery<
+    WebstoreItem[]
+  >({
+    queryKey: queryKeys.items.all,
+    queryFn: async () => {
+      const { data } = await apiClient.get<ItemReadDTO[]>("/items", {
+        params: { page: 1, page_size: 100 },
+      });
+      return data.map(itemDTOToWebstoreItem);
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // ── Fetch purchases for the selected profile ─────────────────────────────
+  const { data: purchases = [] } = useQuery<PurchaseReadDTO[]>({
+    queryKey: queryKeys.purchases.byProfileId(profileId ?? 0),
+    queryFn: async () => {
+      const { data } = await apiClient.get<PurchaseReadDTO[] | null>(
+        `/profiles/${profileId}/purchases`,
+      );
+      // Backend may return null instead of [] when there are no purchases
+      return data ?? [];
+    },
+    enabled: profileId !== null,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  // Build a set of owned item names from purchase history
+  const ownedNames = useMemo(
+    () => new Set((purchases ?? []).map((p) => p.Item)),
+    [purchases],
+  );
+
+  // Merge ownership into items
+  const allItems = useMemo(
+    () =>
+      fetchedItems.map((item) => ({
+        ...item,
+        owned: ownedNames.has(item.name),
+      })),
+    [fetchedItems, ownedNames],
+  );
+
+  // ── Unlock (purchase) mutation ───────────────────────────────────────────
+  const purchaseMutation = useMutation<void, Error, { itemId: number }>({
+    mutationFn: async ({ itemId }) => {
+      if (!profileId) throw new Error("No profile selected");
+      await apiClient.post("/purchases", {
+        PlayerProfileID: profileId,
+        ItemID: itemId,
+        Count: 1,
+        Date: nowRFC822(),
+      });
+    },
+    onSuccess: () => {
+      // Refetch purchases so owned state updates immediately
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.purchases.byProfileId(profileId ?? 0),
+      });
+    },
+  });
+
+  // ── Admin: create item mutation ──────────────────────────────────────────
+  const createMutation = useMutation<
+    void,
+    Error,
+    {
+      name: string;
+      kind: string;
+      combatType?: string;
+      rarity: string;
+      description: string;
+      price: number;
+    }
+  >({
+    mutationFn: async (data) => {
+      const categories: string[] = [data.kind];
+      if (data.kind === "Character" && data.combatType) {
+        categories.push(data.combatType);
+      }
+      await apiClient.post("/items", {
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        rarity: data.rarity,
+        categories,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.items.all });
+    },
+  });
+
+  // ── Admin: delete item mutation ──────────────────────────────────────────
+  const deleteMutation = useMutation<void, Error, string>({
+    mutationFn: async (itemId) => {
+      await apiClient.delete(`/items/${itemId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.items.all });
+    },
+  });
+
+  // ── Pagination / infinite scroll ─────────────────────────────────────────
   const containerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(1);
@@ -19,7 +220,6 @@ export function useItems() {
   const loadTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const kinds: string[] = ["All", "Character", "Skin"];
-
   const rarities: string[] = [
     "All",
     "Common",
@@ -28,15 +228,10 @@ export function useItems() {
     "Epic",
     "Legendary",
   ];
-
   const combatTypes: string[] = ["All", "Melee", "Ranged"];
-
   const ownershipOptions: string[] = ["All", "Owned", "Unowned"];
 
-  // Only show ownership filter when characters are selected (or All with some characters visible)
   const showOwnershipFilter = selectedKind !== "Skin";
-
-  // Only show combat type filter when characters are visible
   const showCombatTypeFilter = selectedKind !== "Skin";
 
   const filteredItems = useMemo(() => {
@@ -82,13 +277,8 @@ export function useItems() {
 
   const loadMore = useCallback(() => {
     if (searchQuery || isLoading) return;
-
-    if (loadTimerRef.current) {
-      clearTimeout(loadTimerRef.current);
-    }
-
+    if (loadTimerRef.current) clearTimeout(loadTimerRef.current);
     setIsLoading(true);
-
     loadTimerRef.current = setTimeout(() => {
       setPage((prev) => prev + 1);
       setIsLoading(false);
@@ -98,32 +288,24 @@ export function useItems() {
 
   useEffect(() => {
     return () => {
-      if (loadTimerRef.current) {
-        clearTimeout(loadTimerRef.current);
-      }
+      if (loadTimerRef.current) clearTimeout(loadTimerRef.current);
     };
   }, []);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
     if (!sentinel || !hasMore || isLoading) return;
-
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
-          loadMore();
-        }
+        if (entries[0].isIntersecting) loadMore();
       },
-      {
-        root: null,
-        rootMargin: "0px 0px 200px 0px",
-        threshold: 0,
-      },
+      { root: null, rootMargin: "0px 0px 200px 0px", threshold: 0 },
     );
-
     observer.observe(sentinel);
     return () => observer.disconnect();
   }, [loadMore, hasMore, isLoading, visibleItems.length]);
+
+  // ── Filter handlers ───────────────────────────────────────────────────────
 
   function handleSearch(query: string) {
     setSearchQuery(query);
@@ -133,7 +315,6 @@ export function useItems() {
   function handleKindChange(kind: string) {
     setSelectedKind(kind);
     setPage(1);
-    // Reset combat type and ownership when switching to Skin
     if (kind === "Skin") {
       setSelectedCombatType("All");
       setSelectedOwnership("All");
@@ -144,21 +325,34 @@ export function useItems() {
     setSelectedRarity(rarity);
     setPage(1);
   }
-
   function handleCombatTypeChange(combatType: string) {
     setSelectedCombatType(combatType);
     setPage(1);
   }
-
   function handleOwnershipChange(ownership: string) {
     setSelectedOwnership(ownership);
     setPage(1);
   }
 
-  function unlockItem(id: string) {
-    setAllItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, owned: true } : item)),
-    );
+  // ── Action handlers ───────────────────────────────────────────────────────
+
+  function unlockItem(itemId: string) {
+    purchaseMutation.mutate({ itemId: Number(itemId) });
+  }
+
+  function handleCreateItem(data: {
+    name: string;
+    kind: string;
+    combatType?: string;
+    rarity: string;
+    description: string;
+    price: number;
+  }) {
+    createMutation.mutate(data);
+  }
+
+  function handleDeleteItem(itemId: string) {
+    deleteMutation.mutate(itemId);
   }
 
   return {
@@ -167,7 +361,7 @@ export function useItems() {
     containerRef,
     sentinelRef,
     hasMore,
-    isLoading,
+    isLoading: itemsLoading || isLoading,
     kinds,
     rarities,
     combatTypes,
@@ -184,5 +378,7 @@ export function useItems() {
     handleCombatTypeChange,
     handleOwnershipChange,
     unlockItem,
+    handleCreateItem,
+    handleDeleteItem,
   };
 }

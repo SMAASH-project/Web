@@ -23,6 +23,9 @@ export const queryKeys = {
     all: ["items"],
     infinite: ["items", "infinite"],
   },
+  purchases: {
+    byProfileId: (profileId: number) => ["purchases", "byProfileId", profileId],
+  },
   news: {
     all: ["news"],
     byCategory: (categories: string[]) => ["news", "byCategory", categories],

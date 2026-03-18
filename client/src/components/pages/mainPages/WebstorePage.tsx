@@ -50,24 +50,9 @@ export function WebstorePage() {
     handleCombatTypeChange,
     handleOwnershipChange,
     unlockItem,
+    handleCreateItem,
+    handleDeleteItem,
   } = useItems();
-
-  const handleCreateItem = (data: {
-    name: string;
-    kind: "Character" | "Skin";
-    combatType?: "Melee" | "Ranged";
-    rarity: "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
-    description: string;
-    price: number;
-  }) => {
-    // TODO: wire to API
-    console.log("Create item:", data);
-  };
-
-  const handleDeleteItem = (id: string) => {
-    // TODO: wire to API
-    console.log("Delete item:", id);
-  };
 
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
   const textShadow = getTextShadow(
