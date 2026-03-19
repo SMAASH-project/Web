@@ -188,20 +188,23 @@ export function useItems() {
     {
       name: string;
       kind: string;
+      combatType?: string;
       rarity: string;
       description: string;
       price: number;
     }
   >({
     mutationFn: async (data) => {
-      // Only "Character" and "Skin" exist as DB categories.
-      // "Melee"/"Ranged" are not seeded, so never include combatType here.
+      const categories: string[] = [data.kind];
+      if (data.kind === "Character" && data.combatType) {
+        categories.push(data.combatType);
+      }
       await apiClient.post("/items", {
         name: data.name,
         description: data.description,
         price: data.price,
         rarity: data.rarity,
-        categories: [data.kind],
+        categories,
       });
     },
     onSuccess: () => {
@@ -355,6 +358,7 @@ export function useItems() {
   function handleCreateItem(data: {
     name: string;
     kind: string;
+    combatType?: string;
     rarity: string;
     description: string;
     price: number;
@@ -395,8 +399,17 @@ export function useItems() {
     isCreating: createMutation.isPending,
     isDeleting: deleteMutation.isPending,
     isPurchasing: purchaseMutation.isPending,
-    createError: createMutation.error?.message ?? null,
-    deleteError: deleteMutation.error?.message ?? null,
-    purchaseError: purchaseMutation.error?.message ?? null,
+    createError:
+      (createMutation.error as any)?.response?.data?.error ??
+      createMutation.error?.message ??
+      null,
+    deleteError:
+      (deleteMutation.error as any)?.response?.data?.error ??
+      deleteMutation.error?.message ??
+      null,
+    purchaseError:
+      (purchaseMutation.error as any)?.response?.data?.error ??
+      purchaseMutation.error?.message ??
+      null,
   };
 }

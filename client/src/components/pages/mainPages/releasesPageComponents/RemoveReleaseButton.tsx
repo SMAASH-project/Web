@@ -56,9 +56,11 @@ export function RemoveReleaseButton({ onConfirm }: { onConfirm?: () => void }) {
           <Trash2 className="w-4 h-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className={`${dialogClass} ${textShadow}`}>
+      <DialogContent
+        className={`${dialogClass} ${textShadow} **:data-[slot='dialog-close']:hover:bg-red-500/20 **:data-[slot='dialog-close']:hover:text-red-300`}
+      >
         <DialogHeader>
-          <DialogTitle className={textShadow}>
+          <DialogTitle className={`${textColor} ${textShadow}`}>
             {t("delete.confirm")}
           </DialogTitle>
           <DialogDescription className={subtextColor}>
@@ -70,14 +72,14 @@ export function RemoveReleaseButton({ onConfirm }: { onConfirm?: () => void }) {
           <DialogClose asChild>
             <Button
               variant="outline"
-              className={`cursor-pointer ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "outline")} ${textShadow}`}
+              className={`cursor-pointer ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "outline")} ${textColor} ${textShadow}`}
             >
               Cancel
             </Button>
           </DialogClose>
           <DialogClose asChild>
             <Button
-              className={`cursor-pointer ${textShadow}`}
+              className={`cursor-pointer ${textShadow} border border-red-500/60 bg-red-600/80 hover:bg-red-500 hover:border-red-400 text-white shadow-md shadow-red-900/40`}
               variant="destructive"
               onClick={() => {
                 onConfirm?.();
