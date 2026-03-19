@@ -217,6 +217,22 @@ export function useItems() {
     mutationFn: async (itemId) => {
       await apiClient.delete(`/items/${itemId}`);
     },
+    onMutate: async (itemId) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.items.all });
+      const previousItems = queryClient.getQueryData<WebstoreItem[]>(
+        queryKeys.items.all,
+      );
+      queryClient.setQueryData<WebstoreItem[]>(queryKeys.items.all, (old) =>
+        (old ?? []).filter((item) => item.id !== itemId),
+      );
+      return { previousItems };
+    },
+    onError: (_err, _itemId, context) => {
+      const ctx = context as { previousItems?: WebstoreItem[] } | undefined;
+      if (ctx?.previousItems !== undefined) {
+        queryClient.setQueryData(queryKeys.items.all, ctx.previousItems);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items.all });
     },
