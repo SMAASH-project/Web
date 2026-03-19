@@ -45,11 +45,13 @@ func (pc PurchasesController) Create(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, dtos.PurchaseToDTO(*newPurchase))
+	result, _ := pc.purchasesBaseRepo.ReadByID(c.Request.Context(), newPurchase.ID, "Item", "PlayerProfile")
+
+	c.JSON(http.StatusCreated, dtos.PurchaseToDTO(result))
 }
 
 func (pc PurchasesController) ReadAll(c *gin.Context) {
-	purchases, err := pc.purchasesBaseRepo.ReadAll(c.Request.Context())
+	purchases, err := pc.purchasesBaseRepo.ReadAll(c.Request.Context(), "Item", "PlayerProfile")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
@@ -62,7 +64,7 @@ func (pc PurchasesController) ReadByID(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
 
-	purchase, err := pc.purchasesBaseRepo.ReadByID(c.Request.Context(), id.(uint))
+	purchase, err := pc.purchasesBaseRepo.ReadByID(c.Request.Context(), id.(uint), "Item", "PlayerProfile")
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Purchase with given id not found", path))

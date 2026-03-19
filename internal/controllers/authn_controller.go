@@ -77,7 +77,10 @@ func (a AuthnController) Login(c *gin.Context) {
 			c.JSON(http.StatusUnauthorized, dtos.NewErrResp("Incorrect password", c.Request.URL.Path))
 			return
 		case errors.Is(err, services.ErrUserBanned):
-			c.JSON(http.StatusUnauthorized, dtos.NewErrResp("User is banned", c.Request.URL.Path))
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error":        dtos.NewErrResp("User is banned", c.Request.URL.Path),
+				"banned_until": user.BannedUntil,
+			})
 			return
 		default:
 			c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))

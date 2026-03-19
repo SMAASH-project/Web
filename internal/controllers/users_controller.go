@@ -269,18 +269,16 @@ func (uc UserController) Ban(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusOK, gin.H{
+		"period": body.Period,
+	})
 }
 
 func (uc UserController) Unban(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
 
-	if err := uc.userRepo.Update(c.Request.Context(), models.User{
-		Model:       gorm.Model{ID: id.(uint)},
-		IsBanned:    false,
-		BannedUntil: nil,
-	}); err != nil {
+	if err := uc.userRepo.Unban(c.Request.Context(), id.(uint)); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("User with given id not found", path))
 			return

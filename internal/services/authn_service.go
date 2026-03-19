@@ -57,7 +57,7 @@ func (a AuthenticationService) Login(c context.Context, u *models.User) (*string
 	}
 
 	if user.IsBanned {
-		return nil, nil, ErrUserBanned
+		return nil, &user, ErrUserBanned
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(u.PasswordHash))

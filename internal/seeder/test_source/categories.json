@@ -1,0 +1,14 @@
+[
+  {
+    "Name": "weapon"
+  },
+  {
+    "Name": "consumable"
+  },
+  {
+    "Name": "skin"
+  },
+  {
+    "Name": "buff"
+  }
+]

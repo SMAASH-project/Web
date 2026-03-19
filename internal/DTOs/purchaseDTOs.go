@@ -8,27 +8,27 @@ import (
 )
 
 type PurchaseReadDTO struct {
-	ID      uint
-	Item    string
-	Count   int
-	Total   int
-	Profile string
-	Date    string
+	ID      uint   `json:"id"`
+	Item    string `json:"item"`
+	Count   int    `json:"count"`
+	Total   int    `json:"total"`
+	Profile string `json:"profile"`
+	Date    string `json:"date"`
 }
 
 type PurchaseCreateDTO struct {
-	PlayerProfileID uint
-	ItemID          uint
-	Count           int
-	Date            string
+	PlayerProfileID uint   `json:"player_profile_id" binding:"required"`
+	ItemID          uint   `json:"item_id" binding:"required"`
+	Count           int    `json:"count" binding:"required"`
+	Date            string `json:"date" binding:"required"`
 }
 
 type PurchaseUpdateDTO struct {
-	ID              uint
-	PlayerProfileID uint
-	ItemID          uint
-	Count           int
-	Date            string
+	ID              uint   `json:"id" binding:"required"`
+	PlayerProfileID uint   `json:"player_profile_id" binding:"required"`
+	ItemID          uint   `json:"item_id" binding:"required"`
+	Count           int    `json:"count" binding:"required"`
+	Date            string `json:"date" binding:"required"`
 }
 
 func PurchaseToDTO(p models.Purchase) PurchaseReadDTO {

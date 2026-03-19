@@ -18,21 +18,21 @@ type BaseRepository[T models.Model] interface {
 }
 
 type BaseRepositoryActions[T models.Model] struct {
-	conn *gorm.DB
+	Conn *gorm.DB
 }
 
 func NewBaseRepositoryActions[T models.Model](conn *gorm.DB) BaseRepository[T] {
 	return &BaseRepositoryActions[T]{
-		conn: conn,
+		Conn: conn,
 	}
 }
 
 func (bra BaseRepositoryActions[T]) Create(c context.Context, value *T) error {
-	return gorm.G[T](bra.conn).Create(c, value)
+	return gorm.G[T](bra.Conn).Create(c, value)
 }
 
 func (bra BaseRepositoryActions[T]) ReadAll(c context.Context, preloads ...string) ([]T, error) {
-	query := gorm.G[T](bra.conn).Where("1 = 1")
+	query := gorm.G[T](bra.Conn).Where("1 = 1")
 	for _, preload := range preloads {
 		query = query.Preload(preload, nil)
 	}
@@ -40,7 +40,7 @@ func (bra BaseRepositoryActions[T]) ReadAll(c context.Context, preloads ...strin
 }
 
 func (bra BaseRepositoryActions[T]) ReadByID(c context.Context, id uint, preloads ...string) (T, error) {
-	query := gorm.G[T](bra.conn).Where("id = ?", id)
+	query := gorm.G[T](bra.Conn).Where("id = ?", id)
 	for _, preload := range preloads {
 		query = query.Preload(preload, nil)
 	}
@@ -48,23 +48,23 @@ func (bra BaseRepositoryActions[T]) ReadByID(c context.Context, id uint, preload
 }
 
 func (bra BaseRepositoryActions[T]) Update(c context.Context, value T) error {
-	_, err := gorm.G[T](bra.conn).Where("id = ?", value.GetID()).Updates(c, value)
+	_, err := gorm.G[T](bra.Conn).Where("id = ?", value.GetID()).Updates(c, value)
 	return err
 }
 
 func (bra BaseRepositoryActions[T]) UpdateOne(c context.Context, id uint, field string, value any) error {
-	_, err := gorm.G[T](bra.conn).Where("id = ?", id).Update(c, field, value)
+	_, err := gorm.G[T](bra.Conn).Where("id = ?", id).Update(c, field, value)
 	return err
 }
 
 func (bra BaseRepositoryActions[T]) Delete(c context.Context, id uint) error {
-	_, err := gorm.G[T](bra.conn).Where("id = ?", id).Delete(c)
+	_, err := gorm.G[T](bra.Conn).Where("id = ?", id).Delete(c)
 	return err
 }
 
 func (bra BaseRepositoryActions[T]) ReadAllPaginated(c context.Context, page int, pageSize int, preloads ...string) ([]T, error) {
 	var result []T
-	query := bra.conn.Model(new(T)).Scopes(Paginate(pageSize*(page-1), pageSize))
+	query := bra.Conn.Model(new(T)).Scopes(Paginate(pageSize*(page-1), pageSize))
 	for _, preload := range preloads {
 		query = query.Preload(preload)
 	}

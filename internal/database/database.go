@@ -7,6 +7,7 @@ import (
 
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -17,7 +18,17 @@ func NewGormDBConn() *gorm.DB {
 		db_url = "test.db"
 	}
 
-	db, err := gorm.Open(sqlite.Open(db_url), &gorm.Config{TranslateError: true})
+	logger := logger.New(
+		log.New(os.Stdout, "/r/n", log.LstdFlags),
+		logger.Config{
+			LogLevel: logger.Info,
+		},
+	)
+
+	db, err := gorm.Open(sqlite.Open(db_url), &gorm.Config{
+		TranslateError: true,
+		Logger:         logger,
+	})
 	if err != nil {
 		log.Panicf("Failed to connect to database: %v", err)
 	}
