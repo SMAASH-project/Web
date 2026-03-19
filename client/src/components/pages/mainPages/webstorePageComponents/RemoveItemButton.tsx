@@ -10,7 +10,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { Trash2 } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
 import {
   getButtonClasses,
@@ -21,7 +21,13 @@ import {
   getTextColor,
 } from "@/lib/utils";
 
-export function RemoveItemButton({ onConfirm }: { onConfirm?: () => void }) {
+export function RemoveItemButton({
+  onConfirm,
+  isDeleting = false,
+}: {
+  onConfirm?: () => void;
+  isDeleting?: boolean;
+}) {
   const { settings } = useSettings();
   const { t } = useTranslation("webstore");
   const glass = settings.useLiquidGlass;
@@ -76,13 +82,21 @@ export function RemoveItemButton({ onConfirm }: { onConfirm?: () => void }) {
           </DialogClose>
           <DialogClose asChild>
             <Button
-              className={`cursor-pointer ${textShadow}`}
+              className={`cursor-pointer ${textShadow} disabled:opacity-60 disabled:cursor-not-allowed`}
               variant="destructive"
+              disabled={isDeleting}
               onClick={() => {
                 onConfirm?.();
               }}
             >
-              Confirm
+              {isDeleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Deleting…
+                </>
+              ) : (
+                "Confirm"
+              )}
             </Button>
           </DialogClose>
         </DialogFooter>

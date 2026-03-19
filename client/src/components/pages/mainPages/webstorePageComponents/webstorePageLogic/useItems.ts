@@ -1,4 +1,11 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+  useContext,
+} from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DateTime } from "luxon";
 import apiClient from "@/lib/apiClient";
@@ -6,6 +13,7 @@ import { queryKeys } from "@/lib/queryKeys";
 import type { WebstoreItem } from "@/types/PageTypes";
 import type { Rarity } from "@/types/PageTypes";
 import { useProfiles } from "@/components/forms/addNewProfile/useProfiles";
+import { AuthContext } from "@/context/AuthContext";
 
 const PAGE_SIZE = 12;
 const LOAD_DELAY_MS = 400;
@@ -101,6 +109,7 @@ function nowRFC822(): string {
 export function useItems() {
   const queryClient = useQueryClient();
   const { selectedProfile } = useProfiles();
+  const { userId } = useContext(AuthContext);
   const profileId = selectedProfile?.id ?? null;
 
   // ── Fetch all items ──────────────────────────────────────────────────────
@@ -163,6 +172,12 @@ export function useItems() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.purchases.byProfileId(profileId ?? 0),
       });
+      // Refetch profile so coin balance updates after purchase
+      if (userId !== null) {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.profiles.byUserId(Number(userId)),
+        });
+      }
     },
   });
 
@@ -173,23 +188,20 @@ export function useItems() {
     {
       name: string;
       kind: string;
-      combatType?: string;
       rarity: string;
       description: string;
       price: number;
     }
   >({
     mutationFn: async (data) => {
-      const categories: string[] = [data.kind];
-      if (data.kind === "Character" && data.combatType) {
-        categories.push(data.combatType);
-      }
+      // Only "Character" and "Skin" exist as DB categories.
+      // "Melee"/"Ranged" are not seeded, so never include combatType here.
       await apiClient.post("/items", {
         name: data.name,
         description: data.description,
         price: data.price,
         rarity: data.rarity,
-        categories,
+        categories: [data.kind],
       });
     },
     onSuccess: () => {
@@ -343,7 +355,6 @@ export function useItems() {
   function handleCreateItem(data: {
     name: string;
     kind: string;
-    combatType?: string;
     rarity: string;
     description: string;
     price: number;
@@ -380,5 +391,12 @@ export function useItems() {
     unlockItem,
     handleCreateItem,
     handleDeleteItem,
+    // Mutation states for UI feedback
+    isCreating: createMutation.isPending,
+    isDeleting: deleteMutation.isPending,
+    isPurchasing: purchaseMutation.isPending,
+    createError: createMutation.error?.message ?? null,
+    deleteError: deleteMutation.error?.message ?? null,
+    purchaseError: purchaseMutation.error?.message ?? null,
   };
 }

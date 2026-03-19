@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import {
   getButtonClasses,
   getInputClasses,
@@ -27,26 +27,26 @@ import {
 
 const RARITIES = ["Common", "Uncommon", "Rare", "Epic", "Legendary"] as const;
 const KINDS = ["Character", "Skin"] as const;
-const COMBAT_TYPES = ["Melee", "Ranged"] as const;
 
 interface CreateItemDialogProps {
   onCreate: (data: {
     name: string;
     kind: (typeof KINDS)[number];
-    combatType?: (typeof COMBAT_TYPES)[number];
     rarity: (typeof RARITIES)[number];
     description: string;
     price: number;
   }) => void;
+  isLoading?: boolean;
 }
 
-export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
+export function CreateItemDialog({
+  onCreate,
+  isLoading = false,
+}: CreateItemDialogProps) {
   const { settings } = useSettings();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [kind, setKind] = useState<(typeof KINDS)[number]>("Character");
-  const [combatType, setCombatType] =
-    useState<(typeof COMBAT_TYPES)[number]>("Melee");
   const [rarity, setRarity] = useState<(typeof RARITIES)[number]>("Common");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -82,19 +82,20 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
     onCreate({
       name: name.trim(),
       kind,
-      ...(kind === "Character" ? { combatType } : {}),
       rarity,
       description: description.trim(),
       price: Number(price),
     });
     setName("");
     setKind("Character");
-    setCombatType("Melee");
     setRarity("Common");
     setDescription("");
     setPrice("");
     setOpen(false);
   };
+
+  const isFormValid =
+    name.trim() !== "" && description.trim() !== "" && price !== "";
 
   const selectCls =
     "w-full rounded-md border border-input bg-transparent dark:bg-input/30 px-3 py-2 text-base md:text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]";
@@ -170,22 +171,9 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
           </div>
 
           {kind === "Character" && (
-            <Field>
-              <Label>Combat Type</Label>
-              <select
-                value={combatType}
-                onChange={(e) =>
-                  setCombatType(e.target.value as (typeof COMBAT_TYPES)[number])
-                }
-                className={`${selectCls} ${inputClass}`}
-              >
-                {COMBAT_TYPES.map((ct) => (
-                  <option key={ct} value={ct}>
-                    {ct}
-                  </option>
-                ))}
-              </select>
-            </Field>
+            <p className={`text-xs ${subtextColor} italic`}>
+              Combat type (Melee/Ranged) is not yet supported by the backend.
+            </p>
           )}
 
           <Field>
@@ -224,10 +212,17 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
           </DialogClose>
           <Button
             onClick={handleSubmit}
-            disabled={!name.trim() || !description.trim() || !price}
+            disabled={!isFormValid || isLoading}
             className={`cursor-pointer ${buttonClass} ${textShadow}`}
           >
-            Create Item
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Creating…
+              </>
+            ) : (
+              "Create Item"
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

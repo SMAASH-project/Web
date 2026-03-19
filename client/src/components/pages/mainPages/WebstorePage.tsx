@@ -52,6 +52,12 @@ export function WebstorePage() {
     unlockItem,
     handleCreateItem,
     handleDeleteItem,
+    isCreating,
+    isDeleting,
+    isPurchasing,
+    createError,
+    deleteError,
+    purchaseError,
   } = useItems();
 
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
@@ -103,9 +109,21 @@ export function WebstorePage() {
               </div>
 
               {/* Admin: Create Item */}
-              {isAdmin && <CreateItemDialog onCreate={handleCreateItem} />}
+              {isAdmin && (
+                <CreateItemDialog
+                  onCreate={handleCreateItem}
+                  isLoading={isCreating}
+                />
+              )}
             </div>
           </div>
+
+          {/* Error banners */}
+          {(createError || deleteError || purchaseError) && (
+            <div className="w-full rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-2 text-sm text-red-400">
+              {createError ?? deleteError ?? purchaseError}
+            </div>
+          )}
 
           {/* Search bar */}
           <SearchItem onSearch={handleSearch} />
@@ -159,6 +177,8 @@ export function WebstorePage() {
                       item={item}
                       onDelete={isAdmin ? handleDeleteItem : undefined}
                       onUnlock={unlockItem}
+                      isDeleting={isDeleting}
+                      isPurchasing={isPurchasing}
                     />
                   </LoadPost>
                 ) : (
@@ -167,6 +187,8 @@ export function WebstorePage() {
                       item={item}
                       onDelete={isAdmin ? handleDeleteItem : undefined}
                       onUnlock={unlockItem}
+                      isDeleting={isDeleting}
+                      isPurchasing={isPurchasing}
                     />
                   </div>
                 ),
