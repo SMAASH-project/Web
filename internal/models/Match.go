@@ -12,7 +12,7 @@ type Match struct {
 	EndedAt   time.Time `gorm:"not null"`
 	LevelID   uint      `gorm:"not null"`
 	Level     Level
-	Players   []*PlayerProfile `gorm:"many2many:match_participation"`
+	Players   []*PlayerProfile `gorm:"many2many:match_participations"`
 }
 
 func (m Match) GetID() uint {

@@ -10,7 +10,6 @@ type PlayerProfileReadDTO struct {
 	ID          uint   `json:"id"`
 	DisplayName string `json:"display_name"`
 	Coins       int64  `json:"coins"`
-	PfpUri      string `json:"pfp_uri"`
 }
 
 type PlayerProfileCreateDTO struct {
@@ -18,7 +17,6 @@ type PlayerProfileCreateDTO struct {
 	UserID      uint   `json:"user_id" binding:"required"`
 }
 
-// TODO: handle profile pictures
 type PlayerProfileUpdateDTO struct {
 	ID          uint   `json:"id" binding:"required"`
 	DisplayName string `json:"display_name" binding:"required,max=20"`
@@ -34,7 +32,6 @@ func PlayerProfileToReadDTO(profile models.PlayerProfile) PlayerProfileReadDTO {
 		ID:          profile.ID,
 		DisplayName: profile.DisplayName,
 		Coins:       profile.Coins,
-		PfpUri:      profile.PfpUri,
 	}
 }
 

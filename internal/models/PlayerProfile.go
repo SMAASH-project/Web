@@ -12,7 +12,7 @@ type PlayerProfile struct {
 	Coins       int64 `gorm:"not null"`
 	PfpUri      string
 	Purchases   []Purchase
-	Matches     []*Match `gorm:"many2many:match_participation"`
+	Matches     []*Match `gorm:"many2many:match_participations"`
 }
 
 func (pp PlayerProfile) GetID() uint {

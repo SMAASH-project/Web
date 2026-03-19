@@ -36,3 +36,4 @@ build/
 /internal/seeder/source/*
 
 .DS_Store
+**/.DS_Store
