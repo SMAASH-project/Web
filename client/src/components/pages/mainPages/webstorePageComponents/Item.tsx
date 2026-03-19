@@ -11,6 +11,7 @@ import {
   Swords,
   Crosshair,
   Paintbrush,
+  Loader2,
 } from "lucide-react";
 import { RemoveItemButton } from "./RemoveItemButton";
 import {
@@ -34,9 +35,17 @@ interface ItemProps {
   item: WebstoreItem;
   onDelete?: (id: string) => void;
   onUnlock?: (id: string) => void;
+  isDeleting?: boolean;
+  isPurchasing?: boolean;
 }
 
-export function Item({ item, onDelete, onUnlock }: ItemProps) {
+export function Item({
+  item,
+  onDelete,
+  onUnlock,
+  isDeleting = false,
+  isPurchasing = false,
+}: ItemProps) {
   const { settings } = useSettings();
   const { t } = useTranslation("webstore");
   const { isAdmin } = useContext(AuthContext);
@@ -75,7 +84,10 @@ export function Item({ item, onDelete, onUnlock }: ItemProps) {
       {/* Admin delete button */}
       {isAdmin && onDelete && (
         <div className="absolute top-2 right-2 z-10">
-          <RemoveItemButton onConfirm={() => onDelete(item.id)} />
+          <RemoveItemButton
+            onConfirm={() => onDelete(item.id)}
+            isDeleting={isDeleting}
+          />
         </div>
       )}
 
@@ -169,11 +181,16 @@ export function Item({ item, onDelete, onUnlock }: ItemProps) {
           ) : (
             <Button
               size="sm"
-              className="w-full h-7 text-xs gap-1.5 bg-amber-500/90 text-black font-semibold hover:bg-amber-400 transition-colors cursor-pointer"
+              className="w-full h-7 text-xs gap-1.5 bg-amber-500/90 text-black font-semibold hover:bg-amber-400 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               onClick={handleUnlock}
+              disabled={isPurchasing}
             >
-              <Unlock className="w-3 h-3" />
-              Unlock
+              {isPurchasing ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Unlock className="w-3 h-3" />
+              )}
+              {isPurchasing ? "Unlocking…" : "Unlock"}
             </Button>
           )}
         </div>

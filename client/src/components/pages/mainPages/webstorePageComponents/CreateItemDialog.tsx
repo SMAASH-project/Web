@@ -9,12 +9,18 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
-import { Plus } from "lucide-react";
+import { Plus, Loader2, ChevronDown, Check } from "lucide-react";
 import {
   getButtonClasses,
   getInputClasses,
@@ -23,11 +29,20 @@ import {
   getTextShadow,
   getSubtextColor,
   getTextColor,
+  getBackgroundClasses,
 } from "@/lib/utils";
 
 const RARITIES = ["Common", "Uncommon", "Rare", "Epic", "Legendary"] as const;
 const KINDS = ["Character", "Skin"] as const;
 const COMBAT_TYPES = ["Melee", "Ranged"] as const;
+
+const RARITY_COLORS: Record<string, string> = {
+  Common: "#9ca3af",
+  Uncommon: "#10b981",
+  Rare: "#3b82f6",
+  Epic: "#8b5cf6",
+  Legendary: "#f59e0b",
+};
 
 interface CreateItemDialogProps {
   onCreate: (data: {
@@ -38,9 +53,73 @@ interface CreateItemDialogProps {
     description: string;
     price: number;
   }) => void;
+  isLoading?: boolean;
 }
 
-export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
+// ─── Reusable styled dropdown ──────────────────────────────────────────────────
+
+interface StyledSelectProps<T extends string> {
+  value: T;
+  options: readonly T[];
+  onChange: (val: T) => void;
+  inputClass: string;
+  textColor: string;
+  bgClass: string;
+  renderOption?: (opt: T) => React.ReactNode;
+}
+
+function StyledSelect<T extends string>({
+  value,
+  options,
+  onChange,
+  inputClass,
+  textColor,
+  bgClass,
+  renderOption,
+}: StyledSelectProps<T>) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className={`w-full flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm shadow-xs outline-none transition-colors cursor-pointer ${inputClass}`}
+        >
+          <span className={`${textColor} flex items-center gap-2`}>
+            {renderOption ? renderOption(value) : value}
+          </span>
+          <ChevronDown
+            className={`w-3.5 h-3.5 shrink-0 opacity-50 ${textColor}`}
+          />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        className={`min-w-(--radix-dropdown-menu-trigger-width) ${bgClass} border-none shadow-xl`}
+        align="start"
+        sideOffset={4}
+      >
+        {options.map((opt) => (
+          <DropdownMenuItem
+            key={opt}
+            onClick={() => onChange(opt)}
+            className={`flex items-center justify-between gap-2 cursor-pointer ${textColor} hover:opacity-80`}
+          >
+            <span className="flex items-center gap-2">
+              {renderOption ? renderOption(opt) : opt}
+            </span>
+            {opt === value && <Check className="w-3.5 h-3.5 opacity-60" />}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+// ─── Main component ────────────────────────────────────────────────────────────
+
+export function CreateItemDialog({
+  onCreate,
+  isLoading = false,
+}: CreateItemDialogProps) {
   const { settings } = useSettings();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -76,6 +155,11 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
     settings.useDarkMode,
   );
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const bgClass = getBackgroundClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+    "strong",
+  );
 
   const handleSubmit = () => {
     if (!name.trim() || !description.trim() || !price) return;
@@ -96,8 +180,11 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
     setOpen(false);
   };
 
-  const selectCls =
-    "w-full rounded-md border border-input bg-transparent dark:bg-input/30 px-3 py-2 text-base md:text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]";
+  const isFormValid =
+    name.trim() !== "" &&
+    description.trim() !== "" &&
+    price !== "" &&
+    Number(price) > 0;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -124,84 +211,86 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
         </DialogHeader>
 
         <FieldGroup>
+          {/* Name */}
           <Field>
-            <Label>Name</Label>
+            <Label className={textColor}>Name</Label>
             <Input
               value={name}
               onChange={(e) => setName((e.target as HTMLInputElement).value)}
               placeholder="Item name"
+              maxLength={20}
               className={inputClass}
             />
           </Field>
 
+          {/* Kind + Rarity row */}
           <div className="grid grid-cols-2 gap-3">
             <Field>
-              <Label>Kind</Label>
-              <select
+              <Label className={textColor}>Kind</Label>
+              <StyledSelect
                 value={kind}
-                onChange={(e) =>
-                  setKind(e.target.value as (typeof KINDS)[number])
-                }
-                className={`${selectCls} ${inputClass}`}
-              >
-                {KINDS.map((k) => (
-                  <option key={k} value={k}>
-                    {k}
-                  </option>
-                ))}
-              </select>
+                options={KINDS}
+                onChange={setKind}
+                inputClass={inputClass}
+                textColor={textColor}
+                bgClass={bgClass}
+              />
             </Field>
             <Field>
-              <Label>Rarity</Label>
-              <select
+              <Label className={textColor}>Rarity</Label>
+              <StyledSelect
                 value={rarity}
-                onChange={(e) =>
-                  setRarity(e.target.value as (typeof RARITIES)[number])
-                }
-                className={`${selectCls} ${inputClass}`}
-              >
-                {RARITIES.map((r) => (
-                  <option key={r} value={r}>
+                options={RARITIES}
+                onChange={setRarity}
+                inputClass={inputClass}
+                textColor={textColor}
+                bgClass={bgClass}
+                renderOption={(r) => (
+                  <>
+                    <span
+                      className="inline-block w-2 h-2 rounded-full shrink-0"
+                      style={{ backgroundColor: RARITY_COLORS[r] }}
+                    />
                     {r}
-                  </option>
-                ))}
-              </select>
+                  </>
+                )}
+              />
             </Field>
           </div>
 
+          {/* Combat type — only for Characters */}
+          {/* Combat type — only for Characters */}
           {kind === "Character" && (
             <Field>
-              <Label>Combat Type</Label>
-              <select
+              <Label className={textColor}>Combat Type</Label>
+              <StyledSelect
                 value={combatType}
-                onChange={(e) =>
-                  setCombatType(e.target.value as (typeof COMBAT_TYPES)[number])
-                }
-                className={`${selectCls} ${inputClass}`}
-              >
-                {COMBAT_TYPES.map((ct) => (
-                  <option key={ct} value={ct}>
-                    {ct}
-                  </option>
-                ))}
-              </select>
+                options={COMBAT_TYPES}
+                onChange={setCombatType}
+                inputClass={inputClass}
+                textColor={textColor}
+                bgClass={bgClass}
+              />
             </Field>
           )}
 
+          {/* Description */}
           <Field>
-            <Label>Description</Label>
+            <Label className={textColor}>Description</Label>
             <Input
               value={description}
               onChange={(e) =>
                 setDescription((e.target as HTMLInputElement).value)
               }
               placeholder="Item description"
+              maxLength={50}
               className={inputClass}
             />
           </Field>
 
+          {/* Price */}
           <Field>
-            <Label>Price</Label>
+            <Label className={textColor}>Price</Label>
             <Input
               type="number"
               min={1}
@@ -224,10 +313,17 @@ export function CreateItemDialog({ onCreate }: CreateItemDialogProps) {
           </DialogClose>
           <Button
             onClick={handleSubmit}
-            disabled={!name.trim() || !description.trim() || !price}
+            disabled={!isFormValid || isLoading}
             className={`cursor-pointer ${buttonClass} ${textShadow}`}
           >
-            Create Item
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Creating…
+              </>
+            ) : (
+              "Create Item"
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

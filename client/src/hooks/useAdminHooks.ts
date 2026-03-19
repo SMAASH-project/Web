@@ -2,8 +2,6 @@
  * Admin-specific React Query hooks.
  *
  * All hooks in this file are wired to the API client.
- * Endpoints marked TODO: BACKEND do not exist yet — see BACKEND_NOTES.md for
- * the exact routes, DTOs, and middleware that need to be added on the Go side.
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -13,35 +11,76 @@ import { AxiosError } from "axios";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 /**
- * Extended user read DTO for the admin panel.
+ * Matches the backend UserReadDTO:
+ *   { id, email, role, is_banned, banned_until, last_login }
  *
- * TODO: BACKEND — The current UserReadDTO is missing `username` and `ban_until`.
- * See BACKEND_NOTES.md §1 for the updated struct.
+ * NOTE: `username` is not returned by the backend yet — components fall back
+ * to `email` when it is absent.
  */
 export interface AdminUserDTO {
   id: number;
   email: string;
-  /** Display name from first profile — needs to be added to backend DTO */
+  /** Not yet returned by the backend; components fall back to email. */
   username: string;
   role: string;
   is_banned: boolean;
-  /** ISO datetime string of when the ban expires; null = permanent / not banned */
-  ban_until: string | null;
+  /** Formatted datetime string of when the ban expires; empty string = not banned. */
+  banned_until: string;
   last_login: string;
 }
 
+/** Frontend-internal representation of a ban request before conversion. */
 export interface BanPayload {
-  /** "permanent" sets is_banned=true with no expiry; "temporary" uses ban_until */
+  /** "permanent" uses a very large period; "temporary" derives minutes from ban_until. */
   ban_type: "permanent" | "temporary";
-  /** Only required when ban_type is "temporary". ISO 8601 datetime string. */
+  /** ISO 8601 datetime string. Required when ban_type is "temporary". */
   ban_until?: string;
-  /**
-   * Optional human-readable reason for the ban — stored on the backend and
-   * can be shown to the user or in audit logs.
-   * TODO: BACKEND — add `reason` field to the ban endpoint. See BACKEND_NOTES.md §2b.
-   */
+  /** Optional reason — not yet stored by the backend. */
   reason?: string;
 }
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+/**
+ * Minutes used for a "permanent" ban (≈ 50 years).
+ * The backend stores a concrete BannedUntil timestamp, so we approximate
+ * permanence with this large value.
+ */
+const PERMANENT_BAN_MINUTES = 50 * 365 * 24 * 60; // 26 280 000
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
+
+/**
+ * Converts a frontend BanPayload into the minutes period the backend expects.
+ *
+ * POST /api/users/:id/ban  body: { id, period }  (period in minutes, uint)
+ */
+function banPayloadToMinutes(payload: BanPayload): number {
+  if (payload.ban_type === "permanent") {
+    return PERMANENT_BAN_MINUTES;
+  }
+  const endMs = new Date(payload.ban_until!).getTime();
+  const minutes = Math.round((endMs - Date.now()) / 60_000);
+  // Ensure at least 1 minute so the backend uint binding does not reject 0.
+  return Math.max(1, minutes);
+}
+
+// ─── Ban-duration display helper (commented — backend will return minutes) ────
+//
+// When the ban endpoint eventually returns the remaining ban time in minutes,
+// use this function to convert it to a human-readable label for the frontend.
+//
+// function minutesToBanDuration(minutes: number): string {
+//   if (minutes >= PERMANENT_BAN_MINUTES) return "Permanent";
+//   const days = Math.floor(minutes / (60 * 24));
+//   const hours = Math.floor((minutes % (60 * 24)) / 60);
+//   const mins = minutes % 60;
+//   const parts: string[] = [];
+//   if (days > 0) parts.push(`${days}d`);
+//   if (hours > 0) parts.push(`${hours}h`);
+//   if (mins > 0) parts.push(`${mins}m`);
+//   return parts.length > 0 ? parts.join(" ") : "< 1 minute";
+// }
 
 // ─── Query Keys ───────────────────────────────────────────────────────────────
 
@@ -104,13 +143,10 @@ export function useAdminUserQuery(userId: number | null) {
 /**
  * Ban a user (permanent or timed).
  *
- * TODO: BACKEND — This endpoint does not exist yet.
- * Route:   POST /api/admin/users/:id/ban
- * Auth:    Requires admin role (AdminOnly middleware)
- * Body:    { ban_type: "permanent" | "temporary", ban_until?: string }
+ * Route:   POST /api/users/:id/ban
+ * Auth:    Requires admin role
+ * Body:    { id: number, period: number }  — period is in minutes (uint)
  * Returns: 204 No Content
- *
- * See BACKEND_NOTES.md §2 for full implementation details.
  */
 export function useBanUserMutation() {
   const queryClient = useQueryClient();
@@ -118,8 +154,8 @@ export function useBanUserMutation() {
   return useMutation<void, AxiosError, { userId: number; payload: BanPayload }>(
     {
       mutationFn: async ({ userId, payload }) => {
-        // TODO: BACKEND — change path to /admin/users/:id/ban once the route exists.
-        await apiClient.post(`/admin/users/${userId}/ban`, payload);
+        const period = banPayloadToMinutes(payload);
+        await apiClient.post(`/users/${userId}/ban`, { id: userId, period });
       },
       onSuccess: (_data, variables) => {
         // Invalidate the user list and the specific user entry
@@ -135,20 +171,17 @@ export function useBanUserMutation() {
 /**
  * Unban a user.
  *
- * TODO: BACKEND — This endpoint does not exist yet.
- * Route:   POST /api/admin/users/:id/unban
- * Auth:    Requires admin role (AdminOnly middleware)
+ * Route:   POST /api/users/:id/unban
+ * Auth:    Requires admin role
+ * Body:    (none)
  * Returns: 204 No Content
- *
- * See BACKEND_NOTES.md §2c for implementation details.
  */
 export function useUnbanUserMutation() {
   const queryClient = useQueryClient();
 
   return useMutation<void, AxiosError, { userId: number }>({
     mutationFn: async ({ userId }) => {
-      // TODO: BACKEND — change path to /admin/users/:id/unban once the route exists.
-      await apiClient.post(`/admin/users/${userId}/unban`);
+      await apiClient.post(`/users/${userId}/unban`);
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: adminQueryKeys.users.all });
