@@ -217,6 +217,29 @@ export function useItems() {
     mutationFn: async (itemId) => {
       await apiClient.delete(`/items/${itemId}`);
     },
+    onMutate: async (itemId) => {
+      // Cancel any in-flight refetches so they don't overwrite our optimistic update
+      await queryClient.cancelQueries({ queryKey: queryKeys.items.all });
+
+      // Snapshot previous value for rollback
+      const previousItems = queryClient.getQueryData<WebstoreItem[]>(
+        queryKeys.items.all,
+      );
+
+      // Optimistically remove the item immediately
+      queryClient.setQueryData<WebstoreItem[]>(queryKeys.items.all, (old) =>
+        (old ?? []).filter((item) => item.id !== itemId),
+      );
+
+      return { previousItems };
+    },
+    onError: (_err, _itemId, context) => {
+      // Roll back on failure
+      const ctx = context as { previousItems?: WebstoreItem[] } | undefined;
+      if (ctx?.previousItems !== undefined) {
+        queryClient.setQueryData(queryKeys.items.all, ctx.previousItems);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items.all });
     },

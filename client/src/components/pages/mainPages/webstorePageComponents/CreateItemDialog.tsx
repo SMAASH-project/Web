@@ -93,7 +93,7 @@ function StyledSelect<T extends string>({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className={`min-w-[var(--radix-dropdown-menu-trigger-width)] ${bgClass} border-none shadow-xl`}
+        className={`min-w-(--radix-dropdown-menu-trigger-width) ${bgClass} border-none shadow-xl`}
         align="start"
         sideOffset={4}
       >
