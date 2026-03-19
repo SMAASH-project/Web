@@ -259,6 +259,7 @@ export function CreateItemDialog({
           </div>
 
           {/* Combat type — only for Characters */}
+          {/* Combat type — only for Characters */}
           {kind === "Character" && (
             <Field>
               <Label className={textColor}>Combat Type</Label>
