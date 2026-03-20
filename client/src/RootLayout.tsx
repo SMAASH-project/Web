@@ -10,6 +10,7 @@ import { ColorProvider } from "./components/pages/profileDependents/settings/set
 import { ProfileProvider } from "@/components/forms/addNewProfile/ProfilesContext";
 import { Wrapper } from "./Wrapper";
 import { Suspense } from "react";
+import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 
 /**
  * Create a single QueryClient instance for the entire app.
@@ -40,9 +41,16 @@ const persister = createSyncStoragePersister({
   storage: window.localStorage,
 });
 
+const RECAPTCHA_SITE_KEY = "6LeA2IQsAAAAAAK7ljf7tDqBjwR_rm5uDAzGbr8S";
+
 /**
  * Root layout rendered by React Router. All providers live here so every
  * route element is a guaranteed descendant of every context provider.
+ *
+ * GoogleReCaptchaProvider is placed here (once, at the root) so the reCAPTCHA
+ * script is loaded a single time for the whole app lifetime. Placing it inside
+ * a form component caused it to remount on every keystroke re-render, which
+ * triggered a flood of /reload and /clr requests to Google's servers.
  */
 export function RootLayout() {
   return (
@@ -55,17 +63,19 @@ export function RootLayout() {
           <NavbarProvider>
             <ColorProvider>
               <ProfileProvider>
-                <Wrapper>
-                  <Suspense
-                    fallback={
-                      <div className="flex items-center justify-center min-h-screen">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
-                      </div>
-                    }
-                  >
-                    <Outlet />
-                  </Suspense>
-                </Wrapper>
+                <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_SITE_KEY}>
+                  <Wrapper>
+                    <Suspense
+                      fallback={
+                        <div className="flex items-center justify-center min-h-screen">
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+                        </div>
+                      }
+                    >
+                      <Outlet />
+                    </Suspense>
+                  </Wrapper>
+                </GoogleReCaptchaProvider>
               </ProfileProvider>
             </ColorProvider>
           </NavbarProvider>

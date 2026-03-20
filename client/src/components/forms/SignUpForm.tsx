@@ -18,10 +18,7 @@ import { Link, useNavigate } from "react-router-dom";
 import React from "react";
 import { generateRandomUsername } from "@/lib/GenerateRandomUsername";
 import { useSignupMutation } from "@/hooks/useQueryHooks";
-import {
-  GoogleReCaptcha,
-  GoogleReCaptchaProvider,
-} from "react-google-recaptcha-v3";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { useTranslation } from "react-i18next";
 import { useSettings } from "@/components/pages/profileDependents/settings/settingsLogic/SettingsContext";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
@@ -30,19 +27,19 @@ export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const recaptchaSiteKey = "6LeA2IQsAAAAAAK7ljf7tDqBjwR_rm5uDAzGbr8S";
-  const captchaEnabled = recaptchaSiteKey.trim().length > 0;
+  const captchaEnabled = true;
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [username, setUsername] = React.useState("");
   const [email, setEmail] = React.useState("");
-  const [captchaToken, setCaptchaToken] = React.useState<string | null>(null);
+
   const [validationError, setValidationError] = React.useState("");
   const navigate = useNavigate();
   const randomUsername = generateRandomUsername();
   const signupMutation = useSignupMutation();
   const { t } = useTranslation("auth");
   const { settings, updateSetting } = useSettings();
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,10 +55,29 @@ export function SignupForm({
       setValidationError(t("signup.errorPasswordShort"));
       return;
     }
+
+    // Execute reCAPTCHA only at submit time — not continuously.
+    // This avoids the flood of /reload and /clr requests that occur when
+    // <GoogleReCaptcha onVerify> is used (it re-verifies on a timer).
+    let captchaToken: string | null = null;
+    if (captchaEnabled) {
+      if (!executeRecaptcha) {
+        setValidationError(t("signup.errorCaptcha"));
+        return;
+      }
+      try {
+        captchaToken = await executeRecaptcha("signup");
+      } catch {
+        setValidationError(t("signup.errorCaptcha"));
+        return;
+      }
+    }
+
     if (captchaEnabled && !captchaToken) {
       setValidationError(t("signup.errorCaptcha"));
       return;
     }
+
     setValidationError("");
     try {
       await signupMutation.mutateAsync({ email, password, username });
@@ -159,37 +175,14 @@ export function SignupForm({
                 <p className="text-red-500">{t("signup.failed")}</p>
               )}
               <Field>
-                {captchaEnabled ? (
-                  <GoogleReCaptchaProvider reCaptchaKey={recaptchaSiteKey}>
-                    <GoogleReCaptcha
-                      onVerify={(token) => setCaptchaToken(token)}
-                    />
-                    <FieldDescription>
-                      {captchaToken
-                        ? t("signup.captchaVerified")
-                        : t("signup.captchaVerifying")}
-                    </FieldDescription>
-                  </GoogleReCaptchaProvider>
-                ) : (
-                  <FieldDescription>
-                    {t("signup.captchaDisabled")}
-                  </FieldDescription>
-                )}
-              </Field>
-              <Field>
                 <Button
                   type="submit"
                   className="text-white"
-                  disabled={
-                    signupMutation.isPending ||
-                    (captchaEnabled && !captchaToken)
-                  }
+                  disabled={signupMutation.isPending}
                 >
                   {signupMutation.isPending
                     ? t("signup.submitting")
-                    : captchaEnabled && !captchaToken
-                      ? t("signup.waitingCaptcha")
-                      : t("signup.submit")}
+                    : t("signup.submit")}
                 </Button>
                 <FieldDescription className="px-6 text-center">
                   {t("signup.hasAccount")}{" "}
