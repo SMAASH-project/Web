@@ -37,7 +37,8 @@
     "title": "Válassz profilt",
     "addNew": "Új hozzáadása",
     "manage": "Profilok kezelése",
-    "done": "Kész"
+    "done": "Kész",
+    "logout": "Kijelentkezés"
   },
   "addProfile": {
     "title": "Új profil létrehozása",

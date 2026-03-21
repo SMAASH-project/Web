@@ -37,7 +37,8 @@
     "title": "Select a Profile",
     "addNew": "Add New",
     "manage": "Manage Profiles",
-    "done": "Done"
+    "done": "Done",
+    "logout": "Logout"
   },
   "addProfile": {
     "title": "Create New Profile",
