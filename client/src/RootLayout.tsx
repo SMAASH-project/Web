@@ -10,17 +10,12 @@ import { ColorProvider } from "./components/pages/profileDependents/settings/set
 import { ProfileProvider } from "@/components/forms/addNewProfile/ProfilesContext";
 import { Wrapper } from "./Wrapper";
 import { Suspense } from "react";
-import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 
-/**
- * Create a single QueryClient instance for the entire app.
- * This is initialized outside the component to avoid recreating it on every render.
- */
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 2 * 60 * 1000, // 2 minutes (reduced from 5)
-      gcTime: 10 * 60 * 1000, // 10 minutes (garbage collection)
+      staleTime: 2 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
       retry: 1,
       refetchOnWindowFocus: true,
       refetchOnReconnect: true,
@@ -33,24 +28,15 @@ const queryClient = new QueryClient({
   },
 });
 
-/**
- * Create a persister for localStorage caching.
- * This enables offline support and faster app startup.
- */
 const persister = createSyncStoragePersister({
   storage: window.localStorage,
 });
 
-const RECAPTCHA_SITE_KEY = "6LeA2IQsAAAAAAK7ljf7tDqBjwR_rm5uDAzGbr8S";
-
 /**
- * Root layout rendered by React Router. All providers live here so every
- * route element is a guaranteed descendant of every context provider.
+ * Root layout rendered by React Router.
  *
- * GoogleReCaptchaProvider is placed here (once, at the root) so the reCAPTCHA
- * script is loaded a single time for the whole app lifetime. Placing it inside
- * a form component caused it to remount on every keystroke re-render, which
- * triggered a flood of /reload and /clr requests to Google's servers.
+ * GoogleReCaptchaProvider is NOT here — it lives only inside SignUpForm so the
+ * reCAPTCHA badge and script are only active on the signup page.
  */
 export function RootLayout() {
   return (
@@ -63,19 +49,17 @@ export function RootLayout() {
           <NavbarProvider>
             <ColorProvider>
               <ProfileProvider>
-                <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_SITE_KEY}>
-                  <Wrapper>
-                    <Suspense
-                      fallback={
-                        <div className="flex items-center justify-center min-h-screen">
-                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
-                        </div>
-                      }
-                    >
-                      <Outlet />
-                    </Suspense>
-                  </Wrapper>
-                </GoogleReCaptchaProvider>
+                <Wrapper>
+                  <Suspense
+                    fallback={
+                      <div className="flex items-center justify-center min-h-screen">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+                      </div>
+                    }
+                  >
+                    <Outlet />
+                  </Suspense>
+                </Wrapper>
               </ProfileProvider>
             </ColorProvider>
           </NavbarProvider>

@@ -18,15 +18,22 @@ import { Link, useNavigate } from "react-router-dom";
 import React from "react";
 import { generateRandomUsername } from "@/lib/GenerateRandomUsername";
 import { useSignupMutation } from "@/hooks/useQueryHooks";
-import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import {
+  useGoogleReCaptcha,
+  GoogleReCaptchaProvider,
+} from "react-google-recaptcha-v3";
 import { useTranslation } from "react-i18next";
 import { useSettings } from "@/components/pages/profileDependents/settings/settingsLogic/SettingsContext";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
 
-export function SignupForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+export function SignupForm(props: React.ComponentProps<"div">) {
+  return (
+    <GoogleReCaptchaProvider reCaptchaKey="6LeA2IQsAAAAAAK7ljf7tDqBjwR_rm5uDAzGbr8S">
+      <SignupFormInner {...props} />
+    </GoogleReCaptchaProvider>
+  );
+}
+function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
   const captchaEnabled = true;
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
