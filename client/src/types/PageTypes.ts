@@ -18,7 +18,7 @@ export interface NewsPost {
   imagePosition?: "Top" | "Right";
   imageSize?: number;
   content: string;
-  createdAt: ReturnType<typeof DateTime.now>;
+  createdAt: DateTime;
 }
 export const newsPosts: NewsPost[] = [
   {
@@ -72,7 +72,7 @@ export interface WebstoreItem {
   description: string;
   price: number;
   owned: boolean;
-  createdAt: ReturnType<typeof DateTime.now>;
+  createdAt: DateTime;
 }
 
 export interface Release {
@@ -89,5 +89,5 @@ export interface Release {
    *     Android: "https://github.com/.../smaash-v1.2.3-android.apk" }
    */
   downloadUrls: Partial<Record<string, string>>;
-  createdAt: ReturnType<typeof DateTime.now>;
+  createdAt: DateTime;
 }

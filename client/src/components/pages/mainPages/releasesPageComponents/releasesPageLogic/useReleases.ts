@@ -231,7 +231,6 @@ export function useReleases(selectedOs: string) {
   }
 
   return {
-    allReleases,
     visibleReleases,
     containerRef,
     sentinelRef,

@@ -4,33 +4,17 @@
  */
 
 export const queryKeys = {
-  auth: {
-    all: ["auth"],
-    login: ["auth", "login"],
-    signup: ["auth", "signup"],
-  },
   profiles: {
     all: ["profiles"],
     byUserId: (userId: number) => ["profiles", "byUserId", userId],
-    byId: (profileId: number) => ["profiles", "byId", profileId],
-  },
-  releases: {
-    all: ["releases"],
-    byOs: (os: string) => ["releases", "byOs", os],
-    infinite: (os: string) => ["releases", "infinite", os],
   },
   githubReleases: {
     all: ["githubReleases"],
   },
   items: {
     all: ["items"],
-    infinite: ["items", "infinite"],
   },
   purchases: {
     byProfileId: (profileId: number) => ["purchases", "byProfileId", profileId],
-  },
-  news: {
-    all: ["news"],
-    byCategory: (categories: string[]) => ["news", "byCategory", categories],
   },
 };
