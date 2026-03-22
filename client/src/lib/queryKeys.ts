@@ -19,6 +19,9 @@ export const queryKeys = {
     byOs: (os: string) => ["releases", "byOs", os],
     infinite: (os: string) => ["releases", "infinite", os],
   },
+  githubReleases: {
+    all: ["githubReleases"],
+  },
   items: {
     all: ["items"],
     infinite: ["items", "infinite"],

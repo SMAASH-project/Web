@@ -326,6 +326,7 @@ import { queryKeys } from "@/lib/queryKeys";
 queryKeys.auth.all; // ["auth"]
 queryKeys.profiles.byUserId(userId); // ["profiles", "byUserId", 5]
 queryKeys.releases.infinite(os); // ["releases", "infinite", "windows"]
+queryKeys.githubReleases.all; // ["githubReleases"] — GitHub releases cache
 queryKeys.news.byCategory(categories); // ["news", "byCategory", ["Patch"]]
 queryKeys.items.all; // ["items"]
 queryKeys.purchases.byProfileId(profileId);
@@ -453,17 +454,26 @@ await banMutation.mutateAsync({
 
 `src/components/pages/mainPages/ReleasesPage.tsx`
 
-Displays game version releases with OS filtering. Uses infinite scroll. Admins see Add/Remove buttons.
+Displays game version releases with OS filtering and infinite scroll. **Releases are sourced directly from the public GitHub repository** — there is no in-app add/remove UI. To publish a new version, create a GitHub release at `https://github.com/SMAASH-project/SMAASH/releases` and attach the build assets.
+
+**Platform detection** is based on file extension of each release asset:
+
+| Extension      | Platform |
+| -------------- | -------- |
+| `.apk`, `.aab` | Android  |
+| `.ipa`         | iOS      |
+
+Recommended asset naming convention: `smaash-v{version}-android.apk` / `smaash-v{version}-ios.ipa`. If the convention changes, update `PLATFORM_MATCHERS` in `useReleases.ts`.
 
 Key sub-components:
 
-- `Releases.tsx` — renders the release list
-- `SelectOs.tsx` — OS filter (Windows / Android / etc.)
-- `AddRelease.tsx` — admin dialog
-- `RemoveReleaseButton.tsx` — admin delete with confirm
-- `DownloadReleaseButton.tsx` — direct download link
-- `SearchRelease.tsx` — client-side search
-- `useReleases.ts` — local state management for the list + mutations
+- `Releases.tsx` — renders the release list; passes the per-OS `downloadUrl` to the button
+- `SelectOs.tsx` — OS filter (iOS / Android)
+- `DownloadReleaseButton.tsx` — opens the GitHub asset URL in a new tab; disabled with tooltip when no asset exists for the selected platform
+- `SearchRelease.tsx` — client-side version search
+- `useReleases.ts` — fetches `GET https://api.github.com/repos/SMAASH-project/SMAASH/releases`, maps assets to `Release` objects, handles infinite scroll
+
+**GitHub API rate limit:** 60 unauthenticated requests/hour per IP. React Query caches results for 10 minutes (`staleTime`) so normal usage stays well within limits. If the repo ever becomes private, move the fetch to a backend proxy so the token never ships in the client bundle.
 
 ### News (`/app/news`)
 
@@ -803,7 +813,8 @@ interface WebstoreItem {
 interface Release {
   id: string;
   version: string;
-  supports: string[]; // OS identifiers
+  supports: string[]; // OS identifiers e.g. ["iOS", "Android"]
+  downloadUrls: Partial<Record<string, string>>; // per-OS GitHub asset URLs
   createdAt: DateTime;
 }
 ```
@@ -965,7 +976,11 @@ const handleProfileClick = useCallback(async (name: string) => { ... }, [deps]);
 
 Global Axios interceptor in `apiClient.ts` catches any non-auth 401 and hard-redirects to `/app/login`. Already implemented.
 
-#### 2. Password Reset Does Nothing
+#### 2. Download Button ✅ Fixed
+
+`DownloadReleaseButton` now opens the GitHub asset `browser_download_url` for the selected OS. Disabled with a tooltip when the release has no asset for the active platform.
+
+#### 3. Password Reset Does Nothing
 
 `PasswordResetForm.tsx` renders but submits nothing. No mutation, no feedback.
 

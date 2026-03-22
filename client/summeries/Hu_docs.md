@@ -326,6 +326,7 @@ import { queryKeys } from "@/lib/queryKeys";
 queryKeys.auth.all; // ["auth"]
 queryKeys.profiles.byUserId(userId); // ["profiles", "byUserId", 5]
 queryKeys.releases.infinite(os); // ["releases", "infinite", "windows"]
+queryKeys.githubReleases.all; // ["githubReleases"] — GitHub releases gyorsítótár
 queryKeys.news.byCategory(categories); // ["news", "byCategory", ["Patch"]]
 queryKeys.items.all; // ["items"]
 queryKeys.purchases.byProfileId(profileId);
@@ -453,17 +454,26 @@ await banMutation.mutateAsync({
 
 `src/components/pages/mainPages/ReleasesPage.tsx`
 
-Játékverzió-kiadásokat jelenít meg operációs rendszer szerinti szűréssel. Végtelen görgetést használ. Az adminok Hozzáadás/Törlés gombokat látnak.
+Játékverzió-kiadásokat jelenít meg operációs rendszer szerinti szűréssel és végtelen görgetéssel. **A kiadások közvetlenül a nyilvános GitHub repitóriumból származnak** — nincs alkalmazáson belüli hozzáadási/törlési felület. Új verzió kiadásához hozz létre egy GitHub release-t a `https://github.com/SMAASH-project/SMAASH/releases` címen, és csatold hozzá az összeállított fájlokat.
+
+**Platform-felismerés** az egyes release-eszközök fájlkiterjesztése alapján történik:
+
+| Kiterjesztés   | Platform |
+| -------------- | -------- |
+| `.apk`, `.aab` | Android  |
+| `.ipa`         | iOS      |
+
+Ajánlott eszköz-elnevezési konvenció: `smaash-v{verzió}-android.apk` / `smaash-v{verzió}-ios.ipa`. Ha a konvenció megváltozik, frissítsd a `PLATFORM_MATCHERS` tömböt az `useReleases.ts`-ben.
 
 Fő alkomponensek:
 
-- `Releases.tsx` — a kiadások listájának megjelenítése
-- `SelectOs.tsx` — operációs rendszer szűrő (Windows / Android / stb.)
-- `AddRelease.tsx` — admin párbeszédpanel
-- `RemoveReleaseButton.tsx` — admin törlés megerősítéssel
-- `DownloadReleaseButton.tsx` — közvetlen letöltési link
-- `SearchRelease.tsx` — kliensoldali keresés
-- `useReleases.ts` — helyi állapotkezelés a listához + mutációk
+- `Releases.tsx` — a kiadások listájának megjelenítése; átadja az OS-specifikus `downloadUrl`-t a gombnak
+- `SelectOs.tsx` — operációs rendszer szűrő (iOS / Android)
+- `DownloadReleaseButton.tsx` — új lapon megnyitja a GitHub eszköz URL-jét; letiltva tooltip-pel, ha nem található eszköz a kiválasztott platformhoz
+- `SearchRelease.tsx` — kliensoldali verzió-keresés
+- `useReleases.ts` — lekéri a `GET https://api.github.com/repos/SMAASH-project/SMAASH/releases` végpontot, leképezi az eszközöket `Release` objektumokra, kezeli a végtelen görgetést
+
+**GitHub API ráta-korlát:** 60 nem hitelesített kérés/óra IP-nként. A React Query 10 percig gyorsítótáraz (`staleTime`), így a normál használat jóval a korlát alatt marad. Ha a repó valaha priváttá válik, a lekérést át kell helyezni egy backend proxy végpontra, hogy a token ne kerüljön be a kliensbe.
 
 ### Hírek (`/app/news`)
 
@@ -803,7 +813,8 @@ interface WebstoreItem {
 interface Release {
   id: string;
   version: string;
-  supports: string[]; // operációs rendszer azonosítók
+  supports: string[]; // pl. ["iOS", "Android"]
+  downloadUrls: Partial<Record<string, string>>; // platformonkénti GitHub eszköz URL-ek
   createdAt: DateTime;
 }
 ```
@@ -965,7 +976,11 @@ const handleProfileClick = useCallback(async (name: string) => { ... }, [deps]);
 
 Globális Axios interceptor az `apiClient.ts`-ben elfog minden nem-hitelesítési 401-est, és keményen átirányít `/app/login`-ra. Már implementálva van.
 
-#### 2. A jelszó-visszaállítás nem csinál semmit
+#### 2. Letöltés gomb ✅ Javítva
+
+A `DownloadReleaseButton` most új lapon megnyitja a GitHub eszköz `browser_download_url`-jét a kiválasztott OS-hez. Le van tiltva tooltip-pel, ha a kiadáshoz nem található eszköz az aktív platformhoz.
+
+#### 3. A jelszó-visszaállítás nem csinál semmit
 
 A `PasswordResetForm.tsx` renderelődik, de semmit nem küld be. Nincs mutáció, nincs visszajelzés.
 

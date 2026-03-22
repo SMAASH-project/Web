@@ -100,7 +100,7 @@ export function NewsPage() {
                 <div className="flex flex-row w-full items-start justify-between gap-3 mb-3">
                   <div className="flex flex-col gap-1.5 flex-1 min-w-0">
                     <Label
-                      className={`text-base sm:text-lg font-semibold ${textColor} ${textShadow} break-words`}
+                      className={`text-base sm:text-lg font-semibold ${textColor} ${textShadow} wrap-break-word`}
                     >
                       {post.title}
                     </Label>
