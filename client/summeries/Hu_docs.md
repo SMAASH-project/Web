@@ -507,8 +507,6 @@ Alkomponensek:
 
 Tárgy bolt. Az érmeegyenleg a `ProfileContext.selectedProfile.coins`-ból jön.
 
-> ⚠️ **Jelenleg példaadatokat használ.** Lásd [§15 Ismert teendők](#15-ismert-teendők-és-backend-függőségek).
-
 Alkomponensek:
 
 - `Item.tsx` — egyedi tárgyak kártyája feloldó gombbal
@@ -516,7 +514,11 @@ Alkomponensek:
 - `RemoveItemButton.tsx` — admin törlés
 - `SearchItem.tsx` — szöveges keresés
 - `ItemFilters.tsx` — szűrés típus, ritkaság, harci típus és tulajdonlás szerint
-- `useItems.ts` — helyi állapot (jelenleg `useState(exampleItems)`)
+- `useItems.ts` — teljes React Query integráció: lekéri a `GET /api/items` végpontot, összefésüli a tulajdonlási adatokat a `GET /profiles/:id/purchases` alapján, kezeli a létrehozási/törlési/vásárlási mutációkat
+
+**Tulajdonlás** meghatározása: a kiválasztott profil vásárlási előzményeit lekérve felépít egy `Set`-et a már megvásárolt tárgyak neveiből. Vásárlás után mind a vásárlások lekérdezése, mind a profil érmék lekérdezése érvénytelenítésre kerül, így az érmeegyenleg azonnal frissül.
+
+**Item → WebstoreItem leképezés:** a backend a típust és harci típust kategória-szövegekként kódolja (`"Character"`, `"Skin"`, `"Melee"`, `"Ranged"`). Az `itemDTOToWebstoreItem()` ezeket visszaalakítja a felhasználói felület által várt típusos mezőkre.
 
 ### Profil (`/app/profile`)
 
@@ -963,13 +965,7 @@ const handleProfileClick = useCallback(async (name: string) => { ... }, [deps]);
 
 Globális Axios interceptor az `apiClient.ts`-ben elfog minden nem-hitelesítési 401-est, és keményen átirányít `/app/login`-ra. Már implementálva van.
 
-#### 2. A webáruház hamis adatokat használ
-
-A `useItems.ts` az `src/types/ExampleItems.ts` fájlból használja az `exampleItems`-t. A valódi `GET /api/items` végpont létezik, de nincs bekötve.
-
-**Javítás:** Cseréld ki a `useState(exampleItems)`-t egy React Query hook-ra, amely a `/api/items` végpontot hívja.
-
-#### 3. A jelszó-visszaállítás nem csinál semmit
+#### 2. A jelszó-visszaállítás nem csinál semmit
 
 A `PasswordResetForm.tsx` renderelődik, de semmit nem küld be. Nincs mutáció, nincs visszajelzés.
 
@@ -994,13 +990,9 @@ Teljes specifikációért lásd a `summeries/BACKEND_NOTES.md` fájlt. Összefog
 | 8   | `GET /api/profiles/:id/matches`                             | Nincs implementálva — a statisztikák helyőrzők |
 | 9   | `POST /api/auth/reset-password`                             | Nincs implementálva                            |
 
-### 🗂️ Webáruház csonkok a `WebstorePage.tsx`-ben
+### 🗂️ Fennmaradó webáruház backend-függőség
 
-```ts
-handleCreateItem; // csak console.log — a POST /api/items létezik
-handleDeleteItem; // csak console.log — a DELETE /api/items/:id létezik
-unlockItem; // csak lokális állapotot módosít — POST /api/profiles/:id/purchases szükséges
-```
+A vásárlási folyamat teljes mértékben implementálva van a frontend oldalon. Az egyetlen fennmaradó hiányosság, hogy a backend jelenleg nem vonja le az érméket a profilból vásárláskor — a `POST /purchases` végpont létrehozza a vásárlási rekordot, de az érmék levonásának logikája hiányzik a szerver oldalán. A fejlécben megjelenő érmeegyenleg nem csökken vásárlás után mindaddig, amíg ez a backend oldalon nincs javítva.
 
 ---
 

@@ -719,8 +719,6 @@ Sub-components:
 
 Item shop. Coin balance from `ProfileContext.selectedProfile.coins`.
 
-> ⚠️ **Currently uses example data.** See [§15 Known TODOs](#15-known-todos--backend-dependencies).
-
 Sub-components:
 
 - `Item.tsx` — individual item card with unlock button
@@ -728,7 +726,11 @@ Sub-components:
 - `RemoveItemButton.tsx` — admin delete
 - `SearchItem.tsx` — text search
 - `ItemFilters.tsx` — filter by kind, rarity, combat type, ownership
-- `useItems.ts` — local state (currently `useState(exampleItems)`)
+- `useItems.ts` — full React Query integration: fetches `GET /api/items`, merges ownership from `GET /profiles/:id/purchases`, handles create/delete/purchase mutations
+
+**Ownership** is derived by fetching the selected profile's purchase history and building a `Set` of owned item names. After a purchase, both the purchases query and the profile coins query are invalidated so the coin balance updates immediately.
+
+**Item → WebstoreItem mapping:** the backend encodes kind and combat type as category strings (`"Character"`, `"Skin"`, `"Melee"`, `"Ranged"`). `itemDTOToWebstoreItem()` decodes these back into the typed fields the UI expects.
 
 ### Profile (`/app/profile`)
 
@@ -1175,13 +1177,7 @@ const handleProfileClick = useCallback(async (name: string) => { ... }, [deps]);
 
 Global Axios interceptor in `apiClient.ts` catches any non-auth 401 and hard-redirects to `/app/login`. Already implemented.
 
-#### 2. Webstore Uses Fake Data
-
-`useItems.ts` uses `exampleItems` from `src/types/ExampleItems.ts`. The real `GET /api/items` endpoint exists but is not wired.
-
-**Fix:** Replace `useState(exampleItems)` with a React Query hook calling `/api/items`.
-
-#### 3. Password Reset Does Nothing
+#### 2. Password Reset Does Nothing
 
 `PasswordResetForm.tsx` renders but submits nothing. No mutation, no feedback.
 
@@ -1206,13 +1202,9 @@ See `summeries/BACKEND_NOTES.md` for full spec. Summary:
 | 8   | `GET /api/profiles/:id/matches`                   | Not implemented — stats are placeholders |
 | 9   | `POST /api/auth/reset-password`                   | Not implemented                          |
 
-### 🗂️ Webstore Stubs in `WebstorePage.tsx`
+### 🗂️ Remaining Webstore Backend Dependency
 
-```ts
-handleCreateItem; // console.log only — POST /api/items exists
-handleDeleteItem; // console.log only — DELETE /api/items/:id exists
-unlockItem; // mutates local state only — needs POST /api/profiles/:id/purchases
-```
+The purchase flow is fully implemented on the frontend. The one remaining gap is that the backend does not yet deduct coins from the profile when a purchase is made — the `POST /purchases` endpoint creates the purchase record but coin deduction logic is missing server-side. The coin balance displayed in the header will not decrease after a purchase until this is fixed on the backend.
 
 ---
 
