@@ -44,7 +44,7 @@ client/
     │   ├── apiClient.ts        # Axios példány + interceptorok
     │   ├── queryKeys.ts        # Centralizált query kulcs-gyár
     │   ├── utils.ts            # Az összes segédmodul barrel re-exportja
-    │   ├── utils/              # dateFormat, themeClasses, liquidGlass, colorMath, classnames
+    │   ├── utils/              # dateFormat, themeClasses, liquidGlass, colorMath, classnames, extractErrorMessage
     │   ├── miscAnimations/     # Újrafelhasználható Motion burkolók
     │   └── pageAnimations/     # Oldal-szintű animáció komponensek
     ├── components/
@@ -638,16 +638,21 @@ A `labelKey` közvetlenül a `src/locales/*/nav.json` fájl egy kulcsára mutat.
 
 ## 9. Űrlapok
 
+Mindhárom űrlap `<FormAlert>` komponenst használ a hibák megjelenítéséhez, és az `extractErrorMessage()` segédfüggvényt az Axios hibák olvasható szöveggé alakításához. Korábban a hibák nyers `<p>` tagekkel kerültek megjelenítésre, és `[object Object]` jelent meg, ha a szerver JSON hibaüzenetet adott vissza.
+
 ### `LoginForm.tsx`
 
 - E-mail + jelszó mezők
 - Meghívja a `useLoginMutation()`-t, sikerkor beállítja az `isLoggedIn`/`userId`/`isAdmin` értékeket, és navigál `/app/profile-selector`-ra
 - Nyelvváltó a jobb felső sarokban
+- A 401-es válaszok specifikus "Hibás email cím vagy jelszó" üzenetet jelenítenek meg; minden egyéb hiba a szerver üzenetét vagy egy fordított visszaesési szöveget mutat
 
 ### `SignUpForm.tsx`
 
 - Felhasználónév / e-mail / jelszó / jelszó megerősítése
-- reCAPTCHA v3 — a `GoogleReCaptchaProvider` burkolja a belső form komponenst. A token csak a beküldéskor kerül lekérésre az `executeRecaptcha("signup")` segítségével — **nem** folyamatosan. Ez megakadályozza a `reload`/`clr` kérés-áradatot.
+- A kliensoldalú validációs hibák (rövid felhasználónév, jelszó eltérés stb.) elsőbbséget élveznek a szerverhibákkal szemben egyetlen `errorMessage` változóban — nincs dupla figyelmeztetés
+- A validációs hibák automatikusan törlődnek, amikor a felhasználó szerkeszti az adott mezőt
+- reCAPTCHA v3 — a `GoogleReCaptchaProvider` körülveszi a belső form komponenst. A token csak beküldéskor kerül lekérésre az `executeRecaptcha("signup")` segítségével — **nem** folyamatosan. Ez megakadályozza a `reload`/`clr` kérés-áradatot.
 - A webhelytitok a komponensbe van kódolva; éles környezetben env változóba kell áthelyezni.
 
 ```tsx
@@ -655,11 +660,10 @@ A `labelKey` közvetlenül a `src/locales/*/nav.json` fájl egy kulcsára mutat.
 export function SignupForm(props) {
   return (
     <GoogleReCaptchaProvider reCaptchaKey="...">
-      <SignupFormInner {...props} /> {/* useGoogleReCaptcha() itt él */}
+      <SignupFormInner {...props} />
     </GoogleReCaptchaProvider>
   );
 }
-// A token egyszer kerül lekérésre beküldéskor:
 const token = await executeRecaptcha("signup");
 ```
 
@@ -675,9 +679,7 @@ A felhasználó profiljait avatarként jeleníti meg. Kiválasztással be lehet 
 
 ### `AddNewProfile.tsx`
 
-Párbeszédpanel-forma új profil létrehozásához. Elfogad megjelenítési nevet és opcionális avatar képfeltöltést. Korlát: 5 profil felhasználónként.
-
----
+## Párbeszédpanel-forma új profil létrehozásához. Elfogad megjelenítési nevet és opcionális avatar képfeltöltést. Korlát: 5 profil felhasználónként. Minden validációs hiba és mezőfelirat teljesen le van fordítva (EN/HU). A hibaüzenetek a `profile.addProfile.*` fordítási kulcsokból jönnek.
 
 ## 10. i18n / Többnyelvű támogatás
 
@@ -738,29 +740,42 @@ A magyar agglutináló nyelv — a fordítások teljes, kontextustudatos szöveg
 
 A komponensek a `src/components/ui/` mappában találhatók, és shadcn mintákat követnek (Radix UI primitívek + Tailwind).
 
-| Komponens        | Fájl                 | Megjegyzések                                           |
-| ---------------- | -------------------- | ------------------------------------------------------ |
-| `Button`         | `button.tsx`         | Változatok a `button-variants.ts` segítségével         |
-| `ButtonGroup`    | `button-group.tsx`   | Vízszintes/függőleges csoportosított gombok            |
-| `Input`          | `input.tsx`          | Standard szövegbeviteli mező                           |
-| `Card`           | `card.tsx`           | Konténer kártya                                        |
-| `Avatar`         | `avatar.tsx`         | Felhasználói/profil avatar tartalék kezdőbetűkkel      |
-| `Badge`          | `badge.tsx`          | Állapot/kategória feliratok                            |
-| `Label`          | `label.tsx`          | Űrlapmező felirat                                      |
-| `Field`          | `field.tsx`          | Field + FieldLabel + FieldDescription elrendezés       |
-| `Dialog`         | `dialog.tsx`         | Modális párbeszédpanel                                 |
-| `Sheet`          | `sheet.tsx`          | Kihúzható oldalpanel                                   |
-| `DropdownMenu`   | `dropdown-menu.tsx`  | Radix legördülő menü                                   |
-| `Popover`        | `popover.tsx`        | Radix felugró ablak                                    |
-| `Switch`         | `switch.tsx`         | Kapcsolókapcsoló                                       |
-| `Checkbox`       | `checkbox.tsx`       | Jelölőnégyzet                                          |
-| `RadioGroup`     | `radio-group.tsx`    | Rádiógomb-csoport                                      |
-| `Accordion`      | `accordion.tsx`      | Összecsukható szakaszok                                |
-| `Separator`      | `separator.tsx`      | Vízszintes/függőleges elválasztó                       |
-| `Calendar`       | `calendar.tsx`       | Egyéni dátumtartomány-naptár (react-day-picker nélkül) |
-| `ColorPicker`    | `color-picker.tsx`   | Hex szín beviteli mező                                 |
-| `Resizable`      | `resizable.tsx`      | Húzással átméretezhető panelek                         |
-| `LanguageToggle` | `LanguageToggle.tsx` | EN/HU zászlógombok hitelesítési oldalakhoz             |
+| Komponens        | Fájl                 | Megjegyzések                                                                |
+| ---------------- | -------------------- | --------------------------------------------------------------------------- |
+| `Button`         | `button.tsx`         | Változatok a `button-variants.ts` segítségével                              |
+| `ButtonGroup`    | `button-group.tsx`   | Vízszintes/függőleges csoportosított gombok                                 |
+| `Input`          | `input.tsx`          | Standard szövegbeviteli mező                                                |
+| `Card`           | `card.tsx`           | Konténer kártya                                                             |
+| `Avatar`         | `avatar.tsx`         | Felhasználói/profil avatar tartalék kezdőbetűkkel                           |
+| `Badge`          | `badge.tsx`          | Állapot/kategória feliratok                                                 |
+| `Label`          | `label.tsx`          | Űrlapmező felirat                                                           |
+| `Field`          | `field.tsx`          | Field + FieldLabel + FieldDescription elrendezés                            |
+| `Dialog`         | `dialog.tsx`         | Modális párbeszédpanel                                                      |
+| `Sheet`          | `sheet.tsx`          | Kihúzható oldalpanel                                                        |
+| `DropdownMenu`   | `dropdown-menu.tsx`  | Radix legördülő menü                                                        |
+| `Popover`        | `popover.tsx`        | Radix felugró ablak                                                         |
+| `Switch`         | `switch.tsx`         | Kapcsolókapcsoló                                                            |
+| `Checkbox`       | `checkbox.tsx`       | Jelölőnégyzet                                                               |
+| `RadioGroup`     | `radio-group.tsx`    | Rádiógomb-csoport                                                           |
+| `Accordion`      | `accordion.tsx`      | Összecsukható szakaszok                                                     |
+| `Separator`      | `separator.tsx`      | Vízszintes/függőleges elválasztó                                            |
+| `Calendar`       | `calendar.tsx`       | Egyéni dátumtartomány-naptár (react-day-picker nélkül)                      |
+| `ColorPicker`    | `color-picker.tsx`   | Hex szín beviteli mező                                                      |
+| `Resizable`      | `resizable.tsx`      | Húzással átméretezhető panelek                                              |
+| `LanguageToggle` | `LanguageToggle.tsx` | EN/HU zászlógombok hitelesítési oldalakhoz                                  |
+| `FormAlert`      | `form-alert.tsx`     | Beágyazott form figyelmeztetés — változatok: `error` \| `success` \| `info` |
+
+### `FormAlert` (`form-alert.tsx`)
+
+Beágyazott figyelmeztetés komponens űrlap-szintű hiba-, siker- és tájékoztató üzenetekhez. A shadcn Alert komponens stílusához igazítva — ikon + opcionális cím + üzenet.
+
+```tsx
+import { FormAlert } from "@/components/ui/form-alert";
+
+<FormAlert variant="error" message={errorMessage} />
+<FormAlert variant="success" message="Profil mentve!" />
+<FormAlert variant="info" message="A jelszóváltás még nem elérhető." />
+```
 
 ### Egyéni naptár (`calendar.tsx`)
 
@@ -882,6 +897,25 @@ Luxon csomagolása konzisztens dátummegjelenítéshez. Elfogad Luxon `DateTime`
 formatDate("2026-03-21T17:30:00Z"); // "2026. márc. 21."
 formatDateTime("2026-03-21T17:30:00Z"); // "2026. márc. 21., 17:30"
 ```
+
+### `src/lib/utils/extractErrorMessage.ts`
+
+Az Axios hibákat olvasható szöveggé alakítja. Megoldja a `[object Object]` problémát, amely akkor fordult elő, amikor a Go backend JSON hibaüzenetet adott vissza.
+
+```ts
+import { extractErrorMessage } from "@/lib/utils/extractErrorMessage";
+
+const message = extractErrorMessage(error, t("login.failed"));
+// Próbál: data.error → data.message → nyers string → axios.message → visszaesés
+```
+
+Keresési prioritás:
+
+1. `error.response.data` mint nyers string
+2. `error.response.data.error` (legtöbb Go végpont)
+3. `error.response.data.message` (egyes validációs válaszok)
+4. `error.message` (Axios beépített, pl. "Network Error")
+5. A megadott `fallback` fordított szöveg
 
 ### `src/lib/GenerateRandomUsername.ts`
 

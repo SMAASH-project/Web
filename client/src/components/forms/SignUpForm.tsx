@@ -13,6 +13,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { FormAlert } from "@/components/ui/form-alert";
 import { cn } from "@/lib/utils";
 import { Link, useNavigate } from "react-router-dom";
 import React from "react";
@@ -25,6 +26,8 @@ import {
 import { useTranslation } from "react-i18next";
 import { useSettings } from "@/components/pages/profileDependents/settings/settingsLogic/SettingsContext";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
+import { extractErrorMessage } from "@/lib/utils/extractErrorMessage";
+import type { AxiosError } from "axios";
 
 export function SignupForm(props: React.ComponentProps<"div">) {
   return (
@@ -33,14 +36,15 @@ export function SignupForm(props: React.ComponentProps<"div">) {
     </GoogleReCaptchaProvider>
   );
 }
+
 function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
   const captchaEnabled = true;
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [username, setUsername] = React.useState("");
   const [email, setEmail] = React.useState("");
-
   const [validationError, setValidationError] = React.useState("");
+
   const navigate = useNavigate();
   const randomUsername = generateRandomUsername();
   const signupMutation = useSignupMutation();
@@ -63,9 +67,6 @@ function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
       return;
     }
 
-    // Execute reCAPTCHA only at submit time — not continuously.
-    // This avoids the flood of /reload and /clr requests that occur when
-    // <GoogleReCaptcha onVerify> is used (it re-verifies on a timer).
     let captchaToken: string | null = null;
     if (captchaEnabled) {
       if (!executeRecaptcha) {
@@ -89,13 +90,20 @@ function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
     try {
       await signupMutation.mutateAsync({ email, password, username });
       navigate("/app/login");
-    } catch (err) {
-      const error = err as { response?: { data?: string } };
-      if (error?.response?.data) {
-        setValidationError(error.response.data.toString());
-      }
+    } catch {
+      // error displayed via signupMutation.isError below
     }
   };
+
+  // Client-side validation errors take priority; fall back to server error
+  const errorMessage =
+    validationError ||
+    (signupMutation.isError
+      ? extractErrorMessage(
+          signupMutation.error as AxiosError,
+          t("signup.failed"),
+        )
+      : "");
 
   return (
     <div className={cn("w-full max-w-md px-4 sm:px-0", className)} {...props}>
@@ -122,7 +130,10 @@ function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
                   type="text"
                   placeholder={`${randomUsername.prefix}${randomUsername.suffix}`}
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={(e) => {
+                    setUsername(e.target.value);
+                    if (validationError) setValidationError("");
+                  }}
                   disabled={signupMutation.isPending}
                   required
                 />
@@ -150,7 +161,10 @@ function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
                   id="password"
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (validationError) setValidationError("");
+                  }}
                   disabled={signupMutation.isPending}
                   required
                 />
@@ -167,7 +181,10 @@ function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
                   id="confirm-password"
                   type="password"
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    if (validationError) setValidationError("");
+                  }}
                   disabled={signupMutation.isPending}
                   required
                 />
@@ -175,12 +192,11 @@ function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
                   {t("signup.confirmPasswordHint")}
                 </FieldDescription>
               </Field>
-              {validationError && (
-                <p className="text-red-500">{validationError}</p>
+
+              {errorMessage && (
+                <FormAlert variant="error" message={errorMessage} />
               )}
-              {signupMutation.isError && (
-                <p className="text-red-500">{t("signup.failed")}</p>
-              )}
+
               <Field>
                 <Button
                   type="submit"

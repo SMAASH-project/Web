@@ -43,7 +43,14 @@
   "addProfile": {
     "title": "Create New Profile",
     "description": "Add a new profile to your account. Click save when you're done.",
+    "username": "Username",
+    "profilePicture": "Profile Picture",
     "saving": "Saving...",
-    "save": "Save changes"
+    "save": "Save changes",
+    "cancel": "Cancel",
+    "errorUsernameRequired": "Username is required.",
+    "errorUsernameTooLong": "Username must be 20 characters or less.",
+    "errorUsernameTaken": "That username is already taken. Please choose a different one.",
+    "errorSaveFailed": "Failed to save profile. Please try again."
   }
 }

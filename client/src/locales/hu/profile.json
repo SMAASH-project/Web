@@ -42,8 +42,15 @@
   },
   "addProfile": {
     "title": "Új profil létrehozása",
-    "description": "Adj hozzá egy új profilt a fiókodhoz. Kattints a mentésre, ha kész vagy.",
+    "description": "Adj hozzá egy új profilt a fiókodhozód. Kattints a mentésre, ha kész vagy.",
+    "username": "Felhasználónév",
+    "profilePicture": "Profilkép",
     "saving": "Mentés...",
-    "save": "Módosítások mentése"
+    "save": "Módosítások mentése",
+    "cancel": "Mégse",
+    "errorUsernameRequired": "A felhasználónév megadása kötelező.",
+    "errorUsernameTooLong": "A felhasználónév legfeljebb 20 karakter lehet.",
+    "errorUsernameTaken": "Ez a felhasználónév már foglalt. Kérjük, válassz másikat.",
+    "errorSaveFailed": "A profil mentése sikertelen. Kérjük, próbáld újra."
   }
 }

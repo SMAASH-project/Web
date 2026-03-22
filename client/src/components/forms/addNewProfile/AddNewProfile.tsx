@@ -12,6 +12,7 @@ import {
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FormAlert } from "@/components/ui/form-alert";
 import { generateRandomUsername } from "@/lib/GenerateRandomUsername";
 import { useProfiles } from "./useProfiles";
 import { useEffect, useState } from "react";
@@ -31,13 +32,11 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
   // Generate a username that's not already in `profiles`.
   const generateUniqueUsername = () => {
     const existing = new Set(profiles.map((p) => p.name));
-    // Try a few times to get a random username that isn't taken.
     for (let i = 0; i < 20; i++) {
       const r = generateRandomUsername();
       const candidate = `${r.prefix}${r.suffix}`;
       if (!existing.has(candidate)) return candidate;
     }
-    // Fallback: append a counter to ensure uniqueness.
     let counter = 1;
     while (true) {
       const r = generateRandomUsername();
@@ -47,7 +46,7 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
     }
   };
 
-  // When the dialog opens, pick a fresh unique username.
+  // When the dialog opens, pick a fresh unique username and clear state.
   useEffect(() => {
     if (open) {
       setError(null);
@@ -55,6 +54,7 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,22 +62,19 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
     if (isSubmitting) return;
 
     const normalizedUsername = username.trim();
+
     if (!normalizedUsername) {
-      setError("Username is required.");
+      setError(t("addProfile.errorUsernameRequired"));
       return;
     }
 
     if (normalizedUsername.length > 20) {
-      setError("Username must be 20 characters or less.");
+      setError(t("addProfile.errorUsernameTooLong"));
       return;
     }
 
-    // Validate uniqueness on submit
     if (profiles.some((p) => p.name === normalizedUsername)) {
-      setError(
-        "That username is already in use. Please choose a different one.",
-      );
-      // Rerandomize so the user gets a fresh suggestion
+      setError(t("addProfile.errorUsernameTaken"));
       setUsername(generateUniqueUsername());
       return;
     }
@@ -91,12 +88,11 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
         avatarFile: profilePicture,
       });
       onOpenChange(false);
-      // Prepare a fresh suggestion for the next time the dialog opens.
       setUsername("");
       setProfilePicture(null);
     } catch (err) {
       console.error("Failed to add profile:", err);
-      setError("Failed to save profile. Please try again.");
+      setError(t("addProfile.errorSaveFailed"));
     } finally {
       setIsSubmitting(false);
     }
@@ -113,7 +109,7 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
           <FieldGroup>
             <Field>
               <Label htmlFor="username-1" className="text-gray-900!">
-                Username
+                {t("addProfile.username")}
               </Label>
               <Input
                 type="text"
@@ -127,14 +123,9 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
                 }}
               />
             </Field>
-            {error ? (
-              <div className="mt-1 text-sm text-red-600" role="alert">
-                {error}
-              </div>
-            ) : null}
             <Field>
               <Label htmlFor="profile-picture-1" className="text-gray-900!">
-                Profile Picture
+                {t("addProfile.profilePicture")}
               </Label>
               <Input
                 type="file"
@@ -148,11 +139,12 @@ export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
                 }}
               />
             </Field>
+            {error && <FormAlert variant="error" message={error} />}
           </FieldGroup>
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline" disabled={isSubmitting}>
-                Cancel
+                {t("addProfile.cancel")}
               </Button>
             </DialogClose>
             <Button type="submit" disabled={isSubmitting}>

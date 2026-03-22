@@ -44,7 +44,7 @@ client/
     │   ├── apiClient.ts        # Axios instance + interceptors
     │   ├── queryKeys.ts        # Centralised query key factory
     │   ├── utils.ts            # Barrel re-export of all util modules
-    │   ├── utils/              # dateFormat, themeClasses, liquidGlass, colorMath, classnames
+    │   ├── utils/              # dateFormat, themeClasses, liquidGlass, colorMath, classnames, extractErrorMessage
     │   ├── miscAnimations/     # Reusable Motion wrappers
     │   └── pageAnimations/     # Page-level animation components
     ├── components/
@@ -638,15 +638,20 @@ export const navItems = [
 
 ## 9. Forms
 
+All three forms use `<FormAlert>` for error display and `extractErrorMessage()` to convert Axios errors into readable strings. Previously errors were displayed as raw `<p>` tags and could show `[object Object]` when the server returned a JSON error object.
+
 ### `LoginForm.tsx`
 
 - Email + password fields
 - Calls `useLoginMutation()`, sets `isLoggedIn`/`userId`/`isAdmin` on success, navigates to `/app/profile-selector`
 - Language toggle in the top-right corner
+- 401 responses show a specific "Incorrect email or password" message; all other errors show the server's message or a translated fallback
 
 ### `SignUpForm.tsx`
 
 - Username / email / password / confirm password
+- Client-side validation errors (username too short, password mismatch, etc.) take priority over server errors in a single `errorMessage` variable — no duplicate alerts
+- Validation errors clear automatically when the user edits the relevant field
 - reCAPTCHA v3 — `GoogleReCaptchaProvider` wraps the inner form component. Token is fetched only on submit via `executeRecaptcha("signup")` — **not** continuously polled. This prevents the `reload`/`clr` request flood.
 - Site key is hardcoded in the component; move to an env variable for production.
 
@@ -675,7 +680,7 @@ Memoised via `React.memo` + `useCallback` to avoid expensive re-renders when pro
 
 ### `AddNewProfile.tsx`
 
-Dialog form to create a new profile. Accepts display name + optional avatar image upload. Limit: 5 profiles per user.
+Dialog form to create a new profile. Accepts display name + optional avatar image upload. Limit: 5 profiles per user. All validation errors and field labels are fully translated (EN/HU). Error strings come from `profile.addProfile.*` translation keys.
 
 ---
 
@@ -738,29 +743,50 @@ Hungarian is agglutinative — translations are complete context-aware strings, 
 
 Components live in `src/components/ui/` and follow shadcn patterns (Radix UI primitives + Tailwind).
 
-| Component        | File                 | Notes                                            |
-| ---------------- | -------------------- | ------------------------------------------------ |
-| `Button`         | `button.tsx`         | Variants via `button-variants.ts`                |
-| `ButtonGroup`    | `button-group.tsx`   | Horizontal/vertical grouped buttons              |
-| `Input`          | `input.tsx`          | Standard text input                              |
-| `Card`           | `card.tsx`           | Container card                                   |
-| `Avatar`         | `avatar.tsx`         | User/profile avatar with fallback initials       |
-| `Badge`          | `badge.tsx`          | Status/category labels                           |
-| `Label`          | `label.tsx`          | Form field label                                 |
-| `Field`          | `field.tsx`          | Field + FieldLabel + FieldDescription layout     |
-| `Dialog`         | `dialog.tsx`         | Modal dialog                                     |
-| `Sheet`          | `sheet.tsx`          | Slide-out side panel                             |
-| `DropdownMenu`   | `dropdown-menu.tsx`  | Radix dropdown                                   |
-| `Popover`        | `popover.tsx`        | Radix popover                                    |
-| `Switch`         | `switch.tsx`         | Toggle switch                                    |
-| `Checkbox`       | `checkbox.tsx`       | Checkbox                                         |
-| `RadioGroup`     | `radio-group.tsx`    | Radio button group                               |
-| `Accordion`      | `accordion.tsx`      | Collapsible sections                             |
-| `Separator`      | `separator.tsx`      | Horizontal/vertical rule                         |
-| `Calendar`       | `calendar.tsx`       | Custom date range calendar (no react-day-picker) |
-| `ColorPicker`    | `color-picker.tsx`   | Hex colour input                                 |
-| `Resizable`      | `resizable.tsx`      | Drag-to-resize panels                            |
-| `LanguageToggle` | `LanguageToggle.tsx` | EN/HU flag buttons for auth pages                |
+| Component        | File                 | Notes                                                        |
+| ---------------- | -------------------- | ------------------------------------------------------------ |
+| `Button`         | `button.tsx`         | Variants via `button-variants.ts`                            |
+| `ButtonGroup`    | `button-group.tsx`   | Horizontal/vertical grouped buttons                          |
+| `Input`          | `input.tsx`          | Standard text input                                          |
+| `Card`           | `card.tsx`           | Container card                                               |
+| `Avatar`         | `avatar.tsx`         | User/profile avatar with fallback initials                   |
+| `Badge`          | `badge.tsx`          | Status/category labels                                       |
+| `Label`          | `label.tsx`          | Form field label                                             |
+| `Field`          | `field.tsx`          | Field + FieldLabel + FieldDescription layout                 |
+| `Dialog`         | `dialog.tsx`         | Modal dialog                                                 |
+| `Sheet`          | `sheet.tsx`          | Slide-out side panel                                         |
+| `DropdownMenu`   | `dropdown-menu.tsx`  | Radix dropdown                                               |
+| `Popover`        | `popover.tsx`        | Radix popover                                                |
+| `Switch`         | `switch.tsx`         | Toggle switch                                                |
+| `Checkbox`       | `checkbox.tsx`       | Checkbox                                                     |
+| `RadioGroup`     | `radio-group.tsx`    | Radio button group                                           |
+| `Accordion`      | `accordion.tsx`      | Collapsible sections                                         |
+| `Separator`      | `separator.tsx`      | Horizontal/vertical rule                                     |
+| `Calendar`       | `calendar.tsx`       | Custom date range calendar (no react-day-picker)             |
+| `ColorPicker`    | `color-picker.tsx`   | Hex colour input                                             |
+| `Resizable`      | `resizable.tsx`      | Drag-to-resize panels                                        |
+| `LanguageToggle` | `LanguageToggle.tsx` | EN/HU flag buttons for auth pages                            |
+| `FormAlert`      | `form-alert.tsx`     | Inline form alert — variants: `error` \| `success` \| `info` |
+
+### `FormAlert` (`form-alert.tsx`)
+
+Inline alert component for form-level error, success, and info messages. Styled to match the shadcn Alert component — icon + optional title + message.
+
+```tsx
+import { FormAlert } from "@/components/ui/form-alert";
+
+// Error (red) — most common use case
+<FormAlert variant="error" message={errorMessage} />
+
+// With a title
+<FormAlert variant="error" title="Login failed" message="Incorrect email or password." />
+
+// Success (green)
+<FormAlert variant="success" message="Profile saved!" />
+
+// Info (blue)
+<FormAlert variant="info" message="Password changes are not yet available." />
+```
 
 ### Custom Calendar (`calendar.tsx`)
 
@@ -882,6 +908,28 @@ Wraps Luxon for consistent date display. Accepts Luxon `DateTime`, JS `Date`, IS
 formatDate("2026-03-21T17:30:00Z"); // "Mar 21, 2026"
 formatDateTime("2026-03-21T17:30:00Z"); // "Mar 21, 2026, 5:30 PM"
 ```
+
+### `src/lib/utils/extractErrorMessage.ts`
+
+Converts an Axios error into a human-readable string. Fixes the `[object Object]` problem that occurred when the Go backend returned a JSON error body and code called `String()` on it.
+
+The Go backend returns errors in several shapes — this function handles all of them:
+
+```ts
+import { extractErrorMessage } from "@/lib/utils/extractErrorMessage";
+
+// In a catch block or mutation error handler:
+const message = extractErrorMessage(error, t("login.failed"));
+// Tries: data.error → data.message → raw string → axios.message → fallback
+```
+
+Lookup priority:
+
+1. `error.response.data` as a plain string
+2. `error.response.data.error` (most Go endpoints)
+3. `error.response.data.message` (some validation responses)
+4. `error.message` (Axios built-in, e.g. "Network Error")
+5. The provided `fallback` translated string
 
 ### `src/lib/GenerateRandomUsername.ts`
 
