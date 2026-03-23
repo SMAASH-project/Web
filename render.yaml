@@ -2,10 +2,11 @@ services:
   - type: web
     name: smaash-web
     runtime: go
+    rootDir: .
     region: frankfurt
     plan: free
     autoDeployTrigger: commit
-    buildCommand: cd client && npm ci && npm run build && cd .. && go build -o build/main cmd/api/main.go && go build -o build/seeder cmd/seeder/main.go
+    buildCommand: cd client && npm ci && npm run build && cd .. && mkdir -p build && go build -o ./build/main ./cmd/api/main.go && go build -o ./build/seeder ./cmd/seeder/main.go
     startCommand: ./build/seeder && ./build/main
     envVars:
       - key: SECRET_KEY
@@ -16,9 +17,3 @@ services:
         value: ./uploads/pfps
       - key: SEED_DATA_URI
         value: ./internal/seeder/test_source
-      - key: ADMIN_EMAIL
-        sync: false
-      - key: ADMIN_PASSWORD
-        sync: false
-      - key: ADMIN_ROLE_ID
-        value: "1"
