@@ -34,6 +34,9 @@ func (s *Server) MountRoutes() *Server {
 
 	// damned gin can't serve files from root path >:(
 	r.Static("/app", "./build/client")
+	r.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusTemporaryRedirect, "/app/")
+	})
 
 	api := r.Group("/api")
 	for _, c := range s.controllers {
