@@ -10,10 +10,6 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: DB_URL
-        value: /var/data/app.db
+        value: test.db
       - key: UPLOAD_DIR
-        value: /var/data/uploads/pfps
-    disk:
-      name: smaash-data
-      mountPath: /var/data
-      sizeGB: 1
+        value: ./uploads/pfps
