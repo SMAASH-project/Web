@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"smaash-web/internal/models"
+	"strconv"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -37,6 +38,26 @@ func (us UserSeeder) Seed(c context.Context, data_root_path string, db *gorm.DB,
 	var target []UserDataFormat
 	if err = json.Unmarshal(raw, &target); err != nil {
 		errStream <- err
+	}
+
+	adminEmail := os.Getenv("ADMIN_EMAIL")
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+	adminRoleID := 1
+	if roleIDRaw := os.Getenv("ADMIN_ROLE_ID"); roleIDRaw != "" {
+		parsedRoleID, parseErr := strconv.Atoi(roleIDRaw)
+		if parseErr != nil {
+			errStream <- parseErr
+		} else {
+			adminRoleID = parsedRoleID
+		}
+	}
+
+	if adminEmail != "" && adminPassword != "" {
+		target = append(target, UserDataFormat{
+			Email:    adminEmail,
+			Password: adminPassword,
+			RoleID:   adminRoleID,
+		})
 	}
 
 	for _, val := range target {
