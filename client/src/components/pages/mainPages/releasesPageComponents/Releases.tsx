@@ -9,12 +9,9 @@ import {
   getSubtextColor,
 } from "@/lib/utils";
 import { LoadPost } from "@/lib/pageAnimations/newsPageAnimations/LoadPost";
-import { RemoveReleaseButton } from "./RemoveReleaseButton";
 import { DownloadReleaseButton } from "./DownloadReleaseButton";
 import type { Release } from "@/types/PageTypes";
 import { Package, Loader2 } from "lucide-react";
-import { useContext } from "react";
-import { AuthContext } from "@/context/AuthContext";
 
 const VERSION_TYPE_COLORS: Record<string, string> = {
   major: "#3b82f6",
@@ -36,7 +33,8 @@ interface ReleasesProps {
   sentinelRef: React.RefObject<HTMLDivElement | null>;
   hasMore: boolean;
   isLoading: boolean;
-  handleRemove: (id: string) => void;
+  /** Optional error message from the GitHub API fetch. */
+  fetchError: string | null;
 }
 
 export function Releases({
@@ -46,10 +44,9 @@ export function Releases({
   sentinelRef,
   hasMore,
   isLoading,
-  handleRemove,
+  fetchError,
 }: ReleasesProps) {
   const { settings } = useSettings();
-  const { isAdmin } = useContext(AuthContext);
   const glass = settings.useLiquidGlass;
   const bgClass = getBackgroundClasses(
     settings.useLiquidGlass,
@@ -147,12 +144,14 @@ export function Releases({
 
                 {/* Right: actions */}
                 <div className="flex items-center gap-1.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
-                  <DownloadReleaseButton version={release.version} />
-                  {isAdmin && (
-                    <RemoveReleaseButton
-                      onConfirm={() => handleRemove(release.id)}
-                    />
-                  )}
+                  <DownloadReleaseButton
+                    version={release.version}
+                    downloadUrl={release.downloadUrls[selectedOs]}
+                  />
+                  {/* Downloads come from GitHub release assets.
+                      Releases are managed on GitHub — there is no in-app
+                      add/remove UI. To publish or retract a release, do so
+                      on https://github.com/SMAASH-project/SMAASH/releases */}
                 </div>
               </div>
             </Card>

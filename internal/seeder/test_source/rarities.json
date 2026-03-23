@@ -1,14 +1,17 @@
 [
   {
-    "Name": "common"
+    "Name": "Common"
   },
   {
-    "Name": "rare"
+    "Name": "Uncommon"
   },
   {
-    "Name": "epic"
+    "Name": "Rare"
   },
   {
-    "Name": "legendary"
+    "Name": "Epic"
+  },
+  {
+    "Name": "Legendary"
   }
 ]

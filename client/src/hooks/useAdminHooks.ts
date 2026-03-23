@@ -88,11 +88,10 @@ export const adminQueryKeys = {
   users: {
     all: ["admin", "users"] as const,
     search: (q: string) => ["admin", "users", "search", q] as const,
-    byId: (id: number) => ["admin", "users", id] as const,
   },
 } as const;
 
-// ─── Queries ─────────────────────────────────────────────────────────────────
+// ─── Queries ──────────────────────────────────────────────────────────────────
 
 /**
  * Fetch all users for the admin panel.
@@ -118,27 +117,7 @@ export function useAdminUsersQuery(searchQuery?: string) {
   });
 }
 
-/**
- * Fetch a single user by id (includes ban status and all fields).
- *
- * TODO: BACKEND — Ensure the extended UserReadDTO (with username + ban_until)
- * is returned from GET /api/users/:id. See BACKEND_NOTES.md §1.
- *
- * Endpoint: GET /api/users/:id
- */
-export function useAdminUserQuery(userId: number | null) {
-  return useQuery<AdminUserDTO, AxiosError>({
-    queryKey: adminQueryKeys.users.byId(userId ?? 0),
-    queryFn: async () => {
-      const { data } = await apiClient.get<AdminUserDTO>(`/users/${userId}`);
-      return data;
-    },
-    enabled: !!userId,
-    staleTime: 30 * 1000,
-  });
-}
-
-// ─── Mutations ───────────────────────────────────────────────────────────────
+// ─── Mutations ────────────────────────────────────────────────────────────────
 
 /**
  * Ban a user (permanent or timed).
@@ -158,11 +137,12 @@ export function useBanUserMutation() {
         await apiClient.post(`/users/${userId}/ban`, { id: userId, period });
       },
       onSuccess: (_data, variables) => {
-        // Invalidate the user list and the specific user entry
         queryClient.invalidateQueries({ queryKey: adminQueryKeys.users.all });
+        // Re-fetch the full user list so ban status updates immediately
         queryClient.invalidateQueries({
-          queryKey: adminQueryKeys.users.byId(variables.userId),
+          queryKey: adminQueryKeys.users.search(""),
         });
+        void variables;
       },
     },
   );
@@ -183,11 +163,8 @@ export function useUnbanUserMutation() {
     mutationFn: async ({ userId }) => {
       await apiClient.post(`/users/${userId}/unban`);
     },
-    onSuccess: (_data, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminQueryKeys.users.all });
-      queryClient.invalidateQueries({
-        queryKey: adminQueryKeys.users.byId(variables.userId),
-      });
     },
   });
 }

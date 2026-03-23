@@ -105,7 +105,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
     const newPost: NewsPost = {
       id: Date.now().toString(),
       ...getFormValues(),
-      createdAt: DateTime.now() as ReturnType<typeof DateTime.now>,
+      createdAt: DateTime.now(),
     };
 
     onCreate?.(newPost);

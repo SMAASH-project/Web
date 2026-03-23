@@ -11,15 +11,11 @@ import { ProfileProvider } from "@/components/forms/addNewProfile/ProfilesContex
 import { Wrapper } from "./Wrapper";
 import { Suspense } from "react";
 
-/**
- * Create a single QueryClient instance for the entire app.
- * This is initialized outside the component to avoid recreating it on every render.
- */
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 2 * 60 * 1000, // 2 minutes (reduced from 5)
-      gcTime: 10 * 60 * 1000, // 10 minutes (garbage collection)
+      staleTime: 2 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
       retry: 1,
       refetchOnWindowFocus: true,
       refetchOnReconnect: true,
@@ -32,17 +28,15 @@ const queryClient = new QueryClient({
   },
 });
 
-/**
- * Create a persister for localStorage caching.
- * This enables offline support and faster app startup.
- */
 const persister = createSyncStoragePersister({
   storage: window.localStorage,
 });
 
 /**
- * Root layout rendered by React Router. All providers live here so every
- * route element is a guaranteed descendant of every context provider.
+ * Root layout rendered by React Router.
+ *
+ * GoogleReCaptchaProvider is NOT here — it lives only inside SignUpForm so the
+ * reCAPTCHA badge and script are only active on the signup page.
  */
 export function RootLayout() {
   return (

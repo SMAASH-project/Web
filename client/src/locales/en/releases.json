@@ -1,19 +1,10 @@
 {
   "title": "Releases",
-  "subtitle": "Browse and manage app releases",
+  "subtitle": "Download the latest builds from GitHub",
   "searchPlaceholder": "Search by version…",
   "noResults": "No releases found.",
+  "fetchError": "Could not load releases from GitHub",
   "download": "Download",
-  "delete": {
-    "confirm": "Confirm Deletion",
-    "description": "Are you sure you want to delete this release? This action cannot be undone.",
-    "cancel": "Cancel",
-    "confirm_action": "Confirm"
-  },
-  "add": {
-    "button": "Add Release",
-    "title": "Add New Release"
-  },
   "os": {
     "ios": "iOS",
     "android": "Android"

@@ -9,6 +9,7 @@ import {
 } from "../ui/card";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
+import { FormAlert } from "../ui/form-alert";
 import { Link, useNavigate } from "react-router-dom";
 import React, { useEffect } from "react";
 import { AuthContext } from "@/context/AuthContext";
@@ -16,6 +17,8 @@ import { useLoginMutation } from "@/hooks/useQueryHooks";
 import { useTranslation } from "react-i18next";
 import { useSettings } from "@/components/pages/profileDependents/settings/settingsLogic/SettingsContext";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
+import { extractErrorMessage } from "@/lib/utils/extractErrorMessage";
+import type { AxiosError } from "axios";
 
 export function LoginForm({
   className,
@@ -59,13 +62,24 @@ export function LoginForm({
       setIsAdmin(response?.role === "admin");
       setIsLoggedIn(true);
     } catch {
-      // handled by mutation state
+      // error displayed via loginMutation.isError below
     }
   };
 
   useEffect(() => {
     if (isLoggedIn) navigate("/app/profile-selector");
   }, [navigate, isLoggedIn]);
+
+  // Determine the best error message to show
+  const loginError = loginMutation.isError
+    ? extractErrorMessage(
+        loginMutation.error as AxiosError,
+        // Use specific "invalid credentials" copy for 401, generic fallback otherwise
+        (loginMutation.error as AxiosError)?.response?.status === 401
+          ? t("login.errorInvalidCredentials")
+          : t("login.failed"),
+      )
+    : null;
 
   return (
     <div className={cn("w-full max-w-md px-4 sm:px-0", className)} {...props}>
@@ -117,12 +131,9 @@ export function LoginForm({
                   disabled={loginMutation.isPending}
                 />
               </Field>
-              {loginMutation.isError && (
-                <p className="text-red-500">
-                  {String(loginMutation.error?.response?.data) ||
-                    t("login.failed")}
-                </p>
-              )}
+
+              {loginError && <FormAlert variant="error" message={loginError} />}
+
               <Field>
                 <Button
                   type="submit"
