@@ -2,6 +2,7 @@ services:
   - type: web
     name: smaash-web
     runtime: go
+    region: frankfurt
     plan: free
     autoDeployTrigger: commit
     buildCommand: cd client && npm ci && npm run build && cd .. && go build -o build/main cmd/api/main.go
