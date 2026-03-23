@@ -4,7 +4,7 @@ import { DateTime } from "luxon";
  * Format a date-like value (Luxon DateTime, JS Date, or ISO/string) to a medium human string.
  */
 export function formatDate(
-  value: ReturnType<typeof DateTime.now> | Date | string | undefined | null,
+  value: DateTime | Date | string | undefined | null,
 ): string {
   if (!value) return "";
 
@@ -29,7 +29,7 @@ export function formatDate(
  * Format a date-like value to include both date and time.
  */
 export function formatDateTime(
-  value: ReturnType<typeof DateTime.now> | Date | string | undefined | null,
+  value: DateTime | Date | string | undefined | null,
 ): string {
   if (!value) return "";
 

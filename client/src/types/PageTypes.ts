@@ -18,7 +18,7 @@ export interface NewsPost {
   imagePosition?: "Top" | "Right";
   imageSize?: number;
   content: string;
-  createdAt: ReturnType<typeof DateTime.now>;
+  createdAt: DateTime;
 }
 export const newsPosts: NewsPost[] = [
   {
@@ -72,12 +72,22 @@ export interface WebstoreItem {
   description: string;
   price: number;
   owned: boolean;
-  createdAt: ReturnType<typeof DateTime.now>;
+  createdAt: DateTime;
 }
 
 export interface Release {
   id: string;
   version: string;
   supports: string[];
-  createdAt: ReturnType<typeof DateTime.now>;
+  /**
+   * Per-platform direct download URLs derived from GitHub release assets.
+   * Keys match OsTypes names exactly: "iOS" | "Android"
+   * A key is absent when no matching asset exists for that platform.
+   *
+   * Example:
+   *   { iOS: "https://github.com/.../smaash-v1.2.3-ios.ipa",
+   *     Android: "https://github.com/.../smaash-v1.2.3-android.apk" }
+   */
+  downloadUrls: Partial<Record<string, string>>;
+  createdAt: DateTime;
 }

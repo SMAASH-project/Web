@@ -1,14 +1,14 @@
 [
   {
-    "Name": "weapon"
+    "Name": "Character"
   },
   {
-    "Name": "consumable"
+    "Name": "Skin"
   },
   {
-    "Name": "skin"
+    "Name": "Melee"
   },
   {
-    "Name": "buff"
+    "Name": "Ranged"
   }
 ]
