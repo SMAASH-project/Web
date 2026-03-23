@@ -6,8 +6,7 @@ services:
     plan: free
     autoDeployTrigger: commit
     buildCommand: cd client && npm ci && npm run build && cd .. && go build -o build/main cmd/api/main.go && go build -o build/seeder cmd/seeder/main.go
-    preDeployCommand: ./build/seeder
-    startCommand: ./build/main
+    startCommand: ./build/seeder && ./build/main
     envVars:
       - key: SECRET_KEY
         generateValue: true
