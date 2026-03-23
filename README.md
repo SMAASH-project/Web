@@ -31,6 +31,8 @@ The app depends on the following environment variables:
 - DB_URL (default: test.db)
 - SEED_DATA_URI (default: ./internal/seeder/test_source)
 - SECRET_KEY (default: super_secret_key)
+- ALLOWED_ORIGINS (default: http://localhost:5173)
+- UPLOAD_DIR (default: ./uploads/pfps)
 
 ### Setting up the project
 1 - Clone the repo:
@@ -180,3 +182,40 @@ To build the project, run `just build-fullstack` to build both the frontend and 
 > Explicit cross compilation is not yet supported, it is on our agenda.
 
 Deploy the contents of the build folder by any means you like
+
+### Render.com deployment (GitHub + Blueprint)
+
+This project can be deployed to Render as a single web service that serves both backend and frontend.
+
+#### What lives where
+- Backend: same Render Web Service process (`./build/main`)
+- Frontend: static files under `/app` served by backend
+- API: mounted under `/api`
+
+#### Step-by-step
+1. Commit and push your code to GitHub, including [render.yaml](render.yaml).
+2. In Render, go to **New** -> **Blueprint**.
+3. Select your repository and branch.
+4. Confirm the Blueprint service settings from [render.yaml](render.yaml):
+  - Build command: `cd client && npm ci && npm run build && cd .. && go build -o build/main cmd/api/main.go`
+  - Start command: `./build/main`
+  - Persistent disk mounted at `/var/data`
+5. Click **Apply** and wait for first deploy.
+6. In Render service environment variables, set or verify:
+  - `SECRET_KEY` (required, random long value)
+  - `DB_URL=/var/data/app.db`
+  - `UPLOAD_DIR=/var/data/uploads/pfps`
+  - `ALLOWED_ORIGINS=https://<your-service>.onrender.com`
+7. Redeploy once after setting the final `ALLOWED_ORIGINS` value.
+
+#### Production endpoints
+Replace `<your-service>` with your Render service name.
+
+- Frontend app: `https://<your-service>.onrender.com/app/`
+- API base: `https://<your-service>.onrender.com/api`
+- Swagger UI: `https://<your-service>.onrender.com/swagger/index.html`
+
+#### Database choice (production)
+- Current code uses SQLite (`DB_URL` points to a file).
+- For low traffic/single instance, SQLite + persistent disk is acceptable.
+- For higher concurrency and scaling, migrate to PostgreSQL and keep separate dev/staging/prod environments.

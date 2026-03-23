@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: smaash-web
+    env: go
+    plan: free
+    autoDeploy: true
+    buildCommand: cd client && npm ci && npm run build && cd .. && go build -o build/main cmd/api/main.go
+    startCommand: ./build/main
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DB_URL
+        value: /var/data/app.db
+      - key: UPLOAD_DIR
+        value: /var/data/uploads/pfps
+    disks:
+      - name: smaash-data
+        mountPath: /var/data
+        sizeGB: 1
