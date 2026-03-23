@@ -69,9 +69,21 @@ func (sc StatsController) ReadMostPlayedLevels(c *gin.Context) {
 	c.JSON(http.StatusOK, utils.Map(res, dtos.TopLevelsToDTO))
 }
 
+func (sc StatsController) ReadPlayersWithMostWins(c *gin.Context) {
+	res, err := sc.statsRepo.ReadPlayersWithMostWins(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+		return
+	}
+
+	c.JSON(http.StatusOK, utils.Map(res, dtos.BestPlayersToDTO))
+}
+
 func (sc StatsController) MountRoutes(apiGroup *gin.RouterGroup) {
 	stats := apiGroup.Group("/stats")
 	stats.GET("top/items", sc.ReadMostPopularItems)
 	stats.GET("top/players", sc.ReadMostActivePlayers)
 	stats.GET("top/levels", sc.ReadMostPlayedLevels)
+	stats.GET("profiles/:id/favourite", sc.ReadFavouriteCharactersOfPlayer)
+	stats.GET("leaderboard", sc.ReadPlayersWithMostWins)
 }

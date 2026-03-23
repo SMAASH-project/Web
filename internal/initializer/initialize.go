@@ -22,7 +22,7 @@ func Initialize() *server.Server {
 	return server.NewServer().
 		SetGracePeriod(10 * time.Second).
 		AddController(controllers.NewUserController(userRepo, profilesBaseRepo)).
-		AddController(controllers.NewAuthnController(authService)).
+		AddController(controllers.NewAuthnController(authService, repository.NewRolesRepositoryActions(conn))).
 		AddController(controllers.NewGameAuthController(userRepo)).
 		AddController(controllers.NewLevelsController(repository.NewBaseRepositoryActions[models.Level](conn))).
 		AddController(controllers.NewPlayerProfileController(profilesBaseRepo)).

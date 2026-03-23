@@ -13,7 +13,7 @@ import (
 )
 
 type Authentication interface {
-	SignUp(context.Context, *models.User) (*models.User, error)
+	SignUp(context.Context, *models.User) error
 	Login(context.Context, *models.User) (*string, *models.User, error)
 }
 
@@ -30,14 +30,17 @@ var (
 	ErrUserBanned               = errors.New("User is banned")
 )
 
-func (a AuthenticationService) SignUp(c context.Context, u *models.User) (*models.User, error) {
+func (a AuthenticationService) SignUp(c context.Context, u *models.User) error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(u.PasswordHash), 10)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	u.PasswordHash = string(hash)
 	err = a.userRepo.Create(c, u)
-	return u, err
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a AuthenticationService) Login(c context.Context, u *models.User) (*string, *models.User, error) {
