@@ -19,3 +19,8 @@ type TopLevelsResult struct {
 	Level
 	CountOfPlays uint
 }
+
+type BestPlayersResult struct {
+	PlayerProfile
+	CountOfWins uint
+}

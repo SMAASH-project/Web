@@ -36,7 +36,7 @@ func TopPlayersToDTO(topPlayer *models.TopPlayersResult) TopPlayersDTO {
 	}
 }
 
-func FavouriteCharacterToDTO(fav models.FavouriteCharacterResult) FavouriteCharactersDTO {
+func FavouriteCharacterToDTO(fav *models.FavouriteCharacterResult) FavouriteCharactersDTO {
 	return FavouriteCharactersDTO{
 		CharacterReadDTO: CharacterToDTO(fav.Character),
 		CountOfPlays:     fav.CountOfPlays,
