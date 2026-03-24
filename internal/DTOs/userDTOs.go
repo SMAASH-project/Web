@@ -1,6 +1,7 @@
 package dtos
 
 import (
+	"context"
 	"smaash-web/internal/models"
 
 	"gorm.io/gorm"
@@ -18,7 +19,6 @@ type UserReadDTO struct {
 type UserCreateDTO struct {
 	Email    string `json:"email" binding:"required,max=30,email"`
 	Password string `json:"password" binding:"required,min=8,max=50"`
-	RoleID   uint   `json:"role_id" binding:"required"`
 }
 
 type UserUpdateDTO struct {
@@ -37,6 +37,11 @@ type UserBanDTO struct {
 	Period uint `json:"period" binding:"required"` // in minutes
 }
 
+type UserPromoteDTO struct {
+	ID         uint   `json:"id" binding:"required"`
+	TargetRole string `json:"target_role" binding:"required,oneof=admin support"`
+}
+
 func UserToDTO(user models.User) UserReadDTO {
 	dto := UserReadDTO{
 		ID:        user.ID,
@@ -53,13 +58,17 @@ func UserToDTO(user models.User) UserReadDTO {
 	return dto
 }
 
-func CreateDTOToUser(dto *UserCreateDTO) *models.User {
+func CreateDTOToUser(dto *UserCreateDTO, roleIDExtractor func(context.Context, string) (models.Role, error)) (*models.User, error) {
+	role, err := roleIDExtractor(context.Background(), "user")
+	if err != nil {
+		return nil, err
+	}
 	return &models.User{
 		Email:        dto.Email,
 		PasswordHash: dto.Password,
-		RoleID:       dto.RoleID,
+		RoleID:       role.ID,
 		IsBanned:     false,
-	}
+	}, nil
 }
 
 func LoginDTOToUser(dto *UserLoginDTO) *models.User {

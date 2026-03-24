@@ -19,5 +19,6 @@ func AutoMigrate(db *gorm.DB) error {
 		&models.Item{},
 		&models.Category{},
 		&models.Rarity{},
+		&models.Post{},
 	)
 }

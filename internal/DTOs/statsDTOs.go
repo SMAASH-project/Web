@@ -22,6 +22,11 @@ type TopLevelsDTO struct {
 	CountOfPlays uint `json:"count_of_plays"`
 }
 
+type BestPlayersDTO struct {
+	PlayerProfileReadDTO
+	CountOfWins uint `json:"count_of_wins"`
+}
+
 func TopItemsToDTO(topItem *models.TopItemsResult) TopItemsDTO {
 	return TopItemsDTO{
 		ItemReadDTO:      ItemToDTO(topItem.Item),
@@ -36,7 +41,7 @@ func TopPlayersToDTO(topPlayer *models.TopPlayersResult) TopPlayersDTO {
 	}
 }
 
-func FavouriteCharacterToDTO(fav models.FavouriteCharacterResult) FavouriteCharactersDTO {
+func FavouriteCharacterToDTO(fav *models.FavouriteCharacterResult) FavouriteCharactersDTO {
 	return FavouriteCharactersDTO{
 		CharacterReadDTO: CharacterToDTO(fav.Character),
 		CountOfPlays:     fav.CountOfPlays,
@@ -47,5 +52,12 @@ func TopLevelsToDTO(topLevel *models.TopLevelsResult) TopLevelsDTO {
 	return TopLevelsDTO{
 		LevelReadDTO: LevelToDTO(topLevel.Level),
 		CountOfPlays: topLevel.CountOfPlays,
+	}
+}
+
+func BestPlayersToDTO(topPlayer *models.BestPlayersResult) BestPlayersDTO {
+	return BestPlayersDTO{
+		PlayerProfileReadDTO: PlayerProfileToReadDTO(topPlayer.PlayerProfile),
+		CountOfWins:          topPlayer.CountOfWins,
 	}
 }

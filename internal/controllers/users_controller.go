@@ -290,6 +290,49 @@ func (uc UserController) Unban(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+func (uc UserController) Promote(c *gin.Context) {
+	path := c.Request.URL.Path
+	id, _ := c.Get("id")
+
+	var body dtos.UserPromoteDTO
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	if id.(uint) != body.ID {
+		c.JSON(http.StatusBadRequest, dtos.NewErrResp("ID from URL doesn't match ID from request body", path))
+		return
+	}
+
+	if err := uc.userRepo.Promote(c.Request.Context(), id.(uint), body.TargetRole); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("Given user or role not found", path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
+func (uc UserController) Demote(c *gin.Context) {
+	path := c.Request.URL.Path
+	id, _ := c.Get("id")
+
+	if err := uc.userRepo.Demote(c.Request.Context(), id.(uint)); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("User with given id not found", path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
 func (uc UserController) MountRoutes(apiGroup *gin.RouterGroup) {
 	users := apiGroup.Group("/users")
 	// no creation, that happens on /auth/signup. No updating password either.
@@ -302,4 +345,6 @@ func (uc UserController) MountRoutes(apiGroup *gin.RouterGroup) {
 	users.GET("/whoami", middlewares.Authorize(middlewares.ANY), uc.WhoAmI)
 	users.POST("/:id/ban", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, uc.Ban)
 	users.POST("/:id/unban", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, uc.Unban)
+	users.POST("/:id/promote", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, uc.Promote)
+	users.POST("/:id/demote", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, uc.Demote)
 }
