@@ -173,6 +173,7 @@ func (uc *UserController) AddProfileToUser(c *gin.Context) {
 			return
 		}
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
 	}
 
 	currentProfiles, err := uc.profilesRepo.ReadByUserID(c.Request.Context(), id.(uint))

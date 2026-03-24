@@ -18,7 +18,10 @@ type ProfilesRepositoryActions struct {
 }
 
 func NewProfilesRepositoryActions(conn *gorm.DB) ProfilesRepository {
-	return ProfilesRepositoryActions{conn: conn}
+	return ProfilesRepositoryActions{
+		conn:           conn,
+		BaseRepository: NewBaseRepositoryActions[models.PlayerProfile](conn),
+	}
 }
 
 func (pra ProfilesRepositoryActions) ReadByUserID(c context.Context, userID uint) ([]models.PlayerProfile, error) {
