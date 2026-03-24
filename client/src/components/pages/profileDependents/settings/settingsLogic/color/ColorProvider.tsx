@@ -1,5 +1,6 @@
 import { type ReactNode, useState, useEffect } from "react";
 import { ColorContext } from "./ColorContext";
+import { type AnimationKey } from "@/lib/animationTypes";
 
 export function ColorProvider({ children }: { children: ReactNode }) {
   const STORAGE_KEY = "color-settings";
@@ -7,6 +8,7 @@ export function ColorProvider({ children }: { children: ReactNode }) {
     colorLeft: "#616161",
     colorMiddle: "#000000",
     colorRight: "#616161",
+    animationKey: null as AnimationKey | null,
   };
 
   // Lazy initializer reads localStorage synchronously on first render
@@ -20,6 +22,7 @@ export function ColorProvider({ children }: { children: ReactNode }) {
         colorLeft: parsed?.colorLeft ?? defaults.colorLeft,
         colorMiddle: parsed?.colorMiddle ?? defaults.colorMiddle,
         colorRight: parsed?.colorRight ?? defaults.colorRight,
+        animationKey: (parsed?.animationKey ?? null) as AnimationKey | null,
       };
     } catch {
       return defaults;
@@ -29,17 +32,25 @@ export function ColorProvider({ children }: { children: ReactNode }) {
   const [colorLeft, setColorLeft] = useState(initial.colorLeft);
   const [colorMiddle, setColorMiddle] = useState(initial.colorMiddle);
   const [colorRight, setColorRight] = useState(initial.colorRight);
+  const [animationKey, setAnimationKey] = useState<AnimationKey | null>(
+    initial.animationKey,
+  );
 
   // Persist changes to localStorage across sessions
   useEffect(() => {
     try {
       if (typeof window === "undefined") return;
-      const payload = JSON.stringify({ colorLeft, colorMiddle, colorRight });
+      const payload = JSON.stringify({
+        colorLeft,
+        colorMiddle,
+        colorRight,
+        animationKey,
+      });
       localStorage.setItem(STORAGE_KEY, payload);
     } catch {
       // ignore write errors
     }
-  }, [colorLeft, colorMiddle, colorRight]);
+  }, [colorLeft, colorMiddle, colorRight, animationKey]);
 
   return (
     <ColorContext.Provider
@@ -47,9 +58,11 @@ export function ColorProvider({ children }: { children: ReactNode }) {
         colorLeft,
         colorMiddle,
         colorRight,
+        animationKey,
         setColorLeft,
         setColorMiddle,
         setColorRight,
+        setAnimationKey,
       }}
     >
       {children}

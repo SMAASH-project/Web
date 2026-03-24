@@ -8,6 +8,9 @@ import {
   toRgbaColor,
 } from "./lib/utils";
 
+import { type AnimationKey } from "@/lib/animationTypes";
+import { AnimatedBackground } from "./directory/AnimatedBackground";
+
 interface WrapperProps {
   children: React.ReactNode;
 }
@@ -42,6 +45,19 @@ export function Wrapper({ children }: WrapperProps) {
 
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
 
+  // Resolve which animation to show:
+  //   animationOverride === null    → use the theme's animationKey
+  //   animationOverride === 'none'  → no animation
+  //   animationOverride === <key>   → use that specific animation
+  let resolvedAnimation: AnimationKey | null = null;
+  if (settings.useAnimations) {
+    if (settings.animationOverride === null) {
+      resolvedAnimation = context?.animationKey ?? null;
+    } else if (settings.animationOverride !== "none") {
+      resolvedAnimation = settings.animationOverride as AnimationKey;
+    }
+  }
+
   return (
     <div
       className={`${textColor} w-screen min-h-screen absolute top-0 left-0 flex items-center justify-center transition-[background-image] duration-600 ease-in-out`}
@@ -54,6 +70,14 @@ export function Wrapper({ children }: WrapperProps) {
         ["--theme-nav-shadow" as string]: themeNavShadow,
       }}
     >
+      {resolvedAnimation && (
+        <AnimatedBackground
+          animationKey={resolvedAnimation}
+          colorLeft={colorLeft}
+          colorMiddle={colorMiddle}
+          colorRight={colorRight}
+        />
+      )}
       {children}
     </div>
   );
