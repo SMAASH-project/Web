@@ -8,6 +8,7 @@ import (
 
 type Match struct {
 	gorm.Model
+	SessionID string    `gorm:"uniqueIndex;not null;type:varchar(64)"` // Photon session ID
 	StartedAt time.Time `gorm:"not null"`
 	EndedAt   time.Time `gorm:"not null"`
 	LevelID   uint      `gorm:"not null"`

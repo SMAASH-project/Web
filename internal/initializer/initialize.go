@@ -32,5 +32,6 @@ func Initialize() *server.Server {
 		AddController(controllers.NewRaritiesController(rarityRepo)).
 		AddController(controllers.NewStatsController(repository.NewStatsRepositoryActions(conn))).
 		AddController(controllers.NewPurchasesController(repository.NewBaseRepositoryActions[models.Purchase](conn), profilesRepo)).
-		AddController(controllers.NewPostsController(repository.NewBaseRepositoryActions[models.Post](conn)))
+		AddController(controllers.NewPostsController(repository.NewBaseRepositoryActions[models.Post](conn))).
+		AddController(controllers.NewMatchController(conn))
 }
