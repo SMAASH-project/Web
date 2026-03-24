@@ -4,6 +4,7 @@ interface Props {
   colorLeft: string;
   colorMiddle: string;
   colorRight: string;
+  paused?: boolean;
 }
 
 const KEYFRAMES = `
@@ -32,6 +33,7 @@ export function SakuraBackground({
   colorLeft,
   colorMiddle,
   colorRight,
+  paused = false,
 }: Props) {
   const colors = [
     colorLeft,
@@ -91,6 +93,7 @@ export function SakuraBackground({
               animation:
                 `sakura-fall ${p.duration}s ${p.delay}s linear infinite, ` +
                 `sakura-sway ${p.duration * 0.6}s ${p.delay}s ease-in-out infinite`,
+              animationPlayState: paused ? "paused" : "running",
             }}
           />
         ))}

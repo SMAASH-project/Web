@@ -36,7 +36,7 @@ client/
     ├── main.tsx                # Router beállítása, lusta importok, StrictMode
     ├── App.tsx                 # Hitelesítési átirányítás kapuja
     ├── RootLayout.tsx          # Minden provider, Suspense határ
-    ├── Wrapper.tsx             # Teljes oldalas átmenet + CSS egyéni tulajdonságok
+    ├── Wrapper.tsx             # Teljes oldalas átmenet + CSS egyéni tulajdonságok (leszármaztatott értékek memoizálva); mindig feloldja az animáció kulcsát és átadja a paused={!useAnimations} propot
     ├── context/                # Hitelesítési és navigációs kontextusok
     ├── hooks/                  # React Query hook-ok (domain szerint felosztva)
     ├── lib/
@@ -243,6 +243,18 @@ useAnimations = true
 ```
 
 Új háttér hozzáadása: hozd létre a komponenst a `src/directory/`-ban, add hozzá a kulcsát az `AnimationKey` típushoz (`src/lib/animationTypes.ts`), add hozzá a feliratot az `ANIMATION_LABELS`-be, és add hozzá a `case`-t az `AnimatedBackground.tsx`-ben.
+
+Minden háttér elfogad egy `paused?: boolean` propot. Ha `true`:
+
+- **Canvas hátterek** egy kezdeti képkockát rajzolnak, majd leállítják a `requestAnimationFrame` ciklust, statikus képkockán hagyva a hátteret.
+- **CSS hátterek** `animationPlayState: "paused"`-t állítanak be minden animált elemen.
+- **Aurora** ezenfelül `animate={}`-t ad át a `motion.div` elemeknek, így azok az `initial` pozíciójukban maradnak.
+
+#### Teljesítmény — késleltetett fade-in
+
+Az `AnimatedBackground.tsx` a `useLocation` segítségével érzékeli az aktuális útvonalat. Azokon az útvonalakon, ahol nehéz backdrop-blur kártya jelenik meg (`/app/settings`, `/app/profile`, `/app/admin`), a háttér wrapper `opacity: 0`-val indul, megszüntetve minden compositálási terhelést a kártya belépési animációja alatt. A `FADE_IN_DELAY_MS` lejárta után (1600 ms — közvetlenül a kártya spring-animációja után) 400 ms alatt `opacity: 1`-re vált.
+
+Ha az aktív `animationKey` megváltozik (pl. témaváltáskor vagy animáció-felülbírálat használatakor), az `AnimatedBackground` keresztfadolja a két hátteret: a kimenő réteg `opacity: 0`-ra, a bejövő `opacity: 1`-re halványodik egyszerre, `CROSSFADE_MS` (600 ms) alatt. Mindkét réteg párhuzamosan van mountolva az átmenet alatt; a régi réteg az átmenet végeztével unmountolódik. A felhasználó szeme a belépő kártyán van, így a háttér megjelenése észrevehetetlen. A háttér canvas/CSS ciklus folyamatosan fut teljes sebességgel; csak a wrapper opacity-je van elnyomva.
 
 ---
 
@@ -586,8 +598,8 @@ Témaválasztó szakasz előre beállított színsémákkal és egyéni 3-megál
 Fő fájlok:
 
 - `SettingsPageContent.tsx` — teljes oldal elrendezése; memoizált alkomponensekre van bontva (`ThemeSection`, `LanguageSection`, `AnimationSection`) `useMemo`-val az összes számított stílusosztályhoz és `useCallback`-kel az összes kezelőhöz. Elfogad egy `animReady: boolean` propot — amíg `false`, a `backdrop-blur-*` el van távolítva a kártya háttérosztályából, hogy a böngésző ne kényszerüljön növekvő blur-régió újramintavételezésére a belépési animáció alatt.
-- `SettingToggle.tsx` — újrafelhasználható kapcsolósor
-- `ThemePicker.tsx` — előre beállított rács + egyéni színválasztók
+- `SettingToggle.tsx` — újrafelhasználható kapcsolósor; `memo`-val burkolva, csak akkor renderelődik újra, ha `useLiquidGlass`, `useDarkMode` vagy a három kapcsoló értéke változik
+- `ThemePicker.tsx` — előre beállított rács + egyéni színválasztók; `memo`-val burkolva, `useMemo`-val a stílusosztályokhoz és `useCallback`-kel az apply kezelőhöz
 - `SettingsContext.tsx` — állapot, perzisztencia, i18n szinkronizálás; tartalmazza az `animationOverride: AnimationOverride` mezőt
 - `SettingsPage.tsx` — kezeli az `animDone` állapotot; `animReady={false}`-t ad át a `SettingsPageContent`-nek, amíg a `CardAnimation.onAnimationComplete` le nem fut, majd `true`-ra vált a teljes liquid glass stílus visszaállításához
 

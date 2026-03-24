@@ -2,6 +2,7 @@ interface Props {
   colorLeft: string;
   colorMiddle: string;
   colorRight: string;
+  paused?: boolean;
 }
 
 const KEYFRAMES = `
@@ -96,6 +97,7 @@ export function LavaLampBackground({
   colorLeft,
   colorMiddle,
   colorRight,
+  paused = false,
 }: Props) {
   const blobColors = [
     colorLeft,
@@ -135,12 +137,16 @@ export function LavaLampBackground({
               background: blobColors[i],
               // Outer glow
               boxShadow: `0 0 80px 30px ${blobColors[i]}88`,
+              animationPlayState: paused ? "paused" : "running",
             }}
           >
             {/* Inner shimmer highlight */}
             <div
               className="absolute inset-0 rounded-[inherit] overflow-hidden"
-              style={{ animation: "highlight-sweep 4s ease-in-out infinite" }}
+              style={{
+                animation: "highlight-sweep 4s ease-in-out infinite",
+                animationPlayState: paused ? "paused" : "running",
+              }}
             >
               <div
                 className="absolute top-[8%] left-[-30%] w-[45%] h-[55%] rounded-full"

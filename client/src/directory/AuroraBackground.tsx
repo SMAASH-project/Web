@@ -4,6 +4,7 @@ interface Props {
   colorLeft: string;
   colorMiddle: string;
   colorRight: string;
+  paused?: boolean;
 }
 
 const STAR_TWINKLE = `
@@ -101,6 +102,7 @@ export function AuroraBackground({
   colorLeft,
   colorMiddle,
   colorRight,
+  paused = false,
 }: Props) {
   const colors = [colorLeft, colorMiddle, colorRight];
 
@@ -122,7 +124,7 @@ export function AuroraBackground({
               height: cfg.h,
               background: `radial-gradient(ellipse 85% 100% at 50% 50%, ${colors[cfg.colorIdx]}dd 0%, ${colors[cfg.colorIdx]}66 45%, transparent 100%)`,
             }}
-            animate={cfg.animate}
+            animate={paused ? {} : cfg.animate}
             transition={{
               duration: cfg.duration,
               delay: -(i * 3.1),
@@ -146,17 +148,21 @@ export function AuroraBackground({
               filter: `blur(${f.blur}px)`,
               background: `linear-gradient(to bottom, transparent 0%, ${colors[f.colorIdx]}cc 30%, ${colors[f.colorIdx]}aa 70%, transparent 100%)`,
             }}
-            animate={{
-              scaleY: [1, 1.3, 0.8, 1.2, 1],
-              scaleX: [1, 0.7, 1.2, 0.85, 1],
-              opacity: [
-                f.baseOpacity,
-                f.baseOpacity * 1.8,
-                f.baseOpacity * 0.4,
-                f.baseOpacity * 1.5,
-                f.baseOpacity,
-              ],
-            }}
+            animate={
+              paused
+                ? {}
+                : {
+                    scaleY: [1, 1.3, 0.8, 1.2, 1],
+                    scaleX: [1, 0.7, 1.2, 0.85, 1],
+                    opacity: [
+                      f.baseOpacity,
+                      f.baseOpacity * 1.8,
+                      f.baseOpacity * 0.4,
+                      f.baseOpacity * 1.5,
+                      f.baseOpacity,
+                    ],
+                  }
+            }
             transition={{
               duration: f.duration,
               delay: f.delay,
@@ -179,6 +185,7 @@ export function AuroraBackground({
               ["--star-base-opacity" as string]: s.baseOpacity,
               opacity: s.baseOpacity,
               animation: `star-twinkle ${s.duration} ${s.delay} ease-in-out infinite`,
+              animationPlayState: paused ? "paused" : "running",
             }}
           />
         ))}

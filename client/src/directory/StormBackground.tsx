@@ -4,6 +4,7 @@ interface Props {
   colorLeft: string;
   colorMiddle: string;
   colorRight: string;
+  paused?: boolean;
 }
 
 const CLOUD_CSS = `
@@ -67,7 +68,12 @@ function makeBolt(startX: number, endX: number, h: number): BoltSegment[] {
   return segments;
 }
 
-export function StormBackground({ colorLeft, colorMiddle, colorRight }: Props) {
+export function StormBackground({
+  colorLeft,
+  colorMiddle,
+  colorRight,
+  paused = false,
+}: Props) {
   const rainCanvasRef = useRef<HTMLCanvasElement>(null);
   const boltCanvasRef = useRef<HTMLCanvasElement>(null);
   const [flashAlpha, setFlashAlpha] = useState(0);
@@ -149,14 +155,14 @@ export function StormBackground({ colorLeft, colorMiddle, colorRight }: Props) {
         ctx!.restore();
       }
 
-      animId = requestAnimationFrame(draw);
+      if (!paused) animId = requestAnimationFrame(draw);
     }
     draw();
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", resize);
     };
-  }, []);
+  }, [paused]);
 
   // ── Lightning bolt canvas ────────────────────────────────────────────────────
   useEffect(() => {
@@ -209,14 +215,14 @@ export function StormBackground({ colorLeft, colorMiddle, colorRight }: Props) {
         ctx!.stroke();
         ctx!.restore();
       }
-      animId = requestAnimationFrame(draw);
+      if (!paused) animId = requestAnimationFrame(draw);
     }
     draw();
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", resize);
     };
-  }, []);
+  }, [paused]);
 
   // ── Lightning timer ──────────────────────────────────────────────────────────
   useEffect(() => {

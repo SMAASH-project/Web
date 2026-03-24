@@ -210,6 +210,84 @@ To build the project, run `just build-fullstack` to build both the frontend and 
 
 Deploy the contents of the build folder by any means you like
 
+# React + TypeScript + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+
+## React Compiler
+
+The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+
+Note: This will impact Vite dev & build performances.
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+
+```js
+export default defineConfig([
+  globalIgnores(["dist"]),
+  {
+    files: ["**/*.{ts,tsx}"],
+    extends: [
+      // Other configs...
+
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
+
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+]);
+```
+
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+
+```js
+// eslint.config.js
+import reactX from "eslint-plugin-react-x";
+import reactDom from "eslint-plugin-react-dom";
+
+export default defineConfig([
+  globalIgnores(["dist"]),
+  {
+    files: ["**/*.{ts,tsx}"],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs["recommended-typescript"],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+]);
+```
+
+---
+
 # SMAASH Client — Developer Documentation
 
 > **Stack:** React 19 · TypeScript · Vite · Tailwind CSS · React Query · Axios · react-i18next · Motion (Framer)  
@@ -248,7 +326,7 @@ client/
     ├── main.tsx                # Router setup, lazy imports, StrictMode
     ├── App.tsx                 # Auth redirect gate
     ├── RootLayout.tsx          # All providers, Suspense boundary
-    ├── Wrapper.tsx             # Full-page gradient + CSS custom properties
+    ├── Wrapper.tsx             # Full-page gradient + CSS custom properties (derived values memoised); always resolves animation key and passes paused={!useAnimations}
     ├── context/                # Auth + Navbar contexts
     ├── hooks/                  # React Query hooks (domain-split)
     ├── lib/
@@ -378,7 +456,7 @@ The theme is driven by three gradient colours stored in `ColorContext` and `loca
 | ------------------- | ------- | ------------------------------------------------------------------------ |
 | `useLiquidGlass`    | `true`  | Frosted glass look (backdrop-blur + transparency)                        |
 | `useDarkMode`       | `false` | Dark variants of all themed classes                                      |
-| `useAnimations`     | `true`  | Animated backgrounds enabled/disabled globally                           |
+| `useAnimations`     | `true`  | `false` freezes backgrounds to a static frame rather than hiding them    |
 | `language`          | `"en"`  | i18next language (`"en"` or `"hu"`)                                      |
 | `animationOverride` | `null`  | `null` = use theme default · `"none"` = force off · `AnimationKey` = pin |
 
@@ -472,6 +550,18 @@ useAnimations = true
 | Slate     | storm             |
 
 Adding a new background: create the component in `src/directory/`, add its key to `AnimationKey` in `src/lib/animationTypes.ts`, add the label in `ANIMATION_LABELS`, add the `case` in `AnimatedBackground.tsx`.
+
+All backgrounds accept a `paused?: boolean` prop. When `true`:
+
+- **Canvas backgrounds** draw one initial frame then stop the `requestAnimationFrame` loop, leaving a frozen still frame.
+- **CSS backgrounds** set `animationPlayState: "paused"` on every animated element.
+- **Aurora** additionally passes `animate={}` to `motion.div` elements so they remain at their `initial` position.
+
+#### Performance — deferred fade-in
+
+`AnimatedBackground.tsx` detects the current route via `useLocation`. On routes with heavy backdrop-blur cards (`/app/settings`, `/app/profile`, `/app/admin`) the background wrapper starts at `opacity: 0`, eliminating all compositing cost while the card entry animation runs. After `FADE_IN_DELAY_MS` (1600 ms — just after the card spring settles) it transitions to `opacity: 1` over 400 ms.
+
+When the active `animationKey` changes (e.g. switching themes or using the animation override), `AnimatedBackground` crossfades between the two backgrounds: the outgoing layer fades to `opacity: 0` and the incoming layer fades to `opacity: 1` simultaneously over `CROSSFADE_MS` (600 ms). Both layers are mounted concurrently during the transition; the old layer is unmounted after the crossfade completes. This is independent of the route-based deferred fade.
 
 ---
 
@@ -818,8 +908,8 @@ Animation Override row (visible only when `useAnimations = true`): pin any anima
 Key files:
 
 - `SettingsPageContent.tsx` — full page layout; split into memoised sub-components (`ThemeSection`, `LanguageSection`, `AnimationSection`) with `useMemo` for all computed style classes and `useCallback` on all handlers. Accepts `animReady: boolean` prop — while `false`, `backdrop-blur-*` is stripped from the card's background class so the browser does not resample a growing blur region during the entry spring animation.
-- `SettingToggle.tsx` — reusable toggle row
-- `ThemePicker.tsx` — preset grid + custom colour pickers
+- `SettingToggle.tsx` — reusable toggle row; wrapped in `memo`, only re-renders when `useLiquidGlass`, `useDarkMode`, or the three toggle values change
+- `ThemePicker.tsx` — preset grid + custom colour pickers; wrapped in `memo` with `useMemo` for style classes and `useCallback` on the apply handler
 - `SettingsContext.tsx` — state, persistence, i18n sync; includes `animationOverride: AnimationOverride`
 - `SettingsPage.tsx` — manages `animDone` state; passes `animReady={false}` into `SettingsPageContent` until `CardAnimation.onAnimationComplete` fires, then flips to `true` to restore full liquid glass styling
 

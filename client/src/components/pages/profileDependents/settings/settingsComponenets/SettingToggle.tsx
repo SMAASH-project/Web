@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   Field,
   FieldContent,
@@ -11,7 +12,7 @@ import { useSettings } from "@/components/pages/profileDependents/settings/setti
 import { getTextColor, getTextShadow, getSubtextColor } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
-export function SettingToggle() {
+export const SettingToggle = memo(function SettingToggle() {
   const { settings, updateSetting } = useSettings();
   const { t } = useTranslation("settings");
 
@@ -84,4 +85,4 @@ export function SettingToggle() {
       </FieldLabel>
     </FieldGroup>
   );
-}
+});

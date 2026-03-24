@@ -4,6 +4,7 @@ interface Props {
   colorLeft: string;
   colorMiddle: string;
   colorRight: string;
+  paused?: boolean;
 }
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -37,6 +38,7 @@ export function SynthwaveBackground({
   colorLeft,
   colorMiddle,
   colorRight,
+  paused = false,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -211,7 +213,7 @@ export function SynthwaveBackground({
       }
       ctx!.restore();
 
-      animId = requestAnimationFrame(draw);
+      if (!paused) animId = requestAnimationFrame(draw);
     }
 
     draw();

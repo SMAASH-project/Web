@@ -4,6 +4,7 @@ interface Props {
   colorLeft: string;
   colorMiddle: string;
   colorRight: string;
+  paused?: boolean;
 }
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -60,6 +61,7 @@ export function DeepSpaceBackground({
   colorLeft,
   colorMiddle,
   colorRight,
+  paused = false,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -368,7 +370,7 @@ export function DeepSpaceBackground({
         drawShootingStar(ss);
       }
 
-      animId = requestAnimationFrame(draw);
+      if (!paused) animId = requestAnimationFrame(draw);
     }
 
     draw();
