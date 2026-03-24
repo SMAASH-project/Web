@@ -15,10 +15,11 @@ import (
 
 type PurchasesController struct {
 	purchasesBaseRepo repository.BaseRepository[models.Purchase]
+	profilesBaseRepo  repository.BaseRepository[models.PlayerProfile]
 }
 
-func NewPurchasesController(purchasesBaseRepo repository.BaseRepository[models.Purchase]) *PurchasesController {
-	return &PurchasesController{purchasesBaseRepo: purchasesBaseRepo}
+func NewPurchasesController(purchasesBaseRepo repository.BaseRepository[models.Purchase], profilesBaseRepo repository.BaseRepository[models.PlayerProfile]) *PurchasesController {
+	return &PurchasesController{purchasesBaseRepo: purchasesBaseRepo, profilesBaseRepo: profilesBaseRepo}
 }
 
 func (pc PurchasesController) Create(c *gin.Context) {
@@ -35,8 +36,8 @@ func (pc PurchasesController) Create(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
 		return
 	}
-
-	if err := pc.purchasesBaseRepo.Create(c.Request.Context(), newPurchase); err != nil {
+	err = pc.purchasesBaseRepo.Create(c.Request.Context(), newPurchase)
+	if err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			c.JSON(http.StatusConflict, dtos.NewErrResp(err.Error(), path))
 			return
@@ -44,10 +45,24 @@ func (pc PurchasesController) Create(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
 		return
 	}
-
+	currentProfile, err := pc.profilesBaseRepo.ReadByID(c.Request.Context(), newPurchase.PlayerProfileID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("Player profile with given id not found", path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
 	result, _ := pc.purchasesBaseRepo.ReadByID(c.Request.Context(), newPurchase.ID, "Item", "PlayerProfile")
+	dto := dtos.PurchaseToDTO(result)
+	currentProfile.Coins -= int64(dto.Total)
+	if err := pc.profilesBaseRepo.Update(c.Request.Context(), currentProfile); err != nil {
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
 
-	c.JSON(http.StatusCreated, dtos.PurchaseToDTO(result))
+	c.JSON(http.StatusCreated, dto)
 }
 
 func (pc PurchasesController) ReadAll(c *gin.Context) {
