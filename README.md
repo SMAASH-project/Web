@@ -39,6 +39,8 @@ The app depends on the following environment variables:
 - DB_URL (default: test.db)
 - SEED_DATA_URI (default: ./internal/seeder/test_source)
 - SECRET_KEY (default: super_secret_key)
+- ALLOWED_ORIGINS (default: http://localhost:5173)
+- UPLOAD_DIR (default: ./uploads/pfps)
 
 ### Setting up the project
 

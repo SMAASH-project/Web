@@ -2,7 +2,9 @@ package server
 
 import (
 	"net/http"
+	"os"
 	"smaash-web/docs/swagger"
+	"strings"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -13,9 +15,18 @@ import (
 func (s *Server) MountRoutes() *Server {
 	r := gin.Default()
 
+	allowedOrigins := strings.Split(os.Getenv("ALLOWED_ORIGINS"), ",")
+	if len(allowedOrigins) == 1 && allowedOrigins[0] == "" {
+		allowedOrigins = []string{"http://localhost:5173"}
+	}
+
+	for i := range allowedOrigins {
+		allowedOrigins[i] = strings.TrimSpace(allowedOrigins[i])
+	}
+
 	// NOTE: this is for develompent only, the built project is running on one server
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowOrigins:     allowedOrigins,
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
 		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type"},
 		AllowCredentials: true,
@@ -23,6 +34,9 @@ func (s *Server) MountRoutes() *Server {
 
 	// damned gin can't serve files from root path >:(
 	r.Static("/app", "./build/client")
+	r.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusTemporaryRedirect, "/app/")
+	})
 
 	api := r.Group("/api")
 	for _, c := range s.controllers {
@@ -34,7 +48,7 @@ func (s *Server) MountRoutes() *Server {
 
 	// SPA fallback
 	r.NoRoute(func(c *gin.Context) {
-		http.ServeFile(c.Writer, c.Request, "./build/client")
+		http.ServeFile(c.Writer, c.Request, "./build/client/index.html")
 	})
 	s.srv.Handler = r
 	return s

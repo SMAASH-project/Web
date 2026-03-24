@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"mime/multipart"
+	"os"
 	"path/filepath"
 	"slices"
 
@@ -59,7 +60,16 @@ func SaveFileToDisc(c *gin.Context, file *multipart.FileHeader) (*string, error)
 		return nil, ErrUnsupportedMediaType
 	}
 
-	uri := "./uploads/pfps/" + uuid.NewString() + extension
+	uploadDir := os.Getenv("UPLOAD_DIR")
+	if uploadDir == "" {
+		uploadDir = "./uploads/pfps"
+	}
+
+	if err := os.MkdirAll(uploadDir, 0o755); err != nil {
+		return nil, err
+	}
+
+	uri := filepath.Join(uploadDir, uuid.NewString()+extension)
 
 	if err := c.SaveUploadedFile(file, uri); err != nil {
 		return nil, err
