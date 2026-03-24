@@ -1,80 +1,100 @@
+import { motion } from "motion/react";
+
 interface Props {
   colorLeft: string;
   colorMiddle: string;
   colorRight: string;
 }
 
-const KEYFRAMES = `
-@keyframes aurora-drift-1 {
-  0%   { transform: translateX(-8%) scaleY(1)    translateY(0%);  opacity: 0.55; }
-  33%  { transform: translateX(6%)  scaleY(1.15) translateY(-3%); opacity: 0.7;  }
-  66%  { transform: translateX(-4%) scaleY(0.9)  translateY(2%);  opacity: 0.5;  }
-  100% { transform: translateX(-8%) scaleY(1)    translateY(0%);  opacity: 0.55; }
-}
-@keyframes aurora-drift-2 {
-  0%   { transform: translateX(5%)  scaleY(1.1)  translateY(-2%); opacity: 0.5;  }
-  40%  { transform: translateX(-7%) scaleY(0.85) translateY(3%);  opacity: 0.65; }
-  75%  { transform: translateX(3%)  scaleY(1.2)  translateY(-1%); opacity: 0.45; }
-  100% { transform: translateX(5%)  scaleY(1.1)  translateY(-2%); opacity: 0.5;  }
-}
-@keyframes aurora-drift-3 {
-  0%   { transform: translateX(-3%) scaleY(0.9)  translateY(1%);  opacity: 0.4;  }
-  50%  { transform: translateX(8%)  scaleY(1.15) translateY(-3%); opacity: 0.6;  }
-  100% { transform: translateX(-3%) scaleY(0.9)  translateY(1%);  opacity: 0.4;  }
-}
-@keyframes aurora-drift-4 {
-  0%   { transform: translateX(2%)  scaleY(1.05) translateY(0%);  opacity: 0.45; }
-  35%  { transform: translateX(-6%) scaleY(1.2)  translateY(-4%); opacity: 0.6;  }
-  70%  { transform: translateX(4%)  scaleY(0.88) translateY(2%);  opacity: 0.35; }
-  100% { transform: translateX(2%)  scaleY(1.05) translateY(0%);  opacity: 0.45; }
-}
-@keyframes aurora-drift-5 {
-  0%   { transform: translateX(-5%) scaleY(1.1)  translateY(-1%); opacity: 0.38; }
-  45%  { transform: translateX(7%)  scaleY(0.9)  translateY(2%);  opacity: 0.55; }
-  100% { transform: translateX(-5%) scaleY(1.1)  translateY(-1%); opacity: 0.38; }
+const STAR_TWINKLE = `
+@keyframes star-twinkle {
+  0%, 100% { opacity: var(--star-base-opacity); transform: scale(1); }
+  50%       { opacity: calc(var(--star-base-opacity) * 0.25); transform: scale(0.7); }
 }
 `;
 
-// Static per-ribbon Tailwind classes — only the gradient color is injected via style
-const RIBBON_CONFIG = [
-  {
-    top: "top-[5%]",
-    h: "h-[28%]",
-    blur: "blur-[55px]",
-    anim: "animate-[aurora-drift-1_14s_0s_ease-in-out_infinite]",
-  },
-  {
-    top: "top-[18%]",
-    h: "h-[32%]",
-    blur: "blur-[65px]",
-    anim: "animate-[aurora-drift-2_18s_-5s_ease-in-out_infinite]",
-  },
-  {
-    top: "top-[10%]",
-    h: "h-[25%]",
-    blur: "blur-[50px]",
-    anim: "animate-[aurora-drift-3_22s_-9s_ease-in-out_infinite]",
-  },
-  {
-    top: "top-[30%]",
-    h: "h-[22%]",
-    blur: "blur-[70px]",
-    anim: "animate-[aurora-drift-4_16s_-3s_ease-in-out_infinite]",
-  },
-  {
-    top: "top-[2%]",
-    h: "h-[20%]",
-    blur: "blur-[45px]",
-    anim: "animate-[aurora-drift-5_20s_-12s_ease-in-out_infinite]",
-  },
-] as const;
-
-// Deterministic star positions derived from index — no Math.random() in render
-const STARS = Array.from({ length: 60 }, (_, i) => ({
-  top: `${(i * 53 + 17) % 60}%`,
+// Deterministic star grid — no Math.random() in render
+const STARS = Array.from({ length: 80 }, (_, i) => ({
+  top: `${(i * 53 + 17) % 72}%`,
   left: `${(i * 37 + 13) % 100}%`,
   size: 1 + (i % 3),
-  opacity: 0.3 + (i % 5) * 0.1,
+  baseOpacity: 0.25 + (i % 6) * 0.09,
+  duration: `${2.5 + (i % 5) * 1.1}s`,
+  delay: `${-(i % 7) * 0.6}s`,
+}));
+
+interface BandConfig {
+  top: string;
+  h: string;
+  blur: string;
+  colorIdx: number;
+  animate: { x: string[]; scaleY: number[]; opacity: number[] };
+  duration: number;
+}
+
+// Wide diffuse color bands
+const BAND_CONFIG: BandConfig[] = [
+  {
+    top: "2%",
+    h: "38%",
+    blur: "blur-[70px]",
+    colorIdx: 0,
+    animate: {
+      x: ["-6%", "5%", "-3%", "7%", "-6%"],
+      scaleY: [1, 1.18, 0.88, 1.12, 1],
+      opacity: [0.52, 0.72, 0.45, 0.68, 0.52],
+    },
+    duration: 16,
+  },
+  {
+    top: "14%",
+    h: "35%",
+    blur: "blur-[80px]",
+    colorIdx: 1,
+    animate: {
+      x: ["4%", "-8%", "6%", "-4%", "4%"],
+      scaleY: [1.1, 0.85, 1.2, 0.9, 1.1],
+      opacity: [0.45, 0.65, 0.38, 0.6, 0.45],
+    },
+    duration: 21,
+  },
+  {
+    top: "7%",
+    h: "28%",
+    blur: "blur-[60px]",
+    colorIdx: 2,
+    animate: {
+      x: ["-4%", "7%", "-6%", "4%", "-4%"],
+      scaleY: [0.92, 1.15, 0.88, 1.08, 0.92],
+      opacity: [0.38, 0.58, 0.3, 0.52, 0.38],
+    },
+    duration: 18,
+  },
+  {
+    top: "22%",
+    h: "25%",
+    blur: "blur-[75px]",
+    colorIdx: 0,
+    animate: {
+      x: ["6%", "-5%", "8%", "-3%", "6%"],
+      scaleY: [1.05, 0.9, 1.15, 0.95, 1.05],
+      opacity: [0.3, 0.5, 0.25, 0.45, 0.3],
+    },
+    duration: 25,
+  },
+];
+
+// Thin vertical curtain fibers — the signature aurora feature
+const FIBER_CONFIG = Array.from({ length: 22 }, (_, i) => ({
+  left: `${(i * 4.7 + 1.2) % 100}%`,
+  width: `${1.5 + (i % 4) * 1.2}%`,
+  height: `${35 + (i % 5) * 8}%`,
+  top: `${1 + (i % 6) * 1.8}%`,
+  colorIdx: i % 3,
+  duration: 4 + (i % 7) * 1.3,
+  delay: -(i % 9) * 0.7,
+  blur: 14 + (i % 4) * 8,
+  baseOpacity: 0.22 + (i % 5) * 0.06,
 }));
 
 export function AuroraBackground({
@@ -82,48 +102,97 @@ export function AuroraBackground({
   colorMiddle,
   colorRight,
 }: Props) {
-  const ribbonColors = [
-    colorLeft,
-    colorMiddle,
-    colorRight,
-    colorLeft,
-    colorRight,
-  ];
+  const colors = [colorLeft, colorMiddle, colorRight];
 
   return (
     <>
-      <style>{KEYFRAMES}</style>
+      <style>{STAR_TWINKLE}</style>
 
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        {RIBBON_CONFIG.map((cfg, i) => (
-          <div
-            key={i}
-            className={[
-              "absolute -left-[10%] w-[120%] rounded-full will-change-[transform,opacity]",
-              cfg.top,
-              cfg.h,
-              cfg.blur,
-              cfg.anim,
-            ].join(" ")}
+        {/* Dark sky — makes aurora pop */}
+        <div className="absolute inset-0 bg-linear-to-b from-[#020818] via-[#050d1c] to-[#0a1428] opacity-75" />
+
+        {/* Wide diffuse color bands */}
+        {BAND_CONFIG.map((cfg, i) => (
+          <motion.div
+            key={`band-${i}`}
+            className={`absolute -left-[8%] w-[116%] rounded-full will-change-[transform,opacity] ${cfg.blur}`}
             style={{
-              background: `radial-gradient(ellipse 80% 100% at 50% 50%, ${ribbonColors[i]}cc 0%, ${ribbonColors[i]}55 50%, transparent 100%)`,
+              top: cfg.top,
+              height: cfg.h,
+              background: `radial-gradient(ellipse 85% 100% at 50% 50%, ${colors[cfg.colorIdx]}dd 0%, ${colors[cfg.colorIdx]}66 45%, transparent 100%)`,
+            }}
+            animate={cfg.animate}
+            transition={{
+              duration: cfg.duration,
+              delay: -(i * 3.1),
+              repeat: Infinity,
+              ease: "easeInOut",
+              times: [0, 0.25, 0.5, 0.75, 1],
             }}
           />
         ))}
 
+        {/* Vertical curtain fibers */}
+        {FIBER_CONFIG.map((f, i) => (
+          <motion.div
+            key={`fiber-${i}`}
+            className="absolute will-change-[transform,opacity]"
+            style={{
+              left: f.left,
+              top: f.top,
+              width: f.width,
+              height: f.height,
+              filter: `blur(${f.blur}px)`,
+              background: `linear-gradient(to bottom, transparent 0%, ${colors[f.colorIdx]}cc 30%, ${colors[f.colorIdx]}aa 70%, transparent 100%)`,
+            }}
+            animate={{
+              scaleY: [1, 1.3, 0.8, 1.2, 1],
+              scaleX: [1, 0.7, 1.2, 0.85, 1],
+              opacity: [
+                f.baseOpacity,
+                f.baseOpacity * 1.8,
+                f.baseOpacity * 0.4,
+                f.baseOpacity * 1.5,
+                f.baseOpacity,
+              ],
+            }}
+            transition={{
+              duration: f.duration,
+              delay: f.delay,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+
+        {/* Stars — twinkling via CSS custom property */}
         {STARS.map((s, i) => (
           <div
-            key={i}
+            key={`star-${i}`}
             className="absolute rounded-full bg-white"
             style={{
               top: s.top,
               left: s.left,
               width: `${s.size}px`,
               height: `${s.size}px`,
-              opacity: s.opacity,
+              ["--star-base-opacity" as string]: s.baseOpacity,
+              opacity: s.baseOpacity,
+              animation: `star-twinkle ${s.duration} ${s.delay} ease-in-out infinite`,
             }}
           />
         ))}
+
+        {/* Faint moon */}
+        <div
+          className="absolute top-[6%] right-[8%] w-10 h-10 rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle at 35% 35%, #fffde0, #e8ddb5 60%, transparent 100%)",
+            boxShadow: "0 0 18px 6px rgba(255,253,200,0.18)",
+            opacity: 0.55,
+          }}
+        />
       </div>
     </>
   );

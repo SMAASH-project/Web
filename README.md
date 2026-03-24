@@ -259,6 +259,7 @@ client/
     │   ├── utils/              # dateFormat, themeClasses, liquidGlass, colorMath, classnames, extractErrorMessage
     │   ├── miscAnimations/     # Reusable Motion wrappers
     │   └── pageAnimations/     # Page-level animation components
+    ├── directory/              # Animated background components
     ├── components/
     │   ├── forms/              # Auth forms + ProfileSelector + AddNewProfile
     │   ├── nav/                # Navbar, mobile drawer, account menu
@@ -373,12 +374,13 @@ The theme is driven by three gradient colours stored in `ColorContext` and `loca
 
 ### Settings Flags
 
-| Flag             | Default | Effect                                            |
-| ---------------- | ------- | ------------------------------------------------- |
-| `useLiquidGlass` | `true`  | Frosted glass look (backdrop-blur + transparency) |
-| `useDarkMode`    | `false` | Dark variants of all themed classes               |
-| `useAnimations`  | `true`  | Motion animations enabled/disabled globally       |
-| `language`       | `"en"`  | i18next language (`"en"` or `"hu"`)               |
+| Flag                | Default | Effect                                                                   |
+| ------------------- | ------- | ------------------------------------------------------------------------ |
+| `useLiquidGlass`    | `true`  | Frosted glass look (backdrop-blur + transparency)                        |
+| `useDarkMode`       | `false` | Dark variants of all themed classes                                      |
+| `useAnimations`     | `true`  | Animated backgrounds enabled/disabled globally                           |
+| `language`          | `"en"`  | i18next language (`"en"` or `"hu"`)                                      |
+| `animationOverride` | `null`  | `null` = use theme default · `"none"` = force off · `AnimationKey` = pin |
 
 ### Theme Helper Functions (`src/lib/utils/themeClasses.ts`)
 
@@ -428,6 +430,48 @@ import { THEMES } from "@/components/pages/profileDependents/settings/settingsLo
 // THEMES: Theme[] — each has { name, colorLeft, colorMiddle, colorRight }
 // Presets: Azure, Slate, Emerald, Amethyst, Coral, Sunset, Ocean, …
 ```
+
+### Animated Backgrounds (`src/directory/`)
+
+Each animated background is a self-contained component that renders as `fixed inset-0 z-0 pointer-events-none` behind all page content. They are dispatched from `AnimatedBackground.tsx` based on the active `AnimationKey`.
+
+| Key         | Component             | Technique          | Description                                                                                                                                             |
+| ----------- | --------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fishtank`  | `FishtankBackground`  | Canvas             | Fish with sinusoidal swim paths, bubbles, caustic floor light shafts                                                                                    |
+| `deepspace` | `DeepSpaceBackground` | Canvas             | 300 colored stars (white/blue/orange/red), milky way band, vivid nebulae with dark canvas overlay, frequent glowing shooting stars (up to 5 concurrent) |
+| `aurora`    | `AuroraBackground`    | CSS + motion/react | Vertical curtain fibers, drifting color bands, star twinkle                                                                                             |
+| `lavalamp`  | `LavaLampBackground`  | CSS keyframes      | Morphing blobs with outer glow, inner shimmer highlight                                                                                                 |
+| `synthwave` | `SynthwaveBackground` | Canvas             | Perspective grid, retro sun, scanline overlay                                                                                                           |
+| `sakura`    | `SakuraBackground`    | CSS keyframes      | Falling petals with per-petal drift/rotation CSS custom properties                                                                                      |
+| `storm`     | `StormBackground`     | CSS + Canvas       | Canvas rain streaks, canvas lightning bolt, drifting cloud layers                                                                                       |
+
+#### Animation resolution in `Wrapper.tsx`
+
+```
+useAnimations = false          → no animation rendered
+useAnimations = true
+  animationOverride = null     → use Theme.animationKey (theme default)
+  animationOverride = "none"   → force no animation
+  animationOverride = <key>    → pin to that animation regardless of theme
+```
+
+#### Preset theme → animation pairings (in `Themes.ts`)
+
+| Theme     | Default animation |
+| --------- | ----------------- |
+| Ocean     | fishtank          |
+| Midnight  | deepspace         |
+| Lavender  | aurora            |
+| Aurora    | aurora            |
+| Amethyst  | lavalamp          |
+| Fire      | lavalamp          |
+| Neon Noir | synthwave         |
+| Sunset    | sakura            |
+| Emerald   | sakura            |
+| Rose Gold | sakura            |
+| Slate     | storm             |
+
+Adding a new background: create the component in `src/directory/`, add its key to `AnimationKey` in `src/lib/animationTypes.ts`, add the label in `ANIMATION_LABELS`, add the `case` in `AnimatedBackground.tsx`.
 
 ---
 
@@ -497,13 +541,15 @@ const {
   colorLeft,
   colorMiddle,
   colorRight,
+  animationKey, // AnimationKey | null — set by applyTheme()
   setColorLeft,
   setColorMiddle,
   setColorRight,
+  setAnimationKey,
 } = useContext(ColorContext);
 ```
 
-Three hex strings that drive `Wrapper.tsx`'s gradient. Persisted to `localStorage` under key `"color-settings"`.
+Three hex strings that drive `Wrapper.tsx`'s gradient, plus `animationKey` which holds the default animation for the active preset. Persisted to `localStorage` under key `"color-settings"`.
 
 ---
 
@@ -766,14 +812,16 @@ Key files:
 `src/components/pages/profileDependents/settings/SettingsPage.tsx`
 
 Toggle cards for: Animations, Liquid Glass, Dark Mode, Language.  
-Theme picker section with preset colour schemes and a custom 3-stop colour picker.
+Theme picker section with preset colour schemes and a custom 3-stop colour picker.  
+Animation Override row (visible only when `useAnimations = true`): pin any animation independently of the active theme preset.
 
 Key files:
 
-- `SettingsPageContent.tsx` — full page layout
+- `SettingsPageContent.tsx` — full page layout; split into memoised sub-components (`ThemeSection`, `LanguageSection`, `AnimationSection`) with `useMemo` for all computed style classes and `useCallback` on all handlers. Accepts `animReady: boolean` prop — while `false`, `backdrop-blur-*` is stripped from the card's background class so the browser does not resample a growing blur region during the entry spring animation.
 - `SettingToggle.tsx` — reusable toggle row
 - `ThemePicker.tsx` — preset grid + custom colour pickers
-- `SettingsContext.tsx` — state, persistence, i18n sync
+- `SettingsContext.tsx` — state, persistence, i18n sync; includes `animationOverride: AnimationOverride`
+- `SettingsPage.tsx` — manages `animDone` state; passes `animReady={false}` into `SettingsPageContent` until `CardAnimation.onAnimationComplete` fires, then flips to `true` to restore full liquid glass styling
 
 ### Admin (`/app/admin`)
 

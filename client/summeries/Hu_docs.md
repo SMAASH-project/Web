@@ -47,6 +47,7 @@ client/
     │   ├── utils/              # dateFormat, themeClasses, liquidGlass, colorMath, classnames, extractErrorMessage
     │   ├── miscAnimations/     # Újrafelhasználható Motion burkolók
     │   └── pageAnimations/     # Oldal-szintű animáció komponensek
+    ├── directory/              # Animált háttérkomponensek
     ├── components/
     │   ├── forms/              # Hitelesítési űrlapok + ProfileSelector + AddNewProfile
     │   ├── nav/                # Navigációs sáv, mobil fiók, fiókmenü
@@ -216,6 +217,32 @@ import { THEMES } from "@/components/pages/profileDependents/settings/settingsLo
 // THEMES: Theme[] — mindegyiknek van { name, colorLeft, colorMiddle, colorRight }
 // Előre beállítottak: Azure, Slate, Emerald, Amethyst, Coral, Sunset, Ocean, …
 ```
+
+### Animált hátterek (`src/directory/`)
+
+Minden animált háttér egy önálló komponens, amely `fixed inset-0 z-0 pointer-events-none` stílussal renderelődik az összes oldaltartalom mögé. Az `AnimatedBackground.tsx` irányítja őket az aktív `AnimationKey` alapján.
+
+| Kulcs       | Komponens             | Technika           | Leírás                                                                                                                                       |
+| ----------- | --------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fishtank`  | `FishtankBackground`  | Canvas             | Halak szinuszos útvonallal, buborékok, kausztikus padlófény                                                                                  |
+| `deepspace` | `DeepSpaceBackground` | Canvas             | 300 színes csillag (fehér/kék/narancs/vörös), Tejút-sáv, élénk ködfoltok sötét canvas-réteggel, gyakori izzó hullócsillagok (max 5 egyidejű) |
+| `aurora`    | `AuroraBackground`    | CSS + motion/react | Függőleges függönyrostok, lebegő színsávok, csillagvillogás                                                                                  |
+| `lavalamp`  | `LavaLampBackground`  | CSS keyframes      | Morpholó blobok külső izzással, belső fényszikra kiemeléssel                                                                                 |
+| `synthwave` | `SynthwaveBackground` | Canvas             | Perspektívarács, retró nap, scanline réteg                                                                                                   |
+| `sakura`    | `SakuraBackground`    | CSS keyframes      | Hulló szirmok, szirmonkénti sodródás/forgás CSS egyéni tulajdonságokkal                                                                      |
+| `storm`     | `StormBackground`     | CSS + Canvas       | Canvas-esőcseppek, canvas-villámcsapás, lebegő felhőrétegek                                                                                  |
+
+#### Animáció-feloldás a `Wrapper.tsx`-ben
+
+```
+useAnimations = false          → nincs animáció
+useAnimations = true
+  animationOverride = null     → Theme.animationKey használata (téma alapértelmezett)
+  animationOverride = "none"   → animáció kényszer kikapcsolása
+  animationOverride = <kulcs>  → adott animáció rögzítése témától függetlenül
+```
+
+Új háttér hozzáadása: hozd létre a komponenst a `src/directory/`-ban, add hozzá a kulcsát az `AnimationKey` típushoz (`src/lib/animationTypes.ts`), add hozzá a feliratot az `ANIMATION_LABELS`-be, és add hozzá a `case`-t az `AnimatedBackground.tsx`-ben.
 
 ---
 
@@ -558,10 +585,11 @@ Témaválasztó szakasz előre beállított színsémákkal és egyéni 3-megál
 
 Fő fájlok:
 
-- `SettingsPageContent.tsx` — teljes oldal elrendezés
+- `SettingsPageContent.tsx` — teljes oldal elrendezése; memoizált alkomponensekre van bontva (`ThemeSection`, `LanguageSection`, `AnimationSection`) `useMemo`-val az összes számított stílusosztályhoz és `useCallback`-kel az összes kezelőhöz. Elfogad egy `animReady: boolean` propot — amíg `false`, a `backdrop-blur-*` el van távolítva a kártya háttérosztályából, hogy a böngésző ne kényszerüljön növekvő blur-régió újramintavételezésére a belépési animáció alatt.
 - `SettingToggle.tsx` — újrafelhasználható kapcsolósor
 - `ThemePicker.tsx` — előre beállított rács + egyéni színválasztók
-- `SettingsContext.tsx` — állapot, perzisztencia, i18n szinkronizálás
+- `SettingsContext.tsx` — állapot, perzisztencia, i18n szinkronizálás; tartalmazza az `animationOverride: AnimationOverride` mezőt
+- `SettingsPage.tsx` — kezeli az `animDone` állapotot; `animReady={false}`-t ad át a `SettingsPageContent`-nek, amíg a `CardAnimation.onAnimationComplete` le nem fut, majd `true`-ra vált a teljes liquid glass stílus visszaállításához
 
 ### Admin (`/app/admin`)
 
