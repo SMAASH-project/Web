@@ -1,119 +1,94 @@
-import { useMemo } from "react";
+import { useContext, useMemo } from "react";
+import { ColorContext } from "./components/pages/profileDependents/settings/settingsLogic/color/ColorContext";
+import { useSettings } from "./components/pages/profileDependents/settings/settingsLogic/SettingsContext";
+import {
+  getAverageHexColor,
+  getTextColor,
+  lightenHexColor,
+  toRgbaColor,
+} from "./lib/utils";
 
-interface Props {
-  colorLeft: string;
-  colorMiddle: string;
-  colorRight: string;
-  paused?: boolean;
+import { type AnimationKey } from "@/lib/animationTypes";
+import { AnimatedBackground } from "./directory/AnimatedBackground";
+
+interface WrapperProps {
+  children: React.ReactNode;
 }
 
-const KEYFRAMES = `
-@keyframes sakura-fall {
-  0%   { transform: translateY(-60px) translateX(0px) rotate(0deg) scale(1); opacity: 0; }
-  5%   { opacity: 1; }
-  90%  { opacity: 0.85; }
-  100% { transform: translateY(110vh) translateX(var(--drift)) rotate(var(--rot-end)) scale(0.7); opacity: 0; }
-}
-@keyframes sakura-sway {
-  0%   { margin-left: 0px; }
-  25%  { margin-left: var(--sway); }
-  75%  { margin-left: calc(var(--sway) * -0.6); }
-  100% { margin-left: 0px; }
-}
-`;
+export function Wrapper({ children }: WrapperProps) {
+  const context = useContext(ColorContext);
+  const { settings } = useSettings();
 
-const PETAL_SHAPES = [
-  "60% 40% 55% 45% / 50% 60% 40% 50%",
-  "50% 50% 30% 70% / 60% 40% 60% 40%",
-  "70% 30% 50% 50% / 40% 60% 50% 50%",
-  "40% 60% 60% 40% / 50% 50% 60% 40%",
-];
+  const colorLeft = context?.colorLeft || "#616161";
+  const colorMiddle = context?.colorMiddle || "#000000";
+  const colorRight = context?.colorRight || "#616161";
 
-export function SakuraBackground({
-  colorLeft,
-  colorMiddle,
-  colorRight,
-  paused = false,
-}: Props) {
-  const colors = [
-    colorLeft,
-    colorMiddle,
-    colorRight,
-    "#ffb7c5",
-    "#ffc0cb",
-    "#ffe4e8",
-    "#ffd1dc",
-  ];
+  // Memoised — only recompute when the three gradient colours or darkMode change
+  const { currentGradient, cssVars } = useMemo(() => {
+    const themeAverage = getAverageHexColor([
+      colorLeft,
+      colorMiddle,
+      colorRight,
+    ]);
+    const themeAccent = lightenHexColor(
+      themeAverage,
+      settings.useDarkMode ? 0.08 : 0.02,
+    );
+    const themeAccentHover = lightenHexColor(
+      themeAverage,
+      settings.useDarkMode ? 0.22 : 0.14,
+    );
+    const themeAccentSoft = toRgbaColor(
+      themeAverage,
+      settings.useDarkMode ? 0.32 : 0.25,
+    );
+    const themeNavBorder = themeAverage;
+    const themeNavShadow = toRgbaColor(
+      lightenHexColor(themeAverage, settings.useDarkMode ? 0.25 : 0.16),
+      settings.useDarkMode ? 0.42 : 0.34,
+    );
+    return {
+      currentGradient: `linear-gradient(to right, ${colorLeft}, ${colorMiddle}, ${colorRight})`,
+      cssVars: {
+        ["--theme-accent" as string]: themeAccent,
+        ["--theme-accent-hover" as string]: themeAccentHover,
+        ["--theme-accent-soft" as string]: themeAccentSoft,
+        ["--theme-nav-border" as string]: themeNavBorder,
+        ["--theme-nav-shadow" as string]: themeNavShadow,
+      },
+    };
+  }, [colorLeft, colorMiddle, colorRight, settings.useDarkMode]);
 
-  const petals = useMemo(
-    () =>
-      Array.from({ length: 32 }, (_, i) => {
-        const duration = 7 + (i % 8) * 1.5;
-        const delay = -((i * 1.3) % 14);
-        return {
-          left: (i * 31 + 7) % 100,
-          size: 8 + (i % 7) * 2.5,
-          duration,
-          delay,
-          drift: (i % 2 === 0 ? 1 : -1) * (30 + (i % 5) * 20),
-          rotEnd: (i % 2 === 0 ? 1 : -1) * (180 + (i % 4) * 90),
-          sway: (i % 2 === 0 ? 1 : -1) * (15 + (i % 4) * 10),
-          color: colors[i % colors.length],
-          opacity: 0.6 + (i % 5) * 0.08,
-          borderRadius: PETAL_SHAPES[i % PETAL_SHAPES.length],
-          rotate: i * 37,
-        };
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [colorLeft, colorMiddle, colorRight],
-  );
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+
+  // Resolve which animation to show.
+  // We always resolve (even when useAnimations is false) so the static
+  // background still renders. paused={true} freezes it.
+  //   animationOverride === null    → use the theme's animationKey
+  //   animationOverride === 'none'  → no background at all
+  //   animationOverride === <key>   → pin to that animation
+  let resolvedAnimation: AnimationKey | null = null;
+  if (settings.animationOverride === null) {
+    resolvedAnimation = context?.animationKey ?? null;
+  } else if (settings.animationOverride !== "none") {
+    resolvedAnimation = settings.animationOverride as AnimationKey;
+  }
 
   return (
-    <>
-      <style>{KEYFRAMES}</style>
-
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        {petals.map((p, i) => (
-          <div
-            key={i}
-            // Static classes; all per-petal dynamic values go in style
-            className="absolute -top-15 blur-[0.4px] will-change-[transform,opacity]"
-            style={{
-              left: `${p.left}vw`,
-              width: `${p.size}px`,
-              height: `${p.size * 0.85}px`,
-              background: p.color,
-              borderRadius: p.borderRadius,
-              opacity: p.opacity,
-              transform: `rotate(${p.rotate}deg)`,
-              // CSS custom properties consumed by the keyframes
-              ["--drift" as string]: `${p.drift}px`,
-              ["--rot-end" as string]: `${p.rotEnd}deg`,
-              ["--sway" as string]: `${p.sway}px`,
-              animation:
-                `sakura-fall ${p.duration}s ${p.delay}s linear infinite, ` +
-                `sakura-sway ${p.duration * 0.6}s ${p.delay}s ease-in-out infinite`,
-              animationPlayState: paused ? "paused" : "running",
-            }}
-          />
-        ))}
-
-        {/* Bokeh circles */}
-        {Array.from({ length: 12 }, (_, i) => (
-          <div
-            key={`bokeh-${i}`}
-            className="absolute rounded-full blur-[18px]"
-            style={{
-              top: `${(i * 43 + 15) % 90}%`,
-              left: `${(i * 67 + 8) % 95}%`,
-              width: `${20 + (i % 5) * 15}px`,
-              height: `${20 + (i % 5) * 15}px`,
-              background: colors[i % colors.length],
-              opacity: 0.08 + (i % 4) * 0.03,
-            }}
-          />
-        ))}
-      </div>
-    </>
+    <div
+      className={`${textColor} w-screen min-h-screen absolute top-0 left-0 flex items-center justify-center transition-[background-image] duration-600 ease-in-out`}
+      style={{ backgroundImage: currentGradient, ...cssVars }}
+    >
+      {resolvedAnimation && (
+        <AnimatedBackground
+          animationKey={resolvedAnimation}
+          colorLeft={colorLeft}
+          colorMiddle={colorMiddle}
+          colorRight={colorRight}
+          paused={!settings.useAnimations}
+        />
+      )}
+      {children}
+    </div>
   );
 }
