@@ -7,6 +7,8 @@ type Character struct {
 	Name              string               `gorm:"unique;not null;type:varchar(20)"`
 	ImgUri            string               `gorm:"not null"`
 	MatchParticipants []MatchParticipation `gorm:"foreignKey:CharacterID;constraint:OnDelete:RESTRICT"`
+	Name   string `gorm:"unique;not null;type:varchar(20)"`
+	ImgURI string `gorm:"not null"`
 }
 
 func (c Character) GetID() uint {
@@ -14,5 +16,5 @@ func (c Character) GetID() uint {
 }
 
 func (c Character) SetURIField(target string) {
-	c.ImgUri = target
+	c.ImgURI = target
 }

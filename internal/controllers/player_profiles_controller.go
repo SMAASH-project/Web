@@ -3,6 +3,7 @@ package controllers
 import (
 	"errors"
 	"net/http"
+	"os"
 	dtos "smaash-web/internal/DTOs"
 	"smaash-web/internal/middlewares"
 	"smaash-web/internal/repository"
@@ -201,7 +202,7 @@ func (pc PlayerProfileController) UploadPFP(c *gin.Context) {
 		return
 	}
 
-	uri, err := utils.SaveFileToDisc(c, file)
+	uri, err := utils.SaveFileToDisc(c, file, utils.PROFILE_PICTURE)
 	if err != nil {
 		if errors.Is(err, utils.ErrUnsupportedMediaType) {
 			c.JSON(http.StatusUnsupportedMediaType, dtos.NewErrResp(err.Error(), path))
@@ -243,6 +244,15 @@ func (pc PlayerProfileController) GetPFP(c *gin.Context) {
 
 	if profile.PfpUri == "" {
 		c.JSON(http.StatusNotFound, dtos.NewErrResp("Given profile has no uploaded profile picture", path))
+		return
+	}
+
+	if _, err := os.Stat(profile.PfpUri); err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("Profile picture of given profile cannot be found", path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp("File is corrupt: "+err.Error(), path))
 		return
 	}
 

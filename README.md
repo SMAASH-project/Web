@@ -8,7 +8,6 @@ This here repository contains the web app that goes along with the Unity game fo
 
 This section details how to get the source of project on your local machine to develop or test. For notes on how to deploy, see the [deployment](#deployment) section of this document.
 
----
 
 ### Prerequisites
 
@@ -35,12 +34,12 @@ This section details how to get the source of project on your local machine to d
 
 The app depends on the following environment variables:
 
-- PORT (default: 8000)
+- PORT (default: 8080)
 - DB_URL (default: test.db)
 - SEED_DATA_URI (default: ./internal/seeder/test_source)
 - SECRET_KEY (default: super_secret_key)
 - ALLOWED_ORIGINS (default: http://localhost:5173)
-- UPLOAD_DIR (default: ./uploads/pfps)
+- UPLOAD_DIR (default: ./uploads)
 
 ### Setting up the project
 
