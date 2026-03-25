@@ -617,7 +617,7 @@ Animation Override row (visible only when `useAnimations = true`): pin any anima
 
 Key files:
 
-- `SettingsPageContent.tsx` — full page layout; split into memoised sub-components (`ThemeSection`, `LanguageSection`, `AnimationSection`) with `useMemo` for all computed style classes and `useCallback` on all handlers. Accepts `animReady: boolean` prop — while `false`, `backdrop-blur-*` is stripped from the card's background class so the browser does not resample a growing blur region during the entry spring animation.
+- `SettingsPageContent.tsx` — full page layout; split into memoised sub-components (`ThemeSection`, `LanguageSection`, `AnimationSection`) with `useMemo` for all computed style classes and `useCallback` on all handlers. Accepts `animReady: boolean` prop — while `false`, `backdrop-blur-*` is stripped from the card background AND all four sections render at `opacity: 0 / translateY(10px)` so the browser skips compositing them during the card entry spring. Once `animReady` flips `true`, each section fades + slides in with a 200 ms CSS transition, staggered at 0 / 80 / 160 / 240 ms respectively.
 - `SettingToggle.tsx` — reusable toggle row; wrapped in `memo`, only re-renders when `useLiquidGlass`, `useDarkMode`, or the three toggle values change
 - `ThemePicker.tsx` — preset grid + custom colour pickers; wrapped in `memo` with `useMemo` for style classes and `useCallback` on the apply handler
 - `SettingsContext.tsx` — state, persistence, i18n sync; includes `animationOverride: AnimationOverride`

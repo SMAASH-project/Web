@@ -24,6 +24,22 @@ import {
   type SettingsState,
 } from "../settingsLogic/SettingsContext";
 import type { ColorContextType } from "../settingsLogic/color/ColorContext";
+import type { CSSProperties } from "react";
+
+// ─── Fade-in helper ───────────────────────────────────────────────────────────
+// Returns inline styles that fade+slide a section in once animReady flips true.
+// While animReady is false the section is invisible so the browser skips
+// compositing it during the card entry spring — that's the whole perf win.
+function sectionStyle(animReady: boolean, delayMs: number): CSSProperties {
+  return {
+    opacity: animReady ? 1 : 0,
+    transform: animReady ? "translateY(0px)" : "translateY(10px)",
+    transition: animReady
+      ? `opacity 200ms ease-out ${delayMs}ms, transform 200ms ease-out ${delayMs}ms`
+      : "none",
+    willChange: "opacity, transform",
+  };
+}
 
 // ─── Memoised sub-components ──────────────────────────────────────────────────
 
@@ -169,14 +185,13 @@ export const SettingsPageContent = memo(function SettingsPageContent({
   const context = useContext(ColorContext);
   const { t } = useTranslation("settings");
 
-  // All style classes memoised — recalculate only when the two relevant flags change
   const classes = useMemo<ClassBag>(() => {
     const rawBg = getBackgroundClasses(
       settings.useLiquidGlass,
       settings.useDarkMode,
     );
-    // Strip backdrop-blur during the entry animation to avoid blurring a
-    // growing region every frame while the spring is running (main perf fix).
+    // Strip backdrop-blur during entry so the browser isn't resampling
+    // a growing blur region every frame while the spring runs.
     const bg = animReady ? rawBg : rawBg.replace(/backdrop-blur-\S+/g, "");
     return {
       bg,
@@ -202,10 +217,13 @@ export const SettingsPageContent = memo(function SettingsPageContent({
     <Card
       className={`z-0 flex flex-col w-full max-w-6xl p-6 sm:p-8 lg:p-10 gap-8 ${classes.bg}`}
     >
-      {/* Row 1: Visual + Themes + Language */}
+      {/* Row 1: Visual + Themes + Language — staggered fade-in per section */}
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-10">
-        {/* Visual Section */}
-        <div className="flex-1 flex items-center justify-center flex-col gap-6">
+        {/* Visual Section — first in, no delay */}
+        <div
+          className="flex-1 flex items-center justify-center flex-col gap-6"
+          style={sectionStyle(animReady, 0)}
+        >
           <Label className={`${classes.text} ${classes.shadow}`}>
             {t("visual.title")}
           </Label>
@@ -214,22 +232,31 @@ export const SettingsPageContent = memo(function SettingsPageContent({
           </div>
         </div>
 
-        <ThemeSection classes={classes} context={context} t={t} />
-        <LanguageSection
-          classes={classes}
-          language={settings.language}
-          updateSetting={updateSetting}
-          t={t}
-        />
+        {/* Theme Section — 80 ms after visual */}
+        <div style={sectionStyle(animReady, 80)} className="flex-1">
+          <ThemeSection classes={classes} context={context} t={t} />
+        </div>
+
+        {/* Language Section — 160 ms after visual */}
+        <div style={sectionStyle(animReady, 160)} className="flex-1">
+          <LanguageSection
+            classes={classes}
+            language={settings.language}
+            updateSetting={updateSetting}
+            t={t}
+          />
+        </div>
       </div>
 
-      {/* Row 2: Animation Override — only rendered when animations are on */}
+      {/* Animation Override — last in, 240 ms */}
       {settings.useAnimations && (
-        <AnimationSection
-          classes={classes}
-          currentOverride={settings.animationOverride}
-          setAnimOverride={setAnimOverride}
-        />
+        <div style={sectionStyle(animReady, 240)}>
+          <AnimationSection
+            classes={classes}
+            currentOverride={settings.animationOverride}
+            setAnimOverride={setAnimOverride}
+          />
+        </div>
       )}
     </Card>
   );

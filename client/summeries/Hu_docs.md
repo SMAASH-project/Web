@@ -597,7 +597,7 @@ Témaválasztó szakasz előre beállított színsémákkal és egyéni 3-megál
 
 Fő fájlok:
 
-- `SettingsPageContent.tsx` — teljes oldal elrendezése; memoizált alkomponensekre van bontva (`ThemeSection`, `LanguageSection`, `AnimationSection`) `useMemo`-val az összes számított stílusosztályhoz és `useCallback`-kel az összes kezelőhöz. Elfogad egy `animReady: boolean` propot — amíg `false`, a `backdrop-blur-*` el van távolítva a kártya háttérosztályából, hogy a böngésző ne kényszerüljön növekvő blur-régió újramintavételezésére a belépési animáció alatt.
+- `SettingsPageContent.tsx` — teljes oldal elrendezése; memoizált alkomponensekre van bontva (`ThemeSection`, `LanguageSection`, `AnimationSection`) `useMemo`-val az összes számított stílusosztályhoz és `useCallback`-kel az összes kezelőhöz. Elfogad egy `animReady: boolean` propot — amíg `false`, a `backdrop-blur-*` el van távolítva a kártya háttérosztályából ÉS mind a négy szekció `opacity: 0 / translateY(10px)` állapotban renderelődik, így a böngésző kihagyja a compositálásukat a kártya belépési spring-animációja alatt. Amint `animReady` `true`-ra vált, minden szekció 200 ms-os CSS átmenettel fade+slide animációval jelenik meg, 0 / 80 / 160 / 240 ms eltolással.
 - `SettingToggle.tsx` — újrafelhasználható kapcsolósor; `memo`-val burkolva, csak akkor renderelődik újra, ha `useLiquidGlass`, `useDarkMode` vagy a három kapcsoló értéke változik
 - `ThemePicker.tsx` — előre beállított rács + egyéni színválasztók; `memo`-val burkolva, `useMemo`-val a stílusosztályokhoz és `useCallback`-kel az apply kezelőhöz
 - `SettingsContext.tsx` — állapot, perzisztencia, i18n szinkronizálás; tartalmazza az `animationOverride: AnimationOverride` mezőt
