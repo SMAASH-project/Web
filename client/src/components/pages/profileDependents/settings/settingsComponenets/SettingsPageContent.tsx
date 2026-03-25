@@ -25,6 +25,7 @@ import {
   type SettingsState,
 } from "../settingsLogic/SettingsContext";
 import type { ColorContextType } from "../settingsLogic/color/ColorContext";
+
 // ─── Memoised sub-components ──────────────────────────────────────────────────
 
 interface ClassBag {
@@ -32,6 +33,7 @@ interface ClassBag {
   text: string;
   shadow: string;
   btn: string;
+  btnSm: string;
   ring: string;
 }
 
@@ -39,18 +41,28 @@ interface ThemeSectionProps {
   classes: ClassBag;
   context: ColorContextType | undefined;
   t: (k: string) => string;
+  showAnimations: boolean;
+  currentOverride: AnimationOverride;
+  setAnimOverride: (key: AnimationOverride) => void;
 }
 
+// ThemeSection now owns the animation override row — it lives directly below
+// the theme grid so the two concepts sit together and the bottom row is gone.
 const ThemeSection = memo(function ThemeSection({
   classes,
   context,
   t,
+  showAnimations,
+  currentOverride,
+  setAnimOverride,
 }: ThemeSectionProps) {
   return (
-    <div className="flex-1 flex items-center justify-center flex-col gap-6">
+    <div className="flex-1 flex items-center justify-center flex-col gap-4">
       <Label className={`${classes.text} ${classes.shadow}`}>
         {t("themes.title")}
       </Label>
+
+      {/* Theme preset grid */}
       <div className="flex items-center justify-center gap-2 flex-wrap">
         {THEMES.map((theme: Theme) => (
           <Button
@@ -62,6 +74,44 @@ const ThemeSection = memo(function ThemeSection({
           </Button>
         ))}
       </div>
+
+      {/* Animation override — inline under themes, only when animations enabled */}
+      {showAnimations && (
+        <div className="w-full">
+          <Label
+            className={`block text-center mb-2 ${classes.text} ${classes.shadow}`}
+          >
+            Animation
+          </Label>
+          <div className="flex flex-wrap justify-center gap-1.5">
+            {/* Theme Default */}
+            <Button
+              className={`cursor-pointer text-xs px-2.5 py-1 h-auto ${classes.btnSm} ${classes.shadow} ${currentOverride === null ? classes.ring : ""}`}
+              onClick={() => setAnimOverride(null)}
+            >
+              Default
+            </Button>
+            {/* None */}
+            <Button
+              className={`cursor-pointer text-xs px-2.5 py-1 h-auto ${classes.btnSm} ${classes.shadow} ${currentOverride === "none" ? classes.ring : ""}`}
+              onClick={() => setAnimOverride("none")}
+            >
+              None
+            </Button>
+            {/* Each animation key */}
+            {ALL_ANIMATION_KEYS.map((key: AnimationKey) => (
+              <Button
+                key={key}
+                className={`cursor-pointer text-xs px-2.5 py-1 h-auto ${classes.btnSm} ${classes.shadow} ${currentOverride === key ? classes.ring : ""}`}
+                onClick={() => setAnimOverride(key)}
+              >
+                {ANIMATION_LABELS[key]}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <ThemePicker />
     </div>
   );
@@ -97,7 +147,7 @@ const LanguageSection = memo(function LanguageSection({
       <Label className={`${classes.text} ${classes.shadow}`}>
         {t("language.title")}
       </Label>
-      <div className="flex items-center justify-center gap-3">
+      <div className="flex items-center justify-center gap-3 flex-wrap">
         <Button
           className={`cursor-pointer ${classes.btn} ${classes.shadow} ${language === "en" ? classes.ring : ""}`}
           onClick={setEn}
@@ -110,49 +160,6 @@ const LanguageSection = memo(function LanguageSection({
         >
           🇭🇺 {t("language.hu")}
         </Button>
-      </div>
-    </div>
-  );
-});
-
-interface AnimationSectionProps {
-  classes: ClassBag;
-  currentOverride: AnimationOverride;
-  setAnimOverride: (key: AnimationOverride) => void;
-}
-
-const AnimationSection = memo(function AnimationSection({
-  classes,
-  currentOverride,
-  setAnimOverride,
-}: AnimationSectionProps) {
-  return (
-    <div className="flex flex-col items-center gap-4 pt-2 border-t border-white/10">
-      <Label className={`${classes.text} ${classes.shadow}`}>
-        Animation Override
-      </Label>
-      <div className="flex flex-wrap items-center justify-center gap-2">
-        <Button
-          className={`cursor-pointer ${classes.btn} ${classes.shadow} ${currentOverride === null ? classes.ring : ""}`}
-          onClick={() => setAnimOverride(null)}
-        >
-          ✨ Theme Default
-        </Button>
-        <Button
-          className={`cursor-pointer ${classes.btn} ${classes.shadow} ${currentOverride === "none" ? classes.ring : ""}`}
-          onClick={() => setAnimOverride("none")}
-        >
-          ✖ None
-        </Button>
-        {ALL_ANIMATION_KEYS.map((key: AnimationKey) => (
-          <Button
-            key={key}
-            className={`cursor-pointer ${classes.btn} ${classes.shadow} ${currentOverride === key ? classes.ring : ""}`}
-            onClick={() => setAnimOverride(key)}
-          >
-            {ANIMATION_LABELS[key]}
-          </Button>
-        ))}
       </div>
     </div>
   );
@@ -174,21 +181,24 @@ export const SettingsPageContent = memo(function SettingsPageContent({
       settings.useLiquidGlass,
       settings.useDarkMode,
     );
-    // Strip backdrop-blur during entry so the browser isn't resampling
-    // a growing blur region every frame while the spring runs.
     const bg = animReady ? rawBg : rawBg.replace(/backdrop-blur-\S+/g, "");
+    const btn = getButtonClasses(settings.useLiquidGlass, settings.useDarkMode);
+    // btnSm reuses the same base class — sizing is controlled in JSX via text-xs/px/py
+    const btnSm = btn;
+    const ring = settings.useLiquidGlass
+      ? settings.useDarkMode
+        ? "ring-2 ring-white/60"
+        : "ring-2 ring-black/40"
+      : settings.useDarkMode
+        ? "ring-2 ring-gray-300"
+        : "ring-2 ring-gray-600";
     return {
       bg,
       text: getTextColor(settings.useLiquidGlass, settings.useDarkMode),
       shadow: getTextShadow(settings.useLiquidGlass, settings.useDarkMode),
-      btn: getButtonClasses(settings.useLiquidGlass, settings.useDarkMode),
-      ring: settings.useLiquidGlass
-        ? settings.useDarkMode
-          ? "ring-2 ring-white/60"
-          : "ring-2 ring-black/40"
-        : settings.useDarkMode
-          ? "ring-2 ring-gray-300"
-          : "ring-2 ring-gray-600",
+      btn,
+      btnSm,
+      ring,
     };
   }, [settings.useLiquidGlass, settings.useDarkMode, animReady]);
 
@@ -201,9 +211,8 @@ export const SettingsPageContent = memo(function SettingsPageContent({
     <Card
       className={`z-0 flex flex-col w-full max-w-6xl p-6 sm:p-8 lg:p-10 gap-8 ${classes.bg}`}
     >
-      {/* Row 1: Visual + Themes + Language — staggered fade-in per section */}
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-10">
-        {/* Visual Section — first in, no delay */}
+        {/* Visual — first in, no delay */}
         <div
           className="flex-1 flex items-center justify-center flex-col gap-6"
           style={sectionStyle(animReady, 0)}
@@ -216,13 +225,26 @@ export const SettingsPageContent = memo(function SettingsPageContent({
           </div>
         </div>
 
-        {/* Theme Section — 80 ms after visual */}
-        <div style={sectionStyle(animReady, 80)} className="flex-1">
-          <ThemeSection classes={classes} context={context} t={t} />
+        {/* Themes + Animation inline — 80 ms */}
+        <div
+          style={sectionStyle(animReady, 80)}
+          className="flex-1 flex items-center justify-center flex-col gap-6"
+        >
+          <ThemeSection
+            classes={classes}
+            context={context}
+            t={t}
+            showAnimations={settings.useAnimations}
+            currentOverride={settings.animationOverride}
+            setAnimOverride={setAnimOverride}
+          />
         </div>
 
-        {/* Language Section — 160 ms after visual */}
-        <div style={sectionStyle(animReady, 160)} className="flex-1">
+        {/* Language — 160 ms */}
+        <div
+          style={sectionStyle(animReady, 160)}
+          className="flex-1 flex items-center justify-center flex-col gap-6"
+        >
           <LanguageSection
             classes={classes}
             language={settings.language}
@@ -231,17 +253,6 @@ export const SettingsPageContent = memo(function SettingsPageContent({
           />
         </div>
       </div>
-
-      {/* Animation Override — last in, 240 ms */}
-      {settings.useAnimations && (
-        <div style={sectionStyle(animReady, 240)}>
-          <AnimationSection
-            classes={classes}
-            currentOverride={settings.animationOverride}
-            setAnimOverride={setAnimOverride}
-          />
-        </div>
-      )}
     </Card>
   );
 });
