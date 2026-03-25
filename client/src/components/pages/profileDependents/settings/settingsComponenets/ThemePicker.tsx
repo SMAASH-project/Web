@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { memo, useCallback, useContext, useMemo, useState } from "react";
 import { ColorContext } from "../settingsLogic/color/ColorContext";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -6,7 +6,7 @@ import { useSettings } from "../settingsLogic/SettingsContext";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { getTextColor, getTextShadow, getButtonClasses } from "@/lib/utils";
 
-export const ThemePicker = () => {
+export const ThemePicker = memo(function ThemePicker() {
   const context = useContext(ColorContext);
   if (!context) {
     throw new Error("ThemePicker must be used within a ColorProvider");
@@ -22,7 +22,6 @@ export const ThemePicker = () => {
     setColorRight,
   } = context;
 
-  // Track pending edits
   const [pendingColorLeft, setPendingColorLeft] = useState<string | null>(null);
   const [pendingColorMiddle, setPendingColorMiddle] = useState<string | null>(
     null,
@@ -31,28 +30,36 @@ export const ThemePicker = () => {
     null,
   );
 
-  // Show pending value if editing, otherwise show applied value
   const displayColorLeft = pendingColorLeft ?? colorLeft;
   const displayColorMiddle = pendingColorMiddle ?? colorMiddle;
   const displayColorRight = pendingColorRight ?? colorRight;
 
-  const handleApplyChanges = () => {
+  const handleApplyChanges = useCallback(() => {
     if (pendingColorLeft !== null) setColorLeft(pendingColorLeft);
     if (pendingColorMiddle !== null) setColorMiddle(pendingColorMiddle);
     if (pendingColorRight !== null) setColorRight(pendingColorRight);
     setPendingColorLeft(null);
     setPendingColorMiddle(null);
     setPendingColorRight(null);
-  };
+  }, [
+    pendingColorLeft,
+    pendingColorMiddle,
+    pendingColorRight,
+    setColorLeft,
+    setColorMiddle,
+    setColorRight,
+  ]);
 
-  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
-  const textShadow = getTextShadow(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const buttonClass = getButtonClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
+  const { textColor, textShadow, buttonClass } = useMemo(
+    () => ({
+      textColor: getTextColor(settings.useLiquidGlass, settings.useDarkMode),
+      textShadow: getTextShadow(settings.useLiquidGlass, settings.useDarkMode),
+      buttonClass: getButtonClasses(
+        settings.useLiquidGlass,
+        settings.useDarkMode,
+      ),
+    }),
+    [settings.useLiquidGlass, settings.useDarkMode],
   );
 
   return (
@@ -60,23 +67,17 @@ export const ThemePicker = () => {
       <Label className={`${textColor} p-1.5 ${textShadow}`}>Custom Theme</Label>
       <ColorPicker
         className="w-10 cursor-pointer"
-        onChange={(v) => {
-          setPendingColorLeft(v);
-        }}
+        onChange={setPendingColorLeft}
         value={displayColorLeft}
       />
       <ColorPicker
         className="w-10 cursor-pointer"
-        onChange={(v) => {
-          setPendingColorMiddle(v);
-        }}
+        onChange={setPendingColorMiddle}
         value={displayColorMiddle}
       />
       <ColorPicker
         className="w-10 cursor-pointer"
-        onChange={(v) => {
-          setPendingColorRight(v);
-        }}
+        onChange={setPendingColorRight}
         value={displayColorRight}
       />
       <Button
@@ -87,4 +88,4 @@ export const ThemePicker = () => {
       </Button>
     </div>
   );
-};
+});

@@ -1,13 +1,20 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import i18n from "@/lib/I18n";
+import { type AnimationKey } from "@/lib/animationTypes";
 
 export type Language = "en" | "hu";
+
+// null  = use the theme's own animationKey (default)
+// 'none' = force no animation even if theme has one
+// AnimationKey = force a specific animation regardless of theme
+export type AnimationOverride = AnimationKey | "none" | null;
 
 export interface SettingsState {
   useAnimations: boolean;
   useLiquidGlass: boolean;
   useDarkMode: boolean;
   language: Language;
+  animationOverride: AnimationOverride;
 }
 
 interface SettingsContextType {
@@ -40,6 +47,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       useLiquidGlass: parsed?.useLiquidGlass ?? true,
       useDarkMode: parsed?.useDarkMode ?? false,
       language: parsed?.language ?? "en",
+      animationOverride: (parsed?.animationOverride ??
+        null) as AnimationOverride,
     };
   });
 

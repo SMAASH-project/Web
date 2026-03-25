@@ -2,6 +2,7 @@ import React, {
   createContext,
   useContext,
   useCallback,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -26,6 +27,10 @@ const ProfileContext = createContext<ProfileContextType>(defaultProfileContext);
 
 export { ProfileContext };
 
+function profileStorageKey(userId: number) {
+  return `selected_profile_${userId}`;
+}
+
 export function ProfileProvider({ children }: { children: React.ReactNode }) {
   const [selectedProfileId, setSelectedProfileId] = useState<number | null>(
     null,
@@ -37,6 +42,20 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
   const { data: fetchedProfiles = [] } = useProfilesQuery(numUserId);
   const addProfileMutation = useAddProfileMutation();
   const deleteProfileMutation = useDeleteProfileMutation();
+
+  // Restore the persisted selection once we have both a userId and the
+  // fetched profiles list. We validate that the stored ID still exists —
+  // the user may have deleted the profile since the last session.
+  useEffect(() => {
+    if (!numUserId || fetchedProfiles.length === 0) return;
+    const stored = localStorage.getItem(profileStorageKey(numUserId));
+    if (!stored) return;
+    const storedId = parseInt(stored, 10);
+    const stillExists = fetchedProfiles.some(
+      (p: ProfileResponse) => p.id === storedId,
+    );
+    if (stillExists) setSelectedProfileId(storedId);
+  }, [numUserId, fetchedProfiles]);
 
   const profiles = useMemo<Profile[]>(
     () =>
@@ -85,9 +104,17 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
   const selectProfile = useCallback(
     (name: string) => {
       const found = profiles.find((p) => p.name === name) || null;
-      setSelectedProfileId(found?.id ?? null);
+      const id = found?.id ?? null;
+      setSelectedProfileId(id);
+      if (numUserId) {
+        if (id !== null) {
+          localStorage.setItem(profileStorageKey(numUserId), String(id));
+        } else {
+          localStorage.removeItem(profileStorageKey(numUserId));
+        }
+      }
     },
-    [profiles],
+    [profiles, numUserId],
   );
 
   return (

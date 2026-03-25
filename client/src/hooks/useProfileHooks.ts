@@ -166,23 +166,27 @@ export function useUploadProfilePictureMutation() {
     mutationFn: async ({ profileId, file }) => {
       await uploadProfilePicture(profileId, file);
     },
-    onSuccess: async (_data, variables) => {
-      // Stamp a new version for this profile BEFORE refetching so that when
-      // useProfilesQuery runs getProfilePictureUrl it produces a fresh URL
-      // with ?v=<timestamp>, bypassing any browser cache of the old image.
+    onSuccess: (_data, variables) => {
+      // Stamp a new version BEFORE patching the cache so getProfilePictureUrl
+      // produces the correct cache-busted URL immediately.
       pfpVersions.set(variables.profileId, Date.now());
       savePfpVersions(pfpVersions);
 
-      // Invalidate and refetch so every subscriber (Navbar, ProfileContext)
-      // immediately picks up the new cache-busted avatar URL.
-      try {
-        await queryClient.invalidateQueries({
-          queryKey: queryKeys.profiles.all,
-        });
-        await queryClient.refetchQueries({ queryKey: queryKeys.profiles.all });
-      } catch (err) {
-        // ignore — localPreview already shows the new image in the current session
-      }
+      // Patch only the avatar_url for this profile in every cached query that
+      // holds profile lists (matches all ["profiles", ...] keys via the prefix).
+      // No network request is made — the profile selector cache is left intact
+      // and will serve accurate data the next time it is visited.
+      queryClient.setQueriesData<ProfileResponse[]>(
+        { queryKey: queryKeys.profiles.all },
+        (cached) => {
+          if (!cached) return cached;
+          return cached.map((p) =>
+            p.id === variables.profileId
+              ? { ...p, avatar_url: getProfilePictureUrl(variables.profileId) }
+              : p,
+          );
+        },
+      );
     },
   });
 }

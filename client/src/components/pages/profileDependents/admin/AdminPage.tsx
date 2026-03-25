@@ -12,7 +12,7 @@
 
 // Content moved to AdminPageContent.tsx
 
-import { useContext } from "react";
+import { useContext, useState, useCallback } from "react";
 import Navbar from "@/components/nav/Navbar";
 import { CardAnimation } from "@/lib/miscAnimations/OnloadAnimationCard";
 import { useSettings } from "../settings/settingsLogic/SettingsContext";
@@ -27,6 +27,9 @@ export function AdminPage() {
   const { isAdmin, isInitializing } = useContext(AuthContext);
   const { settings } = useSettings();
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+
+  const [animDone, setAnimDone] = useState(false);
+  const handleAnimationComplete = useCallback(() => setAnimDone(true), []);
 
   if (isInitializing) {
     return (
@@ -48,12 +51,15 @@ export function AdminPage() {
         <Navbar />
       </div>
       {settings.useAnimations ? (
-        <CardAnimation className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 pt-20 xl:pt-0 flex items-start xl:items-center justify-center">
-          <AdminPageContent />
+        <CardAnimation
+          className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 pt-20 xl:pt-0 flex items-start xl:items-center justify-center"
+          onAnimationComplete={handleAnimationComplete}
+        >
+          <AdminPageContent animReady={animDone} />
         </CardAnimation>
       ) : (
         <div className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 pt-20 xl:pt-0 flex items-start xl:items-center justify-center">
-          <AdminPageContent />
+          <AdminPageContent animReady={true} />
         </div>
       )}
     </div>
