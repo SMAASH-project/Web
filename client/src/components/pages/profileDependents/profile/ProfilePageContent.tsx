@@ -23,6 +23,7 @@ import {
   getTextColor,
   getSubtextColor,
   getTextShadow,
+  sectionStyle,
 } from "@/lib/utils";
 import { useProfiles } from "@/components/forms/addNewProfile/useProfiles";
 import { useUploadProfilePictureMutation } from "@/hooks/useQueryHooks";
@@ -69,7 +70,11 @@ function StatCard({
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function ProfilePageContent() {
+export function ProfilePageContent({
+  animReady = true,
+}: {
+  animReady?: boolean;
+}) {
   const pfpinputRef = useRef<HTMLInputElement>(null);
   const { selectedProfile } = useProfiles();
   const uploadProfilePictureMutation = useUploadProfilePictureMutation();
@@ -108,9 +113,12 @@ export function ProfilePageContent() {
 
   // ─── Theming ────────────────────────────────────────────────────────────────
 
-  const cardBg = useLiquidGlass
+  const rawCardBg = useLiquidGlass
     ? getLiquidGlassClasses(useLiquidGlass, useDarkMode)
     : getBackgroundClasses(useLiquidGlass, useDarkMode);
+  const cardBg = animReady
+    ? rawCardBg
+    : rawCardBg.replace(/backdrop-blur-\S+/g, "");
 
   const panelBg = getBackgroundClasses(useLiquidGlass, useDarkMode, "light");
   const textColor = getTextColor(useLiquidGlass, useDarkMode);
@@ -148,7 +156,10 @@ export function ProfilePageContent() {
       )}
     >
       {/* ═══ Left — avatar + name + edit ═══════════════════════════════════ */}
-      <div className="flex flex-col items-center justify-center gap-5 lg:w-52 lg:shrink-0">
+      <div
+        className="flex flex-col items-center justify-center gap-5 lg:w-52 lg:shrink-0"
+        style={sectionStyle(animReady, 0)}
+      >
         <div>
           <input
             type="file"
@@ -214,7 +225,10 @@ export function ProfilePageContent() {
       <Separator className={cn("block lg:hidden", sepClass)} />
 
       {/* ═══ Center — stats ════════════════════════════════════════════════ */}
-      <div className="flex-1 flex flex-col gap-4">
+      <div
+        className="flex-1 flex flex-col gap-4"
+        style={sectionStyle(animReady, 80)}
+      >
         <p
           className={cn(
             "text-xs font-semibold uppercase tracking-wider",
@@ -315,7 +329,10 @@ export function ProfilePageContent() {
       <Separator className={cn("block lg:hidden", sepClass)} />
 
       {/* ═══ Right — match history ══════════════════════════════════════════ */}
-      <div className="flex-1 flex flex-col gap-4 min-w-0">
+      <div
+        className="flex-1 flex flex-col gap-4 min-w-0"
+        style={sectionStyle(animReady, 160)}
+      >
         <p
           className={cn(
             "text-xs font-semibold uppercase tracking-wider",

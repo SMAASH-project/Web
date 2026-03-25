@@ -12,6 +12,7 @@ import {
   getTextColor,
   getTextShadow,
   getButtonClasses,
+  sectionStyle,
 } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import {
@@ -24,23 +25,6 @@ import {
   type SettingsState,
 } from "../settingsLogic/SettingsContext";
 import type { ColorContextType } from "../settingsLogic/color/ColorContext";
-import type { CSSProperties } from "react";
-
-// ─── Fade-in helper ───────────────────────────────────────────────────────────
-// Returns inline styles that fade+slide a section in once animReady flips true.
-// While animReady is false the section is invisible so the browser skips
-// compositing it during the card entry spring — that's the whole perf win.
-function sectionStyle(animReady: boolean, delayMs: number): CSSProperties {
-  return {
-    opacity: animReady ? 1 : 0,
-    transform: animReady ? "translateY(0px)" : "translateY(10px)",
-    transition: animReady
-      ? `opacity 200ms ease-out ${delayMs}ms, transform 200ms ease-out ${delayMs}ms`
-      : "none",
-    willChange: "opacity, transform",
-  };
-}
-
 // ─── Memoised sub-components ──────────────────────────────────────────────────
 
 interface ClassBag {

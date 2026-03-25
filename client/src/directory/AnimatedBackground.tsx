@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
 import { type AnimationKey } from "@/lib/animationTypes";
 
 import { DeepSpaceBackground } from "./DeepSpaceBackground";
@@ -18,9 +17,6 @@ interface Props {
   paused: boolean;
 }
 
-const FADE_IN_ROUTES = ["/app/settings", "/app/profile", "/app/admin"];
-const FADE_IN_DELAY_MS = 1600; // >= CardAnimation spring visualDuration (1.5 s)
-const FADE_IN_DURATION_MS = 400;
 const CROSSFADE_MS = 600; // duration of the swap transition
 
 interface Layer {
@@ -65,22 +61,6 @@ export function AnimatedBackground({
   colorRight,
   paused,
 }: Props) {
-  const { pathname } = useLocation();
-  const shouldDefer = FADE_IN_ROUTES.includes(pathname);
-
-  // Route-based deferred visibility (settings / profile / admin)
-  const [routeVisible, setRouteVisible] = useState(!shouldDefer);
-  useEffect(() => {
-    if (!shouldDefer) {
-      setRouteVisible(true);
-      return;
-    }
-    setRouteVisible(false);
-    const id = setTimeout(() => setRouteVisible(true), FADE_IN_DELAY_MS);
-    return () => clearTimeout(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
-
   // Crossfade layers
   const layerIdRef = useRef(0);
   const [layers, setLayers] = useState<Layer[]>([
@@ -128,16 +108,7 @@ export function AnimatedBackground({
   const shared = { colorLeft, colorMiddle, colorRight, paused };
 
   return (
-    // Outer wrapper: route-based deferred fade
-    <div
-      className="fixed inset-0 z-0 pointer-events-none"
-      style={{
-        opacity: routeVisible ? 1 : 0,
-        transition: routeVisible
-          ? `opacity ${FADE_IN_DURATION_MS}ms ease-in`
-          : "none",
-      }}
-    >
+    <div className="fixed inset-0 z-0 pointer-events-none">
       {layers.map((layer) => (
         // Inner layer: crossfade wrapper per animation
         <div
