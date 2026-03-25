@@ -6,6 +6,10 @@ import {
   Mail,
   Clock,
   ShieldCheck,
+  ArrowBigUpDash,
+  ArrowBigUp,
+  ArrowBigDown,
+  ArrowBigDownDash,
   Ban,
   Shield,
   Users,
@@ -97,7 +101,11 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
     textShadow,
     subtextColor,
     unbanMutation,
+    promoteMutation,
+    demoteMutation,
     handleUnban,
+    handlePromote,
+    handleDemote,
     setBanDialogOpen,
   } = logic;
 
@@ -179,14 +187,15 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
           </div>
         </div>
 
-        {/* Ban / unban action */}
+        {/* Ban / unban + role actions */}
         <div className="flex flex-col gap-2 shrink-0">
+          {/* Ban / Unban */}
           {selectedUser.is_banned ? (
             <Button
               size="sm"
               onClick={handleUnban}
               disabled={unbanMutation.isPending}
-              className="text-xs flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white border-green-700"
+              className="text-xs flex items-center justify-center gap-1.5 w-full bg-green-600 hover:bg-green-700 text-white border-green-700"
             >
               <ShieldCheck size={13} />
               {unbanMutation.isPending
@@ -197,10 +206,64 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
             <Button
               size="sm"
               onClick={() => setBanDialogOpen(true)}
-              className="text-xs flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white border-red-700"
+              className="text-xs flex items-center justify-center gap-1.5 w-full bg-red-600 hover:bg-red-700 text-white border-red-700"
             >
               <Ban size={13} />
               Ban User
+            </Button>
+          )}
+
+          {/* Promote to Support — only shown for plain users */}
+          {selectedUser.role === "user" && (
+            <Button
+              size="sm"
+              onClick={() => handlePromote("support")}
+              disabled={promoteMutation.isPending}
+              className="text-xs flex items-center justify-center gap-1.5 w-full bg-sky-600 hover:bg-sky-700 text-white border-sky-700"
+            >
+              <ArrowBigUp size={13} />
+              {promoteMutation.isPending ? "..." : "Support"}
+            </Button>
+          )}
+
+          {/* Promote to Admin — shown for users and support */}
+          {(selectedUser.role === "user" ||
+            selectedUser.role === "support") && (
+            <Button
+              size="sm"
+              onClick={() => handlePromote("admin")}
+              disabled={promoteMutation.isPending}
+              className="text-xs flex items-center justify-center gap-1.5 w-full bg-purple-600 hover:bg-purple-700 text-white border-purple-700"
+            >
+              <ArrowBigUpDash size={13} />
+              {promoteMutation.isPending ? "..." : "Admin"}
+            </Button>
+          )}
+
+          {/* Demote to Support — only shown for admins */}
+          {selectedUser.role === "admin" && (
+            <Button
+              size="sm"
+              onClick={() => handlePromote("support")}
+              disabled={promoteMutation.isPending}
+              className="text-xs flex items-center justify-center gap-1.5 w-full bg-sky-600 hover:bg-sky-700 text-white border-sky-700"
+            >
+              <ArrowBigDown size={13} />
+              {promoteMutation.isPending ? "..." : "Support"}
+            </Button>
+          )}
+
+          {/* Demote to User — shown for admins and support */}
+          {(selectedUser.role === "admin" ||
+            selectedUser.role === "support") && (
+            <Button
+              size="sm"
+              onClick={handleDemote}
+              disabled={demoteMutation.isPending}
+              className="text-xs flex items-center justify-center gap-1.5 w-full bg-amber-600 hover:bg-amber-700 text-white border-amber-700"
+            >
+              <ArrowBigDownDash size={13} />
+              {demoteMutation.isPending ? "..." : "User"}
             </Button>
           )}
         </div>

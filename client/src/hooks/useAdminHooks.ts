@@ -168,3 +168,52 @@ export function useUnbanUserMutation() {
     },
   });
 }
+
+/**
+ * Promote a user to a higher role.
+ *
+ * Route:   POST /api/users/:id/promote
+ * Auth:    Requires admin role
+ * Body:    { id: number, target_role: "admin" | "support" }
+ * Returns: 204 No Content
+ */
+export function usePromoteUserMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    void,
+    AxiosError,
+    { userId: number; targetRole: "admin" | "support" }
+  >({
+    mutationFn: async ({ userId, targetRole }) => {
+      await apiClient.post(`/users/${userId}/promote`, {
+        id: userId,
+        target_role: targetRole,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminQueryKeys.users.all });
+    },
+  });
+}
+
+/**
+ * Demote a user back to the base "user" role.
+ *
+ * Route:   POST /api/users/:id/demote
+ * Auth:    Requires admin role
+ * Body:    (none)
+ * Returns: 204 No Content
+ */
+export function useDemoteUserMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, AxiosError, { userId: number }>({
+    mutationFn: async ({ userId }) => {
+      await apiClient.post(`/users/${userId}/demote`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminQueryKeys.users.all });
+    },
+  });
+}

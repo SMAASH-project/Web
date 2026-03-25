@@ -3,6 +3,8 @@ import {
   useAdminUsersQuery,
   useBanUserMutation,
   useUnbanUserMutation,
+  usePromoteUserMutation,
+  useDemoteUserMutation,
   type AdminUserDTO,
 } from "@/hooks/useAdminHooks";
 import { useProfilesQuery } from "@/hooks/useQueryHooks";
@@ -27,6 +29,8 @@ export function useAdminPageLogic() {
   const { data: users = [], isLoading: usersLoading } = useAdminUsersQuery();
   const banMutation = useBanUserMutation();
   const unbanMutation = useUnbanUserMutation();
+  const promoteMutation = usePromoteUserMutation();
+  const demoteMutation = useDemoteUserMutation();
 
   const selectedUser = useMemo(
     () => users.find((u) => u.id === selectedUserId) ?? null,
@@ -76,6 +80,24 @@ export function useAdminPageLogic() {
       await unbanMutation.mutateAsync({ userId: selectedUserId });
     } catch (err) {
       console.error("Unban failed:", err);
+    }
+  };
+
+  const handlePromote = async (targetRole: "admin" | "support") => {
+    if (!selectedUserId) return;
+    try {
+      await promoteMutation.mutateAsync({ userId: selectedUserId, targetRole });
+    } catch (err) {
+      console.error("Promote failed:", err);
+    }
+  };
+
+  const handleDemote = async () => {
+    if (!selectedUserId) return;
+    try {
+      await demoteMutation.mutateAsync({ userId: selectedUserId });
+    } catch (err) {
+      console.error("Demote failed:", err);
     }
   };
 
@@ -157,6 +179,10 @@ export function useAdminPageLogic() {
     handleUnban,
     banMutation,
     unbanMutation,
+    promoteMutation,
+    demoteMutation,
+    handlePromote,
+    handleDemote,
     cardBg,
     panelBg,
     textColor,
