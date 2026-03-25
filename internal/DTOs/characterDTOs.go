@@ -25,7 +25,7 @@ func CharacterToDTO(c models.Character) CharacterReadDTO {
 	return CharacterReadDTO{
 		ID:     c.ID,
 		Name:   c.Name,
-		ImgURI: c.ImgUri,
+		ImgURI: c.ImgURI,
 	}
 }
 

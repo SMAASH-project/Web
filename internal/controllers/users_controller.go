@@ -16,15 +16,15 @@ import (
 )
 
 type UserController struct {
-	userRepo        repository.UserRepository
-	profileBaseRepo repository.BaseRepository[models.PlayerProfile]
+	userRepo     repository.UserRepository
+	profilesRepo repository.ProfilesRepository
 }
 
 func NewUserController(
 	userRepo repository.UserRepository,
-	profilesBaseRepo repository.BaseRepository[models.PlayerProfile],
+	profilesRepo repository.ProfilesRepository,
 ) *UserController {
-	return &UserController{userRepo: userRepo, profileBaseRepo: profilesBaseRepo}
+	return &UserController{userRepo: userRepo, profilesRepo: profilesRepo}
 }
 
 // @description Reads all users
@@ -173,12 +173,24 @@ func (uc *UserController) AddProfileToUser(c *gin.Context) {
 			return
 		}
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	currentProfiles, err := uc.profilesRepo.ReadByUserID(c.Request.Context(), id.(uint))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	if len(currentProfiles) > 4 {
+		c.JSON(http.StatusForbidden, dtos.NewErrResp("A user can have a maximum of five profiles", path))
+		return
 	}
 
 	newProfile := dtos.AppendDTOToPlayerProfile(body)
 	newProfile.UserID = id.(uint)
 
-	if err := uc.profileBaseRepo.Create(c.Request.Context(), &newProfile); err != nil {
+	if err := uc.profilesRepo.Create(c.Request.Context(), &newProfile); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			c.JSON(http.StatusConflict, dtos.NewErrResp("Display name already taken", path))
 			return

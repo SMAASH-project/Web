@@ -3,9 +3,9 @@ package controllers
 import (
 	"errors"
 	"net/http"
+	"os"
 	dtos "smaash-web/internal/DTOs"
 	"smaash-web/internal/middlewares"
-	"smaash-web/internal/models"
 	"smaash-web/internal/repository"
 	"smaash-web/internal/utils"
 
@@ -15,11 +15,11 @@ import (
 )
 
 type PlayerProfileController struct {
-	profilesBaseRepo repository.BaseRepository[models.PlayerProfile]
+	profilesRepo repository.ProfilesRepository
 }
 
-func NewPlayerProfileController(profilesBaseRepo repository.BaseRepository[models.PlayerProfile]) *PlayerProfileController {
-	return &PlayerProfileController{profilesBaseRepo: profilesBaseRepo}
+func NewPlayerProfileController(profilesRepo repository.ProfilesRepository) *PlayerProfileController {
+	return &PlayerProfileController{profilesRepo: profilesRepo}
 }
 
 // @description Reads all profile
@@ -33,7 +33,7 @@ func NewPlayerProfileController(profilesBaseRepo repository.BaseRepository[model
 func (pc PlayerProfileController) ReadAll(c *gin.Context) {
 	page, _ := c.Get("page")
 	size, _ := c.Get("size")
-	profiles, err := pc.profilesBaseRepo.ReadAllPaginated(c.Request.Context(), page.(int), size.(int))
+	profiles, err := pc.profilesRepo.ReadAllPaginated(c.Request.Context(), page.(int), size.(int))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
@@ -55,7 +55,7 @@ func (pc PlayerProfileController) ReadAll(c *gin.Context) {
 func (pc PlayerProfileController) ReadByID(c *gin.Context) {
 	id, _ := c.Get("id")
 	path := c.Request.URL.Path
-	profile, err := pc.profilesBaseRepo.ReadByID(c, id.(uint))
+	profile, err := pc.profilesRepo.ReadByID(c, id.(uint))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp(err.Error(), path))
@@ -86,8 +86,19 @@ func (pc PlayerProfileController) Create(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), path))
 	}
 
+	currentProfiles, err := pc.profilesRepo.ReadByUserID(c.Request.Context(), body.UserID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	if len(currentProfiles) > 4 {
+		c.JSON(http.StatusForbidden, dtos.NewErrResp("A user can have a maximum of five profiles", path))
+		return
+	}
+
 	newProfile := dtos.CreateDTOToPlayerProfile(body)
-	if err := pc.profilesBaseRepo.Create(c, &newProfile); err != nil {
+	if err := pc.profilesRepo.Create(c, &newProfile); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			c.JSON(http.StatusConflict, dtos.NewErrResp("Display name already taken", path))
 			return
@@ -128,7 +139,7 @@ func (pc PlayerProfileController) Update(c *gin.Context) {
 		return
 	}
 
-	if err := pc.profilesBaseRepo.Update(c.Request.Context(), dtos.UpdateDTOToPlayerProfile(body)); err != nil {
+	if err := pc.profilesRepo.Update(c.Request.Context(), dtos.UpdateDTOToPlayerProfile(body)); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Record not found", path))
 			return
@@ -158,7 +169,7 @@ func (pc PlayerProfileController) Delete(c *gin.Context) {
 	id, _ := c.Get("id")
 	path := c.Request.URL.Path
 
-	if err := pc.profilesBaseRepo.Delete(c.Request.Context(), id.(uint)); err != nil {
+	if err := pc.profilesRepo.Delete(c.Request.Context(), id.(uint)); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Record not found", path))
 			return
@@ -191,7 +202,7 @@ func (pc PlayerProfileController) UploadPFP(c *gin.Context) {
 		return
 	}
 
-	uri, err := utils.SaveFileToDisc(c, file)
+	uri, err := utils.SaveFileToDisc(c, file, utils.PROFILE_PICTURE)
 	if err != nil {
 		if errors.Is(err, utils.ErrUnsupportedMediaType) {
 			c.JSON(http.StatusUnsupportedMediaType, dtos.NewErrResp(err.Error(), path))
@@ -201,7 +212,7 @@ func (pc PlayerProfileController) UploadPFP(c *gin.Context) {
 		return
 	}
 
-	if err := pc.profilesBaseRepo.UpdateOne(c.Request.Context(), id.(uint), "pfp_uri", uri); err != nil {
+	if err := pc.profilesRepo.UpdateOne(c.Request.Context(), id.(uint), "pfp_uri", uri); err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
 		return
 	}
@@ -221,7 +232,7 @@ func (pc PlayerProfileController) GetPFP(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
 
-	profile, err := pc.profilesBaseRepo.ReadByID(c.Request.Context(), id.(uint))
+	profile, err := pc.profilesRepo.ReadByID(c.Request.Context(), id.(uint))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Profile with given id not found", path))
@@ -236,6 +247,15 @@ func (pc PlayerProfileController) GetPFP(c *gin.Context) {
 		return
 	}
 
+	if _, err := os.Stat(profile.PfpUri); err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("Profile picture of given profile cannot be found", path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp("File is corrupt: "+err.Error(), path))
+		return
+	}
+
 	c.File(profile.PfpUri)
 }
 
@@ -243,7 +263,7 @@ func (pc PlayerProfileController) ReadPurchases(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
 
-	profile, err := pc.profilesBaseRepo.ReadByID(c.Request.Context(), id.(uint), "Purchases")
+	profile, err := pc.profilesRepo.ReadByID(c.Request.Context(), id.(uint), "Purchases")
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Profile with given id not found", path))

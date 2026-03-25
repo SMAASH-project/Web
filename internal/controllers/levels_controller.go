@@ -3,6 +3,7 @@ package controllers
 import (
 	"errors"
 	"net/http"
+	"os"
 	dtos "smaash-web/internal/DTOs"
 	"smaash-web/internal/middlewares"
 	"smaash-web/internal/models"
@@ -163,6 +164,65 @@ func (lc *LevelsController) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+func (lc LevelsController) UploadImg(c *gin.Context) {
+	path := c.Request.URL.Path
+	id, _ := c.Get("id")
+
+	file, err := c.FormFile("LevelImage")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dtos.NewErrResp("No file uploaded", path))
+		return
+	}
+
+	uri, err := utils.SaveFileToDisc(c, file, utils.LEVEL_IMAGE)
+	if err != nil {
+		if errors.Is(err, utils.ErrUnsupportedMediaType) {
+			c.JSON(http.StatusUnsupportedMediaType, dtos.NewErrResp(err.Error(), path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	if err := lc.levelsBaseRepo.UpdateOne(c.Request.Context(), id.(uint), "img_uri", uri); err != nil {
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	c.String(http.StatusCreated, *uri)
+}
+
+func (lc LevelsController) ReadImg(c *gin.Context) {
+	path := c.Request.URL.Path
+	id, _ := c.Get("id")
+
+	level, err := lc.levelsBaseRepo.ReadByID(c.Request.Context(), id.(uint))
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("Level with given id not found", path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	if level.ImgURI == "" {
+		c.JSON(http.StatusNotFound, dtos.NewErrResp("Given level has no uploaded image", path))
+		return
+	}
+
+	if _, err := os.Stat(level.ImgURI); err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("Image of given level cannot be found", path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp("File is corrupt: "+err.Error(), path))
+		return
+	}
+
+	c.File(level.ImgURI)
+}
+
 func (lc LevelsController) MountRoutes(apiGroup *gin.RouterGroup) {
 	levels := apiGroup.Group("/levels")
 	levels.POST("", middlewares.Authorize(middlewares.ADMIN), lc.Create)
@@ -170,4 +230,6 @@ func (lc LevelsController) MountRoutes(apiGroup *gin.RouterGroup) {
 	levels.GET("/:id", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, lc.ReadByID)
 	levels.PUT("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, lc.Update)
 	levels.DELETE("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, lc.Delete)
+	levels.POST("/:id/img", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, lc.UploadImg)
+	levels.GET("/:id/img", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, lc.ReadImg)
 }
