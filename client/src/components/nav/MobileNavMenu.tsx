@@ -7,6 +7,7 @@ import {
   ArrowLeftRight,
   LogOut,
   ShieldAlert,
+  Bug,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,6 +35,7 @@ interface MobileNavMenuProps {
   username: string;
   onLogout: () => Promise<void>;
   isAdmin?: boolean;
+  isSupport?: boolean;
 }
 
 export function MobileNavMenu({
@@ -42,6 +44,7 @@ export function MobileNavMenu({
   username,
   onLogout,
   isAdmin = false,
+  isSupport = false,
 }: MobileNavMenuProps) {
   const location = useLocation();
   const [open, setOpen] = useState(false);
@@ -163,6 +166,17 @@ export function MobileNavMenu({
               >
                 <ShieldAlert size={16} />
                 <span>{t("account.adminPanel")}</span>
+              </Link>
+            </SheetClose>
+          )}
+          {(isAdmin || isSupport) && (
+            <SheetClose asChild>
+              <Link
+                to="/app/debug"
+                className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors duration-200 no-underline ${textColor} ${hoverClass}`}
+              >
+                <Bug size={16} />
+                <span>{t("account.debugPanel")}</span>
               </Link>
             </SheetClose>
           )}

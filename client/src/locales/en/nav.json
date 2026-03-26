@@ -1,6 +1,6 @@
 {
   "items": {
-    "aboutUs": "About Us",
+    "leaderboard": "Leaderboard",
     "gallery": "Gallery",
     "releases": "Releases",
     "webstore": "Webstore",
@@ -15,6 +15,7 @@
     "support": "Support",
     "changeProfile": "Change Profile",
     "adminPanel": "Admin Panel",
+    "debugPanel": "Debug Panel",
     "logout": "Log out"
   }
 }

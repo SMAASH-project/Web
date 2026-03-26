@@ -16,8 +16,9 @@ const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases`;
  * If the app is ever made private, move this fetch to a backend proxy endpoint
  * so the GitHub token never ships in the client bundle.
  */
-const GITHUB_STALE_TIME = 10 * 60 * 1000; // 10 minutes
+const GITHUB_STALE_TIME = 0; // always treat as stale so refetches go through
 const GITHUB_GC_TIME = 30 * 60 * 1000; // 30 minutes
+const GITHUB_REFETCH_INTERVAL = 5 * 60 * 1000; // poll every 5 minutes
 
 const PAGE_SIZE = 8;
 const LOAD_DELAY_MS = 400;
@@ -167,6 +168,8 @@ export function useReleases(selectedOs: string) {
     },
     staleTime: GITHUB_STALE_TIME,
     gcTime: GITHUB_GC_TIME,
+    refetchInterval: GITHUB_REFETCH_INTERVAL,
+    refetchOnMount: true,
     retry: 2,
   });
 
