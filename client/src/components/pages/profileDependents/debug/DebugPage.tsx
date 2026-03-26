@@ -29,20 +29,18 @@ export function DebugPage() {
 
   return (
     <div
-      className={`min-h-screen w-full self-start flex flex-col items-center ${textColor}`}
+      className={`h-screen w-full flex flex-col overflow-hidden ${textColor}`}
     >
-      <div className="w-full">
-        <Navbar />
-      </div>
+      <Navbar />
       {settings.useAnimations ? (
         <CardAnimation
-          className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 pt-20 xl:pt-0 flex items-start xl:items-center justify-center"
+          className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-8 pt-26 pb-8 flex items-stretch justify-center overflow-hidden"
           onAnimationComplete={handleAnimationComplete}
         >
           <DebugPageContent animReady={animDone} />
         </CardAnimation>
       ) : (
-        <div className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 pt-20 xl:pt-0 flex items-start xl:items-center justify-center">
+        <div className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-8 pt-26 pb-8 flex items-stretch justify-center overflow-hidden">
           <DebugPageContent animReady={true} />
         </div>
       )}

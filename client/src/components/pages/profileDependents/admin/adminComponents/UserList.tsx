@@ -1,9 +1,9 @@
 import { useTranslation } from "react-i18next";
 import React from "react";
 import { Search, Shield } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import UserListItem from "./UserListItem";
 import type { AdminPageLogic } from "@/components/pages/profileDependents/admin/adminLogic/useAdminPageLogic";
+import { LoadPost } from "@/lib/pageAnimations/newsPageAnimations/LoadPost";
 
 export default function UserList({ logic }: { logic: AdminPageLogic }) {
   const { t } = useTranslation("admin");
@@ -62,15 +62,16 @@ export default function UserList({ logic }: { logic: AdminPageLogic }) {
             No users found
           </p>
         ) : (
-          filteredUsers.map((user) => (
-            <UserListItem
-              key={user.id}
-              user={user}
-              isSelected={user.id === selectedUserId}
-              onClick={() => handleUserSelect(user.id)}
-              useLiquidGlass={useLiquidGlass}
-              useDarkMode={useDarkMode}
-            />
+          filteredUsers.map((user, index) => (
+            <LoadPost key={user.id} index={index}>
+              <UserListItem
+                user={user}
+                isSelected={user.id === selectedUserId}
+                onClick={() => handleUserSelect(user.id)}
+                useLiquidGlass={useLiquidGlass}
+                useDarkMode={useDarkMode}
+              />
+            </LoadPost>
           ))
         )}
       </div>

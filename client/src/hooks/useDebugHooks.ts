@@ -1,7 +1,5 @@
 /**
- * Debug panel hooks — stats endpoints + admin coin editing.
- * Stats queries are used by both LeaderboardPage (public) and DebugPage (admin/support).
- * Coin mutation is admin-only (enforced by the backend PUT /profiles/:id route).
+ * Debug panel hooks — stats, game data, and admin tools.
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -41,10 +39,25 @@ export interface BestPlayerDTO {
   count_of_wins: number;
 }
 
-export interface AdminProfileDTO {
+export interface DebugCharacterDTO {
   id: number;
-  display_name: string;
-  coins: number;
+  name: string;
+  img_uri: string;
+}
+
+export interface DebugLevelDTO {
+  id: number;
+  name: string;
+  img_uri: string;
+}
+
+export interface DebugItemDTO {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  rarity: string;
+  categories: string[];
 }
 
 // ─── Query Keys ───────────────────────────────────────────────────────────────
@@ -54,10 +67,12 @@ export const debugQueryKeys = {
   topPlayers: ["debug", "stats", "topPlayers"] as const,
   topLevels: ["debug", "stats", "topLevels"] as const,
   leaderboard: ["debug", "stats", "leaderboard"] as const,
-  allProfiles: ["debug", "allProfiles"] as const,
+  characters: ["debug", "game", "characters"] as const,
+  levels: ["debug", "game", "levels"] as const,
+  items: ["debug", "game", "items"] as const,
 };
 
-// ─── Stats Queries ────────────────────────────────────────────────────────────
+// ─── Stats (also used by LeaderboardPage) ─────────────────────────────────────
 
 export function useTopItemsQuery() {
   return useQuery<TopItemDTO[], AxiosError>({
@@ -105,39 +120,39 @@ export function useLeaderboardQuery() {
   });
 }
 
-// ─── Admin: all profiles ──────────────────────────────────────────────────────
+// ─── Game data (admin-only endpoints) ─────────────────────────────────────────
 
-export function useAllProfilesQuery() {
-  return useQuery<AdminProfileDTO[], AxiosError>({
-    queryKey: debugQueryKeys.allProfiles,
+export function useDebugCharactersQuery() {
+  return useQuery<DebugCharacterDTO[], AxiosError>({
+    queryKey: debugQueryKeys.characters,
     queryFn: async () => {
-      const { data } = await apiClient.get<AdminProfileDTO[]>("/profiles", {
+      const { data } = await apiClient.get<DebugCharacterDTO[]>("/characters");
+      return data ?? [];
+    },
+    staleTime: 2 * 60 * 1000,
+  });
+}
+
+export function useDebugLevelsQuery() {
+  return useQuery<DebugLevelDTO[], AxiosError>({
+    queryKey: debugQueryKeys.levels,
+    queryFn: async () => {
+      const { data } = await apiClient.get<DebugLevelDTO[]>("/levels");
+      return data ?? [];
+    },
+    staleTime: 2 * 60 * 1000,
+  });
+}
+
+export function useDebugItemsQuery() {
+  return useQuery<DebugItemDTO[], AxiosError>({
+    queryKey: debugQueryKeys.items,
+    queryFn: async () => {
+      const { data } = await apiClient.get<DebugItemDTO[]>("/items", {
         params: { page: 1, page_size: 100 },
       });
       return data ?? [];
     },
-    staleTime: 30 * 1000,
-  });
-}
-
-// ─── Admin: update coins ──────────────────────────────────────────────────────
-//
-// PUT /profiles/:id  body: { id, display_name, coins }
-// display_name is required by the backend DTO even when only coins change.
-
-export function useUpdateCoinsMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation<
-    void,
-    AxiosError,
-    { id: number; display_name: string; coins: number }
-  >({
-    mutationFn: async ({ id, display_name, coins }) => {
-      await apiClient.put(`/profiles/${id}`, { id, display_name, coins });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: debugQueryKeys.allProfiles });
-    },
+    staleTime: 2 * 60 * 1000,
   });
 }
