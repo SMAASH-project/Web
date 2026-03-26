@@ -58,6 +58,7 @@ func (s *Server) Run(c context.Context) error {
 		}
 		close(srvErrStream)
 	}()
+	log.Println("API server started successfully")
 
 	signal.Notify(quitStream, syscall.SIGINT, syscall.SIGTERM)
 
