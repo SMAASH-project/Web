@@ -11,7 +11,7 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import { FormAlert } from "../ui/form-alert";
 import { Link, useNavigate } from "react-router-dom";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AuthContext } from "@/context/AuthContext";
 import { useLoginMutation } from "@/hooks/useQueryHooks";
 import { useTranslation } from "react-i18next";
@@ -20,14 +20,49 @@ import { LanguageToggle } from "@/components/ui/LanguageToggle";
 import { extractErrorMessage } from "@/lib/utils/extractErrorMessage";
 import type { AxiosError } from "axios";
 
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_SECONDS = 30;
+
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [password, setPassword] = React.useState("");
-  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
   const { isLoggedIn, setIsLoggedIn, setUserId, setIsAdmin } =
     React.useContext(AuthContext);
+
+  // ── Brute-force friction ────────────────────────────────────────────────
+  const [attempts, setAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+  const [countdown, setCountdown] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const startLockout = () => {
+    const until = Date.now() + LOCKOUT_SECONDS * 1000;
+    setLockedUntil(until);
+    setCountdown(LOCKOUT_SECONDS);
+    timerRef.current = setInterval(() => {
+      const remaining = Math.ceil((until - Date.now()) / 1000);
+      if (remaining <= 0) {
+        clearInterval(timerRef.current!);
+        timerRef.current = null;
+        setLockedUntil(null);
+        setCountdown(0);
+        setAttempts(0);
+      } else {
+        setCountdown(remaining);
+      }
+    }, 500);
+  };
+
+  const isLockedOut = lockedUntil !== null && Date.now() < lockedUntil;
 
   const navigate = useNavigate();
   const loginMutation = useLoginMutation();
@@ -51,6 +86,8 @@ export function LoginForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLockedOut) return;
+
     setIsLoggedIn(false);
     setUserId(null);
     setIsAdmin(false);
@@ -58,11 +95,21 @@ export function LoginForm({
       const response = await loginMutation.mutateAsync({ email, password });
       const parsedUserId = parseUserId(response?.id);
       if (parsedUserId === null) return;
+      // Successful login — clear the attempt counter
+      setAttempts(0);
       setUserId(parsedUserId);
       setIsAdmin(response?.role === "admin");
       setIsLoggedIn(true);
     } catch {
-      // error displayed via loginMutation.isError below
+      // Count credential failures (401s that are not a ban response)
+      const err = loginMutation.error as AxiosError | null;
+      const data = err?.response?.data as Record<string, unknown> | undefined;
+      const isBan = data && "banned_until" in data;
+      if (!isBan && err?.response?.status === 401) {
+        const next = attempts + 1;
+        setAttempts(next);
+        if (next >= MAX_ATTEMPTS) startLockout();
+      }
     }
   };
 
@@ -70,16 +117,27 @@ export function LoginForm({
     if (isLoggedIn) navigate("/app/profile-selector");
   }, [navigate, isLoggedIn]);
 
-  // Determine the best error message to show
+  // Determine the best error message to show.
+  // Any 401 that isn't a ban gets a single vague message — never reveal
+  // whether the email exists or the password was wrong.
   const loginError = loginMutation.isError
-    ? extractErrorMessage(
-        loginMutation.error as AxiosError,
-        // Use specific "invalid credentials" copy for 401, generic fallback otherwise
-        (loginMutation.error as AxiosError)?.response?.status === 401
-          ? t("login.errorInvalidCredentials")
-          : t("login.failed"),
-      )
+    ? (() => {
+        const err = loginMutation.error as AxiosError;
+        const data = err?.response?.data as Record<string, unknown> | undefined;
+        if (data && "banned_until" in data) {
+          const until = data.banned_until;
+          return until
+            ? `Your account is banned until ${until}.`
+            : "Your account has been permanently banned.";
+        }
+        if (err?.response?.status === 401)
+          return t("login.errorInvalidCredentials");
+        return extractErrorMessage(err, t("login.failed"));
+      })()
     : null;
+
+  const attemptsLeft = MAX_ATTEMPTS - attempts;
+  const isFormDisabled = loginMutation.isPending || isLockedOut;
 
   return (
     <div className={cn("w-full max-w-md px-4 sm:px-0", className)} {...props}>
@@ -108,6 +166,7 @@ export function LoginForm({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  disabled={isFormDisabled}
                 />
               </Field>
               <Field>
@@ -128,22 +187,41 @@ export function LoginForm({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  disabled={loginMutation.isPending}
+                  disabled={isFormDisabled}
                 />
               </Field>
 
-              {loginError && <FormAlert variant="error" message={loginError} />}
+              {isLockedOut ? (
+                <FormAlert
+                  variant="error"
+                  message={`Too many failed attempts. Try again in ${countdown}s.`}
+                />
+              ) : (
+                <>
+                  {loginError && (
+                    <FormAlert variant="error" message={loginError} />
+                  )}
+                  {attempts > 0 && attempts < MAX_ATTEMPTS && (
+                    <FormAlert
+                      variant="info"
+                      message={`${attemptsLeft} attempt${attemptsLeft === 1 ? "" : "s"} remaining before a temporary lockout.`}
+                    />
+                  )}
+                </>
+              )}
 
               <Field>
                 <Button
                   type="submit"
                   id="login-button"
                   className="text-white"
-                  disabled={loginMutation.isPending}
+                  disabled={isFormDisabled}
                 >
                   {loginMutation.isPending
                     ? t("login.submitting")
-                    : t("login.submit")}
+                    : isLockedOut
+                      ? `Locked (${countdown}s)`
+                      : t("login.submit")}
                 </Button>
                 <FieldDescription className="text-center">
                   {t("login.noAccount")}{" "}
