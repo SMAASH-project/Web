@@ -9,6 +9,7 @@ import { NavbarProvider } from "./context/NavbarContext";
 import { ColorProvider } from "./components/pages/profileDependents/settings/settingsLogic/color/ColorProvider";
 import { ProfileProvider } from "@/components/forms/addNewProfile/ProfilesContext";
 import { Wrapper } from "./Wrapper";
+import { Toaster } from "@/components/ui/toaster";
 import { Suspense } from "react";
 
 const queryClient = new QueryClient({
@@ -66,6 +67,7 @@ export function RootLayout() {
         </SettingsProvider>
       </AuthProvider>
       <ReactQueryDevtools initialIsOpen={false} />
+      <Toaster />
     </PersistQueryClientProvider>
   );
 }

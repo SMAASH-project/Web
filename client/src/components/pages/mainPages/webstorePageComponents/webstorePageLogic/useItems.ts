@@ -14,6 +14,7 @@ import type { WebstoreItem } from "@/types/PageTypes";
 import type { Rarity } from "@/types/PageTypes";
 import { useProfiles } from "@/components/forms/addNewProfile/useProfiles";
 import { AuthContext } from "@/context/AuthContext";
+import { toast } from "@/lib/toast";
 
 const PAGE_SIZE = 12;
 const LOAD_DELAY_MS = 400;
@@ -154,6 +155,12 @@ export function useItems() {
           queryKey: queryKeys.profiles.byUserId(Number(userId)),
         });
       }
+      toast.success("Item unlocked!");
+    },
+    onError: (err) => {
+      const msg =
+        (err as any)?.response?.data?.error ?? err?.message ?? "Purchase failed.";
+      toast.error(msg);
     },
   });
 
@@ -185,6 +192,12 @@ export function useItems() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items.all });
+      toast.success("Item created.");
+    },
+    onError: (err) => {
+      const msg =
+        (err as any)?.response?.data?.error ?? err?.message ?? "Failed to create item.";
+      toast.error(msg);
     },
   });
 
@@ -208,9 +221,11 @@ export function useItems() {
       if (ctx?.previousItems !== undefined) {
         queryClient.setQueryData(queryKeys.items.all, ctx.previousItems);
       }
+      toast.error("Failed to delete item.");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items.all });
+      toast.success("Item deleted.");
     },
   });
 

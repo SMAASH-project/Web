@@ -27,8 +27,8 @@ import {
   getSubtextColor,
   getTextShadow,
   getInputClasses,
-  sectionStyle,
 } from "@/lib/utils";
+import type { Transition } from "motion/react";
 import {
   useDebugCharactersQuery,
   useDebugLevelsQuery,
@@ -859,6 +859,16 @@ function GameDataTab({
   );
 }
 
+// ─── Animation helpers (mirrors AdminPageContent) ────────────────────────────
+
+const hidden = { opacity: 0, y: 18 };
+const visible = { opacity: 1, y: 0 };
+const colTransition = (delay: number): Transition => ({
+  duration: 0.4,
+  ease: "easeOut",
+  delay,
+});
+
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
 export function DebugPageContent({
@@ -911,12 +921,13 @@ export function DebugPageContent({
       className={`z-0 flex w-full max-w-6xl rounded-xl overflow-hidden flex-1 ${
         animReady ? cardBg : cardBg.replace(/backdrop-blur-\S+/g, "")
       }`}
-      style={sectionStyle(animReady, 0)}
     >
       {/* ── Left sidebar ───────────────────────────────────────────────── */}
-      <div
+      <motion.div
+        initial={hidden}
+        animate={animReady ? visible : hidden}
+        transition={colTransition(0.05)}
         className={`flex flex-col gap-1 p-3 w-44 shrink-0 border-r border-current/10`}
-        style={sectionStyle(animReady, 60)}
       >
         {/* Logo + title */}
         <div className="flex items-center gap-2 px-2 py-2 mb-2">
@@ -946,12 +957,14 @@ export function DebugPageContent({
             Refresh
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* ── Right content area ─────────────────────────────────────────── */}
-      <div
+      <motion.div
+        initial={hidden}
+        animate={animReady ? visible : hidden}
+        transition={colTransition(0.18)}
         className="flex-1 overflow-hidden relative"
-        style={sectionStyle(animReady, 120)}
       >
         <AnimatePresence mode="wait">
           <motion.div
@@ -994,7 +1007,7 @@ export function DebugPageContent({
             )}
           </motion.div>
         </AnimatePresence>
-      </div>
+      </motion.div>
     </div>
   );
 }

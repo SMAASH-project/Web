@@ -25,6 +25,7 @@ import { FilterSelect } from "./newsPageComponents/Filter";
 import { CategoryBadge } from "./newsPageComponents/CategoryBadge";
 import { useContext } from "react";
 import { AuthContext } from "@/context/AuthContext";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function NewsPage() {
   const { settings } = useSettings();
@@ -35,6 +36,7 @@ export function NewsPage() {
 
   const {
     visiblePosts,
+    isLoading: postsLoading,
     containerRef,
     handleCreate,
     handleUpdate,
@@ -90,6 +92,26 @@ export function NewsPage() {
         </div>
 
         {/* ── Post list ── */}
+        {postsLoading && (
+          <ul className="list-none w-full flex flex-col gap-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <li key={i}>
+                <div className={`z-0 flex flex-col p-4 sm:p-6 md:p-8 w-full rounded-xl ${bgClass}`}>
+                  <div className="flex flex-row w-full items-start justify-between gap-3 mb-3">
+                    <div className="flex flex-col gap-2 flex-1">
+                      <Skeleton className="h-5 w-2/3" />
+                      <Skeleton className="h-4 w-24 rounded-full" />
+                    </div>
+                    <Skeleton className="h-4 w-24 shrink-0" />
+                  </div>
+                  <Skeleton className="h-3 w-full mt-1" />
+                  <Skeleton className="h-3 w-5/6 mt-2" />
+                  <Skeleton className="h-3 w-4/6 mt-2" />
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
         <ul className="list-none w-full flex flex-col gap-4">
           {visiblePosts.map((post: NewsPost, index: number) => {
             const cardContent = (

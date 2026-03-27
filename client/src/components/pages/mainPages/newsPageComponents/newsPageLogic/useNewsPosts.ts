@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DateTime } from "luxon";
 import apiClient from "@/lib/apiClient";
 import type { NewsPost } from "@/types/PageTypes";
+import { toast } from "@/lib/toast";
 
 // ─── Backend DTO ──────────────────────────────────────────────────────────────
 
@@ -62,7 +63,7 @@ export function useNewsPosts(selectedCategories: NewsPost["category"][] = []) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // ── Fetch all posts ──────────────────────────────────────────────────────
-  const { data: allPosts = [] } = useQuery<NewsPost[]>({
+  const { data: allPosts = [], isLoading } = useQuery<NewsPost[]>({
     queryKey: POSTS_KEY,
     queryFn: async () => {
       const { data } = await apiClient.get<PostReadDTO[] | null>("/posts", {
@@ -84,6 +85,10 @@ export function useNewsPosts(selectedCategories: NewsPost["category"][] = []) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: POSTS_KEY });
+      toast.success("Post created.");
+    },
+    onError: () => {
+      toast.error("Failed to create post.");
     },
   });
 
@@ -94,6 +99,10 @@ export function useNewsPosts(selectedCategories: NewsPost["category"][] = []) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: POSTS_KEY });
+      toast.success("Post updated.");
+    },
+    onError: () => {
+      toast.error("Failed to update post.");
     },
   });
 
@@ -118,6 +127,10 @@ export function useNewsPosts(selectedCategories: NewsPost["category"][] = []) {
       if (ctx?.previous) {
         queryClient.setQueryData(POSTS_KEY, ctx.previous);
       }
+      toast.error("Failed to delete post.");
+    },
+    onSuccess: () => {
+      toast.success("Post deleted.");
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: POSTS_KEY });
@@ -186,6 +199,7 @@ export function useNewsPosts(selectedCategories: NewsPost["category"][] = []) {
 
   return {
     visiblePosts,
+    isLoading,
     containerRef,
     handleCreate,
     handleUpdate,

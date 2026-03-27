@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   useAdminUsersQuery,
   useBanUserMutation,
@@ -19,12 +19,14 @@ import {
   getTextShadow,
   getInputClasses,
 } from "@/lib/utils";
+import { toast } from "@/lib/toast";
 
 export function useAdminPageLogic() {
   const { settings } = useSettings();
   const { useLiquidGlass, useDarkMode } = settings;
 
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [selectedProfileIdx, setSelectedProfileIdx] = useState(0);
   const [banDialogOpen, setBanDialogOpen] = useState(false);
@@ -46,6 +48,8 @@ export function useAdminPageLogic() {
 
   const selectedProfile = profiles[selectedProfileIdx] ?? null;
 
+  const PAGE_SIZE = 15;
+
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return users;
@@ -55,6 +59,17 @@ export function useAdminPageLogic() {
         u.email.toLowerCase().includes(q),
     );
   }, [users, search]);
+
+  // Reset to page 1 whenever the search query changes
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
+  const paginatedUsers = filteredUsers.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE,
+  );
 
   const handleUserSelect = (id: number) => {
     setSelectedUserId(id);
@@ -73,8 +88,9 @@ export function useAdminPageLogic() {
         payload: { ban_type: banType, ban_until: banUntil, reason },
       });
       setBanDialogOpen(false);
-    } catch (err) {
-      console.error("Ban failed:", err);
+      toast.success("User banned successfully.");
+    } catch {
+      toast.error("Failed to ban user. Please try again.");
     }
   };
 
@@ -82,8 +98,9 @@ export function useAdminPageLogic() {
     if (!selectedUserId) return;
     try {
       await unbanMutation.mutateAsync({ userId: selectedUserId });
-    } catch (err) {
-      console.error("Unban failed:", err);
+      toast.success("User unbanned.");
+    } catch {
+      toast.error("Failed to unban user.");
     }
   };
 
@@ -91,8 +108,9 @@ export function useAdminPageLogic() {
     if (!selectedUserId) return;
     try {
       await promoteMutation.mutateAsync({ userId: selectedUserId, targetRole });
-    } catch (err) {
-      console.error("Promote failed:", err);
+      toast.success(`User promoted to ${targetRole}.`);
+    } catch {
+      toast.error("Failed to promote user.");
     }
   };
 
@@ -100,8 +118,9 @@ export function useAdminPageLogic() {
     if (!selectedUserId) return;
     try {
       await demoteMutation.mutateAsync({ userId: selectedUserId });
-    } catch (err) {
-      console.error("Demote failed:", err);
+      toast.success("User demoted to user.");
+    } catch {
+      toast.error("Failed to demote user.");
     }
   };
 
@@ -117,8 +136,9 @@ export function useAdminPageLogic() {
         optimistic: false,
         invalidateAfterSuccess: true,
       });
-    } catch (err) {
-      console.error("Update coins failed:", err);
+      toast.success("Coins updated.");
+    } catch {
+      toast.error("Failed to update coins.");
     }
   };
 
@@ -182,6 +202,10 @@ export function useAdminPageLogic() {
     useDarkMode,
     search,
     setSearch,
+    page,
+    setPage,
+    totalPages,
+    PAGE_SIZE,
     selectedUserId,
     setSelectedUserId,
     selectedProfileIdx,
@@ -195,6 +219,7 @@ export function useAdminPageLogic() {
     selectedUser,
     selectedProfile,
     filteredUsers,
+    paginatedUsers,
     handleUserSelect,
     handleBanConfirm,
     handleUnban,

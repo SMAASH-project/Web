@@ -17,6 +17,7 @@ import { useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "@/context/AuthContext";
 import { useProfiles } from "@/components/forms/addNewProfile/useProfiles";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function WebstorePage() {
   const { settings } = useSettings();
@@ -163,7 +164,21 @@ export function WebstorePage() {
 
         {/* Item grid */}
         <div ref={containerRef} className="w-full">
-          {visibleItems.length === 0 ? (
+          {isLoading && visibleItems.length === 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className={`rounded-xl p-4 flex flex-col gap-3 ${bgClass}`}>
+                  <Skeleton className="h-32 w-full rounded-lg" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                  <div className="flex items-center justify-between mt-1">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-8 w-20 rounded-lg" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : visibleItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-3 mt-16 opacity-60">
               <ShoppingBag className={`w-12 h-12 ${subtextColor}`} />
               <p className={`text-base ${subtextColor}`}>{t("noResults")}</p>

@@ -1,10 +1,11 @@
-import { StrictMode, lazy } from "react";
+import React, { StrictMode, lazy } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import "@/lib/I18n.ts";
 import App from "./App.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { RootLayout } from "./RootLayout.tsx";
+import { ErrorBoundary } from "./components/ErrorBoundary.tsx";
 
 // Eager load auth forms for better UX
 import { LoginForm } from "./components/forms/LoginForm.tsx";
@@ -73,6 +74,10 @@ const DebugPage = lazy(() =>
   ),
 );
 
+function withBoundary(element: React.ReactNode) {
+  return <ErrorBoundary>{element}</ErrorBoundary>;
+}
+
 const router = createBrowserRouter([
   {
     element: <RootLayout />,
@@ -80,24 +85,18 @@ const router = createBrowserRouter([
       { path: "/app", element: <App /> },
       { path: "/app/login", element: <LoginForm /> },
       { path: "/app/signup", element: <SignupForm /> },
-      {
-        path: "/app/reset-password",
-        element: <PasswordResetForm />,
-      },
-      { path: "/app/leaderboard", element: <LeaderboardPage /> },
-      { path: "/app/gallery", element: <GalleryPage /> },
-      { path: "/app/releases", element: <ReleasesPage /> },
-      { path: "/app/webstore", element: <WebstorePage /> },
-      { path: "/app/news", element: <NewsPage /> },
-      { path: "/app/profile", element: <ProfilePage /> },
-      { path: "/app/settings", element: <SettingsPage /> },
-      {
-        path: "/app/profile-selector",
-        element: <ProfileSelectorForm />,
-      },
+      { path: "/app/reset-password", element: <PasswordResetForm /> },
+      { path: "/app/leaderboard", element: withBoundary(<LeaderboardPage />) },
+      { path: "/app/gallery", element: withBoundary(<GalleryPage />) },
+      { path: "/app/releases", element: withBoundary(<ReleasesPage />) },
+      { path: "/app/webstore", element: withBoundary(<WebstorePage />) },
+      { path: "/app/news", element: withBoundary(<NewsPage />) },
+      { path: "/app/profile", element: withBoundary(<ProfilePage />) },
+      { path: "/app/settings", element: withBoundary(<SettingsPage />) },
+      { path: "/app/profile-selector", element: withBoundary(<ProfileSelectorForm />) },
       { path: "*", element: <NotFoundPage /> },
-      { path: "/app/admin", element: <AdminPage /> },
-      { path: "/app/debug", element: <DebugPage /> },
+      { path: "/app/admin", element: withBoundary(<AdminPage />) },
+      { path: "/app/debug", element: withBoundary(<DebugPage />) },
     ],
   },
 ]);
