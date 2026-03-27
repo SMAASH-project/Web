@@ -1,6 +1,6 @@
 # SMAASH Kliens — Fejlesztői Dokumentáció
 
-> **Stack:** React 19 · TypeScript · Vite · Tailwind CSS · React Query · Axios · react-i18next · Motion (Framer)  
+> **Stack:** React 19 · TypeScript · Vite · Tailwind CSS · React Query · Axios · react-i18next · Motion (Framer)
 > **Alap útvonal:** `client/src/`
 
 ---
@@ -11,17 +11,20 @@
 2. [Belépési pontok és útvonalak](#2-belépési-pontok-és-útvonalak)
 3. [Provider-réteg](#3-provider-réteg)
 4. [Téma-rendszer](#4-téma-rendszer)
-5. [Kontextusok](#5-kontextusok)
-6. [Hook-ok és API-réteg](#6-hook-ok-és-api-réteg)
-7. [Oldalak](#7-oldalak)
-8. [Navigáció](#8-navigáció)
-9. [Űrlapok](#9-űrlapok)
-10. [i18n / Többnyelvű támogatás](#10-i18n--többnyelvű-támogatás)
-11. [UI komponenskönyvtár](#11-ui-komponenskönyvtár)
-12. [Típusok](#12-típusok)
-13. [Segédeszközök](#13-segédeszközök)
-14. [Teljesítmény és build](#14-teljesítmény-és-build)
-15. [Ismert teendők és backend-függőségek](#15-ismert-teendők-és-backend-függőségek)
+5. [Animált hátterek](#5-animált-hátterek)
+6. [Kontextusok](#6-kontextusok)
+7. [Hook-ok és API-réteg](#7-hook-ok-és-api-réteg)
+8. [Oldalak](#8-oldalak)
+9. [Admin és Debug panelek](#9-admin-és-debug-panelek)
+10. [Navigáció](#10-navigáció)
+11. [Űrlapok](#11-űrlapok)
+12. [i18n / Többnyelvű támogatás](#12-i18n--többnyelvű-támogatás)
+13. [UI komponenskönyvtár](#13-ui-komponenskönyvtár)
+14. [Típusok](#14-típusok)
+15. [Segédeszközök és animációk](#15-segédeszközök-és-animációk)
+16. [Teljesítmény és build](#16-teljesítmény-és-build)
+17. [Ismert hibák](#17-ismert-hibák)
+18. [Backend-függőségek](#18-backend-függőségek)
 
 ---
 
@@ -29,278 +32,244 @@
 
 ```
 client/
-├── index.html                  # Belépési HTML — preconnect tippek az API-kiszolgálóhoz
-├── vite.config.ts              # Build konfiguráció, manuális chunk-felosztás
-├── tsconfig.app.json           # Alkalmazás TypeScript konfiguráció
+├── index.html
+├── vite.config.ts
+├── tsconfig.app.json
 └── src/
-    ├── main.tsx                # Router beállítása, lusta importok, StrictMode
+    ├── main.tsx                # Router, lusta importok, StrictMode
     ├── App.tsx                 # Hitelesítési átirányítás kapuja
-    ├── RootLayout.tsx          # Minden provider, Suspense határ
-    ├── Wrapper.tsx             # Teljes oldalas átmenet + CSS egyéni tulajdonságok (leszármaztatott értékek memoizálva); mindig feloldja az animáció kulcsát és átadja a paused={!useAnimations} propot
+    ├── RootLayout.tsx          # Összes provider + Suspense határ
+    ├── Wrapper.tsx             # Teljes oldalas gradiens + CSS egyéni tulajdonságok
     ├── context/                # Hitelesítési és navigációs kontextusok
     ├── hooks/                  # React Query hook-ok (domain szerint felosztva)
     ├── lib/
-    │   ├── I18n.ts             # i18next inicializálás (minden komponens előtt importálandó)
     │   ├── apiClient.ts        # Axios példány + interceptorok
     │   ├── queryKeys.ts        # Centralizált query kulcs-gyár
+    │   ├── animationTypes.ts   # AnimationKey típus + ANIMATION_LABELS
     │   ├── utils.ts            # Az összes segédmodul barrel re-exportja
-    │   ├── utils/              # dateFormat, themeClasses, liquidGlass, colorMath, classnames, extractErrorMessage
+    │   ├── utils/              # dateFormat, themeClasses, liquidGlass,
+    │   │                       #   colorMath, classnames, extractErrorMessage,
+    │   │                       #   sectionStyle
     │   ├── miscAnimations/     # Újrafelhasználható Motion burkolók
-    │   └── pageAnimations/     # Oldal-szintű animáció komponensek
-    ├── directory/              # Animált háttérkomponensek
+    │   └── pageAnimations/     # Oldal-szintű lépcsőzetes animációk
+    ├── directory/              # Animált háttér canvas komponensek
     ├── components/
-    │   ├── forms/              # Hitelesítési űrlapok + ProfileSelector + AddNewProfile
+    │   ├── forms/              # Hitelesítési űrlapok, ProfileSelector, AddNewProfile
     │   ├── nav/                # Navigációs sáv, mobil fiók, fiókmenü
     │   ├── pages/
-    │   │   ├── mainPages/      # Kiadások, Hírek, Webáruház, Rólunk, Galéria
-    │   │   └── profileDependents/  # Profil, Beállítások, Admin
+    │   │   ├── mainPages/      # Kiadások, Hírek, Webáruház, Ranglista, Galéria
+    │   │   └── profileDependents/  # Profil, Beállítások, Admin, Debug
     │   └── ui/                 # Megosztott UI primitívek (shadcn-stílusban)
     ├── locales/
-    │   ├── en/                 # Angol JSON — 9 névtér-fájl
-    │   └── hu/                 # Magyar JSON — azonos struktúra
-    └── types/                  # Megosztott TypeScript interfészek + példaadatok
+    │   ├── en/                 # Angol — 9 névtér-fájl
+    │   └── hu/                 # Magyar — azonos struktúra
+    └── types/                  # Megosztott TypeScript interfészek
 ```
 
 ---
 
 ## 2. Belépési pontok és útvonalak
 
-### `src/main.tsx`
+A hitelesítési oldalak (`login`, `signup`, `reset-password`) **eager-betöltésűek**. Minden más oldal **lustán töltődik be** a `React.lazy` segítségével.
 
-Az alkalmazás gyökere. Beállítja a React Router-t, importálja az i18n-t minden komponens renderelése előtt, és lusta betöltést alkalmaz az összes nehéz oldalra.
+### Útvonaltáblázat
 
-**A hitelesítési útvonalak eager-betöltésűek** (gyorsabb bejelentkezési/regisztrációs élmény). Minden más oldal lusta:
+| Útvonal                 | Komponens                 | Hozzáférés      |
+| ----------------------- | ------------------------- | --------------- |
+| `/app`                  | `App` (átirányítási kapu) | —               |
+| `/app/login`            | `LoginForm`               | Nyilvános       |
+| `/app/signup`           | `SignupForm`              | Nyilvános       |
+| `/app/reset-password`   | `PasswordResetForm`       | Nyilvános       |
+| `/app/leaderboard`      | `LeaderboardPage`         | Nyilvános       |
+| `/app/gallery`          | `GalleryPage`             | Nyilvános       |
+| `/app/releases`         | `ReleasesPage`            | Bejelentkezve   |
+| `/app/news`             | `NewsPage`                | Bejelentkezve   |
+| `/app/webstore`         | `WebstorePage`            | Bejelentkezve   |
+| `/app/profile`          | `ProfilePage`             | Bejelentkezve   |
+| `/app/profile-selector` | `ProfileSelectorForm`     | Bejelentkezve   |
+| `/app/settings`         | `SettingsPage`            | Bejelentkezve   |
+| `/app/admin`            | `AdminPage`               | Csak admin      |
+| `/app/debug`            | `DebugPage`               | Admin + Support |
+| `*`                     | `NotFoundPage`            | —               |
 
-```tsx
-// Eager — a kezdeti bundle-lel töltődik be
-import { LoginForm } from "./components/forms/LoginForm.tsx";
-import { SignupForm } from "./components/forms/SignUpForm.tsx";
-import { PasswordResetForm } from "./components/forms/PasswordResetForm.tsx";
-
-// Lusta — külön chunk-okba van szétválasztva
-const ReleasesPage = lazy(() =>
-  import("./components/pages/mainPages/ReleasesPage.tsx").then((m) => ({
-    default: m.ReleasesPage,
-  })),
-);
-```
-
-**Útvonaltáblázat:**
-
-| Útvonal                 | Komponens                 | Hitelesítés szükséges  |
-| ----------------------- | ------------------------- | ---------------------- |
-| `/app`                  | `App` (átirányítási kapu) | Nem                    |
-| `/app/login`            | `LoginForm`               | Nem                    |
-| `/app/signup`           | `SignupForm`              | Nem                    |
-| `/app/reset-password`   | `PasswordResetForm`       | Nem                    |
-| `/app/releases`         | `ReleasesPage`            | Igen                   |
-| `/app/news`             | `NewsPage`                | Igen                   |
-| `/app/webstore`         | `WebstorePage`            | Igen                   |
-| `/app/profile`          | `ProfilePage`             | Igen                   |
-| `/app/profile-selector` | `ProfileSelectorForm`     | Igen                   |
-| `/app/settings`         | `SettingsPage`            | Igen                   |
-| `/app/admin`            | `AdminPage`               | Igen + Admin szerepkör |
-| `/app/about`            | `AboutPage`               | Nem                    |
-| `/app/gallery`          | `GalleryPage`             | Nem                    |
-| `*`                     | `NotFoundPage`            | Nem                    |
-
-### `src/App.tsx`
-
-Beolvassa az `AuthContext.isLoggedIn` és `isInitializing` értékeket, majd átirányít `/app/releases`-re vagy `/app/login`-ra. Betöltési animációt mutat, amíg a hitelesítés inicializálódik.
+Az `App.tsx` beolvassa az `AuthContext.isLoggedIn` és `isInitializing` értékeket, majd átirányít `/app/releases`-re vagy `/app/login`-ra.
 
 ---
 
 ## 3. Provider-réteg
 
-A `RootLayout.tsx` minden útvonalat ebbe a provider-fába csomagol (legbelső rétegtől kifelé haladva):
-
 ```
 PersistQueryClientProvider   ← React Query + localStorage perzisztencia
-  AuthProvider               ← isLoggedIn, userId, isAdmin
-    SettingsProvider         ← settings, updateSetting (localStorage-ban tárolva)
+  AuthProvider               ← isLoggedIn, userId, isAdmin, isSupport
+    SettingsProvider         ← settings, updateSetting (perzisztált)
       NavbarProvider         ← legördülő menü hover/nyitott állapota
-        ColorProvider        ← gradiens színek (localStorage-ban tárolva)
-          ProfileProvider    ← profiles[], selectedProfile, hozzáadás/törlés/kiválasztás
-            Wrapper          ← teljes oldalas gradiens div + CSS egyéni tulajdonságok
-              Suspense       ← pörgő ikon fallback lusta útvonalakhoz
+        ColorProvider        ← gradiens színek + animationKey (perzisztált)
+          ProfileProvider    ← profiles[], selectedProfile (perzisztált userId szerint)
+            Wrapper          ← gradiens div + CSS egyéni tulajdonságok
+              Suspense       ← pörgő ikon lusta útvonalakhoz
                 Outlet       ← aktív útvonal
 ```
 
-**React Query konfiguráció (`RootLayout.tsx`-ben beállítva):**
+**React Query alapértékek** (`RootLayout.tsx`-ben):
 
 ```ts
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 2 * 60 * 1000, // 2 perc
-      gcTime: 10 * 60 * 1000, // 10 perc
-      retry: 1,
-      refetchOnWindowFocus: true,
-      refetchOnReconnect: true,
-    },
-  },
-});
+staleTime: 2 * 60 * 1000; // 2 perc
+gcTime: 10 * 60 * 1000; // 10 perc
+retry: 1;
+refetchOnWindowFocus: true;
+refetchOnReconnect: true;
 ```
 
-A gyorsítótár `localStorage`-ba kerül mentésre a `createSyncStoragePersister` segítségével, így a lekérdezések túlélik az oldalfrissítést. A `whoami` lekérdezés szándékosan kimarad ebből (`gcTime: 0`), hogy megelőzzük az elavult hitelesítési adatok beszivárgását a gyorsítótárba.
+A gyorsítótár `localStorage`-ba kerül a `createSyncStoragePersister` segítségével. A `whoami` lekérdezés kimarad ebből (`gcTime: 0`).
+
+**Profilkiválasztás perzisztálása:** `localStorage` alatt `selected_profile_<userId>` kulccsal tárolódik. Visszatöltéskor validálva — ha a profil törölve lett, az első profil kerül kiválasztásra.
 
 ---
 
 ## 4. Téma-rendszer
 
-A téma három, a `ColorContext`-ben és `localStorage`-ban tárolt gradiens-szín által van meghatározva. A `Wrapper.tsx` ezen színekből számított CSS egyéni tulajdonságokat számol ki és fecskendezi be a gyökérelemre.
+A témát a `ColorContext`-ben és `localStorage`-ban tárolt három gradiens-szín vezérli. A `Wrapper.tsx` ebből CSS egyéni tulajdonságokat számít ki.
 
-### CSS egyéni tulajdonságok (`Wrapper.tsx` által beállítva)
+### CSS egyéni tulajdonságok
 
-| Változó                | Leírás                                          |
-| ---------------------- | ----------------------------------------------- |
-| `--theme-accent`       | A három gradiens-szín megvilágított átlaga      |
-| `--theme-accent-hover` | Világosabb verzió hover állapotokhoz            |
-| `--theme-accent-soft`  | Félig átlátszó hangsúlyszín finom kitöltésekhez |
-| `--theme-nav-border`   | Átlagszín a navigációs sáv keretéhez            |
-| `--theme-nav-shadow`   | Félig átlátszó árnyékszín                       |
+| Változó                | Leírás                             |
+| ---------------------- | ---------------------------------- |
+| `--theme-accent`       | A három szín megvilágított átlaga  |
+| `--theme-accent-hover` | Hover állapothoz világosabb verzió |
+| `--theme-accent-soft`  | Félig átlátszó hangsúlyszín        |
+| `--theme-nav-border`   | Navigációs sáv keret színe         |
+| `--theme-nav-shadow`   | Árnyék színe                       |
 
 ### Beállítási kapcsolók
 
-| Kapcsoló         | Alapértelmezett | Hatás                                                 |
-| ---------------- | --------------- | ----------------------------------------------------- |
-| `useLiquidGlass` | `true`          | Fagyott üveg megjelenés (backdrop-blur + átlátszóság) |
-| `useDarkMode`    | `false`         | Az összes témázott osztály sötét változata            |
-| `useAnimations`  | `true`          | Motion animációk globálisan engedélyezve/letiltva     |
-| `language`       | `"en"`          | i18next nyelv (`"en"` vagy `"hu"`)                    |
+| Kapcsoló            | Alapértelmezett | Hatás                                                             |
+| ------------------- | --------------- | ----------------------------------------------------------------- |
+| `useLiquidGlass`    | `true`          | Fagyott üveg hatás (backdrop-blur + átlátszóság)                  |
+| `useDarkMode`       | `false`         | Az összes témázott osztály sötét változata                        |
+| `useAnimations`     | `true`          | `false` = hátterek statikus képkockára fagyasztva                 |
+| `language`          | `"en"`          | i18next nyelv (`"en"` vagy `"hu"`)                                |
+| `animationOverride` | `null`          | `null` = téma alapértelmezett · `"none"` = ki · kulcs = rögzített |
 
-### Téma segédfüggvények (`src/lib/utils/themeClasses.ts`)
+### Téma segédfüggvények
 
-Minden komponensnek ezeket a függvényeket kell használnia — soha ne írj inline ternáris téma logikát.
-
-```ts
-import {
-  getTextColor, // Elsődleges szöveg
-  getSubtextColor, // Halvány/másodlagos szöveg
-  getTextShadow, // Szövegárnyék a gradiens háttéren való olvashatósághoz
-  getBackgroundClasses, // Kártya/panel hátterek — változatok: "base" | "light" | "strong"
-  getButtonClasses, // Gomb stílus — változatok: "primary" | "secondary" | "outline"
-  getInputClasses, // Input/textarea/select stílus
-  getDialogClasses, // Modal/párbeszédpanel felület
-  getDialogFooterClasses, // Modal lábléc elválasztó
-} from "@/lib/utils";
-
-// Példa komponensben való használatra:
-const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
-const bgClass = getBackgroundClasses(
-  settings.useLiquidGlass,
-  settings.useDarkMode,
-  "strong",
-);
-```
-
-### Folyékony üveg segédeszközök (`src/lib/utils/liquidGlass.ts`)
-
-További segédeszközök a folyékony üveg vizuális hatáshoz:
+Mindig a `@/lib/utils`-ból importáld — soha ne írj inline ternáris téma logikát:
 
 ```ts
-getLiquidGlassClasses(useLiquidGlass, useDarkMode, variant?)
-// variant: "base" | "input" | "accent"
-
-getLiquidGlassTextShadow(useLiquidGlass, useDarkMode)
-getLiquidGlassHighlight(useLiquidGlass, useDarkMode)
-getLiquidGlassNavHighlight(useLiquidGlass, useDarkMode)
-getLiquidGlassDialogClasses(useLiquidGlass, useDarkMode)
-getLiquidGlassDialogFooterClasses(useLiquidGlass, useDarkMode)
-getLiquidGlassControlClasses(useLiquidGlass, useDarkMode)
+getTextColor(useLiquidGlass, useDarkMode)
+getSubtextColor(useLiquidGlass, useDarkMode)
+getTextShadow(useLiquidGlass, useDarkMode)
+getBackgroundClasses(useLiquidGlass, useDarkMode, variant?)
+// variant: "base" | "light" | "strong"
+getButtonClasses(useLiquidGlass, useDarkMode, variant?)
+// variant: "primary" | "secondary" | "outline"
+getInputClasses(useLiquidGlass, useDarkMode)
+getDialogClasses(useLiquidGlass, useDarkMode)
+getDialogFooterClasses(useLiquidGlass, useDarkMode)
+sectionStyle(animReady, delayMs)
+// visszaad: { opacity, transform, transition, willChange }
 ```
 
-### Előre beállított témák (`src/components/.../settingsLogic/Themes.ts`)
+### Előre beállított témák (`Themes.ts`)
 
-```ts
-import { THEMES } from "@/components/pages/profileDependents/settings/settingsLogic/Themes";
-// THEMES: Theme[] — mindegyiknek van { name, colorLeft, colorMiddle, colorRight }
-// Előre beállítottak: Azure, Slate, Emerald, Amethyst, Coral, Sunset, Ocean, …
-```
-
-### Animált hátterek (`src/directory/`)
-
-Minden animált háttér egy önálló komponens, amely `fixed inset-0 z-0 pointer-events-none` stílussal renderelődik az összes oldaltartalom mögé. Az `AnimatedBackground.tsx` irányítja őket az aktív `AnimationKey` alapján.
-
-| Kulcs       | Komponens             | Technika           | Leírás                                                                                                                                       |
-| ----------- | --------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `fishtank`  | `FishtankBackground`  | Canvas             | Halak szinuszos útvonallal, buborékok, kausztikus padlófény                                                                                  |
-| `deepspace` | `DeepSpaceBackground` | Canvas             | 300 színes csillag (fehér/kék/narancs/vörös), Tejút-sáv, élénk ködfoltok sötét canvas-réteggel, gyakori izzó hullócsillagok (max 5 egyidejű) |
-| `aurora`    | `AuroraBackground`    | CSS + motion/react | Függőleges függönyrostok, lebegő színsávok, csillagvillogás                                                                                  |
-| `lavalamp`  | `LavaLampBackground`  | CSS keyframes      | Morpholó blobok külső izzással, belső fényszikra kiemeléssel                                                                                 |
-| `synthwave` | `SynthwaveBackground` | Canvas             | Perspektívarács, retró nap, scanline réteg                                                                                                   |
-| `sakura`    | `SakuraBackground`    | CSS keyframes      | Hulló szirmok, szirmonkénti sodródás/forgás CSS egyéni tulajdonságokkal                                                                      |
-| `storm`     | `StormBackground`     | CSS + Canvas       | Canvas-esőcseppek, canvas-villámcsapás, lebegő felhőrétegek                                                                                  |
-
-#### Animáció-feloldás a `Wrapper.tsx`-ben
-
-```
-useAnimations = false          → nincs animáció
-useAnimations = true
-  animationOverride = null     → Theme.animationKey használata (téma alapértelmezett)
-  animationOverride = "none"   → animáció kényszer kikapcsolása
-  animationOverride = <kulcs>  → adott animáció rögzítése témától függetlenül
-```
-
-Új háttér hozzáadása: hozd létre a komponenst a `src/directory/`-ban, add hozzá a kulcsát az `AnimationKey` típushoz (`src/lib/animationTypes.ts`), add hozzá a feliratot az `ANIMATION_LABELS`-be, és add hozzá a `case`-t az `AnimatedBackground.tsx`-ben.
-
-Minden háttér elfogad egy `paused?: boolean` propot. Ha `true`:
-
-- **Canvas hátterek** egy kezdeti képkockát rajzolnak, majd leállítják a `requestAnimationFrame` ciklust, statikus képkockán hagyva a hátteret.
-- **CSS hátterek** `animationPlayState: "paused"`-t állítanak be minden animált elemen.
-- **Aurora** ezenfelül `animate={}`-t ad át a `motion.div` elemeknek, így azok az `initial` pozíciójukban maradnak.
-
-#### Teljesítmény — késleltetett fade-in
-
-Az `AnimatedBackground.tsx` a `useLocation` segítségével érzékeli az aktuális útvonalat. Azokon az útvonalakon, ahol nehéz backdrop-blur kártya jelenik meg (`/app/settings`, `/app/profile`, `/app/admin`), a háttér wrapper `opacity: 0`-val indul, megszüntetve minden compositálási terhelést a kártya belépési animációja alatt. A `FADE_IN_DELAY_MS` lejárta után (1600 ms — közvetlenül a kártya spring-animációja után) 400 ms alatt `opacity: 1`-re vált.
-
-Ha az aktív `animationKey` megváltozik (pl. témaváltáskor vagy animáció-felülbírálat használatakor), az `AnimatedBackground` keresztfadolja a két hátteret: a kimenő réteg `opacity: 0`-ra, a bejövő `opacity: 1`-re halványodik egyszerre, `CROSSFADE_MS` (600 ms) alatt. Mindkét réteg párhuzamosan van mountolva az átmenet alatt; a régi réteg az átmenet végeztével unmountolódik. A felhasználó szeme a belépő kártyán van, így a háttér megjelenése észrevehetetlen. A háttér canvas/CSS ciklus folyamatosan fut teljes sebességgel; csak a wrapper opacity-je van elnyomva.
+| Téma      | Alapértelmezett animáció |
+| --------- | ------------------------ |
+| Ocean     | fishtank                 |
+| Midnight  | deepspace                |
+| Lavender  | aurora                   |
+| Aurora    | aurora                   |
+| Amethyst  | lavalamp                 |
+| Fire      | lavalamp                 |
+| Neon Noir | synthwave                |
+| Sunset    | sakura                   |
+| Emerald   | sakura                   |
+| Rose Gold | sakura                   |
+| Slate     | storm                    |
+| Monsoon   | rainonglass              |
+| Corrupted | glitch                   |
+| Nebula    | particleweb              |
 
 ---
 
-## 5. Kontextusok
+## 5. Animált hátterek
 
-### `AuthContext` (`src/context/AuthContext.ts`)
+Minden háttér canvas komponens, amely `fixed inset-0 z-0 pointer-events-none` stílussal renderelődik. Az `AnimatedBackground.tsx` irányítja őket `AnimationKey` alapján.
+
+### Elérhető hátterek
+
+| Kulcs         | Komponens               | Leírás                                                                                                                                                                                                                                                                       |
+| ------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fishtank`    | `FishtankBackground`    | 8 szóló hal szinuszos útvonallal + 2 iskola (10–18 kis hal). Buborékok, hínár-sziluettek a keret szélén, korall-ágak, kausztikus fénypanelek a felső részen, fénysugarak a felszínről, felszíni csillogás, mélységi sötét vignettel az aljánál (nincs homokos aljzat).       |
+| `deepspace`   | `DeepSpaceBackground`   | 300 színes csillag, Tejút-sáv, élénk ködfoltok, hullócsillagok (max. 5 egyszerre).                                                                                                                                                                                           |
+| `aurora`      | `AuroraBackground`      | Függőleges függönyrostok, lebegő színsávok, csillagvillogás. CSS + motion/react.                                                                                                                                                                                             |
+| `lavalamp`    | `LavaLampBackground`    | Morpholó blobok külső izzással és belső fényszikrával. CSS keyframes.                                                                                                                                                                                                        |
+| `synthwave`   | `SynthwaveBackground`   | Perspektívarács, retró nap, scanline réteg. Canvas.                                                                                                                                                                                                                          |
+| `sakura`      | `SakuraBackground`      | Hulló szirmok szirmonkénti sodródás/forgás CSS tulajdonságokkal.                                                                                                                                                                                                             |
+| `storm`       | `StormBackground`       | Canvas esőcseppek + villámcsapás, lebegő CSS felhőrétegek.                                                                                                                                                                                                                   |
+| `rainonglass` | `RainOnGlassBackground` | Üvegfelületi vízcseppek. Minden csepp nő → vár felszíni feszültség remegéssel → gravitációs lefolyás kúposodó nyomvonallal és futó gyönggyel a végén. Max. 45 csepp. Tiszta canvas radiális gradiens — nincs `clip()`, nincs `drawImage`, 60fps.                             |
+| `glitch`      | `GlitchBackground`      | Ütemezett véletlenszerű események: `tear` (vízszintes szelet + RGB eltolás + zaj), `shift` (kromatikus aberráció), `noise` (pixel statikus sáv), `scanline` (fényes villanóvonal), `chromatic` (alsó RGB szétválasztás). Mindig aktív scanline-ok + CRT vignet.              |
+| `particleweb` | `ParticleWebBackground` | 80 lebegő részecske. Vonalak rajzolódnak a 160px-en belüli részecskék között. Az egérkurzor csomópontként viselkedik (200px-en belül vonalakat húz, 60px-en belül taszít). A részecskék pulzálnak és puha fényt bocsátanak ki. Színek interpolálva a teljes téma-gradiensen. |
+
+### Animáció-feloldás (`Wrapper.tsx`)
+
+```
+useAnimations = false           → nincs animáció
+useAnimations = true
+  animationOverride = null      → Theme.animationKey használata
+  animationOverride = "none"    → kényszer kikapcsolás
+  animationOverride = <kulcs>   → rögzítés témától függetlenül
+```
+
+### Új háttér hozzáadása
+
+1. Hozd létre a `src/directory/MyBackground.tsx` fájlt — elfogad `{ colorLeft, colorMiddle, colorRight, paused? }` propokat, renderel `<canvas className="fixed inset-0 z-0 opacity-XX pointer-events-none" />`-t
+2. Add hozzá `"mykey"`-t az `AnimationKey`-hez a `src/lib/animationTypes.ts`-ben
+3. Add hozzá `mykey: "Saját Felirat"` az `ANIMATION_LABELS`-be
+4. Add hozzá `case "mykey": return <MyBackground {...shared} />;`-t az `AnimatedBackground.tsx`-ben
+5. Opcionálisan adj hozzá téma-presetet a `Themes.ts`-be
+
+### Teljesítmény részletek
+
+**Késleltetett fade-in:** Nehéz backdrop-blur kártyás útvonalakon (`/app/settings`, `/app/profile`, `/app/admin`, `/app/debug`) az `AnimatedBackground` `opacity: 0`-val indul. `FADE_IN_DELAY_MS` (1600ms) után vált `opacity: 1`-re 400ms alatt.
+
+**Keresztfade:** Az `animationKey` változásakor a kimenő réteg `opacity: 0`-ra, a bejövő `opacity: 1`-re halványodik egyszerre, `CROSSFADE_MS` (600ms) alatt.
+
+**`paused` prop:** Canvas hátterek egy képkockát rajzolnak, majd leállítják az `rAF` ciklust. CSS hátterek `animationPlayState: "paused"`-t állítanak be.
+
+---
+
+## 6. Kontextusok
+
+### `AuthContext`
 
 ```ts
-interface AuthContextShape {
+{
   isLoggedIn: boolean;
-  isInitializing: boolean; // true, amíg a whoami lekérdezés fut
+  isInitializing: boolean; // true, amíg a whoami fut
   userId: bigint | null;
-  setUserId: (value: bigint | null) => void;
-  setIsLoggedIn: (value: boolean) => void;
   isAdmin: boolean;
-  setIsAdmin: (value: boolean) => void;
+  isSupport: boolean;
+  (setUserId, setIsLoggedIn, setIsAdmin, setIsSupport);
 }
 ```
 
-Az `AuthProvider` tölti fel, amely induláskor meghívja a `useWhoAmIQuery()`-t. Importáld a `useContext(AuthContext)` segítségével.
+Az `isSupport` akkor kerül beállításra, ha a `whoami` `role === "support"`-ot ad vissza. Mindkét `isAdmin` és `isSupport` értéket törölni kell kijelentkezéskor — ez a `Navbar`, `AccountMenu` és `ProfileSelectorForm` komponensekben történik.
 
-```tsx
-const { isLoggedIn, isAdmin, userId } = useContext(AuthContext);
-```
-
-### `SettingsContext` (`src/components/.../settingsLogic/SettingsContext.tsx`)
+### `SettingsContext`
 
 ```ts
-// Hook — hibát dob, ha SettingsProvider-en kívül használják
 const { settings, updateSetting } = useSettings();
-
-// Egyetlen kulcs frissítése
 updateSetting("useDarkMode", true);
 updateSetting("language", "hu");
+// localStorage "settings" kulcs alatt tárolódik
+// Az i18next-et is szinkronban tartja induláskor és nyelvváltáskor
 ```
 
-`"settings"` kulcs alatt tárolódik a `localStorage`-ban. Az i18next-et is szinkronban tartja induláskor és nyelvváltáskor.
-
-### `ProfileContext` (`src/components/forms/addNewProfile/ProfilesContext.tsx`)
+### `ProfileContext`
 
 ```ts
 const { profiles, selectedProfile, addProfile, removeProfile, selectProfile } =
   useProfiles();
-// useProfiles() = useContext(ProfileContext) — az useProfiles.ts-ből
 
-// Profil alakja:
 interface Profile {
   id?: number;
   name: string; // display_name
@@ -311,71 +280,48 @@ interface Profile {
 }
 ```
 
-A `selectedProfile` alapértelmezés szerint az első profilra mutat, ha nincs explicit kiválasztás. Kiválasztás névvel:
+A kiválasztott profil `localStorage` alatt `selected_profile_<userId>` kulccsal tárolódik. Visszatöltéskor validálva.
 
-```ts
-selectProfile("MiKarakterem"); // a kiválasztást komponens állapotban tárolja (csak munkamenetig)
-```
-
-### `ColorContext` (`src/components/.../settingsLogic/color/ColorContext.ts`)
+### `ColorContext`
 
 ```ts
 const {
   colorLeft,
   colorMiddle,
   colorRight,
+  animationKey,
   setColorLeft,
   setColorMiddle,
   setColorRight,
+  setAnimationKey,
 } = useContext(ColorContext);
+// localStorage "color-settings" kulcs alatt tárolódik
+// animationKey: AnimationKey | null — az applyTheme() állítja be
 ```
-
-Három hex-szöveg, amely a `Wrapper.tsx` gradiensét hajtja meg. `"color-settings"` kulcs alatt tárolódik a `localStorage`-ban.
 
 ---
 
-## 6. Hook-ok és API-réteg
+## 7. Hook-ok és API-réteg
 
 ### `src/lib/apiClient.ts`
 
-Megosztott Axios példány. Minden API-hívás ezen keresztül megy.
-
-- **Alap URL:** `/api`
-- **Hitelesítő adatok:** `withCredentials: true` (sütialapú hitelesítés)
-- **Content-Type:** automatikusan `application/json`-ra van beállítva; `FormData` esetén kihagyva (a böngésző állítja be a multipart határt)
-- **401-es interceptor:** Bármely nem-hitelesítési végponttól érkező 401-es válasz esetén keményen átirányít `/app/login`-ra. A hitelesítési végpontok (`/auth/*`, `/users/whoami`) ki vannak zárva, hogy elkerüljük az átirányítási hurkokat hibás jelszavas válaszoknál.
-
-```ts
-import apiClient from "@/lib/apiClient";
-
-// Példa közvetlen használatra (inkább hook-okat használj, ahol lehetséges):
-const { data } = await apiClient.get<SajátTípus>("/endpoint");
-await apiClient.post("/endpoint", body);
-await apiClient.put("/endpoint/1", body);
-await apiClient.delete("/endpoint/1");
-```
+- Alap URL: `/api`, `withCredentials: true`
+- `Content-Type`: automatikusan `application/json`; `FormData` esetén kihagyva
+- **401-es interceptor:** nem-hitelesítési 401-es válaszoknál `/app/login`-ra irányít. Hitelesítési végpontok kizárva.
 
 ### `src/lib/queryKeys.ts`
 
-Centralizált kulcs-gyár — minden `queryKey` és `invalidateQueries` híváshoz ezeket használd a következetes gyorsítótár-kezelés érdekében.
-
 ```ts
-import { queryKeys } from "@/lib/queryKeys";
-
-queryKeys.auth.all; // ["auth"]
-queryKeys.profiles.byUserId(userId); // ["profiles", "byUserId", 5]
-queryKeys.releases.infinite(os); // ["releases", "infinite", "windows"]
-queryKeys.githubReleases.all; // ["githubReleases"] — GitHub releases gyorsítótár
-queryKeys.news.byCategory(categories); // ["news", "byCategory", ["Patch"]]
+queryKeys.profiles.all; // ["profiles"]
+queryKeys.profiles.byUserId(id); // ["profiles", "byUserId", id]
+queryKeys.githubReleases.all; // ["githubReleases"]
 queryKeys.items.all; // ["items"]
-queryKeys.purchases.byProfileId(profileId);
+queryKeys.purchases.byProfileId(id); // ["purchases", "byProfileId", id]
 ```
 
-### Hook fájlok
+A debug panel saját `debugQueryKeys`-t exportál az `useDebugHooks.ts`-ből.
 
-A hook-ok domain szerint vannak felosztva. Mindegyik újra exportálva van a `useQueryHooks.ts`-ből kényelmes elérés céljából.
-
-#### `src/hooks/useAuthHooks.ts`
+### `useAuthHooks.ts`
 
 | Hook                           | Metódus | Végpont         |
 | ------------------------------ | ------- | --------------- |
@@ -385,163 +331,68 @@ A hook-ok domain szerint vannak felosztva. Mindegyik újra exportálva van a `us
 | `useLogoutMutation()`          | POST    | `/auth/logout`  |
 | `useUpdateUserEmailMutation()` | PUT     | `/users/:id`    |
 
-```ts
-// Bejelentkezési példa
-const loginMutation = useLoginMutation();
-try {
-  const data = await loginMutation.mutateAsync({ email, password });
-  // data: { id: number, role: string }
-} catch (err) { ... }
+### `useProfileHooks.ts`
 
-// Kijelentkezés — törli a gyorsítótárat és a whoami-t, navigálj be/ki magad
-const logoutMutation = useLogoutMutation();
-await logoutMutation.mutateAsync();
-setIsLoggedIn(false);
-navigate("/app/login");
-```
+| Hook                                | Leírás                                                                                                                                                                                                                                                   |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useProfilesQuery(userId)`          | Összes profil lekérése; `?v=` gyorsítótár-elkerülő paramétert fűz az avatar URL-ekhez                                                                                                                                                                    |
+| `useAddProfileMutation()`           | `POST /users/:id/profiles`, opcionális `profile_picture: File`                                                                                                                                                                                           |
+| `useUpdateProfileMutation()`        | `PUT /profiles/:id`. Támogatja az `optimistic` és `invalidateAfterSuccess` opciókat                                                                                                                                                                      |
+| `useDeleteProfileMutation()`        | `DELETE /profiles/:id`. Optimista eltávolítás hiba esetén visszaállítással                                                                                                                                                                               |
+| `useUploadProfilePictureMutation()` | `POST /profiles/:id/pfp` multipart. Siker esetén: frissíti a verziót a `sessionStorage["pfp_versions"]`-ban, majd `setQueriesData`-val csak az `avatar_url` mezőt patcheli az összes profil gyorsítótár-bejegyzésben — **nem indít hálózati refetch-et** |
 
-#### `src/hooks/useProfileHooks.ts`
+**Megjelenítési név szabályok:** max. 20 karakter a `clampDisplayName()` segítségével. Duplikált nevekhez véletlenszerű 4 karakteres utótag kerül.
 
-| Hook                                | Leírás                                                                                                                         |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `useProfilesQuery(userId)`          | Egy felhasználó összes profiljának lekérése. `?v=` paramétert fűz hozzá az avatar URL-ekhez a gyorsítótár-elkerülés érdekében. |
-| `useAddProfileMutation()`           | POST a `/users/:id/profiles` végpontra. Opcionális `profile_picture: File` paramétert fogad.                                   |
-| `useUpdateProfileMutation()`        | PUT a `/profiles/:id` végpontra. **Optimista frissítést** támogat az `onMutate` segítségével.                                  |
-| `useDeleteProfileMutation()`        | DELETE `/profiles/:id`. **Optimista eltávolítás** hiba esetén visszaállítással.                                                |
-| `useUploadProfilePictureMutation()` | POST multipart a `/profiles/:id/pfp` végpontra. Automatikusan növeli a verziószámot a gyorsítótár-elkerüléshez.                |
+### `useAdminHooks.ts`
 
-```ts
-// Profil hozzáadása képpel
-const addProfileMutation = useAddProfileMutation();
-await addProfileMutation.mutateAsync({
-  display_name: "HősSlime",
-  user_id: 42,
-  profile_picture: fajlInputbol,
-});
+| Hook                       | Végpont                   | Megjegyzések                                                              |
+| -------------------------- | ------------------------- | ------------------------------------------------------------------------- |
+| `useAdminUsersQuery()`     | `GET /users`              | Kliensoldali szűrés, amíg a backend nem támogatja a `?search=` paramétert |
+| `useBanUserMutation()`     | `POST /users/:id/ban`     | Body: `{ id, period }` (percek). Végleges = 50 év percekben               |
+| `useUnbanUserMutation()`   | `POST /users/:id/unban`   | Nincs body                                                                |
+| `usePromoteUserMutation()` | `POST /users/:id/promote` | Body: `{ id, target_role: "admin"\|"support" }`                           |
+| `useDemoteUserMutation()`  | `POST /users/:id/demote`  | Nincs body — mindig `"user"`-re fokoz le                                  |
 
-// Optimista megjelenítési név frissítés
-const updateMutation = useUpdateProfileMutation();
-await updateMutation.mutateAsync({
-  profileId: 7,
-  payload: { id: 7, display_name: "ÚjNév", coins: 500 },
-  optimistic: true, // gyorsítótár frissítése a szerver megerősítése előtt
-  invalidateAfterSuccess: true,
-});
-```
+### `useDebugHooks.ts`
 
-**Megjelenítési név szabályok:** 20 karakterre van korlátozva a `clampDisplayName()` segítségével. Az ismétlődő nevekhez automatikusan egy véletlenszerű 4 karakteres utótag kerül hozzáfűzésre.
+Statisztikai lekérdezések (a `LeaderboardPage` is használja):
 
-**Avatar gyorsítótár-elkerülés:** A profilkép-verziók a `sessionStorage`-ban tárolódnak `"pfp_versions"` kulcs alatt. Feltöltés után a verzió növekszik, megváltoztatva a `?v=` query paramétert és arra kényszerítve a böngészőt, hogy lekérje az új képet.
+- `useTopItemsQuery()` — `GET /stats/top/items`
+- `useTopPlayersQuery()` — `GET /stats/top/players`
+- `useTopLevelsQuery()` — `GET /stats/top/levels`
+- `useLeaderboardQuery()` — `GET /stats/leaderboard`
 
-#### `src/hooks/useContentHooks.ts` + `useQueryHooks.ts`
+Játékadatok (csak admin végpontok):
 
-Végtelen lekérdezési hook-ok lapozható tartalomhoz. Mindegyik ugyanazt a válaszboritékot használja:
+- `useDebugCharactersQuery()` — `GET /characters`
+- `useDebugLevelsQuery()` — `GET /levels`
+- `useDebugItemsQuery()` — `GET /items?page=1&page_size=100`
+
+### Tartalmi hook-ok (`useContentHooks.ts`)
 
 ```ts
-interface PaginatedResponse<T> {
-  items: T[]; // vagy releases / posts
-  page: number;
-  pageSize: number;
-  total: number;
-  hasMore: boolean;
-}
+useReleasesInfiniteQuery(os, pageSize?)
+useItemsInfiniteQuery(filters?, pageSize?)
+useNewsInfiniteQuery(categories?, pageSize?)
 ```
-
-| Hook                                           | Fő paraméterek                              | Végpont                                 |
-| ---------------------------------------------- | ------------------------------------------- | --------------------------------------- |
-| `useReleasesInfiniteQuery(os, pageSize?)`      | `os: string`                                | `GET /releases?os=&page=&pageSize=`     |
-| `useItemsInfiniteQuery(filters?, pageSize?)`   | `kind`, `rarity`, `combatType`, `ownership` | `GET /items?...`                        |
-| `useNewsInfiniteQuery(categories?, pageSize?)` | `categories: string[]`                      | `GET /news?categories=&page=&pageSize=` |
-
-```ts
-const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-  useReleasesInfiniteQuery("windows", 8);
-
-const releases = data?.pages.flatMap((p) => p.releases) ?? [];
-```
-
-#### `src/hooks/useAdminHooks.ts`
-
-Admin panel hook-ok. Mindegyik megköveteli, hogy a hívó admin legyen (a backend middleware fogja kikényszeríteni, ha implementálva lesz).
-
-| Hook                          | Végpont                 | Megjegyzések                                                              |
-| ----------------------------- | ----------------------- | ------------------------------------------------------------------------- |
-| `useAdminUsersQuery(search?)` | `GET /users`            | Kliensoldali szűrés, amíg a backend nem támogatja a `?search=` paramétert |
-| `useAdminUserQuery(userId)`   | `GET /users/:id`        |                                                                           |
-| `useBanUserMutation()`        | `POST /users/:id/ban`   | A `BanPayload`-ot `{ id, period }` formátumra konvertálja percekben       |
-| `useUnbanUserMutation()`      | `POST /users/:id/unban` |                                                                           |
-
-```ts
-const banMutation = useBanUserMutation();
-await banMutation.mutateAsync({
-  userId: 99,
-  payload: {
-    ban_type: "temporary",
-    ban_until: "2026-06-15T14:00:00Z",
-    reason: "Mérgező viselkedés",
-  },
-});
-```
-
-**Végleges kitiltás** `50 * 365 * 24 * 60` percet (~50 év) használ, mert a backend egy konkrét időbélyeget tárol.
 
 ---
 
-## 7. Oldalak
+## 8. Oldalak
+
+### Ranglista (`/app/leaderboard`)
+
+Nyilvános. Felváltotta a „Rólunk" oldalt a navigációban. Négy statisztikai panel: Győzelmi ranglista, Legaktívabb játékosok, Legtöbbet játszott pályák, Legtöbbet vásárolt tárgyak. Panelenkénti top 10, éremszínek (arany/ezüst/bronz) az első háromnak. Animációk: `CardAnimation` belépés → `sectionStyle` lépcsőzetes panel fade (0/80/160/240ms késés) → `LoadPost` sor-stagger minden panelen belül.
 
 ### Kiadások (`/app/releases`)
 
-`src/components/pages/mainPages/ReleasesPage.tsx`
-
-Játékverzió-kiadásokat jelenít meg operációs rendszer szerinti szűréssel és végtelen görgetéssel. **A kiadások közvetlenül a nyilvános GitHub repitóriumból származnak** — nincs alkalmazáson belüli hozzáadási/törlési felület. Új verzió kiadásához hozz létre egy GitHub release-t a `https://github.com/SMAASH-project/SMAASH/releases` címen, és csatold hozzá az összeállított fájlokat.
-
-**Platform-felismerés** az egyes release-eszközök fájlkiterjesztése alapján történik:
-
-| Kiterjesztés   | Platform |
-| -------------- | -------- |
-| `.apk`, `.aab` | Android  |
-| `.ipa`         | iOS      |
-
-Ajánlott eszköz-elnevezési konvenció: `smaash-v{verzió}-android.apk` / `smaash-v{verzió}-ios.ipa`. Ha a konvenció megváltozik, frissítsd a `PLATFORM_MATCHERS` tömböt az `useReleases.ts`-ben.
-
-Fő alkomponensek:
-
-- `Releases.tsx` — a kiadások listájának megjelenítése; átadja az OS-specifikus `downloadUrl`-t a gombnak
-- `SelectOs.tsx` — operációs rendszer szűrő (iOS / Android)
-- `DownloadReleaseButton.tsx` — új lapon megnyitja a GitHub eszköz URL-jét; letiltva tooltip-pel, ha nem található eszköz a kiválasztott platformhoz
-- `SearchRelease.tsx` — kliensoldali verzió-keresés
-- `useReleases.ts` — lekéri a `GET https://api.github.com/repos/SMAASH-project/SMAASH/releases` végpontot, leképezi az eszközöket `Release` objektumokra, kezeli a végtelen görgetést
-
-**GitHub API ráta-korlát:** 60 nem hitelesített kérés/óra IP-nként. A React Query 10 percig gyorsítótáraz (`staleTime`), így a normál használat jóval a korlát alatt marad. Ha a repó valaha priváttá válik, a lekérést át kell helyezni egy backend proxy végpontra, hogy a token ne kerüljön be a kliensbe.
+Lekéri a `GET https://api.github.com/repos/SMAASH-project/SMAASH/releases` végpontot. Platform-felismerés fájlkiterjesztés alapján: `.apk`/`.aab` → Android, `.ipa` → iOS. `staleTime: 0`, `refetchOnMount: true`, `refetchInterval: 5 * 60 * 1000`. A `DownloadReleaseButton` új lapon nyitja meg a GitHub eszköz URL-jét; le van tiltva tooltip-pel, ha nincs eszköz a kiválasztott platformhoz.
 
 ### Hírek (`/app/news`)
 
-`src/components/pages/mainPages/NewsPage.tsx`
+Markdown-megjelenítésű bejegyzések (`react-markdown` + `remark-gfm`) kategória-szűrővel, képtámogatással (`imagePosition: "Top"|"Right"`, `imageSize`), admin szerkesztés/törlés. `LoadPost` stagger a bejegyzéseken.
 
-Markdown-megjelenítésű hírbejegyzések kategóriajelvényekkel és képtámogatással. Reszponzív: az oldalsó képek mobilon egymás alá kerülnek.
-
-Fő funkciók:
-
-- A bejegyzések támogatják az `imagePosition: "Top" | "Right"` és `imageSize: number` tulajdonságokat  
-  Asztali gépen az oldalsó képek a beállított `imageSize%` értéket használják. Mobilon teljes szélességben jelennek meg.
-- `react-markdown` + `remark-gfm` rendereli a bejegyzés tartalmát
-- Kategória szűrő `FilterSelect` felugróval
-- Az adminok `EditButton` és `RemoveButton` gombokat látnak bejegyzésenként
-- Bejegyzés belépési animációk `LoadPost` segítségével (tiszteli a `useAnimations` beállítást)
-
-Alkomponensek:
-
-- `AddNews.tsx` — admin létrehozó párbeszédpanel
-- `EditButton.tsx` — admin szerkesztő párbeszédpanel
-- `RemoveButton.tsx` — admin törlés megerősítés
-- `Search.tsx` — szöveges keresés
-- `Filter.tsx` / `FilterSelection.tsx` — kategória szűrő
-- `CategoryBadge.tsx` — színkódolt kategóriajelvény
-- `useNewsPosts.ts` — bejegyzések CRUD állapota
-- `useNewsCategoryFilter.ts` — szűrő állapota
-- `useNewsForm.ts` — űrlap állapota létrehozáshoz/szerkesztéshez
-
-**Kategória-színek** (`types/PageTypes.ts`-ben definiálva):
+**Kategória-színek:**
 
 | Kategória      | Szín                  |
 | -------------- | --------------------- |
@@ -552,293 +403,189 @@ Alkomponensek:
 
 ### Webáruház (`/app/webstore`)
 
-`src/components/pages/mainPages/WebstorePage.tsx`
+Tárgy bolt. Érmeegyenleg a `selectedProfile.coins`-ból. Szűrők: típus, ritkaság, harci típus, tulajdonlás. Végtelen görgetés (12/oldal).
 
-Tárgy bolt. Az érmeegyenleg a `ProfileContext.selectedProfile.coins`-ból jön.
+**Adatfolyam:**
 
-Alkomponensek:
+1. `GET /api/items?page=1&page_size=100` — összes tárgy
+2. `GET /profiles/:id/purchases` — tulajdonlás (⚠️ lásd Ismert hibák §17)
+3. `ownedNames` Set a `p.item` mezőből
+4. Vásárlás: `POST /purchases` — body: `{ player_profile_id, item_id, count: 1, date: "YYYY-MM-DD" }`
+5. Siker esetén: vásárlások + profilok lekérdezések érvénytelenítése (érmék frissítése)
 
-- `Item.tsx` — egyedi tárgyak kártyája feloldó gombbal
-- `CreateItemDialog.tsx` — admin létrehozás
-- `RemoveItemButton.tsx` — admin törlés
-- `SearchItem.tsx` — szöveges keresés
-- `ItemFilters.tsx` — szűrés típus, ritkaság, harci típus és tulajdonlás szerint
-- `useItems.ts` — teljes React Query integráció: lekéri a `GET /api/items` végpontot, összefésüli a tulajdonlási adatokat a `GET /profiles/:id/purchases` alapján, kezeli a létrehozási/törlési/vásárlási mutációkat
+**Item → WebstoreItem leképezés:** a backend típust és harci típust kategória-szövegekként kódolja (`"Character"`, `"Skin"`, `"Melee"`, `"Ranged"`). Az `itemDTOToWebstoreItem()` visszaalakítja ezeket.
 
-**Tulajdonlás** meghatározása: a kiválasztott profil vásárlási előzményeit lekérve felépít egy `Set`-et a már megvásárolt tárgyak neveiből. Vásárlás után mind a vásárlások lekérdezése, mind a profil érmék lekérdezése érvénytelenítésre kerül, így az érmeegyenleg azonnal frissül.
-
-**Item → WebstoreItem leképezés:** a backend a típust és harci típust kategória-szövegekként kódolja (`"Character"`, `"Skin"`, `"Melee"`, `"Ranged"`). Az `itemDTOToWebstoreItem()` ezeket visszaalakítja a felhasználói felület által várt típusos mezőkre.
+**Admin funkciók:** Létrehozás (`POST /api/items`) és törlés (`DELETE /api/items/:id`) optimista eltávolítással + visszaállítással.
 
 ### Profil (`/app/profile`)
 
-`src/components/pages/profileDependents/profile/ProfilePage.tsx`
-
-Háromoszlopos elrendezés: avatar/név/szerkesztés | statisztikák | meccs-előzmények.
+Háromoszlopos elrendezés:
 
 ```
 [ Avatar / Név / Szerkesztés ] | [ Statisztikák ] | [ Meccs-előzmények ]
 ```
 
-Élő adatok: érmék, utoljára aktív, profil azonosító (`ProfileContext`-ből).  
-Helyőrző adatok (halvány, `opacity-40`): győzelmek, vereségek, győzési arány, meccsszám.  
-Meccs-előzmények: üres állapot — a `GET /api/profiles/:id/matches` végpontra vár.
-
-Fő fájlok:
-
-- `ProfilePageContent.tsx` — mindhárom panel
-- `UpdateSheet.tsx` — kihúzható lap a profil átnevezéséhez és az avatar megváltoztatásához
+Élő adatok: érmék, utoljára aktív, profil azonosító. Helyőrző (halvány): győzelmek, vereségek, győzési arány. Meccs-előzmények: üres — a `GET /api/profiles/:id/matches` végpontra vár.
 
 ### Beállítások (`/app/settings`)
 
-`src/components/pages/profileDependents/settings/SettingsPage.tsx`
+Kapcsolók (Animációk, Folyékony üveg, Sötét mód, Nyelv), téma-presetek, egyéni 3-megállós színválasztó, animáció-felülbírálat sor. `sectionStyle` lépcsőzetes szekciók (0/80/160/240ms). Az `animReady` prop: amíg `false`, a `backdrop-blur-*` el van távolítva a kártyából + a szekciók láthatatlanok; `true`-ra vált a `CardAnimation` spring befejezése után.
 
-Kapcsolókártyák: Animációk, Folyékony üveg, Sötét mód, Nyelv.  
-Témaválasztó szakasz előre beállított színsémákkal és egyéni 3-megállós színválasztóval.
+---
 
-Fő fájlok:
+## 9. Admin és Debug Panelek
 
-- `SettingsPageContent.tsx` — teljes oldal elrendezése; memoizált alkomponensekre van bontva (`ThemeSection`, `LanguageSection`, `AnimationSection`) `useMemo`-val az összes számított stílusosztályhoz és `useCallback`-kel az összes kezelőhöz. Elfogad egy `animReady: boolean` propot — amíg `false`, a `backdrop-blur-*` el van távolítva a kártya háttérosztályából ÉS mind a négy szekció `opacity: 0 / translateY(10px)` állapotban renderelődik, így a böngésző kihagyja a compositálásukat a kártya belépési spring-animációja alatt. Amint `animReady` `true`-ra vált, minden szekció 200 ms-os CSS átmenettel fade+slide animációval jelenik meg, 0 / 80 / 160 / 240 ms eltolással.
-- `SettingToggle.tsx` — újrafelhasználható kapcsolósor; `memo`-val burkolva, csak akkor renderelődik újra, ha `useLiquidGlass`, `useDarkMode` vagy a három kapcsoló értéke változik
-- `ThemePicker.tsx` — előre beállított rács + egyéni színválasztók; `memo`-val burkolva, `useMemo`-val a stílusosztályokhoz és `useCallback`-kel az apply kezelőhöz
-- `SettingsContext.tsx` — állapot, perzisztencia, i18n szinkronizálás; tartalmazza az `animationOverride: AnimationOverride` mezőt
-- `SettingsPage.tsx` — kezeli az `animDone` állapotot; `animReady={false}`-t ad át a `SettingsPageContent`-nek, amíg a `CardAnimation.onAnimationComplete` le nem fut, majd `true`-ra vált a teljes liquid glass stílus visszaállításához
-
-### Admin (`/app/admin`)
-
-`src/components/pages/profileDependents/admin/AdminPage.tsx`
+### Admin Panel (`/app/admin`)
 
 Hitelesítés-védelmes: a nem-adminok `<NotFoundPage />`-t látnak (megkülönböztethetetlen egy valódi 404-estől).
 
-Háromoszlopos elrendezés:
+**Elrendezés:**
 
 ```
-[ Felhasználólista + Keresés ] | [ Felhasználó részletei + Statisztikák ] | [ Felhasználó profiljai ]
+[ Felhasználólista + Keresés ] | [ Felhasználó részletei + Műveletek ] | [ Felhasználó profiljai + Érme-szerkesztő ]
 ```
 
-Fő fájlok:
+Az oszlopok `motion.div`-val animáltan jelennek meg a `CardAnimation` után (késések: 50ms, 180ms, 310ms). A felhasználólista sorai `LoadPost` stagger-t használnak. A felhasználói részletek `AnimatePresence mode="wait"` a `selectedUser.id`-n alapulva — felhasználóváltáskor keresztfade-del (0ms fejléckártya, 80ms statisztika).
 
-- `AdminPageContent.tsx` — háromoszlopos kártya
-- `UserList.tsx` — görgethető lista kliensoldali kereséssel
-- `UserListItem.tsx` — sor kitiltás-jelzővel
-- `UserDetail.tsx` — kiválasztott felhasználó fejléce, fiókstatisztikák, szerepkörjelvény, kitilt/felold gomb
-- `ProfilesPanel.tsx` — kiválasztott felhasználó profiljai
-- `ban/BanDialog.tsx` — teljes kitiltó modal (előre beállítottak + egyéni dátumtartomány + ok)
-- `ban/BanPresetCard.tsx` — egyedi előre beállított opció
-- `ban/BanCustomRange.tsx` — egyéni naptár + időpörgetők
-- `adminLogic/useAdminPageLogic.ts` — oldal állapota + témázás
-- `adminLogic/useBanDialogLogic.ts` — kitiltó párbeszédpanel állapota
+**Szerepkörjelvények:**
 
-**Szerepkörjelvény-leképezés:**
+| Backend érték | Szín            | Ikon         |
+| ------------- | --------------- | ------------ |
+| `"admin"`     | Lila            | Pajzs        |
+| `"support"`   | Égkék           | Fejhallgató  |
+| `"user"`      | Semleges szürke | Felhasználók |
 
-| Backend szerepkör | Jelvény színe   | Ikon         |
-| ----------------- | --------------- | ------------ |
-| `"admin"`         | Lila            | Pajzs        |
-| `"support"`       | Égkék           | Fejhallgató  |
-| `"user"`          | Semleges szürke | Felhasználók |
+**Szerepkör-műveletek:**
 
-**Kitiltási párbeszédpanel folyamata:**
+- `user` → Promóció Supportra (égkék), Promóció Adminra (lila)
+- `support` → Promóció Adminra (lila), Lefokozás Supportra (égkék), Lefokozás Userre (borostyán)
+- `admin` → Lefokozás Supportra (égkék), Lefokozás Userre (borostyán)
 
-1. Előre beállított időszak kiválasztása (1ó / 12ó / 24ó / 7n / 31n / 365n / Végleges) VAGY egyéni dátumtartomány
-2. Opcionálisan ok kiválasztása/beírása
-3. Megerősítés — elküldi a `{ id, period }` adatokat (időszak percekben) a `POST /users/:id/ban` végpontra
+**Érme-szerkesztő** (a Profilok panelben, kiválasztott profil esetén jelenik meg):
+
+- Szám-beviteli mező + ±100 gombok + gyors presetek (1e, 5e, 10e)
+- Mentés: szürke (nincs változás) → borostyán (módosítva) → zöld + pipa (mentve)
+- Meghívja a `PUT /profiles/:id` végpontot: `{ id, display_name, coins }`
+- A draft automatikusan szinkronizál profilváltáskor
+
+**Kitiltási párbeszédpanel:**
+
+- Presetek: 1ó / 12ó / 24ó (timeout), 7n / 31n / 365n (kitiltás), Végleges
+- Egyéni: naptár + időpörgetők (ÓÓ:PP, körbe-forgatással)
+- Ok: 8 preset chip + szabad szöveg textarea (opcionális)
+- Megerősítés: `POST /users/:id/ban` — body: `{ id, period }` (percek)
+
+### Debug Panel (`/app/debug`)
+
+Admin + support. Rögzített magasságú kártya (`flex-1`, kitölti a viewportot). Bal oldalsáv (144px) fül-gombokkal + alján rögzített Refresh gombbal. Jobb oldal: `AnimatePresence mode="wait"` — fül-tartalom balra/jobbra csúszik váltáskor (200ms).
+
+**Fülek:**
+
+| Fül         | Hozzáférés      | Tartalom                                                                                                                                                                                                                                                    |
+| ----------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Rendszer    | admin + support | Böngésző (user agent, nyelv, online állapot, kapcsolat, memória, CPU), Kijelző (viewport, képernyő, pixel arány, színmélység), Munkamenet (szerepkör, user ID, query cache szám, időzóna, helyi idő), Környezet (alap URL, útvonal, build mód, dev szerver) |
+| Cache       | admin + support | Élő React Query cache explorer. Szűrés query kulcs alapján. Kibővíthető bejegyzések: státusz ikon, utoljára frissítve, nyers adat (1500 karakterre csonkítva), bejegyzésenkénti Érvénytelenítés + Eltávolítás. Összes érvénytelenítése + Frissítés gombok.  |
+| Végpontok   | admin + support | API tesztelő. Metódus-választó (GET/POST/PUT/DELETE/PATCH, színkódolva), útvonal-bevitel, JSON body textarea, Küldés gomb. Gyors útvonal presetek. Válasz panel: státusz kód (színes), késleltetés, nyers JSON.                                             |
+| Játékadatok | csak admin      | Karakterek rács (avatar + név + ID), Pályák rács (kép + név + ID), Tárhely tárgyak lista (ID + név + ritkaság jelvény + ár). Mind admin-only végpontokból töltődik be.                                                                                      |
 
 ---
 
-## 8. Navigáció
+## 10. Navigáció
 
-### `Navbar.tsx`
+**Asztali navigációs sáv:** Admin Panel gomb (pajzs ikon, csak admin) + Debug Panel gomb (hibajelző ikon, admin + support) bal felül. Középen: nav elemek. Jobb oldalt: felhasználónév + fiókmenü legördülő.
 
-Rögzített felső sáv. A `NavbarContext`-et használja a legördülő menü hover-követéséhez az idő előtti bezárás megakadályozása érdekében.
+**Mobil fiók (`MobileNavMenu`):** Teljes navigációs linkek + Fiók szekció (Profil, Beállítások, Admin Panel ha admin, Debug Panel ha admin/support, Kijelentkezés).
 
-- Asztali: logó balra, navigációs linkek középre, fiókmenü jobbra. Az Admin gomb csak akkor jelenik meg, ha `isAdmin === true`.
-- Mobil töréspontnál: hamburger → `MobileNavMenu` kihúzható lap.
-
-### `MobileNavMenu.tsx`
-
-Kihúzható lap mobilra. Tartalmaz teljes navigációs linkeket + fiókszakaszt (Profil, Beállítások, Admin Panel ha admin, Kijelentkezés).
-
-### `AccountMenu.tsx`
-
-Legördülő menü a navigációs sáv jobb oldalán. Tartalmaz: Profil, Beállítások, Kijelentkezés.
-
-### `navLogic/navItems.ts`
-
-```ts
-// Új navigációs elemek hozzáadása itt:
-export const navItems = [
-  { path: "/app/releases", labelKey: "nav.releases", icon: Download },
-  { path: "/app/news", labelKey: "nav.news", icon: Newspaper },
-  // ...
-];
-```
-
-A `labelKey` közvetlenül a `src/locales/*/nav.json` fájl egy kulcsára mutat.
+**Nav elemek** (`navItems.ts`): Ranglista, Galéria, Kiadások, Webáruház, Hírek. Feliratok `labelKey` segítségével a `src/locales/*/nav.json`-ból (tartalmaz `leaderboard` és `debugPanel` kulcsokat).
 
 ---
 
-## 9. Űrlapok
+## 11. Űrlapok
 
-Mindhárom űrlap `<FormAlert>` komponenst használ a hibák megjelenítéséhez, és az `extractErrorMessage()` segédfüggvényt az Axios hibák olvasható szöveggé alakításához. Korábban a hibák nyers `<p>` tagekkel kerültek megjelenítésre, és `[object Object]` jelent meg, ha a szerver JSON hibaüzenetet adott vissza.
+Mindegyik `<FormAlert>`-et használ a hibák megjelenítéséhez és az `extractErrorMessage()`-t az Axios hibák normalizálásához.
 
 ### `LoginForm.tsx`
 
-- E-mail + jelszó mezők
-- Meghívja a `useLoginMutation()`-t, sikerkor beállítja az `isLoggedIn`/`userId`/`isAdmin` értékeket, és navigál `/app/profile-selector`-ra
-- Nyelvváltó a jobb felső sarokban
-- A 401-es válaszok specifikus "Hibás email cím vagy jelszó" üzenetet jelenítenek meg; minden egyéb hiba a szerver üzenetét vagy egy fordított visszaesési szöveget mutat
+Email + jelszó. Siker esetén: beállítja az `isLoggedIn`/`userId`/`isAdmin`/`isSupport` értékeket, navigál `/app/profile-selector`-ra. 401 → specifikus „Hibás email cím vagy jelszó" üzenet.
 
-### `SignUpForm.tsx`
+### `SignupForm.tsx`
 
-- Felhasználónév / e-mail / jelszó / jelszó megerősítése
-- A kliensoldalú validációs hibák (rövid felhasználónév, jelszó eltérés stb.) elsőbbséget élveznek a szerverhibákkal szemben egyetlen `errorMessage` változóban — nincs dupla figyelmeztetés
-- A validációs hibák automatikusan törlődnek, amikor a felhasználó szerkeszti az adott mezőt
-- reCAPTCHA v3 — a `GoogleReCaptchaProvider` körülveszi a belső form komponenst. A token csak beküldéskor kerül lekérésre az `executeRecaptcha("signup")` segítségével — **nem** folyamatosan. Ez megakadályozza a `reload`/`clr` kérés-áradatot.
-- A webhelytitok a komponensbe van kódolva; éles környezetben env változóba kell áthelyezni.
-
-```tsx
-// Hogyan van strukturálva a reCAPTCHA a kérés-spam elkerülésére:
-export function SignupForm(props) {
-  return (
-    <GoogleReCaptchaProvider reCaptchaKey="...">
-      <SignupFormInner {...props} />
-    </GoogleReCaptchaProvider>
-  );
-}
-const token = await executeRecaptcha("signup");
-```
+Felhasználónév / email / jelszó / megerősítés. Kliensoldali validációs hibák elsőbbséget élveznek. reCAPTCHA v3 — a token csak beküldéskor kerül lekérésre az `executeRecaptcha("signup")` segítségével, nem folyamatosan.
 
 ### `PasswordResetForm.tsx`
 
-> ⚠️ **Az űrlap beküld, de semmilyen mutációt nem indít.** Blokkolva van a `POST /api/auth/reset-password` backend végpontra való várakozás miatt. Lásd [§15](#15-ismert-teendők-és-backend-függőségek).
+⚠️ Renderelődik, de nem indít mutációt. Blokkolva a `POST /api/auth/reset-password` backend végpontra várva.
 
 ### `ProfileSelectorForm.tsx`
 
-A felhasználó profiljait avatarként jeleníti meg. Kiválasztással be lehet lépni az alkalmazásba; a "Profilok kezelése" mód engedélyezi a törlést. A Kijelentkezés gomb meghívja a `useLogoutMutation()`-t és visszaállítja a hitelesítési állapotot.
-
-`React.memo` + `useCallback` segítségével memoizálva az újrarenderelések csökkentése érdekében.
+Profilok avatarként megjelenítve. „Profilok kezelése" engedélyezi a törlést. Kijelentkezés törli az `isAdmin` + `isSupport` értékeket. `React.memo` + `useCallback` a teljesítmény érdekében.
 
 ### `AddNewProfile.tsx`
 
-## Párbeszédpanel-forma új profil létrehozásához. Elfogad megjelenítési nevet és opcionális avatar képfeltöltést. Korlát: 5 profil felhasználónként. Minden validációs hiba és mezőfelirat teljesen le van fordítva (EN/HU). A hibaüzenetek a `profile.addProfile.*` fordítási kulcsokból jönnek.
+Párbeszédpanel: megjelenítési név + opcionális avatar. Korlát: 5 profil felhasználónként. Teljes fordítás (EN/HU).
 
-## 10. i18n / Többnyelvű támogatás
+---
+
+## 12. i18n / Többnyelvű támogatás
 
 **Nyelvek:** Angol (`en`) · Magyar (`hu`)
 
-### Beállítás
-
-A `src/lib/I18n.ts`-t a `main.tsx`-ben kell importálni **minden komponens renderelése előtt:**
-
-```ts
-import "@/lib/I18n.ts"; // main.tsx 4. sor
-```
-
-### Használat
-
-```tsx
-import { useTranslation } from "react-i18next";
-
-const { t } = useTranslation("auth");
-// t("login.title")   → "Login to your account" (en) / "Bejelentkezés" (hu)
-// t("signup.submit") → "Create Account" / "Fiók létrehozása"
-```
+A `src/lib/I18n.ts`-t a `main.tsx`-ben minden komponens renderelése előtt importálni kell.
 
 ### Névterek
 
-| Fájl            | Felhasználva                                                   |
-| --------------- | -------------------------------------------------------------- |
-| `auth.json`     | Bejelentkezés, Regisztráció, Jelszó-visszaállítás űrlapok      |
-| `nav.json`      | Navigációs sáv, fiókmenü, navigációs elemek                    |
-| `settings.json` | Beállítások oldal                                              |
-| `profile.json`  | Profil oldal, UpdateSheet, ProfileSelector, AddNewProfile      |
-| `releases.json` | Kiadások oldal + alkomponensek                                 |
-| `news.json`     | Hírek oldal + alkomponensek                                    |
-| `webstore.json` | Webáruház oldal + alkomponensek                                |
-| `admin.json`    | Admin panel, kitiltási párbeszédpanel, minden kitiltási szöveg |
-| `common.json`   | 404 oldal, megosztott feliratok                                |
+| Fájl            | Felhasználva                                                                               |
+| --------------- | ------------------------------------------------------------------------------------------ |
+| `auth.json`     | Bejelentkezés, Regisztráció, Jelszó-visszaállítás                                          |
+| `nav.json`      | Navigációs sáv, mobil fiók, nav elemek (tartalmaz `leaderboard` és `debugPanel` kulcsokat) |
+| `settings.json` | Beállítások oldal                                                                          |
+| `profile.json`  | Profil oldal, UpdateSheet, ProfileSelector, AddNewProfile                                  |
+| `releases.json` | Kiadások oldal                                                                             |
+| `news.json`     | Hírek oldal                                                                                |
+| `webstore.json` | Webáruház oldal                                                                            |
+| `admin.json`    | Admin panel, kitiltási párbeszédpanel                                                      |
+| `common.json`   | 404 oldal, megosztott feliratok                                                            |
 
-### Nyelvváltás
-
-A nyelv a `SettingsContext`-ben tárolódik (`settings.language`). Az `updateSetting("language", "hu")` megváltoztatása automatikusan meghívja az `i18n.changeLanguage()`-t egy `useEffect` segítségével a `SettingsContext`-ben.
-
-A nyelvválasztó elérhető a Beállítások oldalon és `<LanguageToggle />` komponensként mindhárom hitelesítési oldalon.
+A nyelv a `SettingsContext`-ben tárolódik. Az `updateSetting("language", "hu")` automatikusan meghívja az `i18n.changeLanguage()`-t.
 
 ### Új nyelv hozzáadása
 
 1. Hozz létre `src/locales/<kód>/` mappát ugyanazzal a 9 JSON fájllal
-2. Importáld az összes fájlt a `src/lib/I18n.ts`-ben, és add hozzá a `resources` objektumhoz
-3. Adj hozzá egy gombot a `SettingsPageContent.tsx`-ben és a `LanguageToggle.tsx`-ben
+2. Importáld az `src/lib/I18n.ts`-ben és add hozzá a `resources` objektumhoz
+3. Adj hozzá gombot a `SettingsPageContent.tsx`-ben és `LanguageToggle.tsx`-ben
 4. Add hozzá a kódot a `Language` típushoz a `SettingsContext.tsx`-ben
 
-### Magyar nyelvű megjegyzések
+---
 
-A magyar agglutináló nyelv — a fordítások teljes, kontextustudatos szövegek, nem összerakott töredékekből állnak. A kitiltás időtartam-feliratok (`"1 óra"`, `"7 nap"`) teljes szövegek a JSON-ban. Az interpolált szövegek i18next szintaxist használnak: `"Tiltva {{date}}-ig"`.
+## 13. UI komponenskönyvtár
+
+A komponensek a `src/components/ui/` mappában találhatók, shadcn mintákkal (Radix UI + Tailwind).
+
+| Komponens        | Megjegyzések                                                                                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Button`         | Változatok a `button-variants.ts` segítségével                                                                                                               |
+| `ButtonGroup`    | Vízszintes/függőleges csoportosított gombok                                                                                                                  |
+| `Input`          | Standard szövegbeviteli mező                                                                                                                                 |
+| `Card`           | Konténer kártya                                                                                                                                              |
+| `Avatar`         | Tartalék kezdőbetűkkel; `size` prop                                                                                                                          |
+| `Badge`          | Állapot/kategória feliratok                                                                                                                                  |
+| `Dialog`         | Modal — `getDialogClasses`-t használ                                                                                                                         |
+| `Sheet`          | Kihúzható oldalpanel                                                                                                                                         |
+| `DropdownMenu`   | Radix legördülő menü                                                                                                                                         |
+| `Popover`        | Radix felugró ablak                                                                                                                                          |
+| `Switch`         | Kapcsoló                                                                                                                                                     |
+| `Calendar`       | Egyéni tartomány-naptár — nincs `react-day-picker`. A tartomány-kiemelés összefüggő pillulasávként jelenik meg. A `fromDate` blokkolja a múltbeli dátumokat. |
+| `ColorPicker`    | Hex szín beviteli mező                                                                                                                                       |
+| `LanguageToggle` | EN/HU zászlógombok hitelesítési oldalakhoz                                                                                                                   |
+| `FormAlert`      | Beágyazott figyelmeztetés — `variant: "error"\|"success"\|"info"`. Megoldja a `[object Object]` hibajelenítési hibát.                                        |
+| `Separator`      | Vízszintes/függőleges elválasztó                                                                                                                             |
+| `Resizable`      | Húzással átméretezhető panelek                                                                                                                               |
 
 ---
 
-## 11. UI komponenskönyvtár
-
-A komponensek a `src/components/ui/` mappában találhatók, és shadcn mintákat követnek (Radix UI primitívek + Tailwind).
-
-| Komponens        | Fájl                 | Megjegyzések                                                                |
-| ---------------- | -------------------- | --------------------------------------------------------------------------- |
-| `Button`         | `button.tsx`         | Változatok a `button-variants.ts` segítségével                              |
-| `ButtonGroup`    | `button-group.tsx`   | Vízszintes/függőleges csoportosított gombok                                 |
-| `Input`          | `input.tsx`          | Standard szövegbeviteli mező                                                |
-| `Card`           | `card.tsx`           | Konténer kártya                                                             |
-| `Avatar`         | `avatar.tsx`         | Felhasználói/profil avatar tartalék kezdőbetűkkel                           |
-| `Badge`          | `badge.tsx`          | Állapot/kategória feliratok                                                 |
-| `Label`          | `label.tsx`          | Űrlapmező felirat                                                           |
-| `Field`          | `field.tsx`          | Field + FieldLabel + FieldDescription elrendezés                            |
-| `Dialog`         | `dialog.tsx`         | Modális párbeszédpanel                                                      |
-| `Sheet`          | `sheet.tsx`          | Kihúzható oldalpanel                                                        |
-| `DropdownMenu`   | `dropdown-menu.tsx`  | Radix legördülő menü                                                        |
-| `Popover`        | `popover.tsx`        | Radix felugró ablak                                                         |
-| `Switch`         | `switch.tsx`         | Kapcsolókapcsoló                                                            |
-| `Checkbox`       | `checkbox.tsx`       | Jelölőnégyzet                                                               |
-| `RadioGroup`     | `radio-group.tsx`    | Rádiógomb-csoport                                                           |
-| `Accordion`      | `accordion.tsx`      | Összecsukható szakaszok                                                     |
-| `Separator`      | `separator.tsx`      | Vízszintes/függőleges elválasztó                                            |
-| `Calendar`       | `calendar.tsx`       | Egyéni dátumtartomány-naptár (react-day-picker nélkül)                      |
-| `ColorPicker`    | `color-picker.tsx`   | Hex szín beviteli mező                                                      |
-| `Resizable`      | `resizable.tsx`      | Húzással átméretezhető panelek                                              |
-| `LanguageToggle` | `LanguageToggle.tsx` | EN/HU zászlógombok hitelesítési oldalakhoz                                  |
-| `FormAlert`      | `form-alert.tsx`     | Beágyazott form figyelmeztetés — változatok: `error` \| `success` \| `info` |
-
-### `FormAlert` (`form-alert.tsx`)
-
-Beágyazott figyelmeztetés komponens űrlap-szintű hiba-, siker- és tájékoztató üzenetekhez. A shadcn Alert komponens stílusához igazítva — ikon + opcionális cím + üzenet.
-
-```tsx
-import { FormAlert } from "@/components/ui/form-alert";
-
-<FormAlert variant="error" message={errorMessage} />
-<FormAlert variant="success" message="Profil mentve!" />
-<FormAlert variant="info" message="A jelszóváltás még nem elérhető." />
-```
-
-### Egyéni naptár (`calendar.tsx`)
-
-Önálló, nincs külső datepicker-függőség. Támogatja az `single` és `range` módokat.
-
-A tartomány-kiemelés összefüggő pillulasávként jelenik meg — `rounded-l-full` a kezdő dátumon, `rounded-r-full` a végén, lapos oldalak a belső napokon.
-
-```tsx
-<Calendar
-  mode="range"
-  selected={{ from: kezdoDatum, to: vegDatum }}
-  onSelect={handleSelect}
-  fromDate={new Date()} // múltbeli dátumok blokkolása
-/>
-```
-
----
-
-## 12. Típusok
+## 14. Típusok
 
 ### `src/types/PageTypes.ts`
-
-Fő domain interfészek, amelyek az oldalakon és hook-okban használatosak.
 
 ```ts
 interface NewsPost {
@@ -848,9 +595,9 @@ interface NewsPost {
   image?: string;
   imageAlt?: string;
   imagePosition?: "Top" | "Right";
-  imageSize?: number; // vh a Top-hoz; % szélesség a Right-hoz
+  imageSize?: number;
   content: string; // Markdown
-  createdAt: DateTime; // Luxon DateTime
+  createdAt: DateTime;
 }
 
 interface WebstoreItem {
@@ -861,141 +608,64 @@ interface WebstoreItem {
   rarity: "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
   description: string;
   price: number;
-  owned: boolean;
+  owned: boolean; // kliensoldali vásárlásokból levezetett
   createdAt: DateTime;
 }
 
 interface Release {
   id: string;
   version: string;
-  supports: string[]; // pl. ["iOS", "Android"]
-  downloadUrls: Partial<Record<string, string>>; // platformonkénti GitHub eszköz URL-ek
+  supports: string[];
+  downloadUrls: Partial<Record<string, string>>;
   createdAt: DateTime;
 }
 ```
 
-### `src/types/OsTypes.ts`
-
-Operációs rendszer azonosító konstansok a kiadás-szűréshez.
-
-### `src/types/ExampleItems.ts` / `ExampleReleases.ts`
-
-Helyőrző adatok. Az `ExampleItems`-t jelenleg a `useItems.ts` használja — lásd [§15](#15-ismert-teendők-és-backend-függőségek).
-
 ---
 
-## 13. Segédeszközök
+## 15. Segédeszközök és animációk
 
-### `src/lib/utils.ts`
-
-Barrel re-export. Mindent importálj a `@/lib/utils`-ból:
+### `src/lib/utils/sectionStyle.ts`
 
 ```ts
-import {
-  cn, // osztálynév összevonás (clsx + tailwind-merge)
-  formatDate, // Luxon DateTime | Date | string → "2026. márc. 21."
-  formatDateTime, // → "2026. márc. 21., 17:30"
-  // Téma segédeszközök:
-  getTextColor,
-  getSubtextColor,
-  getTextShadow,
-  getBackgroundClasses,
-  getButtonClasses,
-  getInputClasses,
-  getDialogClasses,
-  getDialogFooterClasses,
-  // Folyékony üveg segédeszközök:
-  getLiquidGlassClasses,
-  getLiquidGlassTextShadow,
-  getLiquidGlassHighlight,
-  getLiquidGlassNavHighlight,
-  getLiquidGlassDialogClasses,
-  getLiquidGlassControlClasses,
-  // Színmatematika:
-  getAverageHexColor,
-  lightenHexColor,
-  toRgbaColor,
-  getTextColor,
-} from "@/lib/utils";
+sectionStyle(animReady: boolean, delayMs: number): CSSProperties
 ```
+
+Visszaad: `{ opacity, transform, transition, willChange }`. Amíg `animReady` false: `opacity: 0`, `translateY(10px)`, nincs átmenet. Miután true-ra vált: `delayMs` késéssel fade-in. A Beállítások, Admin, Ranglista, Debug oldalak használják lépcsőzetes szekció-belépéshez.
+
+### `src/lib/utils/extractErrorMessage.ts`
+
+Axios hibákat olvasható szöveggé alakít. Prioritás: `data` mint string → `data.error` → `data.message` → `error.message` → megadott fallback.
 
 ### `src/lib/utils/colorMath.ts`
 
-Tiszta szín-aritmetika, amelyet a `Wrapper.tsx` használ:
-
 ```ts
-getAverageHexColor(colors: string[]): string   // N hex szín átlaga
+getAverageHexColor(colors: string[]): string
 lightenHexColor(hex: string, amount: number): string  // 0.0–1.0
 toRgbaColor(hex: string, alpha: number): string
 ```
 
 ### `src/lib/utils/dateFormat.ts`
 
-Luxon csomagolása konzisztens dátummegjelenítéshez. Elfogad Luxon `DateTime`-t, JS `Date`-t, ISO szövegeket vagy `undefined`-t.
-
 ```ts
 formatDate("2026-03-21T17:30:00Z"); // "2026. márc. 21."
 formatDateTime("2026-03-21T17:30:00Z"); // "2026. márc. 21., 17:30"
+// Elfogad Luxon DateTime, JS Date, ISO string vagy undefined értéket
 ```
 
-### `src/lib/utils/extractErrorMessage.ts`
+### Animációs segédeszközök
 
-Az Axios hibákat olvasható szöveggé alakítja. Megoldja a `[object Object]` problémát, amely akkor fordult elő, amikor a Go backend JSON hibaüzenetet adott vissza.
+**`CardAnimation`** (`miscAnimations/OnloadAnimationCard.tsx`) — spring scale-in belépés (`scale: 0→1`, spring `visualDuration: 1.5, bounce: 0.2`). Minden fő oldal használja.
 
-```ts
-import { extractErrorMessage } from "@/lib/utils/extractErrorMessage";
+**`LoadPost`** (`pageAnimations/newsPageAnimations/LoadPost.tsx`) — `opacity: 0→1, y: 20→0`, `delay: index * 0.1s`. Lista-sor stagger-hez.
 
-const message = extractErrorMessage(error, t("login.failed"));
-// Próbál: data.error → data.message → nyers string → axios.message → visszaesés
-```
-
-Keresési prioritás:
-
-1. `error.response.data` mint nyers string
-2. `error.response.data.error` (legtöbb Go végpont)
-3. `error.response.data.message` (egyes validációs válaszok)
-4. `error.message` (Axios beépített, pl. "Network Error")
-5. A megadott `fallback` fordított szöveg
-
-### `src/lib/GenerateRandomUsername.ts`
-
-Véletlenszerű felhasználónév-javaslatokat generál a regisztrációs helyőrzőhöz.
-
-```ts
-const { prefix, suffix } = generateRandomUsername();
-// prefix: "ClassicFog", suffix: ""  → "ClassicFog"
-```
-
-### Animációk
-
-#### `src/lib/miscAnimations/`
-
-| Komponens                   | Leírás                           |
-| --------------------------- | -------------------------------- |
-| `OnloadAnimationCard.tsx`   | Fade-in + felcsúszás betöltéskor |
-| `OnloadAnimationNavbar.tsx` | Navigációs sáv belépési animáció |
-| `AnimatedAccordion.tsx`     | Accordion magassági átmenettel   |
-| `ColorInterpolation.tsx`    | Sima színátmenet-burkoló         |
-
-#### `src/lib/pageAnimations/newsPageAnimations/LoadPost.tsx`
-
-Az egyes hírbejegyzés-kártyákat lépcsőzetes belépési animációval burkolja:
-
-```tsx
-<LoadPost key={post.id} index={index}>
-  <Card>...</Card>
-</LoadPost>
-```
-
-Csak akkor rendereli a motion burkolót, ha a `settings.useAnimations` értéke `true`.
+**`sectionStyle`** — CSS-in-JS megközelítés a kártyákon belüli lépcsőzetes szekció-animációkhoz.
 
 ---
 
-## 14. Teljesítmény és build
+## 16. Teljesítmény és build
 
 ### Bundle-stratégia
-
-Manuális chunk-ok a `vite.config.ts`-ben definiálva:
 
 | Chunk            | Tartalom                              | Gzip          |
 | ---------------- | ------------------------------------- | ------------- |
@@ -1004,112 +674,80 @@ Manuális chunk-ok a `vite.config.ts`-ben definiálva:
 | `ui-vendor`      | framer-motion, motion, lucide-react   | ~45 KB        |
 | Útvonal chunk-ok | Oldalanként lustán betöltve           | Igény szerint |
 
-Kezdeti bundle: **~94 KB gzip** (349 KB-ról csökkent az optimalizálás előtt).
+**Kezdeti bundle: ~94 KB gzip** (349 KB-ról csökkent az optimalizálás előtt).
 
-### Lusta betöltés
+### Fő optimalizációk
 
-Az összes nem-hitelesítési oldal lustán töltődik be a `main.tsx`-ben:
-
-```ts
-const ReleasesPage = lazy(() =>
-  import("./components/pages/mainPages/ReleasesPage.tsx").then((m) => ({
-    default: m.ReleasesPage,
-  })),
-);
-```
-
-A `RootLayout.tsx`-ben lévő `Suspense` határ pörgő ikont mutat, amíg a chunk-ok betöltődnek.
-
-### Bundle-vizualizáló
-
-```bash
-npm run build
-# Megnyitja a build/stats.html-t — az összes chunk interaktív faszerkezet-térképe
-```
-
-### Erőforrás-tippek
-
-Az `index.html`-ben `preconnect` és `dns-prefetch` található az API-kiszolgálóhoz, hogy az első API-hívás ne okozzon teljes DNS + TLS-kézfogási késést.
-
-### Renderelés-optimalizálás
-
-A `ProfileSelectorForm.tsx` memoizálja a `ProfileAvatar` komponenst és a `handleProfileClick` visszahívást:
-
-```tsx
-const ProfileAvatar = memo(function ProfileAvatar({ ... }) { ... });
-const handleProfileClick = useCallback(async (name: string) => { ... }, [deps]);
-```
+- Profilkép feltöltés: `setQueriesData` csak az `avatar_url` mezőt patcheli — nincs hálózati refetch
+- `ProfileSelectorForm`: `React.memo` + `useCallback` az avataron és a kattintás-kezelőn
+- Beállítások, Admin, Debug: az `animReady` prop eltávolítja a `backdrop-blur-*`-t a belépési spring alatt
+- Animált hátterek: 1600ms késleltetett fade-in nehéz kártyás útvonalakon
+- reCAPTCHA: token csak beküldéskor kerül lekérésre, nem pollingol
 
 ---
 
-## 15. Ismert teendők és backend-függőségek
+## 17. Ismert hibák
 
-### ⚠️ Frontend hibák (javítható most, backend nélkül)
+### ⚠️ Vásárlás → Tárgy nem kerül Megvásárolt állapotba (Aktív hiba)
 
-#### 1. 401 / Munkamenet lejárta ✅ Javítva
+**Gyökér ok:** A `GET /profiles/:id/purchases` backend végpont a `Purchases`-t preloadolja, de a `Purchases.Item`-et nem, így a `p.Item.Name` üres string-et ad vissza. Az `ownedNames.has(item.name)` soha nem egyezik — minden tárgy megvásároltként jelenik meg még vásárlás után sem.
 
-Globális Axios interceptor az `apiClient.ts`-ben elfog minden nem-hitelesítési 401-est, és keményen átirányít `/app/login`-ra. Már implementálva van.
+**Backend javítás:** A `"Purchases.Item"` preload hozzáadása a `ReadPurchases`-hez a `player_profiles_controller.go`-ban:
 
-#### 2. Letöltés gomb ✅ Javítva
+```go
+// Előtte
+profile, err := pc.profilesRepo.ReadByID(ctx, id.(uint), "Purchases")
+// Utána
+profile, err := pc.profilesRepo.ReadByID(ctx, id.(uint), "Purchases", "Purchases.Item")
+```
 
-A `DownloadReleaseButton` most új lapon megnyitja a GitHub eszköz `browser_download_url`-jét a kiválasztott OS-hez. Le van tiltva tooltip-pel, ha a kiadáshoz nem található eszköz az aktív platformhoz.
-
-#### 3. A jelszó-visszaállítás nem csinál semmit
-
-A `PasswordResetForm.tsx` renderelődik, de semmit nem küld be. Nincs mutáció, nincs visszajelzés.
-
-**Részleges frontend javítás:** Tiltsd le a beküldő gombot, és jelenítsd meg a "még nem elérhető" üzenetet.  
-**Teljes javítás:** Először szükséges a `POST /api/auth/reset-password` backend végpont.
+**Frontend javítás (backendtől független):** vásárlás sikeresége esetén optimistán meghívni a `setQueryData`-t az items cache-n, hogy `owned: true`-ra állítsa a tárgyat item ID alapján — nincs szükség névegyeztetésre. Fájl: `src/components/pages/mainPages/webstorePageComponents/webstorePageLogic/useItems.ts`.
 
 ---
 
-### 🔧 Szükséges backend végpontok
+## 18. Backend-függőségek
 
-Teljes specifikációért lásd a `summeries/BACKEND_NOTES.md` fájlt. Összefoglalás:
+### Már implementálva
 
-| #   | Végpont                                                     | Állapot                                        |
-| --- | ----------------------------------------------------------- | ---------------------------------------------- |
-| 1   | Role preload a `GET /users` és `GET /users/:id` végpontokon | Hiányzik — a jelvények üresen jelennek meg     |
-| 2   | `username` + `ban_until` mezők a `UserReadDTO`-ban          | Hiányzik — `"—"` jelenik meg                   |
-| 3   | `POST /admin/users/:id/ban`                                 | Nincs implementálva                            |
-| 4   | `POST /admin/users/:id/unban`                               | Nincs implementálva                            |
-| 5   | Admin-only middleware a `/admin/*` útvonalakon              | Nincs implementálva                            |
-| 6   | `?search=` paraméter a `GET /users` végponton               | Kliensoldali megkerülő aktív                   |
-| 7   | `POST /api/profiles/:id/purchases`                          | Nincs implementálva — a feloldás csak lokális  |
-| 8   | `GET /api/profiles/:id/matches`                             | Nincs implementálva — a statisztikák helyőrzők |
-| 9   | `POST /api/auth/reset-password`                             | Nincs implementálva                            |
+- `POST /users/:id/ban` — body: `{ id, period }` (percek)
+- `POST /users/:id/unban`
+- `POST /users/:id/promote` — body: `{ id, target_role: "admin"|"support" }`
+- `POST /users/:id/demote`
+- `GET /users` Role preload-dal
+- `GET /users/:id` Role preload-dal
+- `GET /profiles/:id/purchases` (létezik, de hiányzik az `Item` preload — lásd §17)
+- `PUT /profiles/:id` — az érme-szerkesztő ezt használja
 
-### 🗂️ Fennmaradó webáruház backend-függőség
+### Még szükséges
 
-A vásárlási folyamat teljes mértékben implementálva van a frontend oldalon. Az egyetlen fennmaradó hiányosság, hogy a backend jelenleg nem vonja le az érméket a profilból vásárláskor — a `POST /purchases` végpont létrehozza a vásárlási rekordot, de az érmék levonásának logikája hiányzik a szerver oldalán. A fejlécben megjelenő érmeegyenleg nem csökken vásárlás után mindaddig, amíg ez a backend oldalon nincs javítva.
+| #   | Végpont                                                             | Hatás                                                      |
+| --- | ------------------------------------------------------------------- | ---------------------------------------------------------- |
+| 1   | `GET /profiles/:id/purchases` — `Purchases.Item` preload hozzáadása | **Kritikus** — tulajdonlás-követés meghibásodott           |
+| 2   | `GET /api/profiles/:id/matches`                                     | Meccs-előzmények + győzelem/vereség statisztikák helyőrzők |
+| 3   | `POST /api/auth/reset-password`                                     | Jelszó-visszaállítási űrlap nem csinál semmit              |
+| 4   | `?search=` a `GET /api/users` végponton                             | Admin kliensoldali megkerülőt alkalmaz                     |
+| 5   | `username` mező a `UserReadDTO`-ban                                 | `"—"` jelenik meg az admin panelben                        |
 
 ---
 
 ## Függelék: Új oldal hozzáadása
 
-1. Hozd létre a komponenst az `src/components/pages/mainPages/MyPage.tsx` fájlban
-2. Adj hozzá lusta importot a `src/main.tsx`-ben
+1. Hozd létre az `src/components/pages/mainPages/MyPage.tsx` fájlt
+2. Adj hozzá lusta importot az `src/main.tsx`-ben
 3. Add hozzá az útvonalat a `createBrowserRouter` konfigurációban
-4. Adj hozzá navigációs elemet az `src/components/nav/navLogic/navItems.ts`-ben (`labelKey` használatával)
-5. Add hozzá a felirat fordítását az `src/locales/en/nav.json` és `src/locales/hu/nav.json` fájlokhoz
+4. Adj hozzá navigációs elemet a `navItems.ts`-ben `labelKey` segítségével
+5. Add hozzá a felirat fordítását az `src/locales/en/nav.json` és `src/locales/hu/nav.json` fájlokba
 6. Használj `useSettings()` + téma segédeszközöket az összes stílushoz
 
 ```tsx
-// Minimális oldal sablon
-import { useSettings } from "../profileDependents/settings/settingsLogic/SettingsContext";
-import { getBackgroundClasses, getTextColor } from "@/lib/utils";
-import Navbar from "../../nav/Navbar";
-
 export function MyPage() {
   const { settings } = useSettings();
-  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
-  const bgClass = getBackgroundClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
+  const { useLiquidGlass, useDarkMode } = settings;
+  const textColor = getTextColor(useLiquidGlass, useDarkMode);
+  const bgClass = getBackgroundClasses(useLiquidGlass, useDarkMode);
 
   return (
-    <div className="p-4 h-screen overflow-y-auto">
+    <div className="p-4 min-h-screen w-full flex flex-col">
       <Navbar />
       <div className={`mt-20 ${bgClass} ${textColor} rounded-xl p-6`}>
         {/* tartalom */}

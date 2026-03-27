@@ -28,35 +28,109 @@ interface Drop {
   y: number;
   r: number;
   targetR: number;
-  growSpeed: number;
-  state: "growing" | "waiting" | "running";
-  waitTimer: number;
-  waitMax: number;
-  trail: Array<{ x: number; y: number; r: number }>;
-  runX: number;
-  runY: number;
-  runSpeed: number;
+  state: "growing" | "sitting" | "running";
+  sitTimer: number;
+  sitMax: number;
+  vy: number; // run speed
+  trailLen: number; // pixels already run
+  trailMaxLen: number;
   wobblePhase: number;
-  opacity: number;
+  alpha: number;
 }
 
-function makeDrop(w: number, h: number): Drop {
+function rand(min: number, max: number) {
+  return min + Math.random() * (max - min);
+}
+
+function spawn(w: number, h: number): Drop {
   return {
-    x: 30 + Math.random() * (w - 60),
-    y: 20 + Math.random() * (h - 40),
+    x: rand(20, w - 20),
+    y: rand(20, h - 20),
     r: 0,
-    targetR: 10 + Math.random() * 30,
-    growSpeed: 0.6 + Math.random() * 1.2,
+    targetR: rand(8, 28),
     state: "growing",
-    waitTimer: 0,
-    waitMax: 1.2 + Math.random() * 4.0,
-    trail: [],
-    runX: 0,
-    runY: 0,
-    runSpeed: 1.0 + Math.random() * 2.5,
+    sitTimer: 0,
+    sitMax: rand(1.5, 5),
+    vy: 0,
+    trailLen: 0,
+    trailMaxLen: rand(60, 200),
     wobblePhase: Math.random() * Math.PI * 2,
-    opacity: 0.75 + Math.random() * 0.25,
+    alpha: rand(0.55, 0.9),
   };
+}
+
+function drawDrop(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  r: number,
+  alpha: number,
+) {
+  if (r < 1) return;
+  const ry = r * 0.9; // gravity squish
+
+  // Body — semi-transparent, dark-tinted so background shows through
+  const body = ctx.createRadialGradient(
+    x - r * 0.2,
+    y - r * 0.25,
+    r * 0.1,
+    x,
+    y,
+    r,
+  );
+  body.addColorStop(0, `rgba(180,210,240,${alpha * 0.55})`);
+  body.addColorStop(0.5, `rgba(140,180,220,${alpha * 0.25})`);
+  body.addColorStop(1, `rgba(100,140,180,${alpha * 0.08})`);
+  ctx.beginPath();
+  ctx.ellipse(x, y, r, ry, 0, 0, Math.PI * 2);
+  ctx.fillStyle = body;
+  ctx.fill();
+
+  // Dark rim
+  ctx.beginPath();
+  ctx.ellipse(x, y, r, ry, 0, 0, Math.PI * 2);
+  ctx.strokeStyle = `rgba(40,60,90,${alpha * 0.55})`;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Top-left specular
+  const hl = ctx.createRadialGradient(
+    x - r * 0.3,
+    y - r * 0.35,
+    0,
+    x - r * 0.1,
+    y - r * 0.1,
+    r * 0.5,
+  );
+  hl.addColorStop(0, `rgba(255,255,255,${alpha * 0.9})`);
+  hl.addColorStop(0.4, `rgba(255,255,255,${alpha * 0.3})`);
+  hl.addColorStop(1, `rgba(255,255,255,0)`);
+  ctx.beginPath();
+  ctx.ellipse(
+    x - r * 0.15,
+    y - r * 0.2,
+    r * 0.38,
+    r * 0.22,
+    -0.4,
+    0,
+    Math.PI * 2,
+  );
+  ctx.fillStyle = hl;
+  ctx.fill();
+
+  // Bottom caustic crescent
+  ctx.beginPath();
+  ctx.ellipse(
+    x + r * 0.05,
+    y + ry * 0.62,
+    r * 0.28,
+    r * 0.09,
+    0.1,
+    0,
+    Math.PI * 2,
+  );
+  ctx.fillStyle = `rgba(255,255,255,${alpha * 0.25})`;
+  ctx.fill();
 }
 
 export function RainOnGlassBackground({
@@ -66,290 +140,136 @@ export function RainOnGlassBackground({
   paused = false,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  // Offscreen canvas holds the blurred background — redrawn only on resize/color change
-  const bgCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const canvasEl = canvas; // capture non-null canvas for inner closures
+    const ctx = canvasEl.getContext("2d")!;
 
     const [lr, lg, lb] = hexToRgb(colorLeft);
     const [mr, mg, mb] = hexToRgb(colorMiddle);
     const [rr, rg, rb] = hexToRgb(colorRight);
 
-    let animId: number;
+    let animId = 0;
     let t = 0;
     const DT = 1 / 60;
 
-    // ── Offscreen background canvas ──────────────────────────────────────────
-    const bg = document.createElement("canvas");
-    bgCanvasRef.current = bg;
-
-    function buildBackground(w: number, h: number) {
-      bg.width = w;
-      bg.height = h;
-      const bgCtx = bg.getContext("2d")!;
-
-      // Base gradient
-      const base = bgCtx.createLinearGradient(0, 0, w, h);
-      base.addColorStop(0, `rgb(${lr},${lg},${lb})`);
-      base.addColorStop(0.5, `rgb(${mr},${mg},${mb})`);
-      base.addColorStop(1, `rgb(${rr},${rg},${rb})`);
-      bgCtx.fillStyle = base;
-      bgCtx.fillRect(0, 0, w, h);
-
-      // Soft light blobs — these show up "through" the drops as bokeh
-      const blobs = [
-        { x: w * 0.2, y: h * 0.3, r: h * 0.25, cr: mr, cg: mg, cb: mb },
-        { x: w * 0.75, y: h * 0.25, r: h * 0.3, cr: rr, cg: rg, cb: rb },
-        { x: w * 0.5, y: h * 0.7, r: h * 0.22, cr: lr, cg: lg, cb: lb },
-        { x: w * 0.85, y: h * 0.65, r: h * 0.2, cr: mr, cg: mg, cb: mb },
-        { x: w * 0.1, y: h * 0.8, r: h * 0.18, cr: rr, cg: rg, cb: rb },
-      ];
-      for (const b of blobs) {
-        const g = bgCtx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
-        g.addColorStop(
-          0,
-          `rgba(${Math.min(255, b.cr + 80)},${Math.min(255, b.cg + 80)},${Math.min(255, b.cb + 80)},0.8)`,
-        );
-        g.addColorStop(0.5, `rgba(${b.cr},${b.cg},${b.cb},0.4)`);
-        g.addColorStop(1, `rgba(${b.cr},${b.cg},${b.cb},0)`);
-        bgCtx.fillStyle = g;
-        bgCtx.beginPath();
-        bgCtx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-        bgCtx.fill();
-      }
-
-      // Frosted glass layer — CSS blur via filter on a copy
-      // Instead of expensive per-pixel ops we just overlay a translucent fog
-      bgCtx.fillStyle = "rgba(120,140,160,0.18)";
-      bgCtx.fillRect(0, 0, w, h);
-    }
-
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      buildBackground(canvas.width, canvas.height);
+      canvasEl.width = window.innerWidth;
+      canvasEl.height = window.innerHeight;
     };
     resize();
     window.addEventListener("resize", resize);
 
-    // ── Drop pool ─────────────────────────────────────────────────────────────
-    const MAX_DROPS = 60;
-    const drops: Drop[] = Array.from({ length: MAX_DROPS }, () =>
-      makeDrop(canvas.width, canvas.height),
+    // 45 drops — small enough for smooth 60fps
+    const drops: Drop[] = Array.from({ length: 45 }, () =>
+      spawn(canvasEl.width, canvasEl.height),
     );
-    // Stagger so screen isn't empty at start
-    drops.forEach((d, i) => {
-      if (i < 35) {
-        d.r = 5 + Math.random() * d.targetR;
-        d.state = "waiting";
-        d.waitTimer = Math.random() * d.waitMax;
-      }
+    // pre-age half so screen isn't empty
+    drops.slice(0, 22).forEach((d) => {
+      d.r = rand(4, d.targetR);
+      d.state = "sitting";
+      d.sitTimer = rand(0, d.sitMax);
     });
 
-    let spawnTimer = 0;
-
-    // ── Draw one drop using refraction trick ──────────────────────────────────
-    function drawDrop(
-      dx: number,
-      dy: number,
-      dr: number,
-      opacity: number,
-      scaleX: number = 1,
-    ) {
-      if (dr < 1.5) return;
-
-      ctx!.save();
-
-      // Clip to ellipse (drops are slightly squished vertically from gravity)
-      const ry = dr * 0.88;
-      ctx!.beginPath();
-      ctx!.ellipse(dx, dy, dr * scaleX, ry, 0, 0, Math.PI * 2);
-      ctx!.clip();
-
-      // ── Refraction: draw background inverted/offset inside the drop ───────
-      // A convex lens inverts the image and magnifies it.
-      // We simulate this by drawing the bg scaled up and flipped around the drop centre.
-      const zoom = 1.6;
-      const srcX = dx - dr * zoom;
-      const srcY = dy - ry * zoom;
-      const srcW = dr * zoom * 2;
-      const srcH = ry * zoom * 2;
-
-      ctx!.save();
-      // Flip vertically around drop centre to simulate inversion
-      ctx!.translate(dx, dy);
-      ctx!.scale(1, -1);
-      ctx!.translate(-dx, -dy);
-      ctx!.globalAlpha = opacity;
-      ctx!.drawImage(
-        bg,
-        srcX,
-        srcY,
-        srcW,
-        srcH,
-        dx - dr * scaleX,
-        dy - ry,
-        dr * scaleX * 2,
-        ry * 2,
-      );
-      ctx!.restore();
-
-      ctx!.restore(); // end clip
-
-      // ── Dark rim — gives the bead depth and separation from background ────
-      ctx!.save();
-      ctx!.beginPath();
-      ctx!.ellipse(dx, dy, dr * scaleX, ry, 0, 0, Math.PI * 2);
-      ctx!.strokeStyle = `rgba(0,0,0,${0.35 * opacity})`;
-      ctx!.lineWidth = 1.2;
-      ctx!.stroke();
-
-      // Inner light rim at bottom (refracted light exit)
-      ctx!.beginPath();
-      ctx!.ellipse(
-        dx,
-        dy + ry * 0.55,
-        dr * scaleX * 0.7,
-        ry * 0.18,
-        0,
-        0,
-        Math.PI * 2,
-      );
-      ctx!.strokeStyle = `rgba(255,255,255,${0.2 * opacity})`;
-      ctx!.lineWidth = 0.8;
-      ctx!.stroke();
-      ctx!.restore();
-
-      // ── Specular highlight — top-left bright oval ─────────────────────────
-      ctx!.save();
-      const hlGrad = ctx!.createRadialGradient(
-        dx - dr * scaleX * 0.28,
-        dy - ry * 0.32,
-        0,
-        dx - dr * scaleX * 0.1,
-        dy - ry * 0.1,
-        dr * scaleX * 0.52,
-      );
-      hlGrad.addColorStop(0, `rgba(255,255,255,${0.9 * opacity})`);
-      hlGrad.addColorStop(0.3, `rgba(255,255,255,${0.45 * opacity})`);
-      hlGrad.addColorStop(1, `rgba(255,255,255,0)`);
-      ctx!.fillStyle = hlGrad;
-      ctx!.beginPath();
-      ctx!.ellipse(
-        dx - dr * scaleX * 0.12,
-        dy - ry * 0.18,
-        dr * scaleX * 0.42,
-        ry * 0.28,
-        -0.3,
-        0,
-        Math.PI * 2,
-      );
-      ctx!.fill();
-      ctx!.restore();
-    }
-
-    // ── Draw run-off trail ────────────────────────────────────────────────────
-    function drawTrail(d: Drop) {
-      if (d.trail.length < 3) return;
-      ctx!.save();
-
-      // Trail body — tapered semi-transparent tube
-      for (let i = 1; i < d.trail.length; i++) {
-        const a = d.trail[i - 1];
-        const b = d.trail[i];
-        const progress = i / d.trail.length;
-        const trailR = a.r * (1 - progress * 0.6);
-        const alpha = (1 - progress) * 0.28 * d.opacity;
-
-        ctx!.beginPath();
-        ctx!.moveTo(a.x, a.y);
-        ctx!.lineTo(b.x, b.y);
-        ctx!.strokeStyle = `rgba(160,200,240,${alpha})`;
-        ctx!.lineWidth = trailR * 1.6;
-        ctx!.lineCap = "round";
-        ctx!.stroke();
-      }
-
-      // Small bead at tail tip
-      if (d.trail.length > 0) {
-        const tip = d.trail[d.trail.length - 1];
-        const beadR = tip.r * 0.5;
-        drawDrop(tip.x, tip.y, beadR, d.opacity * 0.6);
-      }
-
-      ctx!.restore();
-    }
+    let spawnCooldown = 0;
 
     function draw() {
-      const w = canvas!.width;
-      const h = canvas!.height;
+      const w = canvasEl.width;
+      const h = canvasEl.height;
       t += DT;
 
-      // ── Base: frosted glass background ────────────────────────────────────
-      // Draw bg with slight blur simulation via the fog layer already baked in
-      ctx!.clearRect(0, 0, w, h);
-      ctx!.drawImage(bg, 0, 0);
+      ctx.clearRect(0, 0, w, h);
 
-      // Condensation haze over everything (very subtle)
-      ctx!.fillStyle = "rgba(160,180,200,0.06)";
-      ctx!.fillRect(0, 0, w, h);
+      // Condensation tint — one gradient per frame, very cheap
+      const tint = ctx.createLinearGradient(0, 0, w, h);
+      tint.addColorStop(0, `rgba(${lr},${lg},${lb},0.12)`);
+      tint.addColorStop(0.5, `rgba(${mr},${mg},${mb},0.08)`);
+      tint.addColorStop(1, `rgba(${rr},${rg},${rb},0.12)`);
+      ctx.fillStyle = tint;
+      ctx.fillRect(0, 0, w, h);
 
-      // ── Spawn drops ───────────────────────────────────────────────────────
-      spawnTimer -= DT;
-      if (spawnTimer <= 0) {
+      // Subtle fog patches — 4 static blobs, no per-frame recompute
+      ctx.save();
+      ctx.globalAlpha = 0.055;
+      const blobPositions = [
+        [0.2, 0.3],
+        [0.75, 0.25],
+        [0.5, 0.72],
+        [0.88, 0.6],
+      ] as const;
+      for (const [bx, by] of blobPositions) {
+        const g = ctx.createRadialGradient(
+          w * bx,
+          h * by,
+          0,
+          w * bx,
+          h * by,
+          Math.min(w, h) * 0.28,
+        );
+        g.addColorStop(0, `rgba(${mr},${mg},${mb},1)`);
+        g.addColorStop(1, `rgba(${mr},${mg},${mb},0)`);
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, w, h);
+      }
+      ctx.restore();
+
+      // Respawn dead drops
+      spawnCooldown -= DT;
+      if (spawnCooldown <= 0) {
         const dead = drops.find(
           (d) =>
-            (d.state === "running" && d.runY > h + 40) ||
-            (d.state === "running" && d.opacity <= 0),
+            d.state === "running" &&
+            (d.trailLen >= d.trailMaxLen || d.alpha <= 0),
         );
-        if (dead) Object.assign(dead, makeDrop(w, h));
-        spawnTimer = 0.2 + Math.random() * 0.5;
+        if (dead) Object.assign(dead, spawn(w, h));
+        spawnCooldown = rand(0.25, 0.7);
       }
 
-      // ── Update and render drops ───────────────────────────────────────────
+      // Update + draw each drop
       for (const d of drops) {
         if (d.state === "growing") {
-          d.r = Math.min(d.targetR, d.r + d.growSpeed);
-          if (d.r >= d.targetR) {
-            d.state = "waiting";
-          }
-        } else if (d.state === "waiting") {
-          d.waitTimer += DT;
-          // Gentle jiggle while waiting (surface tension)
-          const jiggle = 1 + Math.sin(t * 2.5 + d.wobblePhase) * 0.012;
-          drawDrop(d.x, d.y, d.r * jiggle, d.opacity);
-          if (d.waitTimer >= d.waitMax) {
+          d.r = Math.min(d.targetR, d.r + d.targetR * 0.04);
+          if (d.r >= d.targetR * 0.98) d.state = "sitting";
+          drawDrop(ctx, d.x, d.y, d.r, d.alpha * (d.r / d.targetR));
+        } else if (d.state === "sitting") {
+          d.sitTimer += DT;
+          // Surface tension jiggle — vary r very slightly
+          const jiggle = 1 + Math.sin(t * 3 + d.wobblePhase) * 0.015;
+          drawDrop(ctx, d.x, d.y, d.r * jiggle, d.alpha);
+          if (d.sitTimer >= d.sitMax) {
             d.state = "running";
-            d.runX = d.x;
-            d.runY = d.y + d.r;
-            d.trail = [{ x: d.x, y: d.y, r: d.r }];
+            d.vy = rand(1.2, 2.5);
           }
-          continue; // already drew above
-        } else if (d.state === "running") {
-          // Gravity + gentle horizontal wobble (impurity on glass)
-          d.runX += Math.sin(t * 3.5 + d.wobblePhase) * 0.3;
-          d.runY += d.runSpeed;
-          d.runSpeed = Math.min(d.runSpeed + 0.04, 5.5); // accelerate under gravity
-          d.trail.push({ x: d.runX, y: d.runY, r: d.r * 0.45 });
-          if (d.trail.length > 40) d.trail.shift();
-          d.opacity = Math.max(0, d.opacity - 0.004);
+        } else {
+          // Running — accelerate downward, wobble sideways
+          d.vy = Math.min(d.vy + 0.06, 5.5);
+          const wx = Math.sin(t * 3.5 + d.wobblePhase) * 0.5;
+          d.x += wx;
+          d.y += d.vy;
+          d.trailLen += d.vy;
+          d.alpha -= 0.003;
 
-          drawTrail(d);
-          // Draw flattened running bead at the tip
-          drawDrop(d.runX, d.runY, d.r * 0.6, d.opacity, 0.75);
-          // Ghost at origin — shrinks away
-          if (d.opacity > 0.4) {
-            drawDrop(d.x, d.y, d.r * (d.opacity - 0.3), d.opacity * 0.4);
+          // Trail — single tapered stroke behind the bead, very cheap
+          if (d.trailLen > 6) {
+            const trailTop = Math.max(0, d.y - Math.min(d.trailLen, 120));
+            const tg = ctx.createLinearGradient(d.x, trailTop, d.x, d.y);
+            tg.addColorStop(0, `rgba(160,200,230,0)`);
+            tg.addColorStop(0.4, `rgba(160,200,230,${d.alpha * 0.18})`);
+            tg.addColorStop(1, `rgba(200,225,245,${d.alpha * 0.32})`);
+            ctx.beginPath();
+            ctx.moveTo(d.x, trailTop);
+            ctx.lineTo(d.x, d.y);
+            ctx.strokeStyle = tg;
+            ctx.lineWidth = d.r * 0.9;
+            ctx.lineCap = "round";
+            ctx.stroke();
           }
-          continue;
+
+          // The running bead — slightly flattened from speed
+          drawDrop(ctx, d.x, d.y, d.r * 0.65, Math.max(0, d.alpha));
         }
-
-        // Growing state — just draw
-        drawDrop(d.x, d.y, d.r, d.opacity * (d.r / d.targetR));
       }
 
       if (!paused) animId = requestAnimationFrame(draw);
@@ -357,10 +277,10 @@ export function RainOnGlassBackground({
 
     draw();
     return () => {
-      cancelAnimationFrame(animId);
+      if (animId) cancelAnimationFrame(animId);
       window.removeEventListener("resize", resize);
     };
-  }, [colorLeft, colorMiddle, colorRight]);
+  }, [colorLeft, colorMiddle, colorRight, paused]);
 
   return (
     <canvas
