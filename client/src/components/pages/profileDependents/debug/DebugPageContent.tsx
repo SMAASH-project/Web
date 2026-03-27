@@ -497,11 +497,22 @@ const METHOD_COLORS: Record<Method, string> = {
 
 const QUICK_ROUTES = [
   { label: "Who Am I", method: "GET" as Method, path: "/users/whoami" },
+  { label: "All Users", method: "GET" as Method, path: "/users" },
   {
     label: "All Items",
     method: "GET" as Method,
     path: "/items?page=1&page_size=10",
   },
+  {
+    label: "All Posts",
+    method: "GET" as Method,
+    path: "/posts?page=1&page_size=10",
+  },
+  { label: "Characters", method: "GET" as Method, path: "/characters" },
+  { label: "Levels", method: "GET" as Method, path: "/levels" },
+  { label: "Rarities", method: "GET" as Method, path: "/rarities" },
+  { label: "Categories", method: "GET" as Method, path: "/categories" },
+  { label: "Purchases", method: "GET" as Method, path: "/purchases" },
   { label: "Top Players", method: "GET" as Method, path: "/stats/top/players" },
   { label: "Leaderboard", method: "GET" as Method, path: "/stats/leaderboard" },
   { label: "Top Levels", method: "GET" as Method, path: "/stats/top/levels" },

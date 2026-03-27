@@ -31,7 +31,7 @@ import type { AxiosError } from "axios";
 
 export function SignupForm(props: React.ComponentProps<"div">) {
   return (
-    <GoogleReCaptchaProvider reCaptchaKey="6LeA2IQsAAAAAAK7ljf7tDqBjwR_rm5uDAzGbr8S">
+    <GoogleReCaptchaProvider reCaptchaKey="6LfiUposAAAAAPLDMCXDkIBHkZ0JwtbQ-J5fbbdi">
       <SignupFormInner {...props} />
     </GoogleReCaptchaProvider>
   );

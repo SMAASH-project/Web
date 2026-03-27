@@ -34,7 +34,7 @@ const ProfileAvatar = memo(function ProfileAvatar({
       <motion.div
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
-        className="cursor-pointer"
+        className="cursor-pointer group/avatar"
       >
         <Avatar
           size="lg"

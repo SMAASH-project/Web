@@ -52,7 +52,6 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await logoutMutation.mutateAsync();
-      console.log("Logout successful");
       setIsLoggedIn(false);
       setUserId(null);
       setIsAdmin(false);
