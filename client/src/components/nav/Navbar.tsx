@@ -8,7 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useMediaQuery } from "./navLogic/useMediaQuery";
 import { useLogoutMutation } from "@/hooks/useQueryHooks";
 import { AuthContext } from "@/context/AuthContext";
-import { ShieldAlert } from "lucide-react";
+import { ShieldAlert, Bug } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
   getBackgroundClasses,
@@ -24,8 +24,14 @@ const Navbar = () => {
   const username = selectedProfile?.name ?? "PlaceholderUserName";
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const navigate = useNavigate();
-  const { setIsLoggedIn, setUserId, setIsAdmin, isAdmin } =
-    useContext(AuthContext);
+  const {
+    setIsLoggedIn,
+    setUserId,
+    setIsAdmin,
+    setIsSupport,
+    isAdmin,
+    isSupport,
+  } = useContext(AuthContext);
   const logoutMutation = useLogoutMutation();
   const { t } = useTranslation("nav");
   const navBackground = getBackgroundClasses(
@@ -46,10 +52,10 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await logoutMutation.mutateAsync();
-      console.log("Logout successful");
       setIsLoggedIn(false);
       setUserId(null);
       setIsAdmin(false);
+      setIsSupport(false);
       navigate("/app/login");
     } catch (error) {
       console.error("Logout failed:", error);
@@ -67,7 +73,7 @@ const Navbar = () => {
       {isDesktop ? (
         <>
           {/* Desktop layout — left/right have equal min-width so center stays centered */}
-          <div className="flex-1 min-w-0 flex items-center">
+          <div className="flex-1 min-w-0 flex items-center gap-2">
             {isAdmin && (
               <Link
                 to="/app/admin"
@@ -77,6 +83,18 @@ const Navbar = () => {
                 <ShieldAlert size={14} />
                 <span className="hidden lg:inline">
                   {t("account.adminPanel")}
+                </span>
+              </Link>
+            )}
+            {(isAdmin || isSupport) && (
+              <Link
+                to="/app/debug"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 no-underline ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "secondary")} ${textColor}`}
+                title={t("account.debugPanel")}
+              >
+                <Bug size={14} />
+                <span className="hidden lg:inline">
+                  {t("account.debugPanel")}
                 </span>
               </Link>
             )}
@@ -112,6 +130,7 @@ const Navbar = () => {
             username={username}
             onLogout={handleLogout}
             isAdmin={isAdmin}
+            isSupport={isSupport}
           />
           <span
             className={`text-sm truncate max-w-[50vw] ${textColor} ${textShadow}`}

@@ -1,6 +1,6 @@
 # SMAASH Client — Developer Documentation
 
-> **Stack:** React 19 · TypeScript · Vite · Tailwind CSS · React Query · Axios · react-i18next · Motion (Framer)  
+> **Stack:** React 19 · TypeScript · Vite · Tailwind CSS · React Query · Axios · react-i18next · Motion (Framer)
 > **Base path:** `client/src/`
 
 ---
@@ -11,17 +11,20 @@
 2. [Entry Points & Routing](#2-entry-points--routing)
 3. [Provider Stack](#3-provider-stack)
 4. [Theming System](#4-theming-system)
-5. [Contexts](#5-contexts)
-6. [Hooks & API Layer](#6-hooks--api-layer)
-7. [Pages](#7-pages)
-8. [Navigation](#8-navigation)
-9. [Forms](#9-forms)
-10. [i18n / Multilingual Support](#10-i18n--multilingual-support)
-11. [UI Component Library](#11-ui-component-library)
-12. [Types](#12-types)
-13. [Utilities](#13-utilities)
-14. [Performance & Build](#14-performance--build)
-15. [Known TODOs & Backend Dependencies](#15-known-todos--backend-dependencies)
+5. [Animated Backgrounds](#5-animated-backgrounds)
+6. [Contexts](#6-contexts)
+7. [Hooks & API Layer](#7-hooks--api-layer)
+8. [Pages](#8-pages)
+9. [Admin & Debug Panels](#9-admin--debug-panels)
+10. [Navigation](#10-navigation)
+11. [Forms](#11-forms)
+12. [i18n / Multilingual Support](#12-i18n--multilingual-support)
+13. [UI Component Library](#13-ui-component-library)
+14. [Types](#14-types)
+15. [Utilities & Animations](#15-utilities--animations)
+16. [Performance & Build](#16-performance--build)
+17. [Known Bugs](#17-known-bugs)
+18. [Backend Dependencies](#18-backend-dependencies)
 
 ---
 
@@ -29,223 +32,147 @@
 
 ```
 client/
-├── index.html                  # Entry HTML — preconnect hints for API host
-├── vite.config.ts              # Build config, manual chunk splitting
-├── tsconfig.app.json           # App TypeScript config
+├── index.html
+├── vite.config.ts
+├── tsconfig.app.json
 └── src/
-    ├── main.tsx                # Router setup, lazy imports, StrictMode
+    ├── main.tsx                # Router, lazy imports, StrictMode
     ├── App.tsx                 # Auth redirect gate
-    ├── RootLayout.tsx          # All providers, Suspense boundary
-    ├── Wrapper.tsx             # Full-page gradient + CSS custom properties (derived values memoised); always resolves animation key and passes paused={!useAnimations}
+    ├── RootLayout.tsx          # All providers + Suspense boundary
+    ├── Wrapper.tsx             # Full-page gradient + CSS custom properties
     ├── context/                # Auth + Navbar contexts
     ├── hooks/                  # React Query hooks (domain-split)
     ├── lib/
-    │   ├── I18n.ts             # i18next init (must import before any component)
     │   ├── apiClient.ts        # Axios instance + interceptors
     │   ├── queryKeys.ts        # Centralised query key factory
+    │   ├── animationTypes.ts   # AnimationKey union + ANIMATION_LABELS
     │   ├── utils.ts            # Barrel re-export of all util modules
-    │   ├── utils/              # dateFormat, themeClasses, liquidGlass, colorMath, classnames, extractErrorMessage
+    │   ├── utils/              # dateFormat, themeClasses, liquidGlass,
+    │   │                       #   colorMath, classnames, extractErrorMessage,
+    │   │                       #   sectionStyle
     │   ├── miscAnimations/     # Reusable Motion wrappers
-    │   └── pageAnimations/     # Page-level animation components
-    ├── directory/              # Animated background components
+    │   └── pageAnimations/     # Page-level stagger components
+    ├── directory/              # Animated background canvas components
     ├── components/
-    │   ├── forms/              # Auth forms + ProfileSelector + AddNewProfile
+    │   ├── forms/              # Auth forms, ProfileSelector, AddNewProfile
     │   ├── nav/                # Navbar, mobile drawer, account menu
     │   ├── pages/
-    │   │   ├── mainPages/      # Releases, News, Webstore, About, Gallery
-    │   │   └── profileDependents/  # Profile, Settings, Admin
+    │   │   ├── mainPages/      # Releases, News, Webstore, Leaderboard, Gallery
+    │   │   └── profileDependents/  # Profile, Settings, Admin, Debug
     │   └── ui/                 # Shared UI primitives (shadcn-style)
     ├── locales/
-    │   ├── en/                 # English JSON — 9 namespace files
-    │   └── hu/                 # Hungarian JSON — same structure
-    └── types/                  # Shared TypeScript interfaces + example data
+    │   ├── en/                 # English — 9 namespace files
+    │   └── hu/                 # Hungarian — same structure
+    └── types/                  # Shared TypeScript interfaces
 ```
 
 ---
 
 ## 2. Entry Points & Routing
 
-### `src/main.tsx`
+Auth-critical pages (`login`, `signup`, `reset-password`) are **eager-loaded**. All others are **lazy-loaded** via `React.lazy`.
 
-The application root. Sets up React Router, imports i18n before any component renders, and applies lazy loading to all heavy pages.
+### Route table
 
-**Auth routes are eager-loaded** (faster login/signup UX). All other pages are lazy:
+| Path                    | Component             | Access          |
+| ----------------------- | --------------------- | --------------- |
+| `/app`                  | `App` (redirect gate) | —               |
+| `/app/login`            | `LoginForm`           | Public          |
+| `/app/signup`           | `SignupForm`          | Public          |
+| `/app/reset-password`   | `PasswordResetForm`   | Public          |
+| `/app/leaderboard`      | `LeaderboardPage`     | Public          |
+| `/app/gallery`          | `GalleryPage`         | Public          |
+| `/app/releases`         | `ReleasesPage`        | Logged in       |
+| `/app/news`             | `NewsPage`            | Logged in       |
+| `/app/webstore`         | `WebstorePage`        | Logged in       |
+| `/app/profile`          | `ProfilePage`         | Logged in       |
+| `/app/profile-selector` | `ProfileSelectorForm` | Logged in       |
+| `/app/settings`         | `SettingsPage`        | Logged in       |
+| `/app/admin`            | `AdminPage`           | Admin only      |
+| `/app/debug`            | `DebugPage`           | Admin + Support |
+| `*`                     | `NotFoundPage`        | —               |
 
-```tsx
-// Eager — loaded with the initial bundle
-import { LoginForm } from "./components/forms/LoginForm.tsx";
-import { SignupForm } from "./components/forms/SignUpForm.tsx";
-import { PasswordResetForm } from "./components/forms/PasswordResetForm.tsx";
-
-// Lazy — code-split into separate chunks
-const ReleasesPage = lazy(() =>
-  import("./components/pages/mainPages/ReleasesPage.tsx").then((m) => ({
-    default: m.ReleasesPage,
-  })),
-);
-```
-
-**Route table:**
-
-| Path                    | Component             | Auth Required    |
-| ----------------------- | --------------------- | ---------------- |
-| `/app`                  | `App` (redirect gate) | No               |
-| `/app/login`            | `LoginForm`           | No               |
-| `/app/signup`           | `SignupForm`          | No               |
-| `/app/reset-password`   | `PasswordResetForm`   | No               |
-| `/app/releases`         | `ReleasesPage`        | Yes              |
-| `/app/news`             | `NewsPage`            | Yes              |
-| `/app/webstore`         | `WebstorePage`        | Yes              |
-| `/app/profile`          | `ProfilePage`         | Yes              |
-| `/app/profile-selector` | `ProfileSelectorForm` | Yes              |
-| `/app/settings`         | `SettingsPage`        | Yes              |
-| `/app/admin`            | `AdminPage`           | Yes + Admin role |
-| `/app/about`            | `AboutPage`           | No               |
-| `/app/gallery`          | `GalleryPage`         | No               |
-| `*`                     | `NotFoundPage`        | No               |
-
-### `src/App.tsx`
-
-Reads `AuthContext.isLoggedIn` and `isInitializing`, then redirects to `/app/releases` or `/app/login`. Shows a spinner while auth is initialising.
+`App.tsx` reads `AuthContext.isLoggedIn` + `isInitializing`, then redirects to `/app/releases` or `/app/login`. Shows a spinner while auth initialises.
 
 ---
 
 ## 3. Provider Stack
 
-`RootLayout.tsx` wraps every route in this provider tree (innermost to outermost):
-
 ```
 PersistQueryClientProvider   ← React Query + localStorage persistence
-  AuthProvider               ← isLoggedIn, userId, isAdmin
-    SettingsProvider         ← settings, updateSetting (persisted to localStorage)
+  AuthProvider               ← isLoggedIn, userId, isAdmin, isSupport
+    SettingsProvider         ← settings, updateSetting (persisted)
       NavbarProvider         ← dropdown hover/open state
-        ColorProvider        ← gradient colors (persisted to localStorage)
-          ProfileProvider    ← profiles[], selectedProfile, add/remove/select
-            Wrapper          ← full-page gradient div + CSS custom properties
+        ColorProvider        ← gradient colours + animationKey (persisted)
+          ProfileProvider    ← profiles[], selectedProfile (persisted per userId)
+            Wrapper          ← gradient div + CSS custom properties
               Suspense       ← spinner fallback for lazy routes
                 Outlet       ← active route
 ```
 
-**React Query config (set in `RootLayout.tsx`):**
+**React Query defaults** (set in `RootLayout.tsx`):
 
 ```ts
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 2 * 60 * 1000, // 2 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
-      retry: 1,
-      refetchOnWindowFocus: true,
-      refetchOnReconnect: true,
-    },
-  },
-});
+staleTime: 2 * 60 * 1000; // 2 minutes
+gcTime: 10 * 60 * 1000; // 10 minutes
+retry: 1;
+refetchOnWindowFocus: true;
+refetchOnReconnect: true;
 ```
 
-Cache is persisted to `localStorage` via `createSyncStoragePersister`, so queries survive page refresh. The `whoami` query explicitly opts out (`gcTime: 0`) to avoid stale auth leaking into the persisted cache.
+Cache is persisted to `localStorage` via `createSyncStoragePersister`. The `whoami` query opts out (`gcTime: 0`) to prevent stale auth leaking into the persisted cache.
+
+**Profile selection persistence:** stored in `localStorage` under key `selected_profile_<userId>`. On mount, once both `userId` and fetched profiles are available, the stored ID is validated — if the profile was deleted, the first profile is used instead.
 
 ---
 
 ## 4. Theming System
 
-The theme is driven by three gradient colours stored in `ColorContext` and `localStorage`. `Wrapper.tsx` computes derived CSS custom properties from these colours and injects them on the root element.
+The theme is driven by three gradient colours in `ColorContext` + `localStorage`. `Wrapper.tsx` computes derived CSS custom properties from them and injects them on the root element.
 
-### CSS Custom Properties (set by `Wrapper.tsx`)
+### CSS Custom Properties
 
-| Variable               | Description                                     |
-| ---------------------- | ----------------------------------------------- |
-| `--theme-accent`       | Lightened average of the three gradient colours |
-| `--theme-accent-hover` | Lighter version for hover states                |
-| `--theme-accent-soft`  | Semi-transparent accent for subtle fills        |
-| `--theme-nav-border`   | Average colour for nav border                   |
-| `--theme-nav-shadow`   | Semi-transparent shadow colour                  |
+| Variable               | Description                              |
+| ---------------------- | ---------------------------------------- |
+| `--theme-accent`       | Lightened average of the three colours   |
+| `--theme-accent-hover` | Lighter version for hover states         |
+| `--theme-accent-soft`  | Semi-transparent accent for subtle fills |
+| `--theme-nav-border`   | Average colour for nav border            |
+| `--theme-nav-shadow`   | Semi-transparent shadow colour           |
 
 ### Settings Flags
 
-| Flag                | Default | Effect                                                                   |
-| ------------------- | ------- | ------------------------------------------------------------------------ |
-| `useLiquidGlass`    | `true`  | Frosted glass look (backdrop-blur + transparency)                        |
-| `useDarkMode`       | `false` | Dark variants of all themed classes                                      |
-| `useAnimations`     | `true`  | `false` freezes backgrounds to a static frame rather than hiding them    |
-| `language`          | `"en"`  | i18next language (`"en"` or `"hu"`)                                      |
-| `animationOverride` | `null`  | `null` = use theme default · `"none"` = force off · `AnimationKey` = pin |
+| Flag                | Default | Effect                                                    |
+| ------------------- | ------- | --------------------------------------------------------- |
+| `useLiquidGlass`    | `true`  | Frosted glass look (backdrop-blur + transparency)         |
+| `useDarkMode`       | `false` | Dark variants of all themed classes                       |
+| `useAnimations`     | `true`  | `false` freezes backgrounds to a static frame             |
+| `language`          | `"en"`  | i18next language (`"en"` or `"hu"`)                       |
+| `animationOverride` | `null`  | `null` = theme default · `"none"` = force off · key = pin |
 
-### Theme Helper Functions (`src/lib/utils/themeClasses.ts`)
+### Theme Helper Functions
 
-All components must use these functions — never inline ternary theme logic.
-
-```ts
-import {
-  getTextColor, // Primary text
-  getSubtextColor, // Muted/secondary text
-  getTextShadow, // Text shadow for readability on gradient backgrounds
-  getBackgroundClasses, // Card/panel backgrounds — variants: "base" | "light" | "strong"
-  getButtonClasses, // Button styling — variants: "primary" | "secondary" | "outline"
-  getInputClasses, // Input/textarea/select styling
-  getDialogClasses, // Modal/dialog surface
-  getDialogFooterClasses, // Modal footer separator
-} from "@/lib/utils";
-
-// Example usage in a component:
-const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
-const bgClass = getBackgroundClasses(
-  settings.useLiquidGlass,
-  settings.useDarkMode,
-  "strong",
-);
-```
-
-### Liquid Glass Helpers (`src/lib/utils/liquidGlass.ts`)
-
-Additional helpers for the liquid glass visual effect:
+Always import from `@/lib/utils` — never write inline ternary theme logic:
 
 ```ts
-getLiquidGlassClasses(useLiquidGlass, useDarkMode, variant?)
-// variant: "base" | "input" | "accent"
-
-getLiquidGlassTextShadow(useLiquidGlass, useDarkMode)
-getLiquidGlassHighlight(useLiquidGlass, useDarkMode)
-getLiquidGlassNavHighlight(useLiquidGlass, useDarkMode)
-getLiquidGlassDialogClasses(useLiquidGlass, useDarkMode)
-getLiquidGlassDialogFooterClasses(useLiquidGlass, useDarkMode)
-getLiquidGlassControlClasses(useLiquidGlass, useDarkMode)
+getTextColor(useLiquidGlass, useDarkMode)
+getSubtextColor(useLiquidGlass, useDarkMode)
+getTextShadow(useLiquidGlass, useDarkMode)
+getBackgroundClasses(useLiquidGlass, useDarkMode, variant?)
+// variant: "base" | "light" | "strong"
+getButtonClasses(useLiquidGlass, useDarkMode, variant?)
+// variant: "primary" | "secondary" | "outline"
+getInputClasses(useLiquidGlass, useDarkMode)
+getDialogClasses(useLiquidGlass, useDarkMode)
+getDialogFooterClasses(useLiquidGlass, useDarkMode)
+sectionStyle(animReady, delayMs)
+// returns { opacity, transform, transition, willChange }
+// used for staggered fade+slide section animations
 ```
 
-### Preset Themes (`src/components/.../settingsLogic/Themes.ts`)
+### Preset Themes (`Themes.ts`)
 
-```ts
-import { THEMES } from "@/components/pages/profileDependents/settings/settingsLogic/Themes";
-// THEMES: Theme[] — each has { name, colorLeft, colorMiddle, colorRight }
-// Presets: Azure, Slate, Emerald, Amethyst, Coral, Sunset, Ocean, …
-```
-
-### Animated Backgrounds (`src/directory/`)
-
-Each animated background is a self-contained component that renders as `fixed inset-0 z-0 pointer-events-none` behind all page content. They are dispatched from `AnimatedBackground.tsx` based on the active `AnimationKey`.
-
-| Key         | Component             | Technique          | Description                                                                                                                                             |
-| ----------- | --------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `fishtank`  | `FishtankBackground`  | Canvas             | Fish with sinusoidal swim paths, bubbles, caustic floor light shafts                                                                                    |
-| `deepspace` | `DeepSpaceBackground` | Canvas             | 300 colored stars (white/blue/orange/red), milky way band, vivid nebulae with dark canvas overlay, frequent glowing shooting stars (up to 5 concurrent) |
-| `aurora`    | `AuroraBackground`    | CSS + motion/react | Vertical curtain fibers, drifting color bands, star twinkle                                                                                             |
-| `lavalamp`  | `LavaLampBackground`  | CSS keyframes      | Morphing blobs with outer glow, inner shimmer highlight                                                                                                 |
-| `synthwave` | `SynthwaveBackground` | Canvas             | Perspective grid, retro sun, scanline overlay                                                                                                           |
-| `sakura`    | `SakuraBackground`    | CSS keyframes      | Falling petals with per-petal drift/rotation CSS custom properties                                                                                      |
-| `storm`     | `StormBackground`     | CSS + Canvas       | Canvas rain streaks, canvas lightning bolt, drifting cloud layers                                                                                       |
-
-#### Animation resolution in `Wrapper.tsx`
-
-```
-useAnimations = false          → no animation rendered
-useAnimations = true
-  animationOverride = null     → use Theme.animationKey (theme default)
-  animationOverride = "none"   → force no animation
-  animationOverride = <key>    → pin to that animation regardless of theme
-```
-
-#### Preset theme → animation pairings (in `Themes.ts`)
-
-| Theme     | Default animation |
+| Theme     | Default Animation |
 | --------- | ----------------- |
 | Ocean     | fishtank          |
 | Midnight  | deepspace         |
@@ -258,66 +185,92 @@ useAnimations = true
 | Emerald   | sakura            |
 | Rose Gold | sakura            |
 | Slate     | storm             |
-
-Adding a new background: create the component in `src/directory/`, add its key to `AnimationKey` in `src/lib/animationTypes.ts`, add the label in `ANIMATION_LABELS`, add the `case` in `AnimatedBackground.tsx`.
-
-All backgrounds accept a `paused?: boolean` prop. When `true`:
-
-- **Canvas backgrounds** draw one initial frame then stop the `requestAnimationFrame` loop, leaving a frozen still frame.
-- **CSS backgrounds** set `animationPlayState: "paused"` on every animated element.
-- **Aurora** additionally passes `animate={}` to `motion.div` elements so they remain at their `initial` position.
-
-#### Performance — deferred fade-in
-
-`AnimatedBackground.tsx` detects the current route via `useLocation`. On routes with heavy backdrop-blur cards (`/app/settings`, `/app/profile`, `/app/admin`) the background wrapper starts at `opacity: 0`, eliminating all compositing cost while the card entry animation runs. After `FADE_IN_DELAY_MS` (1600 ms — just after the card spring settles) it transitions to `opacity: 1` over 400 ms.
-
-When the active `animationKey` changes (e.g. switching themes or using the animation override), `AnimatedBackground` crossfades between the two backgrounds: the outgoing layer fades to `opacity: 0` and the incoming layer fades to `opacity: 1` simultaneously over `CROSSFADE_MS` (600 ms). Both layers are mounted concurrently during the transition; the old layer is unmounted after the crossfade completes. This is independent of the route-based deferred fade.
+| Monsoon   | rainonglass       |
+| Corrupted | glitch            |
+| Nebula    | particleweb       |
 
 ---
 
-## 5. Contexts
+## 5. Animated Backgrounds
 
-### `AuthContext` (`src/context/AuthContext.ts`)
+Each background is a canvas component that renders as `fixed inset-0 z-0 pointer-events-none`. Dispatched by `AnimatedBackground.tsx` based on the active `AnimationKey`.
+
+### Available Backgrounds
+
+| Key           | Component               | Description                                                                                                                                                                                                                                                                                      |
+| ------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `fishtank`    | `FishtankBackground`    | 8 solo fish with sinusoidal swim paths + 2 schools of 10–18 small fish. Bubbles, seaweed silhouettes at bottom edges, branching coral, caustic light pools on upper half, light shafts from surface, surface shimmer, deep dark vignette at bottom (no sand floor).                              |
+| `deepspace`   | `DeepSpaceBackground`   | 300 coloured stars, milky way band, vivid nebulae, frequent glowing shooting stars (up to 5 concurrent).                                                                                                                                                                                         |
+| `aurora`      | `AuroraBackground`      | Vertical curtain fibres, drifting colour bands, star twinkle. CSS + motion/react.                                                                                                                                                                                                                |
+| `lavalamp`    | `LavaLampBackground`    | Morphing blobs with outer glow and inner shimmer highlight. CSS keyframes.                                                                                                                                                                                                                       |
+| `synthwave`   | `SynthwaveBackground`   | Perspective grid, retro sun, scanline overlay. Canvas.                                                                                                                                                                                                                                           |
+| `sakura`      | `SakuraBackground`      | Falling petals with per-petal drift/rotation CSS custom properties.                                                                                                                                                                                                                              |
+| `storm`       | `StormBackground`       | Canvas rain streaks + lightning bolt, drifting CSS cloud layers.                                                                                                                                                                                                                                 |
+| `rainonglass` | `RainOnGlassBackground` | Glass-surface water drops. Each drop grows → sits with surface-tension jiggle → gravity run-off with tapered trail and running bead at tip. 45 drops max. Pure canvas radial gradients — no `clip()`, no `drawImage`, 60fps.                                                                     |
+| `glitch`      | `GlitchBackground`      | Scheduled random events: `tear` (horizontal slice + RGB offset + noise), `shift` (chromatic aberration), `noise` (pixel static band), `scanline` (bright flash line), `chromatic` (bottom RGB split). Events cluster and fade with `sin(progress*π)` easing. Always-on scanlines + CRT vignette. |
+| `particleweb` | `ParticleWebBackground` | 80 drifting particles. Lines drawn between particles within 160px. Mouse cursor acts as an additional node (draws lines within 200px, repels within 60px). Particles pulse in size with a soft glow. Colours interpolated across the full theme gradient.                                        |
+
+### Animation Resolution (`Wrapper.tsx`)
+
+```
+useAnimations = false           → no animation rendered
+useAnimations = true
+  animationOverride = null      → use Theme.animationKey (theme default)
+  animationOverride = "none"    → force no animation
+  animationOverride = <key>     → pin to that animation regardless of theme
+```
+
+### Adding a New Background
+
+1. Create `src/directory/MyBackground.tsx` — accepts `{ colorLeft, colorMiddle, colorRight, paused? }`, renders `<canvas className="fixed inset-0 z-0 opacity-XX pointer-events-none" />`
+2. Add `"mykey"` to `AnimationKey` in `src/lib/animationTypes.ts`
+3. Add `mykey: "My Label"` to `ANIMATION_LABELS`
+4. Add `case "mykey": return <MyBackground {...shared} />;` in `AnimatedBackground.tsx`
+5. Optionally add a theme preset in `Themes.ts`
+
+### Performance Details
+
+**Deferred fade-in:** On routes with heavy backdrop-blur cards (`/app/settings`, `/app/profile`, `/app/admin`, `/app/debug`), `AnimatedBackground` starts at `opacity: 0` to eliminate compositing cost during the card entry spring. After `FADE_IN_DELAY_MS` (1600ms) it transitions to `opacity: 1` over 400ms.
+
+**Crossfade:** When `animationKey` changes, the outgoing layer fades to `opacity: 0` and the incoming fades to `opacity: 1` simultaneously over `CROSSFADE_MS` (600ms). Old layer is unmounted after the crossfade.
+
+**`paused` prop:** Canvas backgrounds draw one frame then stop the `rAF` loop. CSS backgrounds set `animationPlayState: "paused"`. Aurora additionally sets `animate={}` on motion elements.
+
+---
+
+## 6. Contexts
+
+### `AuthContext`
 
 ```ts
-interface AuthContextShape {
+{
   isLoggedIn: boolean;
-  isInitializing: boolean; // true while whoami query is in flight
+  isInitializing: boolean; // true while whoami is in-flight
   userId: bigint | null;
-  setUserId: (value: bigint | null) => void;
-  setIsLoggedIn: (value: boolean) => void;
   isAdmin: boolean;
-  setIsAdmin: (value: boolean) => void;
+  isSupport: boolean;
+  (setUserId, setIsLoggedIn, setIsAdmin, setIsSupport);
 }
 ```
 
-Populated by `AuthProvider`, which calls `useWhoAmIQuery()` on mount. Import with `useContext(AuthContext)`.
+`isSupport` is set when `whoami` returns `role === "support"`. Both `isAdmin` and `isSupport` must be cleared on logout — done in `Navbar`, `AccountMenu`, and `ProfileSelectorForm`.
 
-```tsx
-const { isLoggedIn, isAdmin, userId } = useContext(AuthContext);
-```
-
-### `SettingsContext` (`src/components/.../settingsLogic/SettingsContext.tsx`)
+### `SettingsContext`
 
 ```ts
-// Hook — throws if used outside SettingsProvider
 const { settings, updateSetting } = useSettings();
-
-// Update a single key
 updateSetting("useDarkMode", true);
 updateSetting("language", "hu");
+// Persisted under localStorage key "settings"
+// Also syncs i18next on mount and on language change
 ```
 
-Persists to `localStorage` under key `"settings"`. Also syncs i18next on mount and on language change.
-
-### `ProfileContext` (`src/components/forms/addNewProfile/ProfilesContext.tsx`)
+### `ProfileContext`
 
 ```ts
 const { profiles, selectedProfile, addProfile, removeProfile, selectProfile } =
   useProfiles();
-// useProfiles() = useContext(ProfileContext) — from useProfiles.ts
 
-// Profile shape:
 interface Profile {
   id?: number;
   name: string; // display_name
@@ -328,73 +281,48 @@ interface Profile {
 }
 ```
 
-`selectedProfile` defaults to the first profile if none is explicitly selected. Selecting by name:
+Selected profile is persisted to `localStorage` under `selected_profile_<userId>`. Validated on restore.
 
-```ts
-selectProfile("MyCharacter"); // persists selection in component state (session only)
-```
-
-### `ColorContext` (`src/components/.../settingsLogic/color/ColorContext.ts`)
+### `ColorContext`
 
 ```ts
 const {
   colorLeft,
   colorMiddle,
   colorRight,
-  animationKey, // AnimationKey | null — set by applyTheme()
+  animationKey,
   setColorLeft,
   setColorMiddle,
   setColorRight,
   setAnimationKey,
 } = useContext(ColorContext);
+// Persisted under localStorage key "color-settings"
+// animationKey: AnimationKey | null — set by applyTheme()
 ```
-
-Three hex strings that drive `Wrapper.tsx`'s gradient, plus `animationKey` which holds the default animation for the active preset. Persisted to `localStorage` under key `"color-settings"`.
 
 ---
 
-## 6. Hooks & API Layer
+## 7. Hooks & API Layer
 
 ### `src/lib/apiClient.ts`
 
-Shared Axios instance. All API calls go through this.
-
-- **Base URL:** `/api`
-- **Credentials:** `withCredentials: true` (cookie-based auth)
-- **Content-Type:** auto-set to `application/json`; omitted for `FormData` (browser sets multipart boundary)
-- **401 interceptor:** Any 401 from a non-auth endpoint hard-redirects to `/app/login`. Auth endpoints (`/auth/*`, `/users/whoami`) are excluded to avoid redirect loops on wrong-password responses.
-
-```ts
-import apiClient from "@/lib/apiClient";
-
-// Example direct usage (prefer hooks where possible):
-const { data } = await apiClient.get<MyType>("/endpoint");
-await apiClient.post("/endpoint", body);
-await apiClient.put("/endpoint/1", body);
-await apiClient.delete("/endpoint/1");
-```
+- Base URL: `/api`, `withCredentials: true`
+- `Content-Type`: auto `application/json`; omitted for `FormData`
+- **401 interceptor:** non-auth 401s hard-redirect to `/app/login`. Auth endpoints (`/auth/*`, `/users/whoami`) are excluded to avoid redirect loops.
 
 ### `src/lib/queryKeys.ts`
 
-Centralised key factory — use these for all `queryKey` and `invalidateQueries` calls to ensure consistent cache management.
-
 ```ts
-import { queryKeys } from "@/lib/queryKeys";
-
-queryKeys.auth.all; // ["auth"]
-queryKeys.profiles.byUserId(userId); // ["profiles", "byUserId", 5]
-queryKeys.releases.infinite(os); // ["releases", "infinite", "windows"]
-queryKeys.githubReleases.all; // ["githubReleases"] — GitHub releases cache
-queryKeys.news.byCategory(categories); // ["news", "byCategory", ["Patch"]]
+queryKeys.profiles.all; // ["profiles"]
+queryKeys.profiles.byUserId(id); // ["profiles", "byUserId", id]
+queryKeys.githubReleases.all; // ["githubReleases"]
 queryKeys.items.all; // ["items"]
-queryKeys.purchases.byProfileId(profileId);
+queryKeys.purchases.byProfileId(id); // ["purchases", "byProfileId", id]
 ```
 
-### Hook Files
+Debug panel uses its own `debugQueryKeys` exported from `useDebugHooks.ts`.
 
-Hooks are split by domain. All are re-exported from `useQueryHooks.ts` for convenience.
-
-#### `src/hooks/useAuthHooks.ts`
+### `useAuthHooks.ts`
 
 | Hook                           | Method | Endpoint        |
 | ------------------------------ | ------ | --------------- |
@@ -404,163 +332,70 @@ Hooks are split by domain. All are re-exported from `useQueryHooks.ts` for conve
 | `useLogoutMutation()`          | POST   | `/auth/logout`  |
 | `useUpdateUserEmailMutation()` | PUT    | `/users/:id`    |
 
-```ts
-// Login example
-const loginMutation = useLoginMutation();
-try {
-  const data = await loginMutation.mutateAsync({ email, password });
-  // data: { id: number, role: string }
-} catch (err) { ... }
+### `useProfileHooks.ts`
 
-// Logout — clears cache and whoami, navigate to login yourself
-const logoutMutation = useLogoutMutation();
-await logoutMutation.mutateAsync();
-setIsLoggedIn(false);
-navigate("/app/login");
-```
+| Hook                                | Description                                                                                                                                                                                                                     |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useProfilesQuery(userId)`          | Fetch all profiles; appends `?v=` cache-bust param to avatar URLs                                                                                                                                                               |
+| `useAddProfileMutation()`           | `POST /users/:id/profiles` with optional `profile_picture: File`                                                                                                                                                                |
+| `useUpdateProfileMutation()`        | `PUT /profiles/:id`. Supports `optimistic: boolean` and `invalidateAfterSuccess: boolean`                                                                                                                                       |
+| `useDeleteProfileMutation()`        | `DELETE /profiles/:id`. Optimistic removal with rollback on error                                                                                                                                                               |
+| `useUploadProfilePictureMutation()` | `POST /profiles/:id/pfp` multipart. On success: stamps new version in `sessionStorage["pfp_versions"]`, then calls `setQueriesData` to patch only `avatar_url` in all profiles cache entries — **no network refetch triggered** |
 
-#### `src/hooks/useProfileHooks.ts`
+**Display name rules:** clamped to 20 chars via `clampDisplayName()`. Duplicate names get a random 4-char suffix.
 
-| Hook                                | Description                                                                            |
-| ----------------------------------- | -------------------------------------------------------------------------------------- |
-| `useProfilesQuery(userId)`          | Fetch all profiles for a user. Appends cache-busted `?v=` param to avatar URLs.        |
-| `useAddProfileMutation()`           | POST to `/users/:id/profiles`. Accepts optional `profile_picture: File`.               |
-| `useUpdateProfileMutation()`        | PUT to `/profiles/:id`. Supports **optimistic updates** via `onMutate`.                |
-| `useDeleteProfileMutation()`        | DELETE `/profiles/:id`. **Optimistic removal** with rollback on error.                 |
-| `useUploadProfilePictureMutation()` | POST multipart to `/profiles/:id/pfp`. Auto-increments version seed for cache-busting. |
+### `useAdminHooks.ts`
 
-```ts
-// Add profile with picture
-const addProfileMutation = useAddProfileMutation();
-await addProfileMutation.mutateAsync({
-  display_name: "HeroSlime",
-  user_id: 42,
-  profile_picture: fileFromInput,
-});
+| Hook                       | Endpoint                  | Notes                                                             |
+| -------------------------- | ------------------------- | ----------------------------------------------------------------- |
+| `useAdminUsersQuery()`     | `GET /users`              | Client-side search until backend supports `?search=`              |
+| `useBanUserMutation()`     | `POST /users/:id/ban`     | Body: `{ id, period }` (minutes). Permanent = 50 years in minutes |
+| `useUnbanUserMutation()`   | `POST /users/:id/unban`   | No body                                                           |
+| `usePromoteUserMutation()` | `POST /users/:id/promote` | Body: `{ id, target_role: "admin"\|"support" }`                   |
+| `useDemoteUserMutation()`  | `POST /users/:id/demote`  | No body — always demotes to `"user"`                              |
 
-// Optimistic display name update
-const updateMutation = useUpdateProfileMutation();
-await updateMutation.mutateAsync({
-  profileId: 7,
-  payload: { id: 7, display_name: "NewName", coins: 500 },
-  optimistic: true, // update cache before server confirms
-  invalidateAfterSuccess: true,
-});
-```
+### `useDebugHooks.ts`
 
-**Display name rules:** clamped to 20 characters via `clampDisplayName()`. Duplicate names get a random 4-char suffix appended automatically.
+Stats queries (also used by `LeaderboardPage`):
 
-**Avatar cache-busting:** Profile picture versions are persisted in `sessionStorage` under key `"pfp_versions"`. After an upload, the version increments, changing the `?v=` query param and forcing the browser to fetch the new image.
+- `useTopItemsQuery()` — `GET /stats/top/items`
+- `useTopPlayersQuery()` — `GET /stats/top/players`
+- `useTopLevelsQuery()` — `GET /stats/top/levels`
+- `useLeaderboardQuery()` — `GET /stats/leaderboard`
 
-#### `src/hooks/useContentHooks.ts` + `useQueryHooks.ts`
+Game data queries (admin-only endpoints):
 
-Infinite-query hooks for paginated content. All share the same response envelope:
+- `useDebugCharactersQuery()` — `GET /characters`
+- `useDebugLevelsQuery()` — `GET /levels`
+- `useDebugItemsQuery()` — `GET /items?page=1&page_size=100`
+
+### Content hooks (`useContentHooks.ts`)
+
+Infinite-query hooks for paginated content:
 
 ```ts
-interface PaginatedResponse<T> {
-  items: T[]; // or releases / posts
-  page: number;
-  pageSize: number;
-  total: number;
-  hasMore: boolean;
-}
+useReleasesInfiniteQuery(os, pageSize?)     // GET /releases?os=&page=&pageSize=
+useItemsInfiniteQuery(filters?, pageSize?)  // GET /items?...
+useNewsInfiniteQuery(categories?, pageSize?) // GET /news?categories=&page=&pageSize=
 ```
-
-| Hook                                           | Key params                                  | Endpoint                                |
-| ---------------------------------------------- | ------------------------------------------- | --------------------------------------- |
-| `useReleasesInfiniteQuery(os, pageSize?)`      | `os: string`                                | `GET /releases?os=&page=&pageSize=`     |
-| `useItemsInfiniteQuery(filters?, pageSize?)`   | `kind`, `rarity`, `combatType`, `ownership` | `GET /items?...`                        |
-| `useNewsInfiniteQuery(categories?, pageSize?)` | `categories: string[]`                      | `GET /news?categories=&page=&pageSize=` |
-
-```ts
-const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-  useReleasesInfiniteQuery("windows", 8);
-
-const releases = data?.pages.flatMap((p) => p.releases) ?? [];
-```
-
-#### `src/hooks/useAdminHooks.ts`
-
-Admin panel hooks. All require the caller to be an admin (enforced by backend middleware once implemented).
-
-| Hook                          | Endpoint                | Notes                                                |
-| ----------------------------- | ----------------------- | ---------------------------------------------------- |
-| `useAdminUsersQuery(search?)` | `GET /users`            | Client-side filter until backend supports `?search=` |
-| `useAdminUserQuery(userId)`   | `GET /users/:id`        |                                                      |
-| `useBanUserMutation()`        | `POST /users/:id/ban`   | Converts `BanPayload` to `{ id, period }` in minutes |
-| `useUnbanUserMutation()`      | `POST /users/:id/unban` |                                                      |
-
-```ts
-const banMutation = useBanUserMutation();
-await banMutation.mutateAsync({
-  userId: 99,
-  payload: {
-    ban_type: "temporary",
-    ban_until: "2026-06-15T14:00:00Z",
-    reason: "Toxic behaviour",
-  },
-});
-```
-
-**Permanent ban** uses `50 * 365 * 24 * 60` minutes (~50 years) because the backend stores a concrete timestamp.
 
 ---
 
-## 7. Pages
+## 8. Pages
+
+### Leaderboard (`/app/leaderboard`)
+
+Public. Replaced "About Us" in the nav. Four stat panels: Win Leaderboard, Most Active Players, Most Played Levels, Most Purchased Items. Top 10 per panel, medal colours for top 3 (gold/silver/bronze). Animations: `CardAnimation` entry → `sectionStyle` staggered panel fade (0/80/160/240ms delay) → `LoadPost` row stagger inside each panel.
 
 ### Releases (`/app/releases`)
 
-`src/components/pages/mainPages/ReleasesPage.tsx`
-
-Displays game version releases with OS filtering and infinite scroll. **Releases are sourced directly from the public GitHub repository** — there is no in-app add/remove UI. To publish a new version, create a GitHub release at `https://github.com/SMAASH-project/SMAASH/releases` and attach the build assets.
-
-**Platform detection** is based on file extension of each release asset:
-
-| Extension      | Platform |
-| -------------- | -------- |
-| `.apk`, `.aab` | Android  |
-| `.ipa`         | iOS      |
-
-Recommended asset naming convention: `smaash-v{version}-android.apk` / `smaash-v{version}-ios.ipa`. If the convention changes, update `PLATFORM_MATCHERS` in `useReleases.ts`.
-
-Key sub-components:
-
-- `Releases.tsx` — renders the release list; passes the per-OS `downloadUrl` to the button
-- `SelectOs.tsx` — OS filter (iOS / Android)
-- `DownloadReleaseButton.tsx` — opens the GitHub asset URL in a new tab; disabled with tooltip when no asset exists for the selected platform
-- `SearchRelease.tsx` — client-side version search
-- `useReleases.ts` — fetches `GET https://api.github.com/repos/SMAASH-project/SMAASH/releases`, maps assets to `Release` objects, handles infinite scroll
-
-**GitHub API rate limit:** 60 unauthenticated requests/hour per IP. React Query caches results for 10 minutes (`staleTime`) so normal usage stays well within limits. If the repo ever becomes private, move the fetch to a backend proxy so the token never ships in the client bundle.
+Fetches from `GET https://api.github.com/repos/SMAASH-project/SMAASH/releases`. Platform detection by asset extension: `.apk`/`.aab` → Android, `.ipa` → iOS. `staleTime: 0`, `refetchOnMount: true`, `refetchInterval: 5 * 60 * 1000`. `DownloadReleaseButton` opens the GitHub asset URL in a new tab; disabled with tooltip when no asset for the selected platform.
 
 ### News (`/app/news`)
 
-`src/components/pages/mainPages/NewsPage.tsx`
+Markdown-rendered posts (`react-markdown` + `remark-gfm`) with category filter, image support (`imagePosition: "Top"|"Right"`, `imageSize`), admin edit/delete. `LoadPost` stagger on entries.
 
-Markdown-rendered news posts with category badges and image support. Responsive: side images stack on mobile.
-
-Key features:
-
-- Posts support `imagePosition: "Top" | "Right"` and `imageSize: number`  
-  On desktop, side images honour the configured `imageSize%`. On mobile they stack full-width.
-- `react-markdown` + `remark-gfm` renders post content
-- Category filter via `FilterSelect` popover
-- Admins see `EditButton` and `RemoveButton` per post
-- Post entry animations via `LoadPost` (respects `useAnimations` setting)
-
-Sub-components:
-
-- `AddNews.tsx` — admin create dialog
-- `EditButton.tsx` — admin edit dialog
-- `RemoveButton.tsx` — admin delete confirm
-- `Search.tsx` — text search
-- `Filter.tsx` / `FilterSelection.tsx` — category filter
-- `CategoryBadge.tsx` — colour-coded category pill
-- `useNewsPosts.ts` — post CRUD state
-- `useNewsCategoryFilter.ts` — filter state
-- `useNewsForm.ts` — form state for create/edit
-
-**Category colours** (defined in `types/PageTypes.ts`):
+**Category colours:**
 
 | Category       | Colour             |
 | -------------- | ------------------ |
@@ -571,305 +406,189 @@ Sub-components:
 
 ### Webstore (`/app/webstore`)
 
-`src/components/pages/mainPages/WebstorePage.tsx`
+Item shop. Coin balance from `selectedProfile.coins`. Filters: kind, rarity, combat type, ownership. Infinite scroll (12/page).
 
-Item shop. Coin balance from `ProfileContext.selectedProfile.coins`.
+**Data flow:**
 
-Sub-components:
+1. `GET /api/items?page=1&page_size=100` — all items
+2. `GET /profiles/:id/purchases` — ownership (⚠️ see Known Bugs §17)
+3. `ownedNames` Set from `p.item` field
+4. Purchase: `POST /purchases` with `{ player_profile_id, item_id, count: 1, date: "YYYY-MM-DD" }`
+5. On success: invalidate purchases + profiles queries (coins update)
 
-- `Item.tsx` — individual item card with unlock button
-- `CreateItemDialog.tsx` — admin create
-- `RemoveItemButton.tsx` — admin delete
-- `SearchItem.tsx` — text search
-- `ItemFilters.tsx` — filter by kind, rarity, combat type, ownership
-- `useItems.ts` — full React Query integration: fetches `GET /api/items`, merges ownership from `GET /profiles/:id/purchases`, handles create/delete/purchase mutations
+**Item → WebstoreItem mapping:** backend encodes kind/combat type as category strings (`"Character"`, `"Skin"`, `"Melee"`, `"Ranged"`). `itemDTOToWebstoreItem()` decodes these back to typed fields.
 
-**Ownership** is derived by fetching the selected profile's purchase history and building a `Set` of owned item names. After a purchase, both the purchases query and the profile coins query are invalidated so the coin balance updates immediately.
-
-**Item → WebstoreItem mapping:** the backend encodes kind and combat type as category strings (`"Character"`, `"Skin"`, `"Melee"`, `"Ranged"`). `itemDTOToWebstoreItem()` decodes these back into the typed fields the UI expects.
+**Admin features:** Create (`POST /api/items`) and delete (`DELETE /api/items/:id`) with optimistic removal + rollback.
 
 ### Profile (`/app/profile`)
 
-`src/components/pages/profileDependents/profile/ProfilePage.tsx`
-
-Three-panel layout: avatar/name/edit | stats | match history.
+Three-panel layout:
 
 ```
 [ Avatar / Name / Edit ] | [ Stats ] | [ Match History ]
 ```
 
-Live data: coins, last seen, profile ID (from `ProfileContext`).  
-Placeholder data (dimmed, `opacity-40`): wins, losses, win rate, match count.  
-Match history: empty state — waiting on `GET /api/profiles/:id/matches`.
-
-Key files:
-
-- `ProfilePageContent.tsx` — all three panels
-- `UpdateSheet.tsx` — slide-out sheet to rename profile and change avatar
+Live data: coins, last seen, profile ID. Placeholder (dimmed): wins, losses, win rate, match count. Match history: empty — waiting on `GET /api/profiles/:id/matches`.
 
 ### Settings (`/app/settings`)
 
-`src/components/pages/profileDependents/settings/SettingsPage.tsx`
+Toggles (Animations, Liquid Glass, Dark Mode, Language), theme preset picker, custom 3-stop colour picker, animation override row. `sectionStyle` staggered sections (0/80/160/240ms). `animReady` prop: while `false`, `backdrop-blur-*` stripped from card + sections stay invisible; flips to `true` after `CardAnimation` spring completes.
 
-Toggle cards for: Animations, Liquid Glass, Dark Mode, Language.  
-Theme picker section with preset colour schemes and a custom 3-stop colour picker.  
-Animation Override row (visible only when `useAnimations = true`): pin any animation independently of the active theme preset.
+---
 
-Key files:
+## 9. Admin & Debug Panels
 
-- `SettingsPageContent.tsx` — full page layout; split into memoised sub-components (`ThemeSection`, `LanguageSection`, `AnimationSection`) with `useMemo` for all computed style classes and `useCallback` on all handlers. Accepts `animReady: boolean` prop — while `false`, `backdrop-blur-*` is stripped from the card background AND all four sections render at `opacity: 0 / translateY(10px)` so the browser skips compositing them during the card entry spring. Once `animReady` flips `true`, each section fades + slides in with a 200 ms CSS transition, staggered at 0 / 80 / 160 / 240 ms respectively.
-- `SettingToggle.tsx` — reusable toggle row; wrapped in `memo`, only re-renders when `useLiquidGlass`, `useDarkMode`, or the three toggle values change
-- `ThemePicker.tsx` — preset grid + custom colour pickers; wrapped in `memo` with `useMemo` for style classes and `useCallback` on the apply handler
-- `SettingsContext.tsx` — state, persistence, i18n sync; includes `animationOverride: AnimationOverride`
-- `SettingsPage.tsx` — manages `animDone` state; passes `animReady={false}` into `SettingsPageContent` until `CardAnimation.onAnimationComplete` fires, then flips to `true` to restore full liquid glass styling
-
-### Admin (`/app/admin`)
-
-`src/components/pages/profileDependents/admin/AdminPage.tsx`
+### Admin Panel (`/app/admin`)
 
 Auth-gated: non-admins see `<NotFoundPage />` (indistinguishable from a real 404).
 
-Three-panel layout:
+**Layout:**
 
 ```
-[ User List + Search ] | [ User Detail + Stats ] | [ User's Profiles ]
+[ User List + Search ] | [ User Detail + Actions ] | [ User Profiles + Coin Editor ]
 ```
 
-Key files:
+Columns animate in sequentially with `motion.div` after `CardAnimation` completes (delays: 50ms, 180ms, 310ms). User list rows use `LoadPost` stagger. User detail cards use `AnimatePresence mode="wait"` keyed on `selectedUser.id` — cross-fades when user changes with staggered card fade (0ms header, 80ms stats).
 
-- `AdminPageContent.tsx` — three-panel card
-- `UserList.tsx` — scrollable list with client-side search
-- `UserListItem.tsx` — row with ban indicator
-- `UserDetail.tsx` — selected user header, account stats, role badge, ban/unban button
-- `ProfilesPanel.tsx` — selected user's profiles
-- `ban/BanDialog.tsx` — full ban modal (presets + custom date range + reason)
-- `ban/BanPresetCard.tsx` — individual preset option
-- `ban/BanCustomRange.tsx` — custom calendar + time spinners
-- `adminLogic/useAdminPageLogic.ts` — page state + theming
-- `adminLogic/useBanDialogLogic.ts` — ban dialog state
+**Role badges:**
 
-**Role badge mapping:**
+| Backend value | Colour       | Icon       |
+| ------------- | ------------ | ---------- |
+| `"admin"`     | Purple       | Shield     |
+| `"support"`   | Sky blue     | Headphones |
+| `"user"`      | Neutral gray | Users      |
 
-| Backend role | Badge colour | Icon       |
-| ------------ | ------------ | ---------- |
-| `"admin"`    | Purple       | Shield     |
-| `"support"`  | Sky blue     | Headphones |
-| `"user"`     | Neutral gray | Users      |
+**Role actions:**
 
-**Ban dialog flow:**
+- `user` → Promote to Support (sky), Promote to Admin (purple)
+- `support` → Promote to Admin (purple), Demote to Support (sky), Demote to User (amber)
+- `admin` → Demote to Support (sky), Demote to User (amber)
 
-1. Select preset (1h / 12h / 24h / 7d / 31d / 365d / Permanent) OR pick custom date range
-2. Optionally pick/type a reason
-3. Confirm — sends `{ id, period }` (period in minutes) to `POST /users/:id/ban`
+**Coin editor** (in Profiles Panel, shown when a profile is selected):
+
+- Number input + ±100 buttons + quick presets (1k, 5k, 10k)
+- Save: grey (no change) → amber (dirty) → green + checkmark (saved)
+- Calls `PUT /profiles/:id` with `{ id, display_name, coins }`
+- Draft auto-syncs when selected profile changes
+
+**Ban dialog:**
+
+- Presets: 1h / 12h / 24h (timeouts), 7d / 31d / 365d (bans), Permanent
+- Custom: calendar + time spinners (HH:MM, wrap-around)
+- Reason: 8 preset chips + free-text textarea (optional)
+- Confirm: `POST /users/:id/ban` with `{ id, period }` (minutes)
+
+### Debug Panel (`/app/debug`)
+
+Admin + support. Fixed-height card (`flex-1`, fills viewport). Left sidebar (144px) with tab buttons + Refresh pinned to bottom. Right: `AnimatePresence mode="wait"` tab content slides left/right on switch (200ms).
+
+**Tabs:**
+
+| Tab       | Access          | Content                                                                                                                                                                                                                                                      |
+| --------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| System    | admin + support | Browser (user agent, language, online, connection, device memory, CPU threads), Display (viewport, screen, pixel ratio, color depth), Session (role, user ID, query cache count, timezone, local time), Environment (base URL, path, build mode, dev server) |
+| Cache     | admin + support | Live React Query cache explorer. Filter by query key. Expandable entries: status icon, last updated, raw data (truncated at 1500 chars), per-entry Invalidate + Remove buttons. Invalidate All + Refresh buttons.                                            |
+| Endpoints | admin + support | API tester. Method selector (GET/POST/PUT/DELETE/PATCH, colour-coded), path input, JSON body textarea, Send button. Quick route presets. Response panel: status code (coloured), latency, raw JSON output.                                                   |
+| Game Data | admin only      | Characters grid (avatar + name + ID), Levels grid (image + name + ID), Store Items list (ID + name + rarity badge + price). All load from admin-only endpoints.                                                                                              |
 
 ---
 
-## 8. Navigation
+## 10. Navigation
 
-### `Navbar.tsx`
+**Desktop navbar:** Admin Panel button (shield icon, admin only) + Debug Panel button (bug icon, admin + support) in top-left. Centre: nav items. Right: username + account menu dropdown.
 
-Fixed top bar. Uses `NavbarContext` for dropdown hover tracking to prevent premature close.
+**Mobile drawer (`MobileNavMenu`):** Full nav links + Account section (Profile, Settings, Admin Panel if admin, Debug Panel if admin/support, Logout).
 
-- Desktop: logo left, nav links centre, account menu right. Admin button appears only when `isAdmin === true`.
-- Mobile breakpoint: hamburger → `MobileNavMenu` sheet drawer.
-
-### `MobileNavMenu.tsx`
-
-Sheet drawer for mobile. Contains full nav links + account section (Profile, Settings, Admin Panel if admin, Logout).
-
-### `AccountMenu.tsx`
-
-Dropdown menu in the top-right of the navbar. Contains Profile, Settings, Logout.
-
-### `navLogic/navItems.ts`
-
-```ts
-// Add new nav items here:
-export const navItems = [
-  { path: "/app/releases", labelKey: "nav.releases", icon: Download },
-  { path: "/app/news", labelKey: "nav.news", icon: Newspaper },
-  // ...
-];
-```
-
-`labelKey` maps directly to a key in `src/locales/*/nav.json`.
+**Nav items** (`navItems.ts`): Leaderboard, Gallery, Releases, Webstore, News. Labels via `labelKey` mapping to `src/locales/*/nav.json`.
 
 ---
 
-## 9. Forms
+## 11. Forms
 
-All three forms use `<FormAlert>` for error display and `extractErrorMessage()` to convert Axios errors into readable strings. Previously errors were displayed as raw `<p>` tags and could show `[object Object]` when the server returned a JSON error object.
+All use `<FormAlert>` for error display and `extractErrorMessage()` for Axios error normalisation.
 
 ### `LoginForm.tsx`
 
-- Email + password fields
-- Calls `useLoginMutation()`, sets `isLoggedIn`/`userId`/`isAdmin` on success, navigates to `/app/profile-selector`
-- Language toggle in the top-right corner
-- 401 responses show a specific "Incorrect email or password" message; all other errors show the server's message or a translated fallback
+Email + password. On success: sets `isLoggedIn`/`userId`/`isAdmin`/`isSupport`, navigates to `/app/profile-selector`. 401 → specific "Incorrect email or password" message.
 
-### `SignUpForm.tsx`
+### `SignupForm.tsx`
 
-- Username / email / password / confirm password
-- Client-side validation errors (username too short, password mismatch, etc.) take priority over server errors in a single `errorMessage` variable — no duplicate alerts
-- Validation errors clear automatically when the user edits the relevant field
-- reCAPTCHA v3 — `GoogleReCaptchaProvider` wraps the inner form component. Token is fetched only on submit via `executeRecaptcha("signup")` — **not** continuously polled. This prevents the `reload`/`clr` request flood.
-- Site key is hardcoded in the component; move to an env variable for production.
-
-```tsx
-// How reCAPTCHA is structured to avoid request spam:
-export function SignupForm(props) {
-  return (
-    <GoogleReCaptchaProvider reCaptchaKey="...">
-      <SignupFormInner {...props} /> {/* useGoogleReCaptcha() lives here */}
-    </GoogleReCaptchaProvider>
-  );
-}
-// Token is fetched once at submit:
-const token = await executeRecaptcha("signup");
-```
+Username / email / password / confirm. Client-side validation errors take priority. reCAPTCHA v3 — token fetched only on submit via `executeRecaptcha("signup")`, not continuously polled.
 
 ### `PasswordResetForm.tsx`
 
-> ⚠️ **Form submits but fires no mutation.** Blocked on `POST /api/auth/reset-password` backend endpoint. See [§15](#15-known-todos--backend-dependencies).
+⚠️ Renders but fires no mutation. Blocked on `POST /api/auth/reset-password`.
 
 ### `ProfileSelectorForm.tsx`
 
-Displays user's profiles as avatars. Select to enter app; "Manage Profiles" mode enables delete. Logout button calls `useLogoutMutation()` and resets auth state.
-
-Memoised via `React.memo` + `useCallback` to avoid expensive re-renders when profiles list is large.
+Profiles as avatars. "Manage Profiles" enables delete. Logout clears `isAdmin` + `isSupport`. `React.memo` + `useCallback` for performance.
 
 ### `AddNewProfile.tsx`
 
-Dialog form to create a new profile. Accepts display name + optional avatar image upload. Limit: 5 profiles per user. All validation errors and field labels are fully translated (EN/HU). Error strings come from `profile.addProfile.*` translation keys.
+Dialog: display name + optional avatar. Limit: 5 profiles per user. Fully translated (EN/HU).
 
 ---
 
-## 10. i18n / Multilingual Support
+## 12. i18n / Multilingual Support
 
 **Languages:** English (`en`) · Hungarian (`hu`)
 
-### Setup
-
-`src/lib/I18n.ts` must be imported in `main.tsx` **before any component renders:**
-
-```ts
-import "@/lib/I18n.ts"; // main.tsx line 4
-```
-
-### Usage
-
-```tsx
-import { useTranslation } from "react-i18next";
-
-const { t } = useTranslation("auth");
-// t("login.title")   → "Login to your account" (en) / "Bejelentkezés" (hu)
-// t("signup.submit") → "Create Account" / "Fiók létrehozása"
-```
+`src/lib/I18n.ts` must be imported in `main.tsx` before any component renders.
 
 ### Namespaces
 
-| File            | Used in                                                   |
-| --------------- | --------------------------------------------------------- |
-| `auth.json`     | Login, Signup, PasswordReset forms                        |
-| `nav.json`      | Navbar, account menu, nav items                           |
-| `settings.json` | Settings page                                             |
-| `profile.json`  | Profile page, UpdateSheet, ProfileSelector, AddNewProfile |
-| `releases.json` | Releases page + sub-components                            |
-| `news.json`     | News page + sub-components                                |
-| `webstore.json` | Webstore page + sub-components                            |
-| `admin.json`    | Admin panel, ban dialog, all ban strings                  |
-| `common.json`   | 404 page, shared labels                                   |
+| File            | Used in                                                                      |
+| --------------- | ---------------------------------------------------------------------------- |
+| `auth.json`     | Login, Signup, PasswordReset                                                 |
+| `nav.json`      | Navbar, mobile drawer, nav items (includes `leaderboard`, `debugPanel` keys) |
+| `settings.json` | Settings page                                                                |
+| `profile.json`  | Profile page, UpdateSheet, ProfileSelector, AddNewProfile                    |
+| `releases.json` | Releases page                                                                |
+| `news.json`     | News page                                                                    |
+| `webstore.json` | Webstore page                                                                |
+| `admin.json`    | Admin panel, ban dialog                                                      |
+| `common.json`   | 404 page, shared labels                                                      |
 
-### Language Switching
-
-Language is stored in `SettingsContext` (`settings.language`). Changing it via `updateSetting("language", "hu")` automatically calls `i18n.changeLanguage()` via a `useEffect` in `SettingsContext`.
-
-Language picker is available on the Settings page and as a `<LanguageToggle />` on all three auth pages.
+Language stored in `SettingsContext`. `updateSetting("language", "hu")` automatically calls `i18n.changeLanguage()`.
 
 ### Adding a New Language
 
 1. Create `src/locales/<code>/` with the same 9 JSON files
-2. Import all files in `src/lib/I18n.ts` and add to `resources`
-3. Add a button in `SettingsPageContent.tsx` and `LanguageToggle.tsx`
+2. Import in `src/lib/I18n.ts` and add to `resources`
+3. Add button in `SettingsPageContent.tsx` and `LanguageToggle.tsx`
 4. Add the code to the `Language` type in `SettingsContext.tsx`
 
-### Hungarian Notes
+---
 
-Hungarian is agglutinative — translations are complete context-aware strings, not assembled from fragments. Ban duration labels (`"1 óra"`, `"7 nap"`) are full strings in the JSON. Interpolated strings use i18next syntax: `"Tiltva {{date}}-ig"`.
+## 13. UI Component Library
+
+Components in `src/components/ui/`, shadcn patterns (Radix UI + Tailwind).
+
+| Component        | Notes                                                                                                                                                                               |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Button`         | Variants via `button-variants.ts`                                                                                                                                                   |
+| `ButtonGroup`    | Horizontal/vertical grouped buttons                                                                                                                                                 |
+| `Input`          | Standard text input                                                                                                                                                                 |
+| `Card`           | Container card                                                                                                                                                                      |
+| `Avatar`         | With fallback initials; `size` prop                                                                                                                                                 |
+| `Badge`          | Status/category labels                                                                                                                                                              |
+| `Dialog`         | Modal — uses `getDialogClasses`                                                                                                                                                     |
+| `Sheet`          | Slide-out side panel                                                                                                                                                                |
+| `DropdownMenu`   | Radix dropdown                                                                                                                                                                      |
+| `Popover`        | Radix popover                                                                                                                                                                       |
+| `Switch`         | Toggle                                                                                                                                                                              |
+| `Calendar`       | Custom range calendar — no `react-day-picker`. Range highlight is a connected pill bar (`rounded-l-full` start, `rounded-r-full` end, flat interior). `fromDate` blocks past dates. |
+| `ColorPicker`    | Hex colour input                                                                                                                                                                    |
+| `LanguageToggle` | EN/HU flag buttons for auth pages                                                                                                                                                   |
+| `FormAlert`      | Inline alert — `variant: "error"\|"success"\|"info"`. Fixes the `[object Object]` error display bug.                                                                                |
+| `Separator`      | Horizontal/vertical rule                                                                                                                                                            |
+| `Resizable`      | Drag-to-resize panels                                                                                                                                                               |
 
 ---
 
-## 11. UI Component Library
-
-Components live in `src/components/ui/` and follow shadcn patterns (Radix UI primitives + Tailwind).
-
-| Component        | File                 | Notes                                                        |
-| ---------------- | -------------------- | ------------------------------------------------------------ |
-| `Button`         | `button.tsx`         | Variants via `button-variants.ts`                            |
-| `ButtonGroup`    | `button-group.tsx`   | Horizontal/vertical grouped buttons                          |
-| `Input`          | `input.tsx`          | Standard text input                                          |
-| `Card`           | `card.tsx`           | Container card                                               |
-| `Avatar`         | `avatar.tsx`         | User/profile avatar with fallback initials                   |
-| `Badge`          | `badge.tsx`          | Status/category labels                                       |
-| `Label`          | `label.tsx`          | Form field label                                             |
-| `Field`          | `field.tsx`          | Field + FieldLabel + FieldDescription layout                 |
-| `Dialog`         | `dialog.tsx`         | Modal dialog                                                 |
-| `Sheet`          | `sheet.tsx`          | Slide-out side panel                                         |
-| `DropdownMenu`   | `dropdown-menu.tsx`  | Radix dropdown                                               |
-| `Popover`        | `popover.tsx`        | Radix popover                                                |
-| `Switch`         | `switch.tsx`         | Toggle switch                                                |
-| `Checkbox`       | `checkbox.tsx`       | Checkbox                                                     |
-| `RadioGroup`     | `radio-group.tsx`    | Radio button group                                           |
-| `Accordion`      | `accordion.tsx`      | Collapsible sections                                         |
-| `Separator`      | `separator.tsx`      | Horizontal/vertical rule                                     |
-| `Calendar`       | `calendar.tsx`       | Custom date range calendar (no react-day-picker)             |
-| `ColorPicker`    | `color-picker.tsx`   | Hex colour input                                             |
-| `Resizable`      | `resizable.tsx`      | Drag-to-resize panels                                        |
-| `LanguageToggle` | `LanguageToggle.tsx` | EN/HU flag buttons for auth pages                            |
-| `FormAlert`      | `form-alert.tsx`     | Inline form alert — variants: `error` \| `success` \| `info` |
-
-### `FormAlert` (`form-alert.tsx`)
-
-Inline alert component for form-level error, success, and info messages. Styled to match the shadcn Alert component — icon + optional title + message.
-
-```tsx
-import { FormAlert } from "@/components/ui/form-alert";
-
-// Error (red) — most common use case
-<FormAlert variant="error" message={errorMessage} />
-
-// With a title
-<FormAlert variant="error" title="Login failed" message="Incorrect email or password." />
-
-// Success (green)
-<FormAlert variant="success" message="Profile saved!" />
-
-// Info (blue)
-<FormAlert variant="info" message="Password changes are not yet available." />
-```
-
-### Custom Calendar (`calendar.tsx`)
-
-Self-contained, no external date-picker dependency. Supports `single` and `range` modes.
-
-Range highlight renders as a connected pill bar — `rounded-l-full` on the start date, `rounded-r-full` on end, flat sides on interior days.
-
-```tsx
-<Calendar
-  mode="range"
-  selected={{ from: startDate, to: endDate }}
-  onSelect={handleSelect}
-  fromDate={new Date()} // block past dates
-/>
-```
-
----
-
-## 12. Types
+## 14. Types
 
 ### `src/types/PageTypes.ts`
-
-Core domain interfaces used across pages and hooks.
 
 ```ts
 interface NewsPost {
@@ -879,9 +598,9 @@ interface NewsPost {
   image?: string;
   imageAlt?: string;
   imagePosition?: "Top" | "Right";
-  imageSize?: number; // vh for Top; % width for Right
+  imageSize?: number;
   content: string; // Markdown
-  createdAt: DateTime; // Luxon DateTime
+  createdAt: DateTime;
 }
 
 interface WebstoreItem {
@@ -892,144 +611,64 @@ interface WebstoreItem {
   rarity: "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
   description: string;
   price: number;
-  owned: boolean;
+  owned: boolean; // derived client-side from purchases
   createdAt: DateTime;
 }
 
 interface Release {
   id: string;
   version: string;
-  supports: string[]; // OS identifiers e.g. ["iOS", "Android"]
-  downloadUrls: Partial<Record<string, string>>; // per-OS GitHub asset URLs
+  supports: string[];
+  downloadUrls: Partial<Record<string, string>>;
   createdAt: DateTime;
 }
 ```
 
-### `src/types/OsTypes.ts`
-
-OS identifier constants for release filtering.
-
-### `src/types/ExampleItems.ts` / `ExampleReleases.ts`
-
-Placeholder data. `ExampleItems` is currently used by `useItems.ts` — see [§15](#15-known-todos--backend-dependencies).
-
 ---
 
-## 13. Utilities
+## 15. Utilities & Animations
 
-### `src/lib/utils.ts`
-
-Barrel re-export. Import everything from `@/lib/utils`:
+### `src/lib/utils/sectionStyle.ts`
 
 ```ts
-import {
-  cn, // classnames merge (clsx + tailwind-merge)
-  formatDate, // Luxon DateTime | Date | string → "Mar 21, 2026"
-  formatDateTime, // → "Mar 21, 2026, 5:30 PM"
-  // Theme helpers:
-  getTextColor,
-  getSubtextColor,
-  getTextShadow,
-  getBackgroundClasses,
-  getButtonClasses,
-  getInputClasses,
-  getDialogClasses,
-  getDialogFooterClasses,
-  // Liquid glass helpers:
-  getLiquidGlassClasses,
-  getLiquidGlassTextShadow,
-  getLiquidGlassHighlight,
-  getLiquidGlassNavHighlight,
-  getLiquidGlassDialogClasses,
-  getLiquidGlassControlClasses,
-  // Color math:
-  getAverageHexColor,
-  lightenHexColor,
-  toRgbaColor,
-  getTextColor,
-} from "@/lib/utils";
+sectionStyle(animReady: boolean, delayMs: number): CSSProperties
 ```
+
+Returns `{ opacity, transform, transition, willChange }`. While `animReady` is false: `opacity: 0`, `translateY(10px)`, no transition. Once `true`: fades in with `delayMs` CSS delay. Used by Settings, Admin, Leaderboard, Debug pages for staggered section entry.
+
+### `src/lib/utils/extractErrorMessage.ts`
+
+Converts Axios errors to readable strings. Priority: `data` as string → `data.error` → `data.message` → `error.message` → provided fallback.
 
 ### `src/lib/utils/colorMath.ts`
 
-Pure colour arithmetic used by `Wrapper.tsx`:
-
 ```ts
-getAverageHexColor(colors: string[]): string   // average of N hex colours
+getAverageHexColor(colors: string[]): string
 lightenHexColor(hex: string, amount: number): string  // 0.0–1.0
 toRgbaColor(hex: string, alpha: number): string
 ```
 
 ### `src/lib/utils/dateFormat.ts`
 
-Wraps Luxon for consistent date display. Accepts Luxon `DateTime`, JS `Date`, ISO strings, or `undefined`.
-
 ```ts
 formatDate("2026-03-21T17:30:00Z"); // "Mar 21, 2026"
 formatDateTime("2026-03-21T17:30:00Z"); // "Mar 21, 2026, 5:30 PM"
+// Accepts Luxon DateTime, JS Date, ISO string, or undefined
 ```
 
-### `src/lib/utils/extractErrorMessage.ts`
+### Animation Utilities
 
-Converts an Axios error into a human-readable string. Fixes the `[object Object]` problem that occurred when the Go backend returned a JSON error body and code called `String()` on it.
+**`CardAnimation`** (`miscAnimations/OnloadAnimationCard.tsx`) — spring scale-in entry (`scale: 0→1`, spring `visualDuration: 1.5, bounce: 0.2`). Used by all main pages.
 
-The Go backend returns errors in several shapes — this function handles all of them:
+**`LoadPost`** (`pageAnimations/newsPageAnimations/LoadPost.tsx`) — `opacity: 0→1, y: 20→0`, `delay: index * 0.1s`. Used for list row stagger.
 
-```ts
-import { extractErrorMessage } from "@/lib/utils/extractErrorMessage";
-
-// In a catch block or mutation error handler:
-const message = extractErrorMessage(error, t("login.failed"));
-// Tries: data.error → data.message → raw string → axios.message → fallback
-```
-
-Lookup priority:
-
-1. `error.response.data` as a plain string
-2. `error.response.data.error` (most Go endpoints)
-3. `error.response.data.message` (some validation responses)
-4. `error.message` (Axios built-in, e.g. "Network Error")
-5. The provided `fallback` translated string
-
-### `src/lib/GenerateRandomUsername.ts`
-
-Generates random username suggestions for the signup placeholder.
-
-```ts
-const { prefix, suffix } = generateRandomUsername();
-// prefix: "ClassicFog", suffix: ""  → "ClassicFog"
-```
-
-### Animations
-
-#### `src/lib/miscAnimations/`
-
-| Component                   | Description                      |
-| --------------------------- | -------------------------------- |
-| `OnloadAnimationCard.tsx`   | Fade-in + slide-up on mount      |
-| `OnloadAnimationNavbar.tsx` | Navbar entrance animation        |
-| `AnimatedAccordion.tsx`     | Accordion with height transition |
-| `ColorInterpolation.tsx`    | Smooth colour transition wrapper |
-
-#### `src/lib/pageAnimations/newsPageAnimations/LoadPost.tsx`
-
-Wraps individual news post cards with staggered entrance animation:
-
-```tsx
-<LoadPost key={post.id} index={index}>
-  <Card>...</Card>
-</LoadPost>
-```
-
-Only renders the motion wrapper if `settings.useAnimations` is `true`.
+**`sectionStyle`** — CSS-in-JS approach for staggered section animations within already-mounted cards.
 
 ---
 
-## 14. Performance & Build
+## 16. Performance & Build
 
 ### Bundle Strategy
-
-Manual chunks defined in `vite.config.ts`:
 
 | Chunk          | Contents                              | Gzipped   |
 | -------------- | ------------------------------------- | --------- |
@@ -1038,112 +677,80 @@ Manual chunks defined in `vite.config.ts`:
 | `ui-vendor`    | framer-motion, motion, lucide-react   | ~45 KB    |
 | Route chunks   | Lazy-loaded per page                  | On demand |
 
-Initial bundle: **~94 KB gzipped** (down from 349 KB before optimisation).
+**Initial bundle: ~94 KB gzipped** (down from 349 KB before optimisation).
 
-### Lazy Loading
+### Key Optimisations
 
-All non-auth pages are lazy loaded in `main.tsx`:
-
-```ts
-const ReleasesPage = lazy(() =>
-  import("./components/pages/mainPages/ReleasesPage.tsx").then((m) => ({
-    default: m.ReleasesPage,
-  })),
-);
-```
-
-The `Suspense` boundary in `RootLayout.tsx` shows a spinner while chunks load.
-
-### Bundle Visualiser
-
-```bash
-npm run build
-# Opens build/stats.html — interactive treemap of all chunks
-```
-
-### Resource Hints
-
-`index.html` has `preconnect` and `dns-prefetch` for the API host so the first API call doesn't incur a full DNS + TLS handshake delay.
-
-### Render Optimisation
-
-`ProfileSelectorForm.tsx` memoises the `ProfileAvatar` component and the `handleProfileClick` callback:
-
-```tsx
-const ProfileAvatar = memo(function ProfileAvatar({ ... }) { ... });
-const handleProfileClick = useCallback(async (name: string) => { ... }, [deps]);
-```
+- Profile picture upload: surgical `setQueriesData` patch on avatar URL only — no refetch
+- `ProfileSelectorForm`: `React.memo` + `useCallback` on avatar + click handler
+- Settings, Admin, Debug: `animReady` prop strips `backdrop-blur-*` from card during entry spring so browser skips compositing
+- Animated backgrounds: deferred 1600ms fade-in on heavy-card routes
+- reCAPTCHA: token fetched only on submit, not polling
 
 ---
 
-## 15. Known TODOs & Backend Dependencies
+## 17. Known Bugs
 
-### ⚠️ Frontend Bugs (fixable now, no backend needed)
+### ⚠️ Purchase → Item Not Marked as Owned (Active Bug)
 
-#### 1. 401 / Session Expiry ✅ Fixed
+**Root cause:** `GET /profiles/:id/purchases` backend preloads `Purchases` without `Purchases.Item`, so `p.Item.Name` returns empty string. `ownedNames.has(item.name)` never matches — all items appear unowned even after purchasing.
 
-Global Axios interceptor in `apiClient.ts` catches any non-auth 401 and hard-redirects to `/app/login`. Already implemented.
+**Backend fix:** add `"Purchases.Item"` to the preload in `ReadPurchases` in `player_profiles_controller.go`:
 
-#### 2. Download Button ✅ Fixed
+```go
+// Before
+profile, err := pc.profilesRepo.ReadByID(ctx, id.(uint), "Purchases")
+// After
+profile, err := pc.profilesRepo.ReadByID(ctx, id.(uint), "Purchases", "Purchases.Item")
+```
 
-`DownloadReleaseButton` now opens the GitHub asset `browser_download_url` for the selected OS. Disabled with a tooltip when the release has no asset for the active platform.
-
-#### 3. Password Reset Does Nothing
-
-`PasswordResetForm.tsx` renders but submits nothing. No mutation, no feedback.
-
-**Partial frontend fix:** Disable the submit button and display a "not yet available" message.  
-**Full fix:** Requires `POST /api/auth/reset-password` backend endpoint first.
+**Frontend fix (independent of backend):** on purchase success, optimistically call `setQueryData` on the items cache to flip `owned: true` by item ID — no name matching needed. File: `src/components/pages/mainPages/webstorePageComponents/webstorePageLogic/useItems.ts`.
 
 ---
 
-### 🔧 Backend Endpoints Needed
+## 18. Backend Dependencies
 
-See `summeries/BACKEND_NOTES.md` for full spec. Summary:
+### Already Implemented
 
-| #   | Endpoint                                          | Status                                   |
-| --- | ------------------------------------------------- | ---------------------------------------- |
-| 1   | Role preload on `GET /users` and `GET /users/:id` | Missing — badges show blank              |
-| 2   | `username` + `ban_until` fields on `UserReadDTO`  | Missing — shows `"—"`                    |
-| 3   | `POST /admin/users/:id/ban`                       | Not implemented                          |
-| 4   | `POST /admin/users/:id/unban`                     | Not implemented                          |
-| 5   | Admin-only middleware on `/admin/*` routes        | Not implemented                          |
-| 6   | `?search=` param on `GET /users`                  | Client-side workaround active            |
-| 7   | `POST /api/profiles/:id/purchases`                | Not implemented — unlock is local-only   |
-| 8   | `GET /api/profiles/:id/matches`                   | Not implemented — stats are placeholders |
-| 9   | `POST /api/auth/reset-password`                   | Not implemented                          |
+- `POST /users/:id/ban` — body: `{ id, period }` (minutes)
+- `POST /users/:id/unban`
+- `POST /users/:id/promote` — body: `{ id, target_role: "admin"|"support" }`
+- `POST /users/:id/demote`
+- `GET /users` with Role preload
+- `GET /users/:id` with Role preload
+- `GET /profiles/:id/purchases` (exists but missing `Item` preload — see §17)
+- `PUT /profiles/:id` — coin editor uses this
 
-### 🗂️ Remaining Webstore Backend Dependency
+### Still Needed
 
-The purchase flow is fully implemented on the frontend. The one remaining gap is that the backend does not yet deduct coins from the profile when a purchase is made — the `POST /purchases` endpoint creates the purchase record but coin deduction logic is missing server-side. The coin balance displayed in the header will not decrease after a purchase until this is fixed on the backend.
+| #   | Endpoint                                                     | Impact                                          |
+| --- | ------------------------------------------------------------ | ----------------------------------------------- |
+| 1   | `GET /profiles/:id/purchases` — add `Purchases.Item` preload | **Critical** — ownership tracking broken        |
+| 2   | `GET /api/profiles/:id/matches`                              | Match history + win/loss stats are placeholders |
+| 3   | `POST /api/auth/reset-password`                              | Password reset form does nothing                |
+| 4   | `?search=` on `GET /api/users`                               | Admin does client-side workaround               |
+| 5   | `username` field on `UserReadDTO`                            | Shows `"—"` in admin panel                      |
 
 ---
 
 ## Appendix: Adding a New Page
 
-1. Create the component in `src/components/pages/mainPages/MyPage.tsx`
-2. Add a lazy import in `src/main.tsx`
-3. Add the route in the `createBrowserRouter` config
-4. Add a nav item in `src/components/nav/navLogic/navItems.ts` (use a `labelKey`)
-5. Add translations for the label in `src/locales/en/nav.json` and `src/locales/hu/nav.json`
+1. Create `src/components/pages/mainPages/MyPage.tsx`
+2. Add lazy import in `src/main.tsx`
+3. Add route in `createBrowserRouter`
+4. Add nav item in `navItems.ts` with a `labelKey`
+5. Add translations in `src/locales/en/nav.json` + `src/locales/hu/nav.json`
 6. Use `useSettings()` + theme helpers for all styling
 
 ```tsx
-// Minimal page template
-import { useSettings } from "../profileDependents/settings/settingsLogic/SettingsContext";
-import { getBackgroundClasses, getTextColor } from "@/lib/utils";
-import Navbar from "../../nav/Navbar";
-
 export function MyPage() {
   const { settings } = useSettings();
-  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
-  const bgClass = getBackgroundClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
+  const { useLiquidGlass, useDarkMode } = settings;
+  const textColor = getTextColor(useLiquidGlass, useDarkMode);
+  const bgClass = getBackgroundClasses(useLiquidGlass, useDarkMode);
 
   return (
-    <div className="p-4 h-screen overflow-y-auto">
+    <div className="p-4 min-h-screen w-full flex flex-col">
       <Navbar />
       <div className={`mt-20 ${bgClass} ${textColor} rounded-xl p-6`}>
         {/* content */}

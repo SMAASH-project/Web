@@ -8,6 +8,8 @@ export const AuthContext = createContext<{
   setIsLoggedIn: (value: boolean) => void;
   isAdmin: boolean;
   setIsAdmin: (value: boolean) => void;
+  isSupport: boolean;
+  setIsSupport: (value: boolean) => void;
 }>({
   isLoggedIn: false,
   isInitializing: true,
@@ -16,4 +18,6 @@ export const AuthContext = createContext<{
   setIsLoggedIn: () => {},
   isAdmin: false,
   setIsAdmin: () => {},
+  isSupport: false,
+  setIsSupport: () => {},
 });

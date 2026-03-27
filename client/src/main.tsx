@@ -17,9 +17,9 @@ const ReleasesPage = lazy(() =>
     default: m.ReleasesPage,
   })),
 );
-const AboutPage = lazy(() =>
-  import("./components/pages/mainPages/AboutPage.tsx").then((m) => ({
-    default: m.AboutPage,
+const LeaderboardPage = lazy(() =>
+  import("./components/pages/mainPages/LeaderboardPage.tsx").then((m) => ({
+    default: m.LeaderboardPage,
   })),
 );
 const GalleryPage = lazy(() =>
@@ -65,6 +65,14 @@ const AdminPage = lazy(() =>
   ),
 );
 
+const DebugPage = lazy(() =>
+  import("./components/pages/profileDependents/debug/DebugPage.tsx").then(
+    (m) => ({
+      default: m.DebugPage,
+    }),
+  ),
+);
+
 const router = createBrowserRouter([
   {
     element: <RootLayout />,
@@ -76,7 +84,7 @@ const router = createBrowserRouter([
         path: "/app/reset-password",
         element: <PasswordResetForm />,
       },
-      { path: "/app/about", element: <AboutPage /> },
+      { path: "/app/leaderboard", element: <LeaderboardPage /> },
       { path: "/app/gallery", element: <GalleryPage /> },
       { path: "/app/releases", element: <ReleasesPage /> },
       { path: "/app/webstore", element: <WebstorePage /> },
@@ -89,6 +97,7 @@ const router = createBrowserRouter([
       },
       { path: "*", element: <NotFoundPage /> },
       { path: "/app/admin", element: <AdminPage /> },
+      { path: "/app/debug", element: <DebugPage /> },
     ],
   },
 ]);

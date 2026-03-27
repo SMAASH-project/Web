@@ -28,7 +28,8 @@ export default function AccountMenu() {
   const { setIsDropdownHovering, setIsDropdownOpen } = useNavbarContext();
   const { settings } = useSettings();
   const { t } = useTranslation("nav");
-  const { setIsLoggedIn, setUserId, setIsAdmin } = useContext(AuthContext);
+  const { setIsLoggedIn, setUserId, setIsAdmin, setIsSupport } =
+    useContext(AuthContext);
   const navigate = useNavigate();
   const logoutMutation = useLogoutMutation();
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
@@ -47,21 +48,17 @@ export default function AccountMenu() {
   );
 
   // Calls the React Query logout mutation to end the session and clear cache
-  const logout = async () => {
+  const handleLogout = async () => {
     try {
       await logoutMutation.mutateAsync();
-      console.log("Logout successful");
       setIsLoggedIn(false);
       setUserId(null);
       setIsAdmin(false);
+      setIsSupport(false);
       navigate("/app/login");
     } catch (error) {
       console.error("Logout failed:", error);
     }
-  };
-
-  const handleLogout = async () => {
-    await logout();
   };
   return (
     <DropdownMenu
@@ -124,19 +121,6 @@ export default function AccountMenu() {
               }`}
             >
               <Link to="/app/settings">{t("account.settings")}</Link>
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-          <DropdownMenuSeparator
-            className={`my-2 ${settings.useDarkMode ? "bg-white/10" : "bg-gray-200"}`}
-          />
-          <DropdownMenuGroup>
-            <DropdownMenuItem
-              disabled
-              className={`px-3 py-2 text-sm rounded-md ${
-                settings.useDarkMode ? "text-white/30" : "text-gray-400"
-              }`}
-            >
-              {t("account.support")}
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator

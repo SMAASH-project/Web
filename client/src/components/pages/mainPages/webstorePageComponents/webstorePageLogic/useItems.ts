@@ -32,14 +32,14 @@ interface ItemReadDTO {
   categories: string[];
 }
 
-// Go's PurchaseReadDTO has no json tags so field names are PascalCase
+// Go's PurchaseReadDTO json tags are snake_case
 interface PurchaseReadDTO {
-  ID: number;
-  Item: string; // item name (unique, used to match ownership)
-  Count: number;
-  Total: number;
-  Profile: string;
-  Date: string;
+  id: number;
+  item: string; // item name (unique, used to match ownership)
+  count: number;
+  total: number;
+  profile: string;
+  date: string;
 }
 
 // ─── Mapping helpers ──────────────────────────────────────────────────────────
@@ -71,37 +71,13 @@ function itemDTOToWebstoreItem(dto: ItemReadDTO): WebstoreItem {
 }
 
 /**
- * Format the current moment as RFC822Z ("02 Jan 06 15:04 -0700").
- * The backend's PurchaseCreateDTO.Date field expects time.RFC822 format.
+ * Returns today's date as YYYY-MM-DD.
+ * The backend's PurchaseCreateDTO.Date field parses with Go's "2006-01-02" layout.
  */
-function nowRFC822(): string {
+function nowDateString(): string {
   const d = new Date();
   const pad = (n: number) => String(n).padStart(2, "0");
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  const day = pad(d.getDate());
-  const mon = months[d.getMonth()];
-  const yr = String(d.getFullYear()).slice(2); // 2-digit year
-  const hh = pad(d.getHours());
-  const mm = pad(d.getMinutes());
-  const tz = d.getTimezoneOffset();
-  const sign = tz <= 0 ? "+" : "-";
-  const absOff = Math.abs(tz);
-  const offH = pad(Math.floor(absOff / 60));
-  const offM = pad(absOff % 60);
-  return `${day} ${mon} ${yr} ${hh}:${mm} ${sign}${offH}${offM}`;
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
@@ -142,7 +118,7 @@ export function useItems() {
 
   // Build a set of owned item names from purchase history
   const ownedNames = useMemo(
-    () => new Set((purchases ?? []).map((p) => p.Item)),
+    () => new Set((purchases ?? []).map((p) => p.item)),
     [purchases],
   );
 
@@ -161,10 +137,10 @@ export function useItems() {
     mutationFn: async ({ itemId }) => {
       if (!profileId) throw new Error("No profile selected");
       await apiClient.post("/purchases", {
-        PlayerProfileID: profileId,
-        ItemID: itemId,
-        Count: 1,
-        Date: nowRFC822(),
+        player_profile_id: profileId,
+        item_id: itemId,
+        count: 1,
+        date: nowDateString(),
       });
     },
     onSuccess: () => {

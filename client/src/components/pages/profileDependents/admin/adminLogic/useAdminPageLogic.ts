@@ -3,9 +3,14 @@ import {
   useAdminUsersQuery,
   useBanUserMutation,
   useUnbanUserMutation,
+  usePromoteUserMutation,
+  useDemoteUserMutation,
   type AdminUserDTO,
 } from "@/hooks/useAdminHooks";
-import { useProfilesQuery } from "@/hooks/useQueryHooks";
+import {
+  useProfilesQuery,
+  useUpdateProfileMutation,
+} from "@/hooks/useQueryHooks";
 import { useSettings } from "../../settings/settingsLogic/SettingsContext";
 import {
   getBackgroundClasses,
@@ -27,6 +32,9 @@ export function useAdminPageLogic() {
   const { data: users = [], isLoading: usersLoading } = useAdminUsersQuery();
   const banMutation = useBanUserMutation();
   const unbanMutation = useUnbanUserMutation();
+  const promoteMutation = usePromoteUserMutation();
+  const demoteMutation = useDemoteUserMutation();
+  const updateProfileMutation = useUpdateProfileMutation();
 
   const selectedUser = useMemo(
     () => users.find((u) => u.id === selectedUserId) ?? null,
@@ -76,6 +84,41 @@ export function useAdminPageLogic() {
       await unbanMutation.mutateAsync({ userId: selectedUserId });
     } catch (err) {
       console.error("Unban failed:", err);
+    }
+  };
+
+  const handlePromote = async (targetRole: "admin" | "support") => {
+    if (!selectedUserId) return;
+    try {
+      await promoteMutation.mutateAsync({ userId: selectedUserId, targetRole });
+    } catch (err) {
+      console.error("Promote failed:", err);
+    }
+  };
+
+  const handleDemote = async () => {
+    if (!selectedUserId) return;
+    try {
+      await demoteMutation.mutateAsync({ userId: selectedUserId });
+    } catch (err) {
+      console.error("Demote failed:", err);
+    }
+  };
+
+  const handleUpdateCoins = async (
+    profileId: number,
+    displayName: string,
+    coins: number,
+  ) => {
+    try {
+      await updateProfileMutation.mutateAsync({
+        profileId,
+        payload: { id: profileId, display_name: displayName, coins },
+        optimistic: false,
+        invalidateAfterSuccess: true,
+      });
+    } catch (err) {
+      console.error("Update coins failed:", err);
     }
   };
 
@@ -157,6 +200,12 @@ export function useAdminPageLogic() {
     handleUnban,
     banMutation,
     unbanMutation,
+    promoteMutation,
+    demoteMutation,
+    handlePromote,
+    handleDemote,
+    updateProfileMutation,
+    handleUpdateCoins,
     cardBg,
     panelBg,
     textColor,

@@ -8,6 +8,9 @@ import { LavaLampBackground } from "./LavaLampBackground";
 import { SynthwaveBackground } from "./SynthwaveBackground";
 import { SakuraBackground } from "./SakuraBackground";
 import { StormBackground } from "./StormBackground";
+import { RainOnGlassBackground } from "./RainOnGlassBackground";
+import { GlitchBackground } from "./GlitchBackground";
+import { ParticleWebBackground } from "./ParticleWebBackground";
 
 interface Props {
   animationKey: AnimationKey;
@@ -49,6 +52,12 @@ function makeBackground(
       return <SakuraBackground {...shared} />;
     case "storm":
       return <StormBackground {...shared} />;
+    case "rainonglass":
+      return <RainOnGlassBackground {...shared} />;
+    case "glitch":
+      return <GlitchBackground {...shared} />;
+    case "particleweb":
+      return <ParticleWebBackground {...shared} />;
     default:
       return null;
   }

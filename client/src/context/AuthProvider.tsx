@@ -6,6 +6,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState<bigint | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSupport, setIsSupport] = useState(false);
 
   const { data, isLoading } = useWhoAmIQuery();
 
@@ -15,6 +16,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (data?.id) {
       setUserId(BigInt(data.id));
       setIsAdmin(data.role === "admin");
+      setIsSupport(data.role === "support");
       setIsLoggedIn(true);
     }
   }, [data, isLoading]);
@@ -29,6 +31,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsLoggedIn,
         isAdmin,
         setIsAdmin,
+        isSupport,
+        setIsSupport,
       }}
     >
       {children}

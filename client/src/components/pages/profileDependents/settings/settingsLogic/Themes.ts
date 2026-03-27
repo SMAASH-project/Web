@@ -99,6 +99,27 @@ export const THEMES: Theme[] = [
     colorRight: "#f5c2a6",
     animationKey: "sakura",
   },
+  {
+    name: "Monsoon",
+    colorLeft: "#1a2a3a",
+    colorMiddle: "#2d4a6a",
+    colorRight: "#4a7a9b",
+    animationKey: "rainonglass",
+  },
+  {
+    name: "Corrupted",
+    colorLeft: "#0d0d1a",
+    colorMiddle: "#1a0a2e",
+    colorRight: "#2d1b4e",
+    animationKey: "glitch",
+  },
+  {
+    name: "Nebula",
+    colorLeft: "#1a1040",
+    colorMiddle: "#6d28d9",
+    colorRight: "#06b6d4",
+    animationKey: "particleweb",
+  },
 ];
 
 export const applyTheme = (
