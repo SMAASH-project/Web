@@ -45,7 +45,7 @@ func PostToDTO(post models.Post) PostReadDTO {
 		ImgAlt:    post.ImgAlt,
 		ImgPos:    post.ImgPos,
 		Content:   post.Content,
-		CreatedAt: post.CreatedAt.Format(DateFormat),
+		CreatedAt: post.CreatedAt.Format(DATE_FORMAT),
 	}
 }
 

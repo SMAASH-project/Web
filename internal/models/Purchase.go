@@ -1,8 +1,6 @@
 package models
 
 import (
-	"time"
-
 	"gorm.io/gorm"
 )
 
@@ -12,8 +10,7 @@ type Purchase struct {
 	PlayerProfile   PlayerProfile
 	ItemID          uint `gorm:"not null"`
 	Item            Item
-	Count           int       `gorm:"not null"`
-	Date            time.Time `gorm:"not null"`
+	Count           int `gorm:"not null"`
 }
 
 func (p Purchase) GetID() uint {

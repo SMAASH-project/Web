@@ -26,12 +26,12 @@ type MatchCreateDTO struct {
 }
 
 func ParseMatchCreateTimes(dto MatchCreateDTO) (time.Time, time.Time, error) {
-	startedAt, err := time.Parse(DateFormat, dto.StartedAt)
+	startedAt, err := time.Parse(DATE_TIME_FORMAT, dto.StartedAt)
 	if err != nil {
 		return time.Time{}, time.Time{}, ErrDateFormatIncorrect
 	}
 
-	endedAt, err := time.Parse(DateFormat, dto.EndedAt)
+	endedAt, err := time.Parse(DATE_TIME_FORMAT, dto.EndedAt)
 	if err != nil {
 		return time.Time{}, time.Time{}, ErrDateFormatIncorrect
 	}
