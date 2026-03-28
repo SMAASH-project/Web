@@ -79,6 +79,7 @@ export function BioluminescenceBackground({ paused = false }: Props) {
     function draw(now: number) {
       animId = requestAnimationFrame(draw);
       if (pausedRef.current) return;
+      if (!canvas || !ctx) return;
 
       const dt = Math.min((now - lastTime) / 1000, 0.05);
       lastTime = now;
