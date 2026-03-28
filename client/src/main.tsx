@@ -98,11 +98,11 @@ const router = createBrowserRouter([
           { path: "/app/profile", element: withBoundary(<ProfilePage />) },
           { path: "/app/settings", element: withBoundary(<SettingsPage />) },
           { path: "/app/profile-selector", element: withBoundary(<ProfileSelectorPage />) },
+          { path: "/app/admin", element: withBoundary(<AdminPage />) },
+          { path: "/app/debug", element: withBoundary(<DebugPage />) },
         ],
       },
       { path: "*", element: <NotFoundPage /> },
-      { path: "/app/admin", element: withBoundary(<AdminPage />) },
-      { path: "/app/debug", element: withBoundary(<DebugPage />) },
     ],
   },
 ]);

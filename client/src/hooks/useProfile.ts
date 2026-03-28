@@ -68,7 +68,17 @@ function getProfilePictureUrl(profileId: number): string {
   return `/api/profiles/${profileId}/pfp${version ? `?v=${version}` : ""}`;
 }
 
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const MAX_PFP_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+
 async function uploadProfilePicture(profileId: number, file: File) {
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    throw new Error("Only JPEG, PNG, WebP, and GIF images are allowed.");
+  }
+  if (file.size > MAX_PFP_SIZE_BYTES) {
+    throw new Error("Image must be smaller than 5 MB.");
+  }
+
   const formData = new FormData();
   formData.append("profilePicture", file);
 
