@@ -17,7 +17,6 @@ import { FormAlert } from "@/components/ui/form-alert";
 import { cn } from "@/lib/utils";
 import { Link, useNavigate } from "react-router-dom";
 import React from "react";
-import { generateRandomUsername } from "@/lib/generateUsername";
 import { useSignupMutation } from "@/hooks/useQueryHooks";
 import {
   useGoogleReCaptcha,
@@ -41,12 +40,10 @@ function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
   const captchaEnabled = true;
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
-  const [username, setUsername] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [validationError, setValidationError] = React.useState("");
 
   const navigate = useNavigate();
-  const randomUsername = generateRandomUsername();
   const signupMutation = useSignupMutation();
   const { t } = useTranslation("auth");
   const { settings, updateSetting } = useSettings();
@@ -54,10 +51,6 @@ function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username.length < 3) {
-      setValidationError(t("signup.errorUsernameShort"));
-      return;
-    }
     if (password !== confirmPassword) {
       setValidationError(t("signup.errorPasswordMismatch"));
       return;
@@ -88,7 +81,7 @@ function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
 
     setValidationError("");
     try {
-      await signupMutation.mutateAsync({ email, password, username });
+      await signupMutation.mutateAsync({ email, password });
       navigate("/app/login");
     } catch {
       // error displayed via signupMutation.isError below
@@ -106,7 +99,7 @@ function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
       : "");
 
   return (
-    <div className={cn("w-full max-w-md px-4 sm:px-0", className)} {...props}>
+    <div className={cn("relative z-10 w-full max-w-md px-4 sm:px-0", className)} {...props}>
       <div className="flex justify-end mb-2">
         <LanguageToggle
           language={settings.language}
@@ -121,24 +114,6 @@ function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
         <CardContent>
           <form onSubmit={handleSubmit}>
             <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="username" className="text-gray-900!">
-                  {t("signup.username")}
-                </FieldLabel>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder={`${randomUsername.prefix}${randomUsername.suffix}`}
-                  value={username}
-                  onChange={(e) => {
-                    setUsername(e.target.value);
-                    if (validationError) setValidationError("");
-                  }}
-                  disabled={signupMutation.isPending}
-                  required
-                />
-                <FieldDescription>{t("signup.usernameHint")}</FieldDescription>
-              </Field>
               <Field>
                 <FieldLabel htmlFor="email" className="text-gray-900!">
                   {t("signup.email")}

@@ -23,7 +23,7 @@ export function PasswordResetPage({
   const { settings, updateSetting } = useSettings();
 
   return (
-    <div className={cn("w-full max-w-md px-4 sm:px-0", className)} {...props}>
+    <div className={cn("relative z-10 w-full max-w-md px-4 sm:px-0", className)} {...props}>
       <div className="flex justify-end mb-2">
         <LanguageToggle
           language={settings.language}

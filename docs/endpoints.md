@@ -27,9 +27,10 @@ template (with potential responses):
   - 500 Internal Server Error: on server failiure
 
 ## Authentication endpoints:
-- POST /api/auth/signup - registers a new user, returns new user
+- POST /api/auth/signup - registers a new user, returns new user. Accepts `email` and `password`.
   - 201 Created: on success
-  - 400 Bad Request: on request body with wrong format and on attemtping to sign up with an email that already has a user registered
+  - 400 Bad Request: on request body with wrong format
+  - 409 Conflict: on attempting to sign up with an email that already has a user registered
   - 500 Internal Server Error: on server failiure
 - POST /api/auth/login - logs in an existing user
   - 200 OK: on success

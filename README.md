@@ -58,7 +58,7 @@ just all
 This command will build the both the backend and the frontend, run all unit tests and seed the database with predefined data. For more on the project's seeder implementation, see the [seeder](#database-seeding) section of this document.
 
 3 - Run:
-Run the generated binary executable inside the build folder. Open your browser of choice, and navigate to [http://localhost/8080/app](http://localhost/8080/app) and admire the beauty of our creation (xd).
+Run the generated binary executable inside the build folder. Open your browser of choice, and navigate to [http://localhost:8080/app](http://localhost:8080/app) and admire the beauty of our creation (xd).
 
 > [!IMPORTANT]
 > So far the output of the main executable file is without extension, meaning the built binary most likely won't run on Windows. Fixing this is on our todo list.
@@ -195,7 +195,7 @@ Here are the branches defined in this repository (and how to use them):
 - **main**: The main branch, you cannot push here. Main can only be populated via pull request from the **test** branch.
 - **test**: This branch is for testing the application before merging into main. You cannot push here, test can only be populated via pull requests from the **backend** and **frontend** branches.
 - **backend**: For developing the Go backend server. If you've worked on the server, push your commits here.
-- **fontend**: For developing the React SPA frontend. If you've worked on the website, push your commits here.
+- **frontend**: For developing the React SPA frontend. If you've worked on the website, push your commits here.
 
 Flow of version control:
 ![Chart depicting the flow of version control](docs/version-control-chart.png)

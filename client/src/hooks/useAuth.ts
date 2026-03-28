@@ -23,7 +23,6 @@ export interface WhoAmIResponse {
 export interface SignupPayload {
   email: string;
   password: string;
-  username: string;
   role_id?: number;
 }
 
