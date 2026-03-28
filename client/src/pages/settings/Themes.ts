@@ -104,14 +104,7 @@ export const THEMES: Theme[] = [
     colorLeft: "#1a2a3a",
     colorMiddle: "#2d4a6a",
     colorRight: "#4a7a9b",
-    animationKey: "rainonglass",
-  },
-  {
-    name: "Corrupted",
-    colorLeft: "#0d0d1a",
-    colorMiddle: "#1a0a2e",
-    colorRight: "#2d1b4e",
-    animationKey: "glitch",
+    animationKey: "puddleripples",
   },
   {
     name: "Nebula",
@@ -119,6 +112,20 @@ export const THEMES: Theme[] = [
     colorMiddle: "#6d28d9",
     colorRight: "#06b6d4",
     animationKey: "particleweb",
+  },
+  {
+    name: "Abyss",
+    colorLeft: "#000d1a",
+    colorMiddle: "#001a2e",
+    colorRight: "#003322",
+    animationKey: "bioluminescence",
+  },
+  {
+    name: "Starmap",
+    colorLeft: "#050510",
+    colorMiddle: "#0a0a20",
+    colorRight: "#10103a",
+    animationKey: "constellation",
   },
 ];
 

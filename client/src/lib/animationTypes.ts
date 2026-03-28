@@ -6,9 +6,10 @@ export type AnimationKey =
   | "synthwave"
   | "sakura"
   | "storm"
-  | "rainonglass"
-  | "glitch"
-  | "particleweb";
+  | "particleweb"
+  | "puddleripples"
+  | "bioluminescence"
+  | "constellation";
 
 export const ANIMATION_LABELS: Record<AnimationKey, string> = {
   fishtank: "Fishtank",
@@ -18,9 +19,10 @@ export const ANIMATION_LABELS: Record<AnimationKey, string> = {
   synthwave: "Synthwave",
   sakura: "Sakura",
   storm: "Storm",
-  rainonglass: "Rain on Glass",
-  glitch: "Glitch",
   particleweb: "Particle Web",
+  puddleripples: "Puddle Ripples",
+  bioluminescence: "Bioluminescence",
+  constellation: "Constellation",
 };
 
 export const ALL_ANIMATION_KEYS = Object.keys(
