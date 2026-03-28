@@ -30,21 +30,21 @@ import {
   AnimatedAccordionContent,
   AnimatedAccordionItem,
   AnimatedAccordionTrigger,
-} from "@/lib/miscAnimations/AnimatedAccordion";
+} from "@/animations/AnimatedAccordion";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MessageSquarePlus, X } from "lucide-react";
-import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { DateTime } from "luxon";
 import type { NewsPost } from "@/types/PageTypes";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { RadioGroupChoiceCard } from "./addAndEdit/RadioGroupChoiceCard";
-import { ResizableVertical } from "./addAndEdit/ResizableVertical";
-import { ResizableHorizontal } from "./addAndEdit/ResizableHorizontal";
-import { CategorySelector } from "./addAndEdit/CategorySelector";
-import { useNewsForm } from "./newsPageLogic/useNewsForm";
+import { RadioGroupChoiceCard } from "./RadioGroupChoiceCard";
+import { ResizableVertical } from "./ResizableVertical";
+import { ResizableHorizontal } from "./ResizableHorizontal";
+import { CategorySelector } from "./CategorySelector";
+import { useNewsForm } from "../useNewsForm";
 
 export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
   const { settings } = useSettings();

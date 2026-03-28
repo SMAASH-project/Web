@@ -8,7 +8,7 @@ import {
   FieldTitle,
 } from "@/components/ui/field";
 import { Switch } from "@/components/ui/switch";
-import { useSettings } from "@/components/pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { getTextColor, getTextShadow, getSubtextColor } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 

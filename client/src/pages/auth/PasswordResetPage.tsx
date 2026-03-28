@@ -1,21 +1,21 @@
 import { cn } from "@/lib/utils";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../ui/card";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "../ui/field";
-import { Input } from "../ui/input";
+} from "@/components/ui/card";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { useSettings } from "@/components/pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
 
-export function PasswordResetForm({
+export function PasswordResetPage({
   className,
   ...props
 }: React.ComponentProps<"div">) {

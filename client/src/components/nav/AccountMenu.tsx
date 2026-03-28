@@ -12,7 +12,7 @@ import { User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { useNavbarContext } from "@/context/NavbarContextUtils";
-import { useSettings } from "../pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "@/context/AuthContext";
 import { useLogoutMutation } from "@/hooks/useQueryHooks";

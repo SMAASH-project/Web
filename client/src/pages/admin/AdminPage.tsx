@@ -14,11 +14,11 @@
 
 import { useContext, useState, useCallback } from "react";
 import Navbar from "@/components/nav/Navbar";
-import { CardAnimation } from "@/lib/miscAnimations/OnloadAnimationCard";
-import { useSettings } from "../settings/settingsLogic/SettingsContext";
+import { CardAnimation } from "@/animations/CardAnimation";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { AuthContext } from "@/context/AuthContext";
-import { NotFoundPage } from "@/components/pages/mainPages/NotFoundPage";
-import AdminPageContent from "./adminComponents/AdminPageContent";
+import { NotFoundPage } from "@/pages/NotFoundPage";
+import AdminPageContent from "./AdminPageContent";
 import { getTextColor } from "@/lib/utils";
 
 // ─── Page wrapper (auth guard) ────────────────────────────────────────────────

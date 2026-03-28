@@ -1,21 +1,21 @@
 import { cn } from "@/lib/utils";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../ui/card";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "../ui/field";
-import { Input } from "../ui/input";
-import { FormAlert } from "../ui/form-alert";
+} from "@/components/ui/card";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { FormAlert } from "@/components/ui/form-alert";
 import { Link, useNavigate } from "react-router-dom";
 import React, { useEffect, useRef, useState } from "react";
 import { AuthContext } from "@/context/AuthContext";
 import { useLoginMutation } from "@/hooks/useQueryHooks";
 import { useTranslation } from "react-i18next";
-import { useSettings } from "@/components/pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
 import { extractErrorMessage } from "@/lib/utils/extractErrorMessage";
 import type { AxiosError } from "axios";
@@ -23,7 +23,7 @@ import type { AxiosError } from "axios";
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_SECONDS = 30;
 
-export function LoginForm({
+export function LoginPage({
   className,
   ...props
 }: React.ComponentProps<"div">) {

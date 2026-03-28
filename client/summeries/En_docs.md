@@ -36,33 +36,84 @@ client/
 ├── vite.config.ts
 ├── tsconfig.app.json
 └── src/
-    ├── main.tsx                # Router, lazy imports, StrictMode
+    ├── main.tsx                # Router, lazy imports, withBoundary(), StrictMode
     ├── App.tsx                 # Auth redirect gate
-    ├── RootLayout.tsx          # All providers + Suspense boundary
+    ├── RootLayout.tsx          # All providers + Suspense boundary + Toaster
     ├── Wrapper.tsx             # Full-page gradient + CSS custom properties
+    ├── animations/             # Reusable Motion wrappers + page-level stagger components
+    │   ├── CardAnimation.tsx   # Spring scale-in entry for all main pages
+    │   ├── LoadPost.tsx        # List row stagger (opacity + y)
+    │   ├── NavbarAnimation.tsx
+    │   ├── ColorInterpolation.tsx
+    │   └── accordion/
+    ├── assets/
+    ├── backgrounds/            # Animated background canvas components
+    ├── components/
+    │   ├── ErrorBoundary.tsx   # Class-based error boundary + withBoundary() used in main.tsx
+    │   ├── nav/                # Navbar, mobile drawer, account menu
+    │   └── ui/                 # Shared UI primitives (shadcn-style)
     ├── context/                # Auth + Navbar contexts
     ├── hooks/                  # React Query hooks (domain-split)
+    │   ├── useAuth.ts
+    │   ├── useAdmin.ts
+    │   ├── useDebug.ts
+    │   ├── useProfile.ts
+    │   └── useQueryHooks.ts    # Re-exports + misc hooks
     ├── lib/
     │   ├── apiClient.ts        # Axios instance + interceptors
-    │   ├── queryKeys.ts        # Centralised query key factory
     │   ├── animationTypes.ts   # AnimationKey union + ANIMATION_LABELS
+    │   ├── i18n.ts             # i18next config
+    │   ├── queryKeys.ts        # Centralised query key factory
+    │   ├── toast.ts            # Pub/sub toast store (no external deps)
     │   ├── utils.ts            # Barrel re-export of all util modules
-    │   ├── utils/              # dateFormat, themeClasses, liquidGlass,
-    │   │                       #   colorMath, classnames, extractErrorMessage,
-    │   │                       #   sectionStyle
-    │   ├── miscAnimations/     # Reusable Motion wrappers
-    │   └── pageAnimations/     # Page-level stagger components
-    ├── directory/              # Animated background canvas components
-    ├── components/
-    │   ├── forms/              # Auth forms, ProfileSelector, AddNewProfile
-    │   ├── nav/                # Navbar, mobile drawer, account menu
-    │   ├── pages/
-    │   │   ├── mainPages/      # Releases, News, Webstore, Leaderboard, Gallery
-    │   │   └── profileDependents/  # Profile, Settings, Admin, Debug
-    │   └── ui/                 # Shared UI primitives (shadcn-style)
+    │   └── utils/              # dateFormat, themeClasses, liquidGlass,
+    │                           #   colorMath, classnames, extractErrorMessage,
+    │                           #   sectionStyle
     ├── locales/
     │   ├── en/                 # English — 9 namespace files
     │   └── hu/                 # Hungarian — same structure
+    ├── pages/
+    │   ├── admin/
+    │   │   ├── AdminPage.tsx
+    │   │   ├── AdminPageContent.tsx
+    │   │   ├── useAdminPageLogic.ts
+    │   │   ├── useBanDialogLogic.ts
+    │   │   └── components/     # UserList, UserDetail, ProfilesPanel,
+    │   │                       #   BanDialog, BanPresetCard, BanCustomRange, UserListItem
+    │   ├── auth/               # LoginPage, SignUpPage, PasswordResetPage
+    │   ├── debug/
+    │   │   ├── DebugPage.tsx
+    │   │   ├── DebugPageContent.tsx
+    │   │   └── tabs/           # SystemTab, CacheTab, EndpointsTab, GameDataTab, shared
+    │   ├── gallery/
+    │   ├── leaderboard/
+    │   ├── news/
+    │   │   ├── NewsPage.tsx
+    │   │   ├── useNewsPosts.ts
+    │   │   ├── useNewsForm.ts
+    │   │   ├── useNewsCategoryFilter.ts
+    │   │   └── components/     # AddNews, EditButton, RemoveButton, Filter,
+    │   │                       #   CategoryBadge, CategorySelector, RadioGroupChoiceCard, …
+    │   ├── profile/
+    │   ├── profile-selector/
+    │   │   ├── ProfileSelectorPage.tsx
+    │   │   ├── AddNewProfileDialog.tsx
+    │   │   ├── ProfilesContext.tsx
+    │   │   ├── ProfilesTypes.ts
+    │   │   └── useProfiles.ts
+    │   ├── releases/
+    │   ├── settings/
+    │   │   ├── SettingsContext.tsx
+    │   │   ├── ColorContext.ts
+    │   │   ├── ColorProvider.tsx
+    │   │   ├── Themes.ts
+    │   │   ├── SettingsPage.tsx
+    │   │   └── components/
+    │   ├── webstore/
+    │   │   ├── WebstorePage.tsx
+    │   │   ├── useItems.ts
+    │   │   └── components/     # Item, CreateItemDialog, SearchItem, ItemFilters, RemoveItemButton
+    │   └── NotFoundPage.tsx
     └── types/                  # Shared TypeScript interfaces
 ```
 
@@ -70,27 +121,27 @@ client/
 
 ## 2. Entry Points & Routing
 
-Auth-critical pages (`login`, `signup`, `reset-password`) are **eager-loaded**. All others are **lazy-loaded** via `React.lazy`.
+Auth-critical pages (`login`, `signup`, `reset-password`) are **eager-loaded**. All others are **lazy-loaded** via `React.lazy`. Every lazy route is wrapped with `withBoundary()` from `components/ErrorBoundary.tsx`, which catches render errors per-route without crashing the whole app.
 
 ### Route table
 
-| Path                    | Component             | Access          |
-| ----------------------- | --------------------- | --------------- |
-| `/app`                  | `App` (redirect gate) | —               |
-| `/app/login`            | `LoginForm`           | Public          |
-| `/app/signup`           | `SignupForm`          | Public          |
-| `/app/reset-password`   | `PasswordResetForm`   | Public          |
-| `/app/leaderboard`      | `LeaderboardPage`     | Public          |
-| `/app/gallery`          | `GalleryPage`         | Public          |
-| `/app/releases`         | `ReleasesPage`        | Logged in       |
-| `/app/news`             | `NewsPage`            | Logged in       |
-| `/app/webstore`         | `WebstorePage`        | Logged in       |
-| `/app/profile`          | `ProfilePage`         | Logged in       |
-| `/app/profile-selector` | `ProfileSelectorForm` | Logged in       |
-| `/app/settings`         | `SettingsPage`        | Logged in       |
-| `/app/admin`            | `AdminPage`           | Admin only      |
-| `/app/debug`            | `DebugPage`           | Admin + Support |
-| `*`                     | `NotFoundPage`        | —               |
+| Path                    | Component              | Access          |
+| ----------------------- | ---------------------- | --------------- |
+| `/app`                  | `App` (redirect gate)  | —               |
+| `/app/login`            | `LoginPage`            | Public          |
+| `/app/signup`           | `SignUpPage`           | Public          |
+| `/app/reset-password`   | `PasswordResetPage`    | Public          |
+| `/app/leaderboard`      | `LeaderboardPage`      | Public          |
+| `/app/gallery`          | `GalleryPage`          | Public          |
+| `/app/releases`         | `ReleasesPage`         | Logged in       |
+| `/app/news`             | `NewsPage`             | Logged in       |
+| `/app/webstore`         | `WebstorePage`         | Logged in       |
+| `/app/profile`          | `ProfilePage`          | Logged in       |
+| `/app/profile-selector` | `ProfileSelectorPage`  | Logged in       |
+| `/app/settings`         | `SettingsPage`         | Logged in       |
+| `/app/admin`            | `AdminPage`            | Admin only      |
+| `/app/debug`            | `DebugPage`            | Admin + Support |
+| `*`                     | `NotFoundPage`         | —               |
 
 `App.tsx` reads `AuthContext.isLoggedIn` + `isInitializing`, then redirects to `/app/releases` or `/app/login`. Shows a spinner while auth initialises.
 
@@ -109,6 +160,8 @@ PersistQueryClientProvider   ← React Query + localStorage persistence
               Suspense       ← spinner fallback for lazy routes
                 Outlet       ← active route
 ```
+
+`<Toaster />` is rendered outside the provider tree (sibling of `PersistQueryClientProvider`) so toast notifications are always visible regardless of route errors.
 
 **React Query defaults** (set in `RootLayout.tsx`):
 
@@ -222,7 +275,7 @@ useAnimations = true
 
 ### Adding a New Background
 
-1. Create `src/directory/MyBackground.tsx` — accepts `{ colorLeft, colorMiddle, colorRight, paused? }`, renders `<canvas className="fixed inset-0 z-0 opacity-XX pointer-events-none" />`
+1. Create `src/backgrounds/MyBackground.tsx` — accepts `{ colorLeft, colorMiddle, colorRight, paused? }`, renders `<canvas className="fixed inset-0 z-0 opacity-XX pointer-events-none" />`
 2. Add `"mykey"` to `AnimationKey` in `src/lib/animationTypes.ts`
 3. Add `mykey: "My Label"` to `ANIMATION_LABELS`
 4. Add `case "mykey": return <MyBackground {...shared} />;` in `AnimatedBackground.tsx`
@@ -253,7 +306,7 @@ useAnimations = true
 }
 ```
 
-`isSupport` is set when `whoami` returns `role === "support"`. Both `isAdmin` and `isSupport` must be cleared on logout — done in `Navbar`, `AccountMenu`, and `ProfileSelectorForm`.
+`isSupport` is set when `whoami` returns `role === "support"`. Both `isAdmin` and `isSupport` must be cleared on logout — done in `Navbar`, `AccountMenu`, and `ProfileSelectorPage`.
 
 ### `SettingsContext`
 
@@ -320,9 +373,9 @@ queryKeys.items.all; // ["items"]
 queryKeys.purchases.byProfileId(id); // ["purchases", "byProfileId", id]
 ```
 
-Debug panel uses its own `debugQueryKeys` exported from `useDebugHooks.ts`.
+Debug panel uses its own `debugQueryKeys` exported from `useDebug.ts`.
 
-### `useAuthHooks.ts`
+### `src/hooks/useAuth.ts`
 
 | Hook                           | Method | Endpoint        |
 | ------------------------------ | ------ | --------------- |
@@ -332,7 +385,7 @@ Debug panel uses its own `debugQueryKeys` exported from `useDebugHooks.ts`.
 | `useLogoutMutation()`          | POST   | `/auth/logout`  |
 | `useUpdateUserEmailMutation()` | PUT    | `/users/:id`    |
 
-### `useProfileHooks.ts`
+### `src/hooks/useProfile.ts`
 
 | Hook                                | Description                                                                                                                                                                                                                     |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -344,7 +397,7 @@ Debug panel uses its own `debugQueryKeys` exported from `useDebugHooks.ts`.
 
 **Display name rules:** clamped to 20 chars via `clampDisplayName()`. Duplicate names get a random 4-char suffix.
 
-### `useAdminHooks.ts`
+### `src/hooks/useAdmin.ts`
 
 | Hook                       | Endpoint                  | Notes                                                             |
 | -------------------------- | ------------------------- | ----------------------------------------------------------------- |
@@ -354,7 +407,7 @@ Debug panel uses its own `debugQueryKeys` exported from `useDebugHooks.ts`.
 | `usePromoteUserMutation()` | `POST /users/:id/promote` | Body: `{ id, target_role: "admin"\|"support" }`                   |
 | `useDemoteUserMutation()`  | `POST /users/:id/demote`  | No body — always demotes to `"user"`                              |
 
-### `useDebugHooks.ts`
+### `src/hooks/useDebug.ts`
 
 Stats queries (also used by `LeaderboardPage`):
 
@@ -369,7 +422,7 @@ Game data queries (admin-only endpoints):
 - `useDebugLevelsQuery()` — `GET /levels`
 - `useDebugItemsQuery()` — `GET /items?page=1&page_size=100`
 
-### Content hooks (`useContentHooks.ts`)
+### Content hooks (`useQueryHooks.ts`)
 
 Infinite-query hooks for paginated content:
 
@@ -378,6 +431,20 @@ useReleasesInfiniteQuery(os, pageSize?)     // GET /releases?os=&page=&pageSize=
 useItemsInfiniteQuery(filters?, pageSize?)  // GET /items?...
 useNewsInfiniteQuery(categories?, pageSize?) // GET /news?categories=&page=&pageSize=
 ```
+
+### `src/lib/toast.ts`
+
+Minimal pub/sub store — no external dependencies.
+
+```ts
+import { toast } from "@/lib/toast";
+toast.success("Saved!");
+toast.error("Something went wrong.");
+toast.info("Loading…");
+// subscribe(fn): returns unsubscribe function — used internally by <Toaster />
+```
+
+`toast.error/success/info` calls are made inside all mutation handlers (admin actions, news CRUD, webstore purchases/create/delete) to give immediate feedback.
 
 ---
 
@@ -393,7 +460,7 @@ Fetches from `GET https://api.github.com/repos/SMAASH-project/SMAASH/releases`. 
 
 ### News (`/app/news`)
 
-Markdown-rendered posts (`react-markdown` + `remark-gfm`) with category filter, image support (`imagePosition: "Top"|"Right"`, `imageSize`), admin edit/delete. `LoadPost` stagger on entries.
+Markdown-rendered posts (`react-markdown` + `remark-gfm`) with category filter, image support (`imagePosition: "Top"|"Right"`, `imageSize`), admin edit/delete. `LoadPost` stagger on entries. Shows 3 skeleton cards while loading.
 
 **Category colours:**
 
@@ -406,7 +473,7 @@ Markdown-rendered posts (`react-markdown` + `remark-gfm`) with category filter, 
 
 ### Webstore (`/app/webstore`)
 
-Item shop. Coin balance from `selectedProfile.coins`. Filters: kind, rarity, combat type, ownership. Infinite scroll (12/page).
+Item shop. Coin balance from `selectedProfile.coins`. Filters: kind, rarity, combat type, ownership. Infinite scroll (12/page). Shows 8 skeleton item cards while initial load is in progress.
 
 **Data flow:**
 
@@ -450,6 +517,12 @@ Auth-gated: non-admins see `<NotFoundPage />` (indistinguishable from a real 404
 
 Columns animate in sequentially with `motion.div` after `CardAnimation` completes (delays: 50ms, 180ms, 310ms). User list rows use `LoadPost` stagger. User detail cards use `AnimatePresence mode="wait"` keyed on `selectedUser.id` — cross-fades when user changes with staggered card fade (0ms header, 80ms stats).
 
+**Pagination:** User list is paginated client-side with `PAGE_SIZE = 15`. Prev/Next controls appear below the list. Page resets automatically when the search query changes.
+
+**Toast feedback:** All admin actions (ban, unban, promote, demote, coin save) emit `toast.success` or `toast.error` via `src/lib/toast`.
+
+**Loading state:** While users are fetching, the list shows 6 `<Skeleton>` rows instead of a spinner.
+
 **Role badges:**
 
 | Backend value | Colour       | Icon       |
@@ -480,16 +553,18 @@ Columns animate in sequentially with `motion.div` after `CardAnimation` complete
 
 ### Debug Panel (`/app/debug`)
 
-Admin + support. Fixed-height card (`flex-1`, fills viewport). Left sidebar (144px) with tab buttons + Refresh pinned to bottom. Right: `AnimatePresence mode="wait"` tab content slides left/right on switch (200ms).
+Admin + support. Fixed-height card (`flex-1`, fills viewport). Left sidebar (144px) with tab buttons + Refresh pinned to bottom. Right: `AnimatePresence mode="wait"` tab content slides left/right on switch (200ms). Sidebar and content area each animate in via `motion.div` (`opacity: 0, y: 18` → `opacity: 1, y: 0`) with staggered delays (50ms sidebar, 180ms content), matching the admin panel's entry animation.
+
+Tab content is split into separate files under `src/pages/debug/tabs/`:
 
 **Tabs:**
 
-| Tab       | Access          | Content                                                                                                                                                                                                                                                      |
-| --------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| System    | admin + support | Browser (user agent, language, online, connection, device memory, CPU threads), Display (viewport, screen, pixel ratio, color depth), Session (role, user ID, query cache count, timezone, local time), Environment (base URL, path, build mode, dev server) |
-| Cache     | admin + support | Live React Query cache explorer. Filter by query key. Expandable entries: status icon, last updated, raw data (truncated at 1500 chars), per-entry Invalidate + Remove buttons. Invalidate All + Refresh buttons.                                            |
-| Endpoints | admin + support | API tester. Method selector (GET/POST/PUT/DELETE/PATCH, colour-coded), path input, JSON body textarea, Send button. Quick route presets. Response panel: status code (coloured), latency, raw JSON output.                                                   |
-| Game Data | admin only      | Characters grid (avatar + name + ID), Levels grid (image + name + ID), Store Items list (ID + name + rarity badge + price). All load from admin-only endpoints.                                                                                              |
+| Tab       | File             | Access          | Content                                                                                                                                                                                                                                                      |
+| --------- | ---------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| System    | `SystemTab.tsx`  | admin + support | Browser (user agent, language, online, connection, device memory, CPU threads), Display (viewport, screen, pixel ratio, color depth), Session (role, user ID, query cache count, timezone, local time), Environment (base URL, path, build mode, dev server) |
+| Cache     | `CacheTab.tsx`   | admin + support | Live React Query cache explorer. Filter by query key. Expandable entries: status icon, last updated, raw data (truncated at 1500 chars), per-entry Invalidate + Remove buttons. Invalidate All + Refresh buttons.                                            |
+| Endpoints | `EndpointsTab.tsx` | admin + support | API tester. Method selector (GET/POST/PUT/DELETE/PATCH, colour-coded), path input, JSON body textarea, Send button. Quick route presets. Response panel: status code (coloured), latency, raw JSON output.                                                   |
+| Game Data | `GameDataTab.tsx` | admin only     | Characters grid (avatar + name + ID), Levels grid (image + name + ID), Store Items list (ID + name + rarity badge + price). All load from admin-only endpoints.                                                                                              |
 
 ---
 
@@ -505,25 +580,25 @@ Admin + support. Fixed-height card (`flex-1`, fills viewport). Left sidebar (144
 
 ## 11. Forms
 
-All use `<FormAlert>` for error display and `extractErrorMessage()` for Axios error normalisation.
+All use `<FormAlert>` for error display and `extractErrorMessage()` for Axios error normalisation. Auth forms live in `src/pages/auth/`.
 
-### `LoginForm.tsx`
+### `LoginPage.tsx`
 
 Email + password. On success: sets `isLoggedIn`/`userId`/`isAdmin`/`isSupport`, navigates to `/app/profile-selector`. 401 → specific "Incorrect email or password" message.
 
-### `SignupForm.tsx`
+### `SignUpPage.tsx`
 
 Username / email / password / confirm. Client-side validation errors take priority. reCAPTCHA v3 — token fetched only on submit via `executeRecaptcha("signup")`, not continuously polled.
 
-### `PasswordResetForm.tsx`
+### `PasswordResetPage.tsx`
 
 ⚠️ Renders but fires no mutation. Blocked on `POST /api/auth/reset-password`.
 
-### `ProfileSelectorForm.tsx`
+### `ProfileSelectorPage.tsx`
 
 Profiles as avatars. "Manage Profiles" enables delete. Logout clears `isAdmin` + `isSupport`. `React.memo` + `useCallback` for performance.
 
-### `AddNewProfile.tsx`
+### `AddNewProfileDialog.tsx`
 
 Dialog: display name + optional avatar. Limit: 5 profiles per user. Fully translated (EN/HU).
 
@@ -533,7 +608,7 @@ Dialog: display name + optional avatar. Limit: 5 profiles per user. Fully transl
 
 **Languages:** English (`en`) · Hungarian (`hu`)
 
-`src/lib/I18n.ts` must be imported in `main.tsx` before any component renders.
+`src/lib/i18n.ts` must be imported in `main.tsx` before any component renders.
 
 ### Namespaces
 
@@ -542,7 +617,7 @@ Dialog: display name + optional avatar. Limit: 5 profiles per user. Fully transl
 | `auth.json`     | Login, Signup, PasswordReset                                                 |
 | `nav.json`      | Navbar, mobile drawer, nav items (includes `leaderboard`, `debugPanel` keys) |
 | `settings.json` | Settings page                                                                |
-| `profile.json`  | Profile page, UpdateSheet, ProfileSelector, AddNewProfile                    |
+| `profile.json`  | Profile page, UpdateSheet, ProfileSelector, AddNewProfileDialog              |
 | `releases.json` | Releases page                                                                |
 | `news.json`     | News page                                                                    |
 | `webstore.json` | Webstore page                                                                |
@@ -554,7 +629,7 @@ Language stored in `SettingsContext`. `updateSetting("language", "hu")` automati
 ### Adding a New Language
 
 1. Create `src/locales/<code>/` with the same 9 JSON files
-2. Import in `src/lib/I18n.ts` and add to `resources`
+2. Import in `src/lib/i18n.ts` and add to `resources`
 3. Add button in `SettingsPageContent.tsx` and `LanguageToggle.tsx`
 4. Add the code to the `Language` type in `SettingsContext.tsx`
 
@@ -583,6 +658,8 @@ Components in `src/components/ui/`, shadcn patterns (Radix UI + Tailwind).
 | `FormAlert`      | Inline alert — `variant: "error"\|"success"\|"info"`. Fixes the `[object Object]` error display bug.                                                                                |
 | `Separator`      | Horizontal/vertical rule                                                                                                                                                            |
 | `Resizable`      | Drag-to-resize panels                                                                                                                                                               |
+| `Skeleton`       | Pulse placeholder — `animate-pulse bg-white/10`. Use `className` prop to size it.                                                                                                  |
+| `Toaster`        | Fixed bottom-right toast container. Subscribes to `src/lib/toast`. Renders success/error/info toasts with icons, dismiss button, `slide-in-from-right` animation.                  |
 
 ---
 
@@ -658,11 +735,25 @@ formatDateTime("2026-03-21T17:30:00Z"); // "Mar 21, 2026, 5:30 PM"
 
 ### Animation Utilities
 
-**`CardAnimation`** (`miscAnimations/OnloadAnimationCard.tsx`) — spring scale-in entry (`scale: 0→1`, spring `visualDuration: 1.5, bounce: 0.2`). Used by all main pages.
+**`CardAnimation`** (`src/animations/CardAnimation.tsx`) — spring scale-in entry (`scale: 0→1`, spring `visualDuration: 1.5, bounce: 0.2`). Used by all main pages.
 
-**`LoadPost`** (`pageAnimations/newsPageAnimations/LoadPost.tsx`) — `opacity: 0→1, y: 20→0`, `delay: index * 0.1s`. Used for list row stagger.
+**`LoadPost`** (`src/animations/LoadPost.tsx`) — `opacity: 0→1, y: 20→0`, `delay: index * 0.1s`. Used for list row stagger.
 
 **`sectionStyle`** — CSS-in-JS approach for staggered section animations within already-mounted cards.
+
+### `src/components/ErrorBoundary.tsx`
+
+Class-based React error boundary. Catches render errors in any child and shows a graceful fallback.
+
+```tsx
+// Wrap a subtree manually:
+<ErrorBoundary fallback={<MyFallback />}>
+  <SomeComponent />
+</ErrorBoundary>
+
+// Or use the helper (used in main.tsx for all lazy routes):
+const WrappedPage = withBoundary(lazy(() => import("./pages/MyPage")));
+```
 
 ---
 
@@ -682,10 +773,11 @@ formatDateTime("2026-03-21T17:30:00Z"); // "Mar 21, 2026, 5:30 PM"
 ### Key Optimisations
 
 - Profile picture upload: surgical `setQueriesData` patch on avatar URL only — no refetch
-- `ProfileSelectorForm`: `React.memo` + `useCallback` on avatar + click handler
+- `ProfileSelectorPage`: `React.memo` + `useCallback` on avatar + click handler
 - Settings, Admin, Debug: `animReady` prop strips `backdrop-blur-*` from card during entry spring so browser skips compositing
 - Animated backgrounds: deferred 1600ms fade-in on heavy-card routes
 - reCAPTCHA: token fetched only on submit, not polling
+- All lazy routes wrapped in per-route `ErrorBoundary` — a crash in one page doesn't take down the whole app
 
 ---
 
@@ -704,7 +796,7 @@ profile, err := pc.profilesRepo.ReadByID(ctx, id.(uint), "Purchases")
 profile, err := pc.profilesRepo.ReadByID(ctx, id.(uint), "Purchases", "Purchases.Item")
 ```
 
-**Frontend fix (independent of backend):** on purchase success, optimistically call `setQueryData` on the items cache to flip `owned: true` by item ID — no name matching needed. File: `src/components/pages/mainPages/webstorePageComponents/webstorePageLogic/useItems.ts`.
+**Frontend fix (independent of backend):** on purchase success, optimistically call `setQueryData` on the items cache to flip `owned: true` by item ID — no name matching needed. File: `src/pages/webstore/useItems.ts`.
 
 ---
 
@@ -735,8 +827,8 @@ profile, err := pc.profilesRepo.ReadByID(ctx, id.(uint), "Purchases", "Purchases
 
 ## Appendix: Adding a New Page
 
-1. Create `src/components/pages/mainPages/MyPage.tsx`
-2. Add lazy import in `src/main.tsx`
+1. Create `src/pages/MyPage.tsx`
+2. Add lazy import in `src/main.tsx` and wrap with `withBoundary()`
 3. Add route in `createBrowserRouter`
 4. Add nav item in `navItems.ts` with a `labelKey`
 5. Add translations in `src/locales/en/nav.json` + `src/locales/hu/nav.json`

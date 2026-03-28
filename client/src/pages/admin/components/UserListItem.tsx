@@ -2,7 +2,7 @@ import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChevronRight, Ban } from "lucide-react";
 import { getTextColor, getSubtextColor } from "@/lib/utils";
-import type { AdminUserDTO } from "@/hooks/useAdminHooks";
+import type { AdminUserDTO } from "@/hooks/useAdmin";
 
 export default function UserListItem({
   user,

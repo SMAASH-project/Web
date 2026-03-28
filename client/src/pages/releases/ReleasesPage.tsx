@@ -1,10 +1,10 @@
-import Navbar from "../../nav/Navbar";
-import { SelectOs } from "./releasesPageComponents/SelectOs";
-import { useSettings } from "../profileDependents/settings/settingsLogic/SettingsContext";
+import Navbar from "@/components/nav/Navbar";
+import { SelectOs } from "./components/SelectOs";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { useState } from "react";
-import { Releases } from "./releasesPageComponents/Releases";
-import { SearchRelease } from "./releasesPageComponents/SearchRelease";
-import { useReleases } from "./releasesPageComponents/releasesPageLogic/useReleases";
+import { Releases } from "./components/Releases";
+import { SearchRelease } from "./components/SearchRelease";
+import { useReleases } from "./useReleases";
 import { getTextColor, getTextShadow, getSubtextColor } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 

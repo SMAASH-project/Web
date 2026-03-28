@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
-import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { Search as SearchIcon, X } from "lucide-react";
 import { useState } from "react";
 import { getInputClasses, getSubtextColor } from "@/lib/utils";

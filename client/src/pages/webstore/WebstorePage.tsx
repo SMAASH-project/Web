@@ -1,11 +1,11 @@
-import Navbar from "../../nav/Navbar";
-import { Item } from "./webstorePageComponents/Item";
-import { SearchItem } from "./webstorePageComponents/SearchItem";
-import { ItemFilters } from "./webstorePageComponents/ItemFilters";
-import { useItems } from "./webstorePageComponents/webstorePageLogic/useItems";
-import { CreateItemDialog } from "./webstorePageComponents/CreateItemDialog";
-import { useSettings } from "../profileDependents/settings/settingsLogic/SettingsContext";
-import { LoadPost } from "@/lib/pageAnimations/newsPageAnimations/LoadPost";
+import Navbar from "@/components/nav/Navbar";
+import { Item } from "./components/Item";
+import { SearchItem } from "./components/SearchItem";
+import { ItemFilters } from "./components/ItemFilters";
+import { useItems } from "./useItems";
+import { CreateItemDialog } from "./components/CreateItemDialog";
+import { useSettings } from "@/pages/settings/SettingsContext";
+import { LoadPost } from "@/animations/LoadPost";
 import { ShoppingBag, Loader2, Coins } from "lucide-react";
 import {
   getTextColor,
@@ -16,7 +16,7 @@ import {
 import { useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "@/context/AuthContext";
-import { useProfiles } from "@/components/forms/addNewProfile/useProfiles";
+import { useProfiles } from "@/pages/profile-selector/useProfiles";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function WebstorePage() {

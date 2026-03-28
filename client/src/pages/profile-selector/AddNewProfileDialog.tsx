@@ -13,7 +13,7 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormAlert } from "@/components/ui/form-alert";
-import { generateRandomUsername } from "@/lib/GenerateRandomUsername";
+import { generateRandomUsername } from "@/lib/generateUsername";
 import { useProfiles } from "./useProfiles";
 import { useEffect, useState } from "react";
 
@@ -22,7 +22,7 @@ interface AddNewProfileProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function AddNewProfile({ open, onOpenChange }: AddNewProfileProps) {
+export function AddNewProfileDialog({ open, onOpenChange }: AddNewProfileProps) {
   const { addProfile, profiles } = useProfiles();
   const { t } = useTranslation("profile");
   const [username, setUsername] = useState("");

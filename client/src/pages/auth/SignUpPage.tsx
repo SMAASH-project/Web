@@ -17,19 +17,19 @@ import { FormAlert } from "@/components/ui/form-alert";
 import { cn } from "@/lib/utils";
 import { Link, useNavigate } from "react-router-dom";
 import React from "react";
-import { generateRandomUsername } from "@/lib/GenerateRandomUsername";
+import { generateRandomUsername } from "@/lib/generateUsername";
 import { useSignupMutation } from "@/hooks/useQueryHooks";
 import {
   useGoogleReCaptcha,
   GoogleReCaptchaProvider,
 } from "react-google-recaptcha-v3";
 import { useTranslation } from "react-i18next";
-import { useSettings } from "@/components/pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
 import { extractErrorMessage } from "@/lib/utils/extractErrorMessage";
 import type { AxiosError } from "axios";
 
-export function SignupForm(props: React.ComponentProps<"div">) {
+export function SignUpPage(props: React.ComponentProps<"div">) {
   return (
     <GoogleReCaptchaProvider reCaptchaKey="6LfiUposAAAAAPLDMCXDkIBHkZ0JwtbQ-J5fbbdi">
       <SignupFormInner {...props} />

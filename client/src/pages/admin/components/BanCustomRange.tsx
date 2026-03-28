@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import React, { useCallback, useState } from "react";
 import { Calendar, type DateRange } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { useSettings } from "@/components/pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import {
   getTextColor,
   getSubtextColor,

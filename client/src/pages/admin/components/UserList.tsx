@@ -2,8 +2,8 @@ import { useTranslation } from "react-i18next";
 import React from "react";
 import { Search, Shield, ChevronLeft, ChevronRight } from "lucide-react";
 import UserListItem from "./UserListItem";
-import type { AdminPageLogic } from "@/components/pages/profileDependents/admin/adminLogic/useAdminPageLogic";
-import { LoadPost } from "@/lib/pageAnimations/newsPageAnimations/LoadPost";
+import type { AdminPageLogic } from "@/pages/admin/useAdminPageLogic";
+import { LoadPost } from "@/animations/LoadPost";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function UserList({ logic }: { logic: AdminPageLogic }) {

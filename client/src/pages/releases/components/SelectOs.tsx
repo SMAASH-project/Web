@@ -1,5 +1,5 @@
 import { OsTypes } from "@/types/OsTypes";
-import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import AppleLogo from "@/assets/osLogos/AppleLogoTransparent.svg?url";
 import AndroidLogo from "@/assets/osLogos/AndroidLogoTransparent.png";
 import { useState, useEffect, useRef, useCallback } from "react";

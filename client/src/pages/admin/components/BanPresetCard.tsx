@@ -1,8 +1,8 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-import { useSettings } from "@/components/pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { getButtonClasses, getTextColor, getSubtextColor } from "@/lib/utils";
-import type { BanPreset } from "@/components/pages/profileDependents/admin/adminLogic/useBanDialogLogic";
+import type { BanPreset } from "@/pages/admin/useBanDialogLogic";
 
 interface Props {
   id: BanPreset;

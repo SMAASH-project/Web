@@ -12,7 +12,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useSettings } from "../settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { useTranslation } from "react-i18next";
 import {
   getBackgroundClasses,
@@ -25,7 +25,7 @@ import {
   cn,
 } from "@/lib/utils";
 import { AuthContext } from "@/context/AuthContext";
-import { useProfiles } from "@/components/forms/addNewProfile/useProfiles";
+import { useProfiles } from "@/pages/profile-selector/useProfiles";
 import {
   useWhoAmIQuery,
   useUpdateUserEmailMutation,

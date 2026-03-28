@@ -6,12 +6,12 @@ import {
   usePromoteUserMutation,
   useDemoteUserMutation,
   type AdminUserDTO,
-} from "@/hooks/useAdminHooks";
+} from "@/hooks/useAdmin";
 import {
   useProfilesQuery,
   useUpdateProfileMutation,
 } from "@/hooks/useQueryHooks";
-import { useSettings } from "../../settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import {
   getBackgroundClasses,
   getTextColor,

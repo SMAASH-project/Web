@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
-import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { getSubtextColor } from "@/lib/utils";
 
 interface DownloadReleaseButtonProps {

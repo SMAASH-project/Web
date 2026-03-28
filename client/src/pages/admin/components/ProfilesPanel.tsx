@@ -3,7 +3,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Coins, Plus, Minus, Check, Loader2 } from "lucide-react";
-import type { AdminPageLogic } from "@/components/pages/profileDependents/admin/adminLogic/useAdminPageLogic";
+import type { AdminPageLogic } from "@/pages/admin/useAdminPageLogic";
 import { getButtonClasses, getInputClasses } from "@/lib/utils";
 
 export default function ProfilesPanel({ logic }: { logic: AdminPageLogic }) {

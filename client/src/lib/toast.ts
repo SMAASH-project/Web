@@ -42,6 +42,6 @@ export const toast = {
   /** Subscribe to toast list changes. Returns an unsubscribe function. */
   subscribe: (fn: Listener) => {
     listeners.add(fn);
-    return () => listeners.delete(fn);
+    return () => { listeners.delete(fn); };
   },
 };

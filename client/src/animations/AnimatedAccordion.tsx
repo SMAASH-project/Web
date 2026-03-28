@@ -3,11 +3,11 @@ import * as React from "react";
 import { Accordion as AccordionPrimitive } from "radix-ui";
 import { cn } from "@/lib/utils";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
-import { useAnimatedAccordionContent } from "@/lib/miscAnimations/accordianFunctions/useAnimatedAccordionContent";
+import { useAnimatedAccordionContent } from "@/animations/accordion/useAnimatedAccordionContent";
 import {
   accordionTransition,
   getAccordionAnimate,
-} from "@/lib/miscAnimations/accordianFunctions/accordionMotionConfig";
+} from "@/animations/accordion/accordionMotionConfig";
 
 function AnimatedAccordion({
   className,

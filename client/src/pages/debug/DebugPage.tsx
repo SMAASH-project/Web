@@ -1,9 +1,9 @@
 import { useContext, useState, useCallback } from "react";
 import Navbar from "@/components/nav/Navbar";
-import { CardAnimation } from "@/lib/miscAnimations/OnloadAnimationCard";
-import { useSettings } from "../settings/settingsLogic/SettingsContext";
+import { CardAnimation } from "@/animations/CardAnimation";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { AuthContext } from "@/context/AuthContext";
-import { NotFoundPage } from "@/components/pages/mainPages/NotFoundPage";
+import { NotFoundPage } from "@/pages/NotFoundPage";
 import { DebugPageContent } from "./DebugPageContent";
 import { getTextColor } from "@/lib/utils";
 

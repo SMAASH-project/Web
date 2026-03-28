@@ -1,6 +1,6 @@
 import { RadioGroup } from "@/components/ui/radio-group";
 import { CATEGORY_COLORS, type NewsPost } from "@/types/PageTypes";
-import { useSettings } from "../../../profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { getLiquidGlassTextShadow, getTextColor } from "@/lib/utils";
 
 interface CategorySelectorProps {

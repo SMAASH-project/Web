@@ -1,4 +1,4 @@
-import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { getBackgroundClasses, getSubtextColor } from "@/lib/utils";
 

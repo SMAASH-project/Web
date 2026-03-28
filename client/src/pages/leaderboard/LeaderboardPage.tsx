@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import Navbar from "@/components/nav/Navbar";
-import { useSettings } from "@/components/pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import {
   getBackgroundClasses,
   getTextColor,
@@ -13,7 +13,7 @@ import {
   useTopPlayersQuery,
   useTopLevelsQuery,
   useLeaderboardQuery,
-} from "@/hooks/useDebugHooks";
+} from "@/hooks/useDebug";
 import {
   Trophy,
   Users,
@@ -23,8 +23,8 @@ import {
   Coins,
   Medal,
 } from "lucide-react";
-import { CardAnimation } from "@/lib/miscAnimations/OnloadAnimationCard";
-import { LoadPost } from "@/lib/pageAnimations/newsPageAnimations/LoadPost";
+import { CardAnimation } from "@/animations/CardAnimation";
+import { LoadPost } from "@/animations/LoadPost";
 
 // ─── Animated stat panel ──────────────────────────────────────────────────────
 

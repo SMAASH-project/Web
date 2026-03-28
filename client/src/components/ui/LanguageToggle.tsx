@@ -1,4 +1,4 @@
-import type { Language } from "@/components/pages/profileDependents/settings/settingsLogic/SettingsContext";
+import type { Language } from "@/pages/settings/SettingsContext";
 
 interface LanguageToggleProps {
   language: Language;

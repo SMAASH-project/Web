@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import type { WebstoreItem } from "@/types/PageTypes";
-import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

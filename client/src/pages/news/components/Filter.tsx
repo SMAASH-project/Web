@@ -7,7 +7,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { EllipsisVertical } from "lucide-react";
-import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { FilterSelection } from "./FilterSelection";
 import type { NewsPost } from "@/types/PageTypes";
 import {

@@ -1,6 +1,6 @@
 import { useContext, useMemo } from "react";
-import { ColorContext } from "./components/pages/profileDependents/settings/settingsLogic/color/ColorContext";
-import { useSettings } from "./components/pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { ColorContext } from "@/pages/settings/ColorContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import {
   getAverageHexColor,
   getTextColor,
@@ -9,7 +9,7 @@ import {
 } from "./lib/utils";
 
 import { type AnimationKey } from "@/lib/animationTypes";
-import { AnimatedBackground } from "./directory/AnimatedBackground";
+import { AnimatedBackground } from "@/backgrounds/AnimatedBackground";
 
 interface WrapperProps {
   children: React.ReactNode;

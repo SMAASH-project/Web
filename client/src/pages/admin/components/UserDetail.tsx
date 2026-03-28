@@ -16,7 +16,7 @@ import {
   Users,
   Headphones,
 } from "lucide-react";
-import type { AdminPageLogic } from "@/components/pages/profileDependents/admin/adminLogic/useAdminPageLogic";
+import type { AdminPageLogic } from "@/pages/admin/useAdminPageLogic";
 import { getButtonClasses } from "@/lib/utils";
 import { DateTime } from "luxon";
 

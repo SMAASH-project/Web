@@ -6,23 +6,23 @@ import {
   getTextShadow,
   getButtonClasses,
 } from "@/lib/utils";
-import Navbar from "../../nav/Navbar";
+import Navbar from "@/components/nav/Navbar";
 import { Card } from "@/components/ui/card";
-import { useSettings } from "../profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { Label } from "@/components/ui/label";
 import type { NewsPost } from "@/types/PageTypes";
-import { AddNews } from "@/components/pages/mainPages/newsPageComponents/AddNews";
-import { RemoveButton } from "@/components/pages/mainPages/newsPageComponents/RemoveButton";
-import { EditButton } from "@/components/pages/mainPages/newsPageComponents/EditButton";
+import { AddNews } from "@/pages/news/components/AddNews";
+import { RemoveButton } from "@/pages/news/components/RemoveButton";
+import { EditButton } from "@/pages/news/components/EditButton";
 import { ButtonGroup } from "@/components/ui/button-group";
-import { Search } from "@/components/pages/mainPages/newsPageComponents/Search";
+import { Search } from "@/pages/news/components/Search";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { useNewsPosts } from "@/components/pages/mainPages/newsPageComponents/newsPageLogic/useNewsPosts";
-import { useNewsCategoryFilter } from "@/components/pages/mainPages/newsPageComponents/newsPageLogic/useNewsCategoryFilter";
-import { LoadPost } from "@/lib/pageAnimations/newsPageAnimations/LoadPost";
-import { FilterSelect } from "./newsPageComponents/Filter";
-import { CategoryBadge } from "./newsPageComponents/CategoryBadge";
+import { useNewsPosts } from "@/pages/news/useNewsPosts";
+import { useNewsCategoryFilter } from "@/pages/news/useNewsCategoryFilter";
+import { LoadPost } from "@/animations/LoadPost";
+import { FilterSelect } from "./components/Filter";
+import { CategoryBadge } from "./components/CategoryBadge";
 import { useContext } from "react";
 import { AuthContext } from "@/context/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";

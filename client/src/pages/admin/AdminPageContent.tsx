@@ -1,10 +1,10 @@
 import { motion } from "motion/react";
 import type { Transition } from "motion/react";
-import UserList from "./UserList";
-import UserDetail from "./UserDetail";
-import ProfilesPanel from "./ProfilesPanel";
-import BanDialog from "./ban/BanDialog";
-import { useAdminPageLogic } from "@/components/pages/profileDependents/admin/adminLogic/useAdminPageLogic";
+import UserList from "./components/UserList";
+import UserDetail from "./components/UserDetail";
+import ProfilesPanel from "./components/ProfilesPanel";
+import BanDialog from "./components/BanDialog";
+import { useAdminPageLogic } from "@/pages/admin/useAdminPageLogic";
 
 const colTransition = (delay: number): Transition => ({
   duration: 0.4,

@@ -12,7 +12,7 @@ import apiClient from "@/lib/apiClient";
 import { queryKeys } from "@/lib/queryKeys";
 import type { WebstoreItem } from "@/types/PageTypes";
 import type { Rarity } from "@/types/PageTypes";
-import { useProfiles } from "@/components/forms/addNewProfile/useProfiles";
+import { useProfiles } from "@/pages/profile-selector/useProfiles";
 import { AuthContext } from "@/context/AuthContext";
 import { toast } from "@/lib/toast";
 

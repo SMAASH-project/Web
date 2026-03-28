@@ -1,4 +1,4 @@
-import { type ColorContextType } from "./color/ColorContext";
+import { type ColorContextType } from "./ColorContext";
 import { type AnimationKey } from "@/lib/animationTypes";
 
 export interface Theme {

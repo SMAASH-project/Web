@@ -1,8 +1,8 @@
 import { memo, useCallback, useContext, useMemo, useState } from "react";
-import { ColorContext } from "../settingsLogic/color/ColorContext";
+import { ColorContext } from "@/pages/settings/ColorContext";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useSettings } from "../settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { getTextColor, getTextShadow, getButtonClasses } from "@/lib/utils";
 

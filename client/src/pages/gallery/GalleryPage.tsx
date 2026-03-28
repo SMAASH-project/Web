@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import Navbar from "../../nav/Navbar";
-import { useSettings } from "../profileDependents/settings/settingsLogic/SettingsContext";
+import Navbar from "@/components/nav/Navbar";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import {
   getBackgroundClasses,
   getTextColor,
   getSubtextColor,
   getTextShadow,
 } from "@/lib/utils";
-import { useDebugCharactersQuery } from "@/hooks/useDebugHooks";
+import { useDebugCharactersQuery } from "@/hooks/useDebug";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient";
 import {
@@ -23,7 +23,7 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { LoadPost } from "@/lib/pageAnimations/newsPageAnimations/LoadPost";
+import { LoadPost } from "@/animations/LoadPost";
 
 // ─── OST track list ───────────────────────────────────────────────────────────
 // Place audio files in your Go server's static build directory:

@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useSettings } from "../settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { UpdateSheet } from "./UpdateSheet";
 import { useTranslation } from "react-i18next";
 import {
@@ -25,7 +25,7 @@ import {
   getTextShadow,
   sectionStyle,
 } from "@/lib/utils";
-import { useProfiles } from "@/components/forms/addNewProfile/useProfiles";
+import { useProfiles } from "@/pages/profile-selector/useProfiles";
 import { useUploadProfilePictureMutation } from "@/hooks/useQueryHooks";
 
 // ─── Stat card ────────────────────────────────────────────────────────────────

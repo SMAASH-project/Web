@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { ProfileContext } from "@/components/forms/addNewProfile/ProfilesContext";
+import { ProfileContext } from "@/pages/profile-selector/ProfilesContext";
 
 export function useProfiles() {
   return useContext(ProfileContext);

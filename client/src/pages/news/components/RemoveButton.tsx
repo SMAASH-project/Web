@@ -11,7 +11,7 @@ import {
   Dialog,
 } from "@/components/ui/dialog";
 import { Trash2 } from "lucide-react";
-import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import {
   getButtonClasses,
   getDialogClasses,

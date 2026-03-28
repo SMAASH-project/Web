@@ -2,9 +2,9 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { memo, useCallback, useContext, useMemo } from "react";
-import { ColorContext } from "../settingsLogic/color/ColorContext";
-import { useSettings } from "../settingsLogic/SettingsContext";
-import { THEMES, applyTheme, type Theme } from "../settingsLogic/Themes";
+import { ColorContext } from "@/pages/settings/ColorContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
+import { THEMES, applyTheme, type Theme } from "@/pages/settings/Themes";
 import { SettingToggle } from "./SettingToggle";
 import { ThemePicker } from "./ThemePicker";
 import {
@@ -23,8 +23,8 @@ import {
 import {
   type AnimationOverride,
   type SettingsState,
-} from "../settingsLogic/SettingsContext";
-import type { ColorContextType } from "../settingsLogic/color/ColorContext";
+} from "@/pages/settings/SettingsContext";
+import type { ColorContextType } from "@/pages/settings/ColorContext";
 
 // ─── Memoised sub-components ──────────────────────────────────────────────────
 

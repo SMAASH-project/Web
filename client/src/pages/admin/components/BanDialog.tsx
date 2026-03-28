@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useSettings } from "@/components/pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import {
   getDialogClasses,
   getDialogFooterClasses,
@@ -20,10 +20,10 @@ import {
   getInputClasses,
   cn,
 } from "@/lib/utils";
-import type { AdminUserDTO } from "@/hooks/useAdminHooks";
+import type { AdminUserDTO } from "@/hooks/useAdmin";
 import BanPresetCard from "./BanPresetCard";
 import BanCustomRange from "./BanCustomRange";
-import { useBanDialogLogic } from "@/components/pages/profileDependents/admin/adminLogic/useBanDialogLogic";
+import { useBanDialogLogic } from "@/pages/admin/useBanDialogLogic";
 
 // ─── Preset reasons ───────────────────────────────────────────────────────────
 

@@ -7,8 +7,8 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import type { NewsPost } from "@/types/PageTypes";
-import { NEWS_FILTER_OPTIONS } from "./newsPageLogic/useNewsCategoryFilter";
-import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
+import { NEWS_FILTER_OPTIONS } from "../useNewsCategoryFilter";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { getSubtextColor } from "@/lib/utils";
 
 interface FilterSelectionProps {

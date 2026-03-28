@@ -1,5 +1,5 @@
 import { CATEGORY_COLORS } from "@/types/PageTypes";
-import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { getTextShadow } from "@/lib/utils";
 
 export function CategoryBadge({ category }: { category: string }) {

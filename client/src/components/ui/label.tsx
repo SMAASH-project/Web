@@ -2,7 +2,7 @@ import * as React from "react";
 import * as LabelPrimitive from "@radix-ui/react-label";
 
 import { cn, getTextColor } from "../../lib/utils";
-import { useSettings } from "../pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 
 function Label({
   className,

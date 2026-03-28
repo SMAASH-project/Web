@@ -1,8 +1,8 @@
 import Navbar from "@/components/nav/Navbar";
-// import { WithOnloadAnimation } from "@/lib/miscAnimations/OnloadAnimationNavbar";
-import { CardAnimation } from "@/lib/miscAnimations/OnloadAnimationCard";
-import { useSettings } from "./settingsLogic/SettingsContext";
-import { SettingsPageContent } from "./settingsComponenets/SettingsPageContent";
+// import { WithOnloadAnimation } from "@/animations/NavbarAnimation";
+import { CardAnimation } from "@/animations/CardAnimation";
+import { useSettings } from "@/pages/settings/SettingsContext";
+import { SettingsPageContent } from "./components/SettingsPageContent";
 import { getTextColor } from "@/lib/utils";
 import { useState, useCallback } from "react";
 

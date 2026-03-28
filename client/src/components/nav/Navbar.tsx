@@ -1,9 +1,9 @@
 import { useContext } from "react";
-import { useSettings } from "../pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { NavMenu } from "./NavMenu";
 import AccountMenu from "./AccountMenu";
 import { MobileNavMenu } from "./MobileNavMenu";
-import { useProfiles } from "../forms/addNewProfile/useProfiles";
+import { useProfiles } from "@/pages/profile-selector/useProfiles";
 import { Link, useNavigate } from "react-router-dom";
 import { useMediaQuery } from "./navLogic/useMediaQuery";
 import { useLogoutMutation } from "@/hooks/useQueryHooks";

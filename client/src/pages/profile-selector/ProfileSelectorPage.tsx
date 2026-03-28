@@ -4,16 +4,16 @@ import {
   getLiquidGlassClasses,
   getLiquidGlassTextShadow,
 } from "@/lib/utils";
-import { useSettings } from "../pages/profileDependents/settings/settingsLogic/SettingsContext";
-import type { SettingsState } from "../pages/profileDependents/settings/settingsLogic/SettingsContext";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Label } from "../ui/label";
+import { useSettings } from "@/pages/settings/SettingsContext";
+import type { SettingsState } from "@/pages/settings/SettingsContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Play, LogOut } from "lucide-react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { useState, useCallback, memo, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { AddNewProfile } from "./addNewProfile/AddNewProfile";
-import { useProfiles } from "./addNewProfile/useProfiles";
+import { AddNewProfileDialog } from "./AddNewProfileDialog";
+import { useProfiles } from "./useProfiles";
 import * as motion from "motion/react-client";
 import { useLogoutMutation } from "@/hooks/useQueryHooks";
 import { AuthContext } from "@/context/AuthContext";
@@ -75,7 +75,7 @@ const ProfileAvatar = memo(function ProfileAvatar({
   );
 });
 
-export function ProfileSelectorForm() {
+export function ProfileSelectorPage() {
   const { settings } = useSettings();
   const { profiles, removeProfile, selectProfile } = useProfiles();
   const { t } = useTranslation("profile");
@@ -182,7 +182,7 @@ export function ProfileSelectorForm() {
           </motion.div>
         </div>
       </div>
-      <AddNewProfile open={showAddProfile} onOpenChange={setShowAddProfile} />
+      <AddNewProfileDialog open={showAddProfile} onOpenChange={setShowAddProfile} />
     </div>
   );
 }

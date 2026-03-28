@@ -1,4 +1,4 @@
-import { useSettings } from "../../profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -8,7 +8,7 @@ import {
   getTextColor,
   getSubtextColor,
 } from "@/lib/utils";
-import { LoadPost } from "@/lib/pageAnimations/newsPageAnimations/LoadPost";
+import { LoadPost } from "@/animations/LoadPost";
 import { DownloadReleaseButton } from "./DownloadReleaseButton";
 import type { Release } from "@/types/PageTypes";
 import { Package, Loader2 } from "lucide-react";
