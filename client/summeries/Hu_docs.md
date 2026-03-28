@@ -50,6 +50,7 @@ client/
     ├── backgrounds/            # Animált háttér canvas komponensek
     ├── components/
     │   ├── ErrorBoundary.tsx   # Osztály-alapú hibaboundary + withBoundary() (main.tsx-ben)
+    │   ├── RequireAuth.tsx     # Layout útvonal-őr — nem bejelentkezett felhasználókat a /app/login-ra irányít
     │   ├── nav/                # Navigációs sáv, mobil fiók, fiókmenü
     │   └── ui/                 # Megosztott UI primitívek (shadcn-stílusban)
     ├── context/                # Hitelesítési és navigációs kontextusok
@@ -123,6 +124,8 @@ client/
 
 A hitelesítési oldalak (`login`, `signup`, `reset-password`) **eager-betöltésűek**. Minden más oldal **lustán töltődik be** a `React.lazy` segítségével. Minden lusta útvonal `withBoundary()`-vel van becsomagolva a `components/ErrorBoundary.tsx`-ből — így egy oldal hibája nem omlik össze az egész alkalmazás.
 
+A bejelentkezési, regisztrációs és jelszó-visszaállítási oldalakon, valamint a catch-all útvonalon kívül minden útvonalat a `RequireAuth` (`components/RequireAuth.tsx`) véd — egy útvonal nélküli layout-elem, amely a nem bejelentkezett felhasználókat a `/app/login`-ra irányítja. Az admin és debug útvonalaknak ezen felül saját belső szerepkör-ellenőrzésük is van (nem adminok `<NotFoundPage />`-t látnak).
+
 ### Útvonaltáblázat
 
 | Útvonal                 | Komponens                  | Hozzáférés      |
@@ -131,8 +134,8 @@ A hitelesítési oldalak (`login`, `signup`, `reset-password`) **eager-betölté
 | `/app/login`            | `LoginPage`                | Nyilvános       |
 | `/app/signup`           | `SignUpPage`               | Nyilvános       |
 | `/app/reset-password`   | `PasswordResetPage`        | Nyilvános       |
-| `/app/leaderboard`      | `LeaderboardPage`          | Nyilvános       |
-| `/app/gallery`          | `GalleryPage`              | Nyilvános       |
+| `/app/leaderboard`      | `LeaderboardPage`          | Bejelentkezve   |
+| `/app/gallery`          | `GalleryPage`              | Bejelentkezve   |
 | `/app/releases`         | `ReleasesPage`             | Bejelentkezve   |
 | `/app/news`             | `NewsPage`                 | Bejelentkezve   |
 | `/app/webstore`         | `WebstorePage`             | Bejelentkezve   |
@@ -237,8 +240,9 @@ sectionStyle(animReady, delayMs)
 | Emerald   | sakura                   |
 | Rose Gold | sakura                   |
 | Slate     | storm                    |
-| Monsoon   | rainonglass              |
-| Corrupted | glitch                   |
+| Monsoon   | puddleripples            |
+| Abyss     | bioluminescence          |
+| Starmap   | constellation            |
 | Nebula    | particleweb              |
 
 ---
@@ -257,10 +261,11 @@ Minden háttér canvas komponens, amely `fixed inset-0 z-0 pointer-events-none` 
 | `lavalamp`    | `LavaLampBackground`    | Morpholó blobok külső izzással és belső fényszikrával. CSS keyframes.                                                                                                                                                                                                        |
 | `synthwave`   | `SynthwaveBackground`   | Perspektívarács, retró nap, scanline réteg. Canvas.                                                                                                                                                                                                                          |
 | `sakura`      | `SakuraBackground`      | Hulló szirmok szirmonkénti sodródás/forgás CSS tulajdonságokkal.                                                                                                                                                                                                             |
-| `storm`       | `StormBackground`       | Canvas esőcseppek + villámcsapás, lebegő CSS felhőrétegek.                                                                                                                                                                                                                   |
-| `rainonglass` | `RainOnGlassBackground` | Üvegfelületi vízcseppek. Minden csepp nő → vár felszíni feszültség remegéssel → gravitációs lefolyás kúposodó nyomvonallal és futó gyönggyel a végén. Max. 45 csepp. Tiszta canvas radiális gradiens — nincs `clip()`, nincs `drawImage`, 60fps.                             |
-| `glitch`      | `GlitchBackground`      | Ütemezett véletlenszerű események: `tear` (vízszintes szelet + RGB eltolás + zaj), `shift` (kromatikus aberráció), `noise` (pixel statikus sáv), `scanline` (fényes villanóvonal), `chromatic` (alsó RGB szétválasztás). Mindig aktív scanline-ok + CRT vignet.              |
-| `particleweb` | `ParticleWebBackground` | 80 lebegő részecske. Vonalak rajzolódnak a 160px-en belüli részecskék között. Az egérkurzor csomópontként viselkedik (200px-en belül vonalakat húz, 60px-en belül taszít). A részecskék pulzálnak és puha fényt bocsátanak ki. Színek interpolálva a teljes téma-gradiensen. |
+| `storm`           | `StormBackground`           | Canvas esőcseppek + villámcsapás, lebegő CSS felhőrétegek.                                                                                                                                                                                                                      |
+| `puddleripples`   | `PuddleRipplesBackground`   | Felülnézetből eső éri a sötét vizet. Koncentrikus tágulő gyűrűk (3 db/csepp) véletlenszerű helyeken jelennek meg ~280ms-enként, 2,8s alatt 55–100px sugarúra tágulnak, kúposodó vonalszélességgel és elhalványuló átlátszósággal. Canvas.                                      |
+| `bioluminescence` | `BioluminescenceBackground` | 38 izzó gömb türkiz/kék/zöld palettán lassan sodródik mélyfekete háttéren. Minden gömbnek radiális halo gradiens + fényes fehér mag van, átlátszósága független szinuszos cikluson pulzál (0,06–0,52 alfa). Canvas.                                                             |
+| `constellation`   | `ConstellationBackground`   | 110 villogó csillag lassú parallaxis sodródással. A közeli csillagokat (80–190px távolságon belül) gradiens vonalak kötik össze, amelyek független lassú ciklusokon halványodnak be és ki. A nagyobb csillagok puha fényt bocsátanak ki. Canvas.                                |
+| `particleweb`     | `ParticleWebBackground`     | 80 lebegő részecske. Vonalak rajzolódnak a 160px-en belüli részecskék között. Az egérkurzor csomópontként viselkedik (200px-en belül vonalakat húz, 60px-en belül taszít). A részecskék pulzálnak és puha fényt bocsátanak ki. Színek interpolálva a teljes téma-gradiensen. |
 
 ### Animáció-feloldás (`Wrapper.tsx`)
 

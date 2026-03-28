@@ -6,6 +6,7 @@ import App from "./App.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { RootLayout } from "./RootLayout.tsx";
 import { ErrorBoundary } from "./components/ErrorBoundary.tsx";
+import { RequireAuth } from "./components/RequireAuth.tsx";
 
 // Eager load auth forms for better UX
 import { LoginPage } from "./pages/auth/LoginPage.tsx";
@@ -86,14 +87,19 @@ const router = createBrowserRouter([
       { path: "/app/login", element: <LoginPage /> },
       { path: "/app/signup", element: <SignUpPage /> },
       { path: "/app/reset-password", element: <PasswordResetPage /> },
-      { path: "/app/leaderboard", element: withBoundary(<LeaderboardPage />) },
-      { path: "/app/gallery", element: withBoundary(<GalleryPage />) },
-      { path: "/app/releases", element: withBoundary(<ReleasesPage />) },
-      { path: "/app/webstore", element: withBoundary(<WebstorePage />) },
-      { path: "/app/news", element: withBoundary(<NewsPage />) },
-      { path: "/app/profile", element: withBoundary(<ProfilePage />) },
-      { path: "/app/settings", element: withBoundary(<SettingsPage />) },
-      { path: "/app/profile-selector", element: withBoundary(<ProfileSelectorPage />) },
+      {
+        element: <RequireAuth />,
+        children: [
+          { path: "/app/leaderboard", element: withBoundary(<LeaderboardPage />) },
+          { path: "/app/gallery", element: withBoundary(<GalleryPage />) },
+          { path: "/app/releases", element: withBoundary(<ReleasesPage />) },
+          { path: "/app/webstore", element: withBoundary(<WebstorePage />) },
+          { path: "/app/news", element: withBoundary(<NewsPage />) },
+          { path: "/app/profile", element: withBoundary(<ProfilePage />) },
+          { path: "/app/settings", element: withBoundary(<SettingsPage />) },
+          { path: "/app/profile-selector", element: withBoundary(<ProfileSelectorPage />) },
+        ],
+      },
       { path: "*", element: <NotFoundPage /> },
       { path: "/app/admin", element: withBoundary(<AdminPage />) },
       { path: "/app/debug", element: withBoundary(<DebugPage />) },

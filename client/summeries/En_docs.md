@@ -50,6 +50,7 @@ client/
     ├── backgrounds/            # Animated background canvas components
     ├── components/
     │   ├── ErrorBoundary.tsx   # Class-based error boundary + withBoundary() used in main.tsx
+    │   ├── RequireAuth.tsx     # Layout route guard — redirects unauthenticated users to /app/login
     │   ├── nav/                # Navbar, mobile drawer, account menu
     │   └── ui/                 # Shared UI primitives (shadcn-style)
     ├── context/                # Auth + Navbar contexts
@@ -123,6 +124,8 @@ client/
 
 Auth-critical pages (`login`, `signup`, `reset-password`) are **eager-loaded**. All others are **lazy-loaded** via `React.lazy`. Every lazy route is wrapped with `withBoundary()` from `components/ErrorBoundary.tsx`, which catches render errors per-route without crashing the whole app.
 
+All routes except login, signup, reset-password, and the catch-all are protected by `RequireAuth` (`components/RequireAuth.tsx`) — a pathless layout route that redirects unauthenticated users to `/app/login`. Admin and debug routes have their own additional internal role checks (non-admins see `<NotFoundPage />`).
+
 ### Route table
 
 | Path                    | Component              | Access          |
@@ -131,8 +134,8 @@ Auth-critical pages (`login`, `signup`, `reset-password`) are **eager-loaded**. 
 | `/app/login`            | `LoginPage`            | Public          |
 | `/app/signup`           | `SignUpPage`           | Public          |
 | `/app/reset-password`   | `PasswordResetPage`    | Public          |
-| `/app/leaderboard`      | `LeaderboardPage`      | Public          |
-| `/app/gallery`          | `GalleryPage`          | Public          |
+| `/app/leaderboard`      | `LeaderboardPage`      | Logged in       |
+| `/app/gallery`          | `GalleryPage`          | Logged in       |
 | `/app/releases`         | `ReleasesPage`         | Logged in       |
 | `/app/news`             | `NewsPage`             | Logged in       |
 | `/app/webstore`         | `WebstorePage`         | Logged in       |
@@ -238,8 +241,9 @@ sectionStyle(animReady, delayMs)
 | Emerald   | sakura            |
 | Rose Gold | sakura            |
 | Slate     | storm             |
-| Monsoon   | rainonglass       |
-| Corrupted | glitch            |
+| Monsoon   | puddleripples     |
+| Abyss     | bioluminescence   |
+| Starmap   | constellation     |
 | Nebula    | particleweb       |
 
 ---
@@ -258,10 +262,11 @@ Each background is a canvas component that renders as `fixed inset-0 z-0 pointer
 | `lavalamp`    | `LavaLampBackground`    | Morphing blobs with outer glow and inner shimmer highlight. CSS keyframes.                                                                                                                                                                                                                       |
 | `synthwave`   | `SynthwaveBackground`   | Perspective grid, retro sun, scanline overlay. Canvas.                                                                                                                                                                                                                                           |
 | `sakura`      | `SakuraBackground`      | Falling petals with per-petal drift/rotation CSS custom properties.                                                                                                                                                                                                                              |
-| `storm`       | `StormBackground`       | Canvas rain streaks + lightning bolt, drifting CSS cloud layers.                                                                                                                                                                                                                                 |
-| `rainonglass` | `RainOnGlassBackground` | Glass-surface water drops. Each drop grows → sits with surface-tension jiggle → gravity run-off with tapered trail and running bead at tip. 45 drops max. Pure canvas radial gradients — no `clip()`, no `drawImage`, 60fps.                                                                     |
-| `glitch`      | `GlitchBackground`      | Scheduled random events: `tear` (horizontal slice + RGB offset + noise), `shift` (chromatic aberration), `noise` (pixel static band), `scanline` (bright flash line), `chromatic` (bottom RGB split). Events cluster and fade with `sin(progress*π)` easing. Always-on scanlines + CRT vignette. |
-| `particleweb` | `ParticleWebBackground` | 80 drifting particles. Lines drawn between particles within 160px. Mouse cursor acts as an additional node (draws lines within 200px, repels within 60px). Particles pulse in size with a soft glow. Colours interpolated across the full theme gradient.                                        |
+| `storm`            | `StormBackground`            | Canvas rain streaks + lightning bolt, drifting CSS cloud layers.                                                                                                                                                                                           |
+| `puddleripples`    | `PuddleRipplesBackground`    | Top-down rain hitting dark water. Concentric expanding rings (3 per drop) spawn at random positions every ~280ms, expanding to 55–100px radius over 2.8s with tapering stroke width and fading opacity. Canvas.                                            |
+| `bioluminescence`  | `BioluminescenceBackground`  | 38 glowing orbs in teal/blue/green palette drift slowly across a deep black background. Each orb has a radial halo gradient + bright white core, pulsing opacity on an independent sinusoidal cycle (0.06–0.52 alpha). Canvas.                             |
+| `constellation`    | `ConstellationBackground`    | 110 twinkling stars with slow parallax drift. Nearby stars (80–190px apart) connected by gradient lines that fade in/out on independent slow cycles. Larger stars emit a soft glow. Canvas.                                                                |
+| `particleweb`      | `ParticleWebBackground`      | 80 drifting particles. Lines drawn between particles within 160px. Mouse cursor acts as an additional node (draws lines within 200px, repels within 60px). Particles pulse in size with a soft glow. Colours interpolated across the full theme gradient.  |
 
 ### Animation Resolution (`Wrapper.tsx`)
 
