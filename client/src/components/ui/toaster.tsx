@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast, type ToastItem } from "@/lib/toast";
 import { CheckCircle2, AlertCircle, Info, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "motion/react";
 
 const ICON: Record<ToastItem["type"], React.ReactNode> = {
   success: <CheckCircle2 size={15} className="shrink-0 text-green-400" />,
@@ -23,36 +24,39 @@ export function Toaster() {
 
   useEffect(() => toast.subscribe(setItems), []);
 
-  if (items.length === 0) return null;
-
   return (
     <div
-      className="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none"
+      className="fixed bottom-4 right-4 z-9999 flex flex-col gap-2 pointer-events-none"
       aria-live="polite"
       aria-atomic="false"
     >
-      {items.map((item) => (
-        <div
-          key={item.id}
-          className={cn(
-            "flex items-center gap-2.5 pl-3.5 pr-3 py-2.5 rounded-xl border",
-            "backdrop-blur-md shadow-lg text-sm font-medium",
-            "pointer-events-auto",
-            "animate-in slide-in-from-right-4 fade-in duration-200",
-            STYLE[item.type],
-          )}
-        >
-          {ICON[item.type]}
-          <span className="flex-1 leading-snug">{item.message}</span>
-          <button
-            onClick={() => setItems((prev) => prev.filter((t) => t.id !== item.id))}
-            className="ml-1 opacity-60 hover:opacity-100 transition-opacity"
-            aria-label="Dismiss"
+      <AnimatePresence>
+        {items.map((item) => (
+          <motion.div
+            key={item.id}
+            initial={{ opacity: 0, x: 64 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ opacity: { duration: 0.4 }, x: { duration: 0.2, ease: "easeOut" } }}
+            className={cn(
+              "flex items-center gap-2.5 pl-3.5 pr-3 py-2.5 rounded-xl border",
+              "backdrop-blur-md shadow-lg text-sm font-medium",
+              "pointer-events-auto",
+              STYLE[item.type],
+            )}
           >
-            <X size={13} />
-          </button>
-        </div>
-      ))}
+            {ICON[item.type]}
+            <span className="flex-1 leading-snug">{item.message}</span>
+            <button
+              onClick={() => setItems((prev) => prev.filter((t) => t.id !== item.id))}
+              className="ml-1 opacity-60 hover:opacity-100 transition-opacity"
+              aria-label="Dismiss"
+            >
+              <X size={13} />
+            </button>
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </div>
   );
 }
