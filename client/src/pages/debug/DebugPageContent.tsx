@@ -7,6 +7,7 @@ import {
   Gamepad2,
   RefreshCw,
   Bug,
+  Eye,
 } from "lucide-react";
 import { useSettings } from "@/pages/settings/SettingsContext";
 import {
@@ -23,16 +24,18 @@ import { SystemTab } from "./tabs/SystemTab";
 import { CacheTab } from "./tabs/CacheTab";
 import { EndpointsTab } from "./tabs/EndpointsTab";
 import { GameDataTab } from "./tabs/GameDataTab";
+import { SightTab } from "./tabs/SightTab";
 
 // ─── Tab definition ───────────────────────────────────────────────────────────
 
-type Tab = "system" | "cache" | "endpoints" | "game";
+type Tab = "system" | "cache" | "endpoints" | "game" | "sight";
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "system", label: "System", icon: <Monitor size={14} /> },
   { id: "cache", label: "Cache", icon: <Database size={14} /> },
   { id: "endpoints", label: "Endpoints", icon: <Terminal size={14} /> },
   { id: "game", label: "Game Data", icon: <Gamepad2 size={14} /> },
+  { id: "sight", label: "Sight", icon: <Eye size={14} /> },
 ];
 
 // ─── Animation helpers (mirrors AdminPageContent) ────────────────────────────
@@ -176,6 +179,13 @@ export function DebugPageContent({
             )}
             {activeTab === "game" && isAdmin && (
               <GameDataTab
+                textColor={textColor}
+                subtextColor={subtextColor}
+                panelBg={panelBg}
+              />
+            )}
+            {activeTab === "sight" && (
+              <SightTab
                 textColor={textColor}
                 subtextColor={subtextColor}
                 panelBg={panelBg}

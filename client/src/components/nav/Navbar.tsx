@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { useSettings } from "@/pages/settings/SettingsContext";
 import { motion } from "motion/react";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
+import { useDebugSettings } from "@/hooks/useDebugSettings";
 import { NavMenu } from "./NavMenu";
 import AccountMenu from "./AccountMenu";
 import { MobileNavMenu } from "./MobileNavMenu";
@@ -22,7 +23,12 @@ import {
 
 const Navbar = () => {
   const { settings } = useSettings();
-  const hidden = useScrollDirection();
+  const scrollHidden = useScrollDirection();
+  const { settings: dbg } = useDebugSettings();
+  const hidden =
+    dbg.navbarOverride === "show" ? false
+    : dbg.navbarOverride === "hide" ? true
+    : scrollHidden;
   const { selectedProfile } = useProfiles();
   const username = selectedProfile?.name ?? "PlaceholderUserName";
   const isDesktop = useMediaQuery("(min-width: 768px)");
