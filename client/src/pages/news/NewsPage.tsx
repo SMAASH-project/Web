@@ -4,12 +4,13 @@ import {
   getBackgroundClasses,
   getTextColor,
   getTextShadow,
+  getSubtextColor,
   getButtonClasses,
 } from "@/lib/utils";
 import Navbar from "@/components/nav/Navbar";
 import { Card } from "@/components/ui/card";
-import { useSettings } from "@/pages/settings/SettingsContext";
 import { Label } from "@/components/ui/label";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import type { NewsPost } from "@/types/PageTypes";
 import { AddNews } from "@/pages/news/components/AddNews";
 import { RemoveButton } from "@/pages/news/components/RemoveButton";
@@ -36,6 +37,8 @@ export function NewsPage() {
 
   const {
     visiblePosts,
+    totalCount,
+    isSearching,
     isLoading: postsLoading,
     containerRef,
     handleCreate,
@@ -45,6 +48,7 @@ export function NewsPage() {
   } = useNewsPosts(selectedCategories);
 
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const subtextColor = getSubtextColor(settings.useLiquidGlass, settings.useDarkMode);
   const textShadow = getTextShadow(
     settings.useLiquidGlass,
     settings.useDarkMode,
@@ -59,7 +63,7 @@ export function NewsPage() {
   );
 
   return (
-    <div className="p-3 sm:p-4 h-screen overflow-y-auto" ref={containerRef}>
+    <div className="p-3 sm:p-4 min-h-screen">
       <Navbar />
       <div className="mt-20 z-0 flex flex-col items-center justify-start gap-4">
         {/* ── Toolbar ── */}
@@ -79,11 +83,11 @@ export function NewsPage() {
           </ButtonGroup>
 
           <span className="flex flex-row items-center gap-2">
-            <Label
-              className={`text-base sm:text-lg ${textColor} ${textShadow} text-center hidden sm:block`}
-            >
-              {t("title") || "Latest News"}
-            </Label>
+            {!postsLoading && (
+              <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${bgClass} ${subtextColor}`}>
+                {isSearching ? `${visiblePosts.length} results` : `${totalCount} posts`}
+              </span>
+            )}
             <FilterSelect
               selectedByCategory={selectedByCategory}
               onCategoryChange={setCategorySelected}

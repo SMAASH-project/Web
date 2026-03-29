@@ -162,20 +162,16 @@ export function useNewsPosts(selectedCategories: NewsPost["category"][] = []) {
   // ── Infinite scroll ───────────────────────────────────────────────────────
 
   const handleScroll = useCallback(() => {
-    if (containerRef.current && !searchQuery) {
-      const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
-      if (scrollTop + clientHeight >= scrollHeight - 5) {
+    if (!searchQuery) {
+      if (window.scrollY + window.innerHeight >= document.body.scrollHeight - 5) {
         setPostsToShow((prev) => prev + 2);
       }
     }
   }, [searchQuery]);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener("scroll", handleScroll);
-      return () => container.removeEventListener("scroll", handleScroll);
-    }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
   // ── Handlers ─────────────────────────────────────────────────────────────
@@ -199,6 +195,8 @@ export function useNewsPosts(selectedCategories: NewsPost["category"][] = []) {
 
   return {
     visiblePosts,
+    totalCount: filteredPosts.length,
+    isSearching: searchQuery.length > 0,
     isLoading,
     containerRef,
     handleCreate,
