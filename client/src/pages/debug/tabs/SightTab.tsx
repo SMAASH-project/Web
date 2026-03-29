@@ -4,6 +4,7 @@ import { Switch } from "@/components/ui/switch";
 import { useDebugSettings } from "@/hooks/useDebugSettings";
 import { toast } from "@/lib/toast";
 import { Section, InfoRow } from "./shared";
+import { useTranslation } from "react-i18next";
 
 const SPEEDS = [0.25, 0.5, 1, 2, 4] as const;
 
@@ -13,6 +14,12 @@ const CSS_VARS = [
   "--theme-accent-soft",
   "--theme-nav-border",
   "--theme-nav-shadow",
+] as const;
+
+const NAV_PILLS = [
+  { value: "auto", key: "navAuto" },
+  { value: "show", key: "navShow" },
+  { value: "hide", key: "navHide" },
 ] as const;
 
 export function SightTab({
@@ -25,6 +32,7 @@ export function SightTab({
   panelBg: string;
 }) {
   const { settings, update } = useDebugSettings();
+  const { t } = useTranslation("debug");
   const [cssVars, setCssVars] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -51,7 +59,7 @@ export function SightTab({
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 auto-rows-min">
 
       {/* ── Animation ─────────────────────────────────────────────────── */}
-      <Section title="Animation" icon={<Zap size={11} />} panelBg={panelBg} subtextColor={subtextColor}>
+      <Section title={t("sight.animation.title")} icon={<Zap size={11} />} panelBg={panelBg} subtextColor={subtextColor}>
         <div className="flex flex-col gap-2 py-1">
           {/* Speed picker */}
           <div className="flex gap-1 flex-wrap">
@@ -66,31 +74,31 @@ export function SightTab({
             ))}
           </div>
           <p className={`text-[10px] leading-tight ${subtextColor}`}>
-            Scales CSS transitions. Motion spring animations are unaffected.
+            {t("sight.animation.speedNote")}
           </p>
 
           {/* Force Replay */}
           <div className="flex items-center justify-between pt-1 border-t border-current/5">
-            <span className={`text-xs ${subtextColor}`}>Force Replay</span>
+            <span className={`text-xs ${subtextColor}`}>{t("sight.animation.forceReplay")}</span>
             <button
               onClick={() => window.location.reload()}
               className={`flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full ${subtextColor} hover:bg-white/10 transition-colors`}
             >
-              <RefreshCw size={10} /> Reload
+              <RefreshCw size={10} /> {t("sight.animation.reload")}
             </button>
           </div>
 
           {/* Navbar override */}
           <div className="flex items-center justify-between pt-1 border-t border-current/5">
-            <span className={`text-xs ${subtextColor}`}>Navbar</span>
+            <span className={`text-xs ${subtextColor}`}>{t("sight.animation.navbar")}</span>
             <div className="flex gap-1">
-              {(["auto", "show", "hide"] as const).map((v) => (
+              {NAV_PILLS.map(({ value, key }) => (
                 <button
-                  key={v}
-                  onClick={() => update({ navbarOverride: v })}
-                  className={`${pillBase} capitalize ${settings.navbarOverride === v ? pillActive : pillInactive}`}
+                  key={value}
+                  onClick={() => update({ navbarOverride: value })}
+                  className={`${pillBase} ${settings.navbarOverride === value ? pillActive : pillInactive}`}
                 >
-                  {v}
+                  {t(`sight.animation.${key}`)}
                 </button>
               ))}
             </div>
@@ -99,43 +107,43 @@ export function SightTab({
       </Section>
 
       {/* ── Visual ────────────────────────────────────────────────────── */}
-      <Section title="Visual" icon={<Eye size={11} />} panelBg={panelBg} subtextColor={subtextColor}>
-        {row("Disable Backdrop Blur", settings.noBackdropBlur, "noBackdropBlur")}
-        {row("Layout Borders", settings.layoutBorders, "layoutBorders")}
+      <Section title={t("sight.visual.title")} icon={<Eye size={11} />} panelBg={panelBg} subtextColor={subtextColor}>
+        {row(t("sight.visual.disableBlur"), settings.noBackdropBlur, "noBackdropBlur")}
+        {row(t("sight.visual.layoutBorders"), settings.layoutBorders, "layoutBorders")}
       </Section>
 
       {/* ── Overlays ──────────────────────────────────────────────────── */}
-      <Section title="Overlays" icon={<Layers size={11} />} panelBg={panelBg} subtextColor={subtextColor}>
-        {row("FPS Counter", settings.showFps, "showFps")}
-        {row("Scroll Position", settings.showScrollPos, "showScrollPos")}
+      <Section title={t("sight.overlays.title")} icon={<Layers size={11} />} panelBg={panelBg} subtextColor={subtextColor}>
+        {row(t("sight.overlays.fps"), settings.showFps, "showFps")}
+        {row(t("sight.overlays.scroll"), settings.showScrollPos, "showScrollPos")}
       </Section>
 
       {/* ── Toast Test ────────────────────────────────────────────────── */}
-      <Section title="Toast Test" icon={<BellRing size={11} />} panelBg={panelBg} subtextColor={subtextColor}>
+      <Section title={t("sight.toast.title")} icon={<BellRing size={11} />} panelBg={panelBg} subtextColor={subtextColor}>
         <div className="flex gap-2 pt-1 flex-wrap">
           <button
-            onClick={() => toast.success("Test success toast")}
+            onClick={() => toast.success(t("sight.toast.msgSuccess"))}
             className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-green-500/20 text-green-400 hover:bg-green-500/30 transition-colors"
           >
-            Success
+            {t("sight.toast.success")}
           </button>
           <button
-            onClick={() => toast.error("Test error toast")}
+            onClick={() => toast.error(t("sight.toast.msgError"))}
             className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
           >
-            Error
+            {t("sight.toast.error")}
           </button>
           <button
-            onClick={() => toast.info("Test info toast")}
+            onClick={() => toast.info(t("sight.toast.msgInfo"))}
             className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
           >
-            Info
+            {t("sight.toast.info")}
           </button>
         </div>
       </Section>
 
       {/* ── CSS Variables ─────────────────────────────────────────────── */}
-      <Section title="CSS Variables" icon={<Palette size={11} />} panelBg={panelBg} subtextColor={subtextColor}>
+      <Section title={t("sight.cssVars.title")} icon={<Palette size={11} />} panelBg={panelBg} subtextColor={subtextColor}>
         {CSS_VARS.map((v) => (
           <InfoRow
             key={v}

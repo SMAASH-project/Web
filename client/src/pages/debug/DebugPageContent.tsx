@@ -20,6 +20,7 @@ import {
 import type { Transition } from "motion/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AuthContext } from "@/context/AuthContext";
+import { useTranslation } from "react-i18next";
 import { SystemTab } from "./tabs/SystemTab";
 import { CacheTab } from "./tabs/CacheTab";
 import { EndpointsTab } from "./tabs/EndpointsTab";
@@ -59,6 +60,7 @@ export function DebugPageContent({
   const { useLiquidGlass, useDarkMode } = settings;
   const { isAdmin, isSupport } = useContext(AuthContext);
   const queryClient = useQueryClient();
+  const { t } = useTranslation("debug");
   const [activeTab, setActiveTab] = useState<Tab>("system");
 
   const cardBg = getBackgroundClasses(useLiquidGlass, useDarkMode);
@@ -70,13 +72,13 @@ export function DebugPageContent({
 
   const visibleTabs = TABS.filter((t) => t.id !== "game" || isAdmin);
 
-  const tabBtn = (t: (typeof TABS)[0]) => {
-    const active = t.id === activeTab;
+  const tabBtn = (tab: (typeof TABS)[0]) => {
+    const active = tab.id === activeTab;
     return (
       <button
-        key={t.id}
+        key={tab.id}
         type="button"
-        onClick={() => setActiveTab(t.id)}
+        onClick={() => setActiveTab(tab.id)}
         className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 text-left ${
           active
             ? useLiquidGlass
@@ -89,8 +91,8 @@ export function DebugPageContent({
             : `${subtextColor} hover:bg-current/8`
         }`}
       >
-        <span className={active ? textColor : subtextColor}>{t.icon}</span>
-        {t.label}
+        <span className={active ? textColor : subtextColor}>{tab.icon}</span>
+        {t(`tabs.${tab.id}`)}
       </button>
     );
   };
@@ -113,10 +115,10 @@ export function DebugPageContent({
           <Bug size={15} className={subtextColor} />
           <div>
             <p className={`text-xs font-bold ${textColor} ${textShadow}`}>
-              Debug
+              {t("title")}
             </p>
             <p className={`text-[10px] ${subtextColor} leading-none`}>
-              {isAdmin ? "Admin" : "Support"}
+              {isAdmin ? t("roles.admin") : t("roles.support")}
             </p>
           </div>
         </div>
@@ -133,7 +135,7 @@ export function DebugPageContent({
             className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-all duration-200 ${subtextColor} hover:bg-current/8`}
           >
             <RefreshCw size={13} />
-            Refresh
+            {t("refresh")}
           </button>
         </div>
       </motion.div>

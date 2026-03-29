@@ -11,6 +11,7 @@ import enNews from "@/locales/en/news.json";
 import enWebstore from "@/locales/en/webstore.json";
 import enAdmin from "@/locales/en/admin.json";
 import enCommon from "@/locales/en/common.json";
+import enDebug from "@/locales/en/debug.json";
 
 // ─── Hungarian ────────────────────────────────────────────────────────────────
 import huAuth from "@/locales/hu/auth.json";
@@ -22,6 +23,7 @@ import huNews from "@/locales/hu/news.json";
 import huWebstore from "@/locales/hu/webstore.json";
 import huAdmin from "@/locales/hu/admin.json";
 import huCommon from "@/locales/hu/common.json";
+import huDebug from "@/locales/hu/debug.json";
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -35,6 +37,7 @@ i18n.use(initReactI18next).init({
       webstore: enWebstore,
       admin: enAdmin,
       common: enCommon,
+      debug: enDebug,
     },
     hu: {
       auth: huAuth,
@@ -46,6 +49,7 @@ i18n.use(initReactI18next).init({
       webstore: huWebstore,
       admin: huAdmin,
       common: huCommon,
+      debug: huDebug,
     },
   },
   lng: "en", // overridden at startup from localStorage via SettingsContext
