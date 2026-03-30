@@ -163,5 +163,5 @@
 }
 
 .debug-layout * {
-  outline: 1px solid rgba(255, 80, 80, 0.35) !important;
+  outline: 1px solid var(--debug-layout-color, rgba(255, 80, 80, 0.35)) !important;
 }
