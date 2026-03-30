@@ -10,7 +10,7 @@ import { ColorProvider } from "@/pages/settings/ColorProvider";
 import { ProfileProvider } from "@/pages/profile-selector/ProfilesContext";
 import { Wrapper } from "./Wrapper";
 import { Toaster } from "@/components/ui/toaster";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { MotionConfig } from "motion/react";
 import { useDebugSettings } from "@/hooks/useDebugSettings";
 
@@ -36,6 +36,27 @@ const persister = createSyncStoragePersister({
 });
 
 const SPEED_TO_MOTION: Record<number, number> = { 0.25: 2, 0.5: 0.8, 1: 0.3, 2: 0.1, 4: 0.05 };
+
+const INSPECTOR_PROPS = [
+  "display", "position", "width", "height",
+  "color", "backgroundColor", "fontSize",
+  "fontWeight", "zIndex", "opacity", "borderRadius",
+] as const;
+
+type InspectorProp = typeof INSPECTOR_PROPS[number];
+
+interface HoverTarget {
+  tag: string;
+  id: string;
+  classes: string[];
+  css: Record<InspectorProp, string>;
+  x: number;
+  y: number;
+}
+
+const CARD_W = 240;
+const CARD_H = 300;
+const CARD_OFFSET = 14;
 const SPEED_TO_CSS: Record<number, number> = { 0.25: 3, 0.5: 1.5, 2: 0.075, 4: 0.03 };
 
 function DebugEffects() {
@@ -109,6 +130,82 @@ function DebugOverlay() {
   );
 }
 
+function ElementInspectorOverlay() {
+  const { settings } = useDebugSettings();
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const [target, setTarget] = useState<HoverTarget | null>(null);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    const el = e.target as Element;
+    if (overlayRef.current?.contains(el) || el === overlayRef.current) return;
+
+    const cs = window.getComputedStyle(el);
+    const css = {} as Record<InspectorProp, string>;
+    for (const prop of INSPECTOR_PROPS) {
+      css[prop] = cs.getPropertyValue(prop.replace(/([A-Z])/g, "-$1").toLowerCase());
+    }
+
+    setTarget({
+      tag: el.tagName.toLowerCase(),
+      id: el.id,
+      classes: Array.from(el.classList).slice(0, 6),
+      css,
+      x: e.clientX,
+      y: e.clientY,
+    });
+  }, []);
+
+  const handleMouseLeave = useCallback(() => setTarget(null), []);
+
+  useEffect(() => {
+    if (!settings.elementInspector) { setTarget(null); return; }
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseleave", handleMouseLeave);
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, [settings.elementInspector, handleMouseMove, handleMouseLeave]);
+
+  if (!settings.elementInspector || !target) return null;
+
+  const flipX = target.x + CARD_OFFSET + CARD_W > window.innerWidth;
+  const flipY = target.y + CARD_OFFSET + CARD_H > window.innerHeight;
+  const left = flipX ? target.x - CARD_W - CARD_OFFSET : target.x + CARD_OFFSET;
+  const top  = flipY ? target.y - CARD_H - CARD_OFFSET : target.y + CARD_OFFSET;
+
+  return (
+    <div
+      ref={overlayRef}
+      data-element-inspector="true"
+      className="fixed z-9999 pointer-events-none"
+      style={{ left, top }}
+    >
+      <div className="rounded-xl backdrop-blur-md bg-black/75 border border-white/10 p-3 w-60 flex flex-col gap-1.5 shadow-xl">
+        <div className="flex items-baseline gap-1.5 border-b border-white/10 pb-1.5">
+          <span className="text-[11px] font-mono font-bold text-violet-300">&lt;{target.tag}&gt;</span>
+          {target.id && <span className="text-[10px] font-mono text-amber-300 truncate">#{target.id}</span>}
+        </div>
+        {target.classes.length > 0 && (
+          <div className="flex flex-wrap gap-1 border-b border-white/10 pb-1.5">
+            {target.classes.map((c) => (
+              <span key={c} className="text-[9px] font-mono px-1 py-0.5 rounded bg-white/10 text-white/70 truncate max-w-40">.{c}</span>
+            ))}
+          </div>
+        )}
+        <div className="flex flex-col gap-0.5">
+          {INSPECTOR_PROPS.map((prop) => (
+            <div key={prop} className="flex justify-between gap-2 items-baseline">
+              <span className="text-[9px] text-white/40 shrink-0">{prop.replace(/([A-Z])/g, "-$1").toLowerCase()}</span>
+              <span className="text-[9px] font-mono text-white/80 truncate text-right max-w-30">{target.css[prop] || "—"}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /**
  * Root layout rendered by React Router.
  *
@@ -151,6 +248,7 @@ export function RootLayout() {
                   <Toaster />
                   <DebugEffects />
                   <DebugOverlay />
+                  <ElementInspectorOverlay />
                 </MotionWrapper>
               </ProfileProvider>
             </ColorProvider>

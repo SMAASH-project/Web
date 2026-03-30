@@ -110,6 +110,7 @@ export function SightTab({
       <Section title={t("sight.visual.title")} icon={<Eye size={11} />} panelBg={panelBg} subtextColor={subtextColor}>
         {row(t("sight.visual.disableBlur"), settings.noBackdropBlur, "noBackdropBlur")}
         {row(t("sight.visual.layoutBorders"), settings.layoutBorders, "layoutBorders")}
+        {row(t("sight.visual.elementInspector"), settings.elementInspector, "elementInspector")}
       </Section>
 
       {/* ── Overlays ──────────────────────────────────────────────────── */}

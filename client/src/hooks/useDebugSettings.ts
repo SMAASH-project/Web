@@ -7,6 +7,7 @@ export interface DebugSettings {
   navbarOverride: "auto" | "show" | "hide";
   showFps: boolean;
   showScrollPos: boolean;
+  elementInspector: boolean;
 }
 
 const KEY = "debug-settings";
@@ -17,6 +18,7 @@ const DEFAULTS: DebugSettings = {
   navbarOverride: "auto",
   showFps: false,
   showScrollPos: false,
+  elementInspector: false,
 };
 
 export function getDebugSettings(): DebugSettings {

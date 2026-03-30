@@ -570,6 +570,7 @@ Tab content is split into separate files under `src/pages/debug/tabs/`:
 | Cache     | `CacheTab.tsx`   | admin + support | Live React Query cache explorer. Filter by query key. Expandable entries: status icon, last updated, raw data (truncated at 1500 chars), per-entry Invalidate + Remove buttons. Invalidate All + Refresh buttons.                                            |
 | Endpoints | `EndpointsTab.tsx` | admin + support | API tester. Method selector (GET/POST/PUT/DELETE/PATCH, colour-coded), path input, JSON body textarea, Send button. Quick route presets. Response panel: status code (coloured), latency, raw JSON output.                                                   |
 | Game Data | `GameDataTab.tsx` | admin only     | Characters grid (avatar + name + ID), Levels grid (image + name + ID), Store Items list (ID + name + rarity badge + price). All load from admin-only endpoints.                                                                                              |
+| Sight     | `SightTab.tsx`   | admin + support | Animation speed picker (0.25×–4×), navbar override (auto/show/hide), force-reload. Visual toggles: Disable Backdrop Blur, Layout Borders, Element Inspector (floating hovercard on hover showing tag / id / classes + 11 computed CSS props; auto-flips at viewport edges). Overlays: FPS counter, scroll position. Toast test buttons. CSS variable viewer (5 theme vars). `ElementInspectorOverlay` lives in `RootLayout.tsx` and is activated by `settings.elementInspector`. |
 
 ---
 

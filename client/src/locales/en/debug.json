@@ -26,7 +26,8 @@
     "visual": {
       "title": "Visual",
       "disableBlur": "Disable Backdrop Blur",
-      "layoutBorders": "Layout Borders"
+      "layoutBorders": "Layout Borders",
+      "elementInspector": "Element Inspector"
     },
     "overlays": {
       "title": "Overlays",

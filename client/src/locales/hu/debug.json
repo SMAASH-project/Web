@@ -26,7 +26,8 @@
     "visual": {
       "title": "Vizuális",
       "disableBlur": "Háttér homályosítás letiltása",
-      "layoutBorders": "Elrendezési szegélyek"
+      "layoutBorders": "Elrendezési szegélyek",
+      "elementInspector": "Elem-vizsgáló"
     },
     "overlays": {
       "title": "Feliratok",
