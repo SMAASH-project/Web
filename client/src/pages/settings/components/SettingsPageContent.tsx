@@ -41,7 +41,6 @@ interface ThemeSectionProps {
   classes: ClassBag;
   context: ColorContextType | undefined;
   t: (k: string) => string;
-  showAnimations: boolean;
   currentOverride: AnimationOverride;
   setAnimOverride: (key: AnimationOverride) => void;
 }
@@ -52,7 +51,6 @@ const ThemeSection = memo(function ThemeSection({
   classes,
   context,
   t,
-  showAnimations,
   currentOverride,
   setAnimOverride,
 }: ThemeSectionProps) {
@@ -75,42 +73,40 @@ const ThemeSection = memo(function ThemeSection({
         ))}
       </div>
 
-      {/* Animation override — inline under themes, only when animations enabled */}
-      {showAnimations && (
-        <div className="w-full">
-          <Label
-            className={`block text-center mb-2 ${classes.text} ${classes.shadow}`}
+      {/* Effect picker — always visible; background renders statically when animations are off */}
+      <div className="w-full">
+        <Label
+          className={`block text-center mb-2 ${classes.text} ${classes.shadow}`}
+        >
+          Effect
+        </Label>
+        <div className="flex flex-wrap justify-center gap-1.5">
+          {/* Theme Default */}
+          <Button
+            className={`cursor-pointer text-xs px-2.5 py-1 h-auto ${classes.btnSm} ${classes.shadow} ${currentOverride === null ? classes.ring : ""}`}
+            onClick={() => setAnimOverride(null)}
           >
-            Animation
-          </Label>
-          <div className="flex flex-wrap justify-center gap-1.5">
-            {/* Theme Default */}
+            Default
+          </Button>
+          {/* None */}
+          <Button
+            className={`cursor-pointer text-xs px-2.5 py-1 h-auto ${classes.btnSm} ${classes.shadow} ${currentOverride === "none" ? classes.ring : ""}`}
+            onClick={() => setAnimOverride("none")}
+          >
+            None
+          </Button>
+          {/* Each animation key */}
+          {ALL_ANIMATION_KEYS.map((key: AnimationKey) => (
             <Button
-              className={`cursor-pointer text-xs px-2.5 py-1 h-auto ${classes.btnSm} ${classes.shadow} ${currentOverride === null ? classes.ring : ""}`}
-              onClick={() => setAnimOverride(null)}
+              key={key}
+              className={`cursor-pointer text-xs px-2.5 py-1 h-auto ${classes.btnSm} ${classes.shadow} ${currentOverride === key ? classes.ring : ""}`}
+              onClick={() => setAnimOverride(key)}
             >
-              Default
+              {ANIMATION_LABELS[key]}
             </Button>
-            {/* None */}
-            <Button
-              className={`cursor-pointer text-xs px-2.5 py-1 h-auto ${classes.btnSm} ${classes.shadow} ${currentOverride === "none" ? classes.ring : ""}`}
-              onClick={() => setAnimOverride("none")}
-            >
-              None
-            </Button>
-            {/* Each animation key */}
-            {ALL_ANIMATION_KEYS.map((key: AnimationKey) => (
-              <Button
-                key={key}
-                className={`cursor-pointer text-xs px-2.5 py-1 h-auto ${classes.btnSm} ${classes.shadow} ${currentOverride === key ? classes.ring : ""}`}
-                onClick={() => setAnimOverride(key)}
-              >
-                {ANIMATION_LABELS[key]}
-              </Button>
-            ))}
-          </div>
+          ))}
         </div>
-      )}
+      </div>
 
       <ThemePicker />
     </div>
@@ -234,7 +230,6 @@ export const SettingsPageContent = memo(function SettingsPageContent({
             classes={classes}
             context={context}
             t={t}
-            showAnimations={settings.useAnimations}
             currentOverride={settings.animationOverride}
             setAnimOverride={setAnimOverride}
           />
