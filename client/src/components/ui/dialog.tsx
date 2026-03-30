@@ -76,7 +76,11 @@ function DialogContent({
               size="icon-sm"
             >
               <XIcon
-                className={settings.useDarkMode ? "text-white" : undefined}
+                className={
+                  settings.useDarkMode || settings.useLiquidGlass
+                    ? "text-white"
+                    : undefined
+                }
               />
               <span className="sr-only">Close</span>
             </Button>

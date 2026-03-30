@@ -113,7 +113,6 @@ const ThemeSection = memo(function ThemeSection({
               context?.setColorMiddle(customTheme.colorMiddle);
               context?.setColorRight(customTheme.colorRight);
               context?.setAnimationKey(null);
-              context?.setEffectMix(null);
             }}
           >
             Custom

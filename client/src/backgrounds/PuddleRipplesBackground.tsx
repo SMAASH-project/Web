@@ -128,7 +128,7 @@ export function PuddleRipplesBackground({
     };
   // Re-initialize when color changes so new ripples use the updated color
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [colorLeft, colorMiddle, colorRight, showRipples]);
+  }, [colorRight, showRipples]);
 
   return (
     <canvas

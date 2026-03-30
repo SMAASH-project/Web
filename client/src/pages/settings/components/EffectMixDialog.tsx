@@ -77,7 +77,7 @@ export function EffectMixDialog() {
     (effectKey: AnimationKey, subKey: string) => {
       setPendingMix((prev) => {
         const current = (prev[effectKey] ??
-          DEFAULT_SUB_EFFECTS[effectKey]) as Record<string, boolean>;
+          DEFAULT_SUB_EFFECTS[effectKey]) as unknown as Record<string, boolean>;
         return {
           ...prev,
           [effectKey]: { ...current, [subKey]: !current[subKey] },
@@ -154,7 +154,7 @@ export function EffectMixDialog() {
                 >;
                 const subValues = (
                   isEnabled ? pendingMix[key] : DEFAULT_SUB_EFFECTS[key]
-                ) as Record<string, boolean>;
+                ) as unknown as Record<string, boolean>;
 
                 return (
                   <AccordionItem key={key} value={key} className="border-white/20">
