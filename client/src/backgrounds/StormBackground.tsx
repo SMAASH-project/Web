@@ -5,6 +5,11 @@ interface Props {
   colorMiddle: string;
   colorRight: string;
   paused?: boolean;
+  preview?: boolean;
+  showRain?: boolean;
+  showLightning?: boolean;
+  showClouds?: boolean;
+  showGroundShimmer?: boolean;
 }
 
 const CLOUD_CSS = `
@@ -73,6 +78,11 @@ export function StormBackground({
   colorMiddle,
   colorRight,
   paused = false,
+  preview = false,
+  showRain = true,
+  showLightning = true,
+  showClouds = true,
+  showGroundShimmer = true,
 }: Props) {
   const rainCanvasRef = useRef<HTMLCanvasElement>(null);
   const boltCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -95,11 +105,11 @@ export function StormBackground({
     let animId: number;
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width = preview ? (canvas.parentElement?.offsetWidth ?? 320) : window.innerWidth;
+      canvas.height = preview ? (canvas.parentElement?.offsetHeight ?? 200) : window.innerHeight;
     };
     resize();
-    window.addEventListener("resize", resize);
+    if (!preview) window.addEventListener("resize", resize);
 
     // Build rain drops — three layers
     const drops: RainDrop[] = Array.from({ length: 200 }, (_, i) => ({
@@ -133,26 +143,28 @@ export function StormBackground({
       const h = canvas!.height;
       ctx!.clearRect(0, 0, w, h);
 
-      for (const d of drops) {
-        d.x += Math.sin(ANGLE) * d.speed;
-        d.y += Math.cos(ANGLE) * d.speed;
-        if (d.y > h + d.length) {
-          d.y = -d.length - Math.random() * 40;
-          d.x = Math.random() * (w + 100) - 50;
-        }
+      if (showRain) {
+        for (const d of drops) {
+          d.x += Math.sin(ANGLE) * d.speed;
+          d.y += Math.cos(ANGLE) * d.speed;
+          if (d.y > h + d.length) {
+            d.y = -d.length - Math.random() * 40;
+            d.x = Math.random() * (w + 100) - 50;
+          }
 
-        ctx!.save();
-        ctx!.globalAlpha = d.opacity;
-        ctx!.strokeStyle = "rgba(200,225,255,1)";
-        ctx!.lineWidth = d.width;
-        ctx!.beginPath();
-        ctx!.moveTo(d.x, d.y);
-        ctx!.lineTo(
-          d.x + Math.sin(ANGLE) * d.length,
-          d.y + Math.cos(ANGLE) * d.length,
-        );
-        ctx!.stroke();
-        ctx!.restore();
+          ctx!.save();
+          ctx!.globalAlpha = d.opacity;
+          ctx!.strokeStyle = "rgba(200,225,255,1)";
+          ctx!.lineWidth = d.width;
+          ctx!.beginPath();
+          ctx!.moveTo(d.x, d.y);
+          ctx!.lineTo(
+            d.x + Math.sin(ANGLE) * d.length,
+            d.y + Math.cos(ANGLE) * d.length,
+          );
+          ctx!.stroke();
+          ctx!.restore();
+        }
       }
 
       if (!paused) animId = requestAnimationFrame(draw);
@@ -160,9 +172,9 @@ export function StormBackground({
     draw();
     return () => {
       cancelAnimationFrame(animId);
-      window.removeEventListener("resize", resize);
+      if (!preview) window.removeEventListener("resize", resize);
     };
-  }, [paused]);
+  }, [paused, showRain]);
 
   // ── Lightning bolt canvas ────────────────────────────────────────────────────
   useEffect(() => {
@@ -174,58 +186,61 @@ export function StormBackground({
     let animId: number;
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width = preview ? (canvas.parentElement?.offsetWidth ?? 320) : window.innerWidth;
+      canvas.height = preview ? (canvas.parentElement?.offsetHeight ?? 200) : window.innerHeight;
     };
     resize();
-    window.addEventListener("resize", resize);
+    if (!preview) window.addEventListener("resize", resize);
 
     function draw() {
       const w = canvas!.width;
       const h = canvas!.height;
       ctx!.clearRect(0, 0, w, h);
 
-      const bolt = boltRef.current;
-      const alpha = boltAlphaRef.current;
-      if (bolt && alpha > 0) {
-        boltAlphaRef.current = Math.max(0, alpha - 0.04);
+      if (showLightning) {
+        const bolt = boltRef.current;
+        const alpha = boltAlphaRef.current;
+        if (bolt && alpha > 0) {
+          boltAlphaRef.current = Math.max(0, alpha - 0.04);
 
-        ctx!.save();
-        ctx!.globalAlpha = Math.min(1, alpha * 1.4);
-        // Outer glow
-        ctx!.shadowBlur = 30;
-        ctx!.shadowColor = "rgba(200,220,255,0.9)";
-        ctx!.strokeStyle = `rgba(230,240,255,${alpha})`;
-        ctx!.lineWidth = 3;
-        ctx!.beginPath();
-        ctx!.moveTo(bolt[0].x, bolt[0].y);
-        for (let i = 1; i < bolt.length; i++) {
-          ctx!.lineTo(bolt[i].x, bolt[i].y);
+          ctx!.save();
+          ctx!.globalAlpha = Math.min(1, alpha * 1.4);
+          // Outer glow
+          ctx!.shadowBlur = 30;
+          ctx!.shadowColor = "rgba(200,220,255,0.9)";
+          ctx!.strokeStyle = `rgba(230,240,255,${alpha})`;
+          ctx!.lineWidth = 3;
+          ctx!.beginPath();
+          ctx!.moveTo(bolt[0].x, bolt[0].y);
+          for (let i = 1; i < bolt.length; i++) {
+            ctx!.lineTo(bolt[i].x, bolt[i].y);
+          }
+          ctx!.stroke();
+          // Inner core
+          ctx!.shadowBlur = 8;
+          ctx!.strokeStyle = `rgba(255,255,255,${Math.min(1, alpha * 1.5)})`;
+          ctx!.lineWidth = 1.2;
+          ctx!.beginPath();
+          ctx!.moveTo(bolt[0].x, bolt[0].y);
+          for (let i = 1; i < bolt.length; i++) {
+            ctx!.lineTo(bolt[i].x, bolt[i].y);
+          }
+          ctx!.stroke();
+          ctx!.restore();
         }
-        ctx!.stroke();
-        // Inner core
-        ctx!.shadowBlur = 8;
-        ctx!.strokeStyle = `rgba(255,255,255,${Math.min(1, alpha * 1.5)})`;
-        ctx!.lineWidth = 1.2;
-        ctx!.beginPath();
-        ctx!.moveTo(bolt[0].x, bolt[0].y);
-        for (let i = 1; i < bolt.length; i++) {
-          ctx!.lineTo(bolt[i].x, bolt[i].y);
-        }
-        ctx!.stroke();
-        ctx!.restore();
       }
       if (!paused) animId = requestAnimationFrame(draw);
     }
     draw();
     return () => {
       cancelAnimationFrame(animId);
-      window.removeEventListener("resize", resize);
+      if (!preview) window.removeEventListener("resize", resize);
     };
-  }, [paused]);
+  }, [paused, showLightning]);
 
   // ── Lightning timer ──────────────────────────────────────────────────────────
   useEffect(() => {
+    if (preview || !showLightning) return;
     function scheduleNext() {
       const delay = 2800 + Math.random() * 5500;
       timerRef.current = setTimeout(() => {
@@ -244,42 +259,47 @@ export function StormBackground({
     }
     scheduleNext();
     return () => clearTimeout(timerRef.current);
-  }, []);
+  }, [preview, showLightning]);
 
   return (
     <>
       <style>{CLOUD_CSS}</style>
 
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+      <div className={`${preview ? "absolute" : "fixed"} inset-0 z-0 pointer-events-none overflow-hidden`}>
         {/* Dark storm atmosphere */}
         <div className="absolute inset-0 bg-[rgba(2,4,12,0.45)]" />
 
-        {/* Cloud layer 1 — wide, low */}
-        <div
-          className="absolute top-[-10%] left-[-18%] w-[85%] h-[48%] blur-[35px] animate-[cloud-drift-1_26s_ease-in-out_infinite]"
-          style={{
-            background: `radial-gradient(ellipse 100% 75% at 35% 45%, rgba(${lr},${lg},${lb},0.62) 0%, transparent 70%)`,
-          }}
-        />
-        {/* Cloud layer 2 */}
-        <div
-          className="absolute top-[-6%] left-[28%] w-[95%] h-[50%] blur-[42px] animate-[cloud-drift-2_33s_ease-in-out_infinite]"
-          style={{
-            background: `radial-gradient(ellipse 100% 85% at 55% 40%, rgba(${mr},${mg},${mb},0.52) 0%, transparent 70%)`,
-          }}
-        />
-        {/* Cloud layer 3 — lighter, further back */}
-        <div
-          className="absolute top-[0%] left-[45%] w-[75%] h-[40%] blur-[28px] animate-[cloud-drift-3_40s_ease-in-out_infinite]"
-          style={{
-            background: `radial-gradient(ellipse 90% 70% at 50% 50%, rgba(${rr},${rg},${rb},0.40) 0%, transparent 70%)`,
-          }}
-        />
-        {/* Underbelly darkening */}
-        <div
-          className="absolute top-[25%] inset-x-0 h-[20%] blur-[50px] opacity-60"
-          style={{ background: "rgba(0,0,5,0.7)" }}
-        />
+        {/* Cloud layers */}
+        {showClouds && (
+          <>
+            {/* Cloud layer 1 — wide, low */}
+            <div
+              className="absolute top-[-10%] left-[-18%] w-[85%] h-[48%] blur-[35px] animate-[cloud-drift-1_26s_ease-in-out_infinite]"
+              style={{
+                background: `radial-gradient(ellipse 100% 75% at 35% 45%, rgba(${lr},${lg},${lb},0.62) 0%, transparent 70%)`,
+              }}
+            />
+            {/* Cloud layer 2 */}
+            <div
+              className="absolute top-[-6%] left-[28%] w-[95%] h-[50%] blur-[42px] animate-[cloud-drift-2_33s_ease-in-out_infinite]"
+              style={{
+                background: `radial-gradient(ellipse 100% 85% at 55% 40%, rgba(${mr},${mg},${mb},0.52) 0%, transparent 70%)`,
+              }}
+            />
+            {/* Cloud layer 3 — lighter, further back */}
+            <div
+              className="absolute top-[0%] left-[45%] w-[75%] h-[40%] blur-[28px] animate-[cloud-drift-3_40s_ease-in-out_infinite]"
+              style={{
+                background: `radial-gradient(ellipse 90% 70% at 50% 50%, rgba(${rr},${rg},${rb},0.40) 0%, transparent 70%)`,
+              }}
+            />
+            {/* Underbelly darkening */}
+            <div
+              className="absolute top-[25%] inset-x-0 h-[20%] blur-[50px] opacity-60"
+              style={{ background: "rgba(0,0,5,0.7)" }}
+            />
+          </>
+        )}
 
         {/* Rain canvas */}
         <canvas
@@ -294,7 +314,7 @@ export function StormBackground({
         />
 
         {/* Screen flash */}
-        {flashAlpha > 0 && (
+        {showLightning && flashAlpha > 0 && (
           <div
             className="absolute inset-0"
             style={{ background: `rgba(210,225,255,${flashAlpha})` }}
@@ -302,12 +322,14 @@ export function StormBackground({
         )}
 
         {/* Ground puddle shimmer */}
-        <div
-          className="absolute bottom-0 inset-x-0 h-[8%]"
-          style={{
-            background: `linear-gradient(to top, rgba(${mr},${mg},${mb},0.18), transparent)`,
-          }}
-        />
+        {showGroundShimmer && (
+          <div
+            className="absolute bottom-0 inset-x-0 h-[8%]"
+            style={{
+              background: `linear-gradient(to top, rgba(${mr},${mg},${mb},0.18), transparent)`,
+            }}
+          />
+        )}
       </div>
     </>
   );

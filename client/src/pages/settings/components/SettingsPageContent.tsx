@@ -45,8 +45,6 @@ interface ThemeSectionProps {
   setAnimOverride: (key: AnimationOverride) => void;
 }
 
-// ThemeSection now owns the animation override row — it lives directly below
-// the theme grid so the two concepts sit together and the bottom row is gone.
 const ThemeSection = memo(function ThemeSection({
   classes,
   context,
@@ -54,6 +52,37 @@ const ThemeSection = memo(function ThemeSection({
   currentOverride,
   setAnimOverride,
 }: ThemeSectionProps) {
+  const colorLeft = context?.colorLeft ?? "";
+  const colorMiddle = context?.colorMiddle ?? "";
+  const colorRight = context?.colorRight ?? "";
+  const customTheme = context?.customTheme ?? null;
+  const effectMix = context?.effectMix ?? null;
+
+  // Detect which preset theme (if any) matches current colors
+  const activeThemeName = useMemo(() => {
+    for (const theme of THEMES) {
+      if (
+        theme.colorLeft === colorLeft &&
+        theme.colorMiddle === colorMiddle &&
+        theme.colorRight === colorRight
+      ) {
+        return theme.name;
+      }
+    }
+    return null;
+  }, [colorLeft, colorMiddle, colorRight]);
+
+  const isCustomThemeActive = useMemo(
+    () =>
+      customTheme !== null &&
+      customTheme.colorLeft === colorLeft &&
+      customTheme.colorMiddle === colorMiddle &&
+      customTheme.colorRight === colorRight,
+    [customTheme, colorLeft, colorMiddle, colorRight],
+  );
+
+  const hasEffectMix = effectMix !== null && Object.keys(effectMix).length > 0;
+
   return (
     <div className="flex-1 flex items-center justify-center flex-col gap-4">
       <Label className={`${classes.text} ${classes.shadow}`}>
@@ -65,15 +94,34 @@ const ThemeSection = memo(function ThemeSection({
         {THEMES.map((theme: Theme) => (
           <Button
             key={theme.name}
-            className={`cursor-pointer ${classes.btn} ${classes.shadow}`}
+            className={`cursor-pointer ${classes.btn} ${classes.shadow} ${
+              activeThemeName === theme.name ? classes.ring : ""
+            }`}
             onClick={() => applyTheme(theme, context)}
           >
             {theme.name}
           </Button>
         ))}
+        {/* Custom saved theme button — only shown when one is saved */}
+        {customTheme && (
+          <Button
+            className={`cursor-pointer ${classes.btn} ${classes.shadow} ${
+              isCustomThemeActive ? classes.ring : ""
+            }`}
+            onClick={() => {
+              context?.setColorLeft(customTheme.colorLeft);
+              context?.setColorMiddle(customTheme.colorMiddle);
+              context?.setColorRight(customTheme.colorRight);
+              context?.setAnimationKey(null);
+              context?.setEffectMix(null);
+            }}
+          >
+            Custom
+          </Button>
+        )}
       </div>
 
-      {/* Effect picker — always visible; background renders statically when animations are off */}
+      {/* Effect picker */}
       <div className="w-full">
         <Label
           className={`block text-center mb-2 ${classes.text} ${classes.shadow}`}
@@ -95,6 +143,15 @@ const ThemeSection = memo(function ThemeSection({
           >
             None
           </Button>
+          {/* Custom mix — only shown when an effectMix is saved */}
+          {hasEffectMix && (
+            <Button
+              className={`cursor-pointer text-xs px-2.5 py-1 h-auto ${classes.btnSm} ${classes.shadow} ${currentOverride === "custom" ? classes.ring : ""}`}
+              onClick={() => setAnimOverride("custom")}
+            >
+              Custom
+            </Button>
+          )}
           {/* Each animation key */}
           {ALL_ANIMATION_KEYS.map((key: AnimationKey) => (
             <Button
@@ -179,7 +236,6 @@ export const SettingsPageContent = memo(function SettingsPageContent({
     );
     const bg = animReady ? rawBg : rawBg.replace(/backdrop-blur-\S+/g, "");
     const btn = getButtonClasses(settings.useLiquidGlass, settings.useDarkMode);
-    // btnSm reuses the same base class — sizing is controlled in JSX via text-xs/px/py
     const btnSm = btn;
     const ring = settings.useLiquidGlass
       ? settings.useDarkMode

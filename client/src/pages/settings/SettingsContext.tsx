@@ -6,8 +6,9 @@ export type Language = "en" | "hu";
 
 // null  = use the theme's own animationKey (default)
 // 'none' = force no animation even if theme has one
+// 'custom' = use the saved effectMix composite
 // AnimationKey = force a specific animation regardless of theme
-export type AnimationOverride = AnimationKey | "none" | null;
+export type AnimationOverride = AnimationKey | "none" | "custom" | null;
 
 export interface SettingsState {
   useAnimations: boolean;

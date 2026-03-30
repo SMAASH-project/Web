@@ -5,6 +5,8 @@ interface Props {
   colorMiddle: string;
   colorRight: string;
   paused?: boolean;
+  preview?: boolean;
+  showRipples?: boolean;
 }
 
 interface Ripple {
@@ -29,6 +31,8 @@ function hexToRgb(hex: string): [number, number, number] {
 export function PuddleRipplesBackground({
   colorRight,
   paused = false,
+  preview = false,
+  showRipples = true,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pausedRef = useRef(paused);
@@ -49,11 +53,11 @@ export function PuddleRipplesBackground({
 
     // Resize canvas to fill the window
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width = preview ? (canvas.parentElement?.offsetWidth ?? 320) : window.innerWidth;
+      canvas.height = preview ? (canvas.parentElement?.offsetHeight ?? 200) : window.innerHeight;
     };
     resize();
-    window.addEventListener("resize", resize);
+    if (!preview) window.addEventListener("resize", resize);
 
     const ripples: Ripple[] = [];
     let lastSpawn = performance.now();
@@ -74,31 +78,36 @@ export function PuddleRipplesBackground({
     const draw = (now: number) => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      for (let i = ripples.length - 1; i >= 0; i--) {
-        const ripple = ripples[i];
+      if (showRipples) {
+        for (let i = ripples.length - 1; i >= 0; i--) {
+          const ripple = ripples[i];
 
-        for (let ring = 0; ring < RING_COUNT; ring++) {
-          const age = (now - ripple.birthTime - ring * RING_OFFSET) / RIPPLE_DURATION;
-          if (age < 0 || age > 1) continue;
+          for (let ring = 0; ring < RING_COUNT; ring++) {
+            const age = (now - ripple.birthTime - ring * RING_OFFSET) / RIPPLE_DURATION;
+            if (age < 0 || age > 1) continue;
 
-          const radius = age * ripple.maxRadius;
-          const opacity = (1 - age) * 0.5;
-          const lineWidth = Math.max(0.4, 2.2 - age * 2);
+            const radius = age * ripple.maxRadius;
+            const opacity = (1 - age) * 0.5;
+            const lineWidth = Math.max(0.4, 2.2 - age * 2);
 
-          ctx.beginPath();
-          ctx.arc(ripple.x, ripple.y, radius, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-          ctx.lineWidth = lineWidth;
-          ctx.stroke();
-        }
+            ctx.beginPath();
+            ctx.arc(ripple.x, ripple.y, radius, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+            ctx.lineWidth = lineWidth;
+            ctx.stroke();
+          }
 
-        // Prune fully expired ripples (last ring done)
-        const totalAge = (now - ripple.birthTime - (RING_COUNT - 1) * RING_OFFSET) / RIPPLE_DURATION;
-        if (totalAge > 1) {
-          ripples.splice(i, 1);
+          // Prune fully expired ripples (last ring done)
+          const totalAge = (now - ripple.birthTime - (RING_COUNT - 1) * RING_OFFSET) / RIPPLE_DURATION;
+          if (totalAge > 1) {
+            ripples.splice(i, 1);
+          }
         }
       }
     };
+
+    // Draw one static frame so preview box isn't blank when paused from mount
+    draw(performance.now());
 
     const loop = (now: number) => {
       if (!pausedRef.current) {
@@ -115,16 +124,16 @@ export function PuddleRipplesBackground({
 
     return () => {
       cancelAnimationFrame(rafRef.current);
-      window.removeEventListener("resize", resize);
+      if (!preview) window.removeEventListener("resize", resize);
     };
   // Re-initialize when color changes so new ripples use the updated color
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [colorRight]);
+  }, [colorLeft, colorMiddle, colorRight, showRipples]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 z-0 opacity-90 pointer-events-none"
+      className={`${preview ? "absolute" : "fixed"} inset-0 z-0 opacity-90 pointer-events-none`}
     />
   );
 }

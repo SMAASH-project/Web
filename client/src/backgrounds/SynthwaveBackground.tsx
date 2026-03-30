@@ -5,6 +5,11 @@ interface Props {
   colorMiddle: string;
   colorRight: string;
   paused?: boolean;
+  preview?: boolean;
+  showSky?: boolean;
+  showSun?: boolean;
+  showGrid?: boolean;
+  showScanlines?: boolean;
 }
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -39,6 +44,11 @@ export function SynthwaveBackground({
   colorMiddle,
   colorRight,
   paused = false,
+  preview = false,
+  showSky = true,
+  showSun = true,
+  showGrid = true,
+  showScanlines = true,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -52,11 +62,11 @@ export function SynthwaveBackground({
     let t = 0;
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width = preview ? (canvas.parentElement?.offsetWidth ?? 320) : window.innerWidth;
+      canvas.height = preview ? (canvas.parentElement?.offsetHeight ?? 200) : window.innerHeight;
     };
     resize();
-    window.addEventListener("resize", resize);
+    if (!preview) window.addEventListener("resize", resize);
 
     const cL = hexToRgb(colorLeft);
     const cM = hexToRgb(colorMiddle);
@@ -74,56 +84,60 @@ export function SynthwaveBackground({
       const vpX = w / 2;
 
       // ── Sky gradient ─────────────────────────────────────────────────────
-      const sky = ctx!.createLinearGradient(0, 0, 0, horizon);
-      sky.addColorStop(0, `rgb(${cL[0]},${cL[1]},${cL[2]})`);
-      sky.addColorStop(0.6, `rgb(${cM[0]},${cM[1]},${cM[2]})`);
-      sky.addColorStop(1, `rgb(${bright[0]},${bright[1]},${bright[2]})`);
-      ctx!.fillStyle = sky;
-      ctx!.fillRect(0, 0, w, horizon);
+      if (showSky) {
+        const sky = ctx!.createLinearGradient(0, 0, 0, horizon);
+        sky.addColorStop(0, `rgb(${cL[0]},${cL[1]},${cL[2]})`);
+        sky.addColorStop(0.6, `rgb(${cM[0]},${cM[1]},${cM[2]})`);
+        sky.addColorStop(1, `rgb(${bright[0]},${bright[1]},${bright[2]})`);
+        ctx!.fillStyle = sky;
+        ctx!.fillRect(0, 0, w, horizon);
+      }
 
       // ── Retro sun ─────────────────────────────────────────────────────────
-      const sunR = w * 0.13;
-      const sunCX = vpX;
-      const sunCY = horizon - sunR * 0.05;
+      if (showSun) {
+        const sunR = w * 0.13;
+        const sunCX = vpX;
+        const sunCY = horizon - sunR * 0.05;
 
-      // Sun gradient
-      const sunGrad = ctx!.createRadialGradient(
-        sunCX,
-        sunCY,
-        0,
-        sunCX,
-        sunCY,
-        sunR,
-      );
-      sunGrad.addColorStop(
-        0,
-        `rgb(${Math.min(255, bright[0] + 40)},${Math.min(255, bright[1] + 20)},${Math.min(255, bright[2] + 80)})`,
-      );
-      sunGrad.addColorStop(0.5, `rgb(${bright[0]},${bright[1]},${bright[2]})`);
-      sunGrad.addColorStop(1, `rgb(${cR[0]},${cR[1]},${cR[2]})`);
+        // Sun gradient
+        const sunGrad = ctx!.createRadialGradient(
+          sunCX,
+          sunCY,
+          0,
+          sunCX,
+          sunCY,
+          sunR,
+        );
+        sunGrad.addColorStop(
+          0,
+          `rgb(${Math.min(255, bright[0] + 40)},${Math.min(255, bright[1] + 20)},${Math.min(255, bright[2] + 80)})`,
+        );
+        sunGrad.addColorStop(0.5, `rgb(${bright[0]},${bright[1]},${bright[2]})`);
+        sunGrad.addColorStop(1, `rgb(${cR[0]},${cR[1]},${cR[2]})`);
 
-      // Clip to semicircle
-      ctx!.save();
-      ctx!.beginPath();
-      ctx!.arc(sunCX, sunCY, sunR, Math.PI, 0); // top half
-      ctx!.lineTo(sunCX + sunR, sunCY);
-      ctx!.lineTo(sunCX - sunR, sunCY);
-      ctx!.closePath();
-      ctx!.clip();
-      ctx!.beginPath();
-      ctx!.arc(sunCX, sunCY, sunR, 0, Math.PI * 2);
-      ctx!.fillStyle = sunGrad;
-      ctx!.fill();
+        // Clip to semicircle
+        ctx!.save();
+        ctx!.beginPath();
+        ctx!.arc(sunCX, sunCY, sunR, Math.PI, 0); // top half
+        ctx!.lineTo(sunCX + sunR, sunCY);
+        ctx!.lineTo(sunCX - sunR, sunCY);
+        ctx!.closePath();
+        ctx!.clip();
+        ctx!.beginPath();
+        ctx!.arc(sunCX, sunCY, sunR, 0, Math.PI * 2);
+        ctx!.fillStyle = sunGrad;
+        ctx!.fill();
 
-      // Horizontal stripe cutouts (scanline effect on sun)
-      const stripeCount = 9;
-      const stripeH = (sunR * 0.72) / (stripeCount * 1.6);
-      for (let i = 0; i < stripeCount; i++) {
-        const sy = sunCY - sunR * 0.08 - i * (stripeH * 2.6);
-        ctx!.fillStyle = `rgba(0,0,0,${0.35 + i * 0.025})`;
-        ctx!.fillRect(sunCX - sunR, sy, sunR * 2, stripeH);
+        // Horizontal stripe cutouts (scanline effect on sun)
+        const stripeCount = 9;
+        const stripeH = (sunR * 0.72) / (stripeCount * 1.6);
+        for (let i = 0; i < stripeCount; i++) {
+          const sy = sunCY - sunR * 0.08 - i * (stripeH * 2.6);
+          ctx!.fillStyle = `rgba(0,0,0,${0.35 + i * 0.025})`;
+          ctx!.fillRect(sunCX - sunR, sy, sunR * 2, stripeH);
+        }
+        ctx!.restore();
       }
-      ctx!.restore();
 
       // ── Ground ─────────────────────────────────────────────────────────────
       const ground = ctx!.createLinearGradient(0, horizon, 0, h);
@@ -153,65 +167,62 @@ export function SynthwaveBackground({
       ctx!.restore();
 
       // ── Perspective grid ─────────────────────────────────────────────────
-      const gridColor = `rgba(${bright[0]},${bright[1]},${bright[2]},0.55)`;
-      const gridFade = `rgba(${bright[0]},${bright[1]},${bright[2]},0)`;
-      ctx!.strokeStyle = gridColor;
-      ctx!.lineWidth = 0.8;
-
-      // Vertical lines (fan from vanishing point)
-      const vLines = 24;
-      for (let i = 0; i <= vLines; i++) {
-        const bx = (w / vLines) * i;
-        const lg = ctx!.createLinearGradient(vpX, horizon, bx, h);
-        lg.addColorStop(0, gridFade);
-        lg.addColorStop(0.3, gridColor);
-        lg.addColorStop(1, gridColor);
-        ctx!.strokeStyle = lg;
-        ctx!.beginPath();
-        ctx!.moveTo(vpX, horizon);
-        ctx!.lineTo(bx, h);
-        ctx!.stroke();
-      }
-
-      // Horizontal lines — perspective spacing, scrolling toward viewer
-      const hLines = 18;
-      const scrollPeriod = 2.0; // seconds per repeat
-      const scrollOffset = (t % scrollPeriod) / scrollPeriod; // 0→1
-
-      for (let i = 0; i <= hLines; i++) {
-        // Non-linear spacing: lines bunch toward horizon
-        const raw = (i + scrollOffset) / hLines;
-        const perspY = horizon + (h - horizon) * Math.pow(raw, 2.8);
-        if (perspY < horizon || perspY > h + 1) continue;
-
-        const alpha = Math.pow(raw, 0.6) * 0.6;
-        const hg = ctx!.createLinearGradient(0, perspY, w, perspY);
-        hg.addColorStop(0, "transparent");
-        hg.addColorStop(
-          0.1,
-          `rgba(${bright[0]},${bright[1]},${bright[2]},${alpha})`,
-        );
-        hg.addColorStop(
-          0.9,
-          `rgba(${bright[0]},${bright[1]},${bright[2]},${alpha})`,
-        );
-        hg.addColorStop(1, "transparent");
-        ctx!.strokeStyle = hg;
+      if (showGrid) {
+        const gridColor = `rgba(${bright[0]},${bright[1]},${bright[2]},0.55)`;
+        const gridFade = `rgba(${bright[0]},${bright[1]},${bright[2]},0)`;
+        ctx!.strokeStyle = gridColor;
         ctx!.lineWidth = 0.8;
-        ctx!.beginPath();
-        ctx!.moveTo(0, perspY);
-        ctx!.lineTo(w, perspY);
-        ctx!.stroke();
+
+        // Vertical lines (fan from vanishing point)
+        const vLines = 24;
+        for (let i = 0; i <= vLines; i++) {
+          const bx = (w / vLines) * i;
+          const lg = ctx!.createLinearGradient(vpX, horizon, bx, h);
+          lg.addColorStop(0, gridFade);
+          lg.addColorStop(0.3, gridColor);
+          lg.addColorStop(1, gridColor);
+          ctx!.strokeStyle = lg;
+          ctx!.beginPath();
+          ctx!.moveTo(vpX, horizon);
+          ctx!.lineTo(bx, h);
+          ctx!.stroke();
+        }
+
+        // Horizontal lines — perspective spacing, scrolling toward viewer
+        const hLines = 18;
+        const scrollPeriod = 2.0;
+        const scrollOffset = (t % scrollPeriod) / scrollPeriod;
+
+        for (let i = 0; i <= hLines; i++) {
+          const raw = (i + scrollOffset) / hLines;
+          const perspY = horizon + (h - horizon) * Math.pow(raw, 2.8);
+          if (perspY < horizon || perspY > h + 1) continue;
+
+          const alpha = Math.pow(raw, 0.6) * 0.6;
+          const hg = ctx!.createLinearGradient(0, perspY, w, perspY);
+          hg.addColorStop(0, "transparent");
+          hg.addColorStop(0.1, `rgba(${bright[0]},${bright[1]},${bright[2]},${alpha})`);
+          hg.addColorStop(0.9, `rgba(${bright[0]},${bright[1]},${bright[2]},${alpha})`);
+          hg.addColorStop(1, "transparent");
+          ctx!.strokeStyle = hg;
+          ctx!.lineWidth = 0.8;
+          ctx!.beginPath();
+          ctx!.moveTo(0, perspY);
+          ctx!.lineTo(w, perspY);
+          ctx!.stroke();
+        }
       }
 
       // ── Scanline overlay ──────────────────────────────────────────────────
-      ctx!.save();
-      ctx!.globalAlpha = 0.04;
-      for (let y = 0; y < h; y += 4) {
-        ctx!.fillStyle = "rgba(0,0,0,1)";
-        ctx!.fillRect(0, y, w, 2);
+      if (showScanlines) {
+        ctx!.save();
+        ctx!.globalAlpha = 0.04;
+        for (let y = 0; y < h; y += 4) {
+          ctx!.fillStyle = "rgba(0,0,0,1)";
+          ctx!.fillRect(0, y, w, 2);
+        }
+        ctx!.restore();
       }
-      ctx!.restore();
 
       if (!paused) animId = requestAnimationFrame(draw);
     }
@@ -219,14 +230,14 @@ export function SynthwaveBackground({
     draw();
     return () => {
       cancelAnimationFrame(animId);
-      window.removeEventListener("resize", resize);
+      if (!preview) window.removeEventListener("resize", resize);
     };
-  }, [colorLeft, colorMiddle, colorRight]);
+  }, [colorLeft, colorMiddle, colorRight, showSky, showSun, showGrid, showScanlines]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 z-0 opacity-[0.72] pointer-events-none"
+      className={`${preview ? "absolute" : "fixed"} inset-0 z-0 opacity-[0.72] pointer-events-none`}
     />
   );
 }

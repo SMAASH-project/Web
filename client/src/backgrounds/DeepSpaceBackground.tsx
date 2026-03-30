@@ -5,6 +5,11 @@ interface Props {
   colorMiddle: string;
   colorRight: string;
   paused?: boolean;
+  preview?: boolean;
+  showStars?: boolean;
+  showMilkyWay?: boolean;
+  showNebulae?: boolean;
+  showShootingStars?: boolean;
 }
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -62,6 +67,11 @@ export function DeepSpaceBackground({
   colorMiddle,
   colorRight,
   paused = false,
+  preview = false,
+  showStars = true,
+  showMilkyWay = true,
+  showNebulae = true,
+  showShootingStars = true,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -77,11 +87,11 @@ export function DeepSpaceBackground({
     const SHOOT_INTERVAL = 60 + Math.random() * 80; // ~1–2.3 s at 60 fps
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width = preview ? (canvas.parentElement?.offsetWidth ?? 320) : window.innerWidth;
+      canvas.height = preview ? (canvas.parentElement?.offsetHeight ?? 200) : window.innerHeight;
     };
     resize();
-    window.addEventListener("resize", resize);
+    if (!preview) window.addEventListener("resize", resize);
 
     const [lr, lg, lb] = hexToRgb(colorLeft);
     const [mr, mg, mb] = hexToRgb(colorMiddle);
@@ -303,11 +313,11 @@ export function DeepSpaceBackground({
       ctx!.fillStyle = "rgba(0,0,8,0.55)";
       ctx!.fillRect(0, 0, w, h);
 
-      drawMilkyWay();
-      drawNebulae(w, h);
+      if (showMilkyWay) drawMilkyWay();
+      if (showNebulae) drawNebulae(w, h);
 
       // Stars
-      for (const s of stars) {
+      if (showStars) for (const s of stars) {
         s.alpha =
           s.baseAlpha +
           Math.sin(t * s.twinkleSpeed + s.twinklePhase) * s.baseAlpha * 0.45;
@@ -355,19 +365,21 @@ export function DeepSpaceBackground({
       }
 
       // Shooting stars
-      if (shootingTimer > SHOOT_INTERVAL && Math.random() < 0.06) {
-        shootingTimer = 0;
-        shootingStars.push(makeShootingStar(w, h));
-        if (shootingStars.length > 5) shootingStars.shift();
-      }
-      for (const ss of shootingStars) {
-        if (!ss.active) continue;
-        ss.x += ss.vx;
-        ss.y += ss.vy;
-        ss.life -= 0.02;
-        ss.alpha = ss.life;
-        if (ss.life <= 0 || ss.x > w + 60 || ss.y > h + 60) ss.active = false;
-        drawShootingStar(ss);
+      if (showShootingStars) {
+        if (shootingTimer > SHOOT_INTERVAL && Math.random() < 0.06) {
+          shootingTimer = 0;
+          shootingStars.push(makeShootingStar(w, h));
+          if (shootingStars.length > 5) shootingStars.shift();
+        }
+        for (const ss of shootingStars) {
+          if (!ss.active) continue;
+          ss.x += ss.vx;
+          ss.y += ss.vy;
+          ss.life -= 0.02;
+          ss.alpha = ss.life;
+          if (ss.life <= 0 || ss.x > w + 60 || ss.y > h + 60) ss.active = false;
+          drawShootingStar(ss);
+        }
       }
 
       if (!paused) animId = requestAnimationFrame(draw);
@@ -376,14 +388,14 @@ export function DeepSpaceBackground({
     draw();
     return () => {
       cancelAnimationFrame(animId);
-      window.removeEventListener("resize", resize);
+      if (!preview) window.removeEventListener("resize", resize);
     };
-  }, [colorLeft, colorMiddle, colorRight]);
+  }, [colorLeft, colorMiddle, colorRight, showStars, showMilkyWay, showNebulae, showShootingStars]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 z-0 opacity-95 pointer-events-none"
+      className={`${preview ? "absolute" : "fixed"} inset-0 z-0 opacity-95 pointer-events-none`}
     />
   );
 }

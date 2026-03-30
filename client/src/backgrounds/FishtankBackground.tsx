@@ -5,6 +5,12 @@ interface Props {
   colorMiddle: string;
   colorRight: string;
   paused?: boolean;
+  preview?: boolean;
+  showFish?: boolean;
+  showBubbles?: boolean;
+  showSeaweed?: boolean;
+  showCaustics?: boolean;
+  showLightShafts?: boolean;
 }
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -277,6 +283,12 @@ export function FishtankBackground({
   colorMiddle,
   colorRight,
   paused = false,
+  preview = false,
+  showFish = true,
+  showBubbles = true,
+  showSeaweed = true,
+  showCaustics = true,
+  showLightShafts = true,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -290,11 +302,11 @@ export function FishtankBackground({
     let t = 0;
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width = preview ? (canvas.parentElement?.offsetWidth ?? 320) : window.innerWidth;
+      canvas.height = preview ? (canvas.parentElement?.offsetHeight ?? 200) : window.innerHeight;
     };
     resize();
-    window.addEventListener("resize", resize);
+    if (!preview) window.addEventListener("resize", resize);
 
     const [lr, lg, lb] = hexToRgb(colorLeft);
     const [mr, mg, mb] = hexToRgb(colorMiddle);
@@ -381,63 +393,69 @@ export function FishtankBackground({
       ctx!.fillRect(0, 0, w, h);
 
       // ── Caustic light patterns on upper half ─────────────────────────────
-      ctx!.save();
-      ctx!.globalAlpha = 0.07;
-      for (let i = 0; i < 7; i++) {
-        const cx =
-          ((i * w * 0.16 + t * 18 * (i % 2 === 0 ? 1 : -0.7)) % (w + 80)) - 40;
-        const cy = h * 0.12 + Math.sin(t * 0.8 + i * 1.1) * h * 0.06;
-        const crad = 80 + Math.sin(t * 0.5 + i) * 25;
-        const caust = ctx!.createRadialGradient(cx, cy, 0, cx, cy, crad);
-        caust.addColorStop(0, `rgba(${mr},${mg},${mb},0.9)`);
-        caust.addColorStop(0.6, `rgba(${mr},${mg},${mb},0.3)`);
-        caust.addColorStop(1, "rgba(0,0,0,0)");
-        ctx!.fillStyle = caust;
-        ctx!.fillRect(0, 0, w, h * 0.4);
-      }
-      ctx!.restore();
-
-      // ── Light shafts from surface ─────────────────────────────────────────
-      for (let i = 0; i < 5; i++) {
-        const rx = w * 0.17 * i + 60 + Math.sin(t * 0.2 + i * 2.1) * 40;
-        const shaftAlpha = 0.022 + Math.sin(t * 0.3 + i) * 0.008;
-        const shaft = ctx!.createLinearGradient(rx, 0, rx, h * 0.7);
-        shaft.addColorStop(0, `rgba(${mr},${mg},${mb},${shaftAlpha * 4})`);
-        shaft.addColorStop(0.4, `rgba(${mr},${mg},${mb},${shaftAlpha})`);
-        shaft.addColorStop(1, "rgba(0,0,0,0)");
+      if (showCaustics) {
         ctx!.save();
-        ctx!.globalAlpha = 1;
-        ctx!.beginPath();
-        ctx!.moveTo(rx - 10, 0);
-        ctx!.lineTo(rx - 50, h * 0.7);
-        ctx!.lineTo(rx + 50, h * 0.7);
-        ctx!.lineTo(rx + 10, 0);
-        ctx!.closePath();
-        ctx!.fillStyle = shaft;
-        ctx!.fill();
+        ctx!.globalAlpha = 0.07;
+        for (let i = 0; i < 7; i++) {
+          const cx =
+            ((i * w * 0.16 + t * 18 * (i % 2 === 0 ? 1 : -0.7)) % (w + 80)) - 40;
+          const cy = h * 0.12 + Math.sin(t * 0.8 + i * 1.1) * h * 0.06;
+          const crad = 80 + Math.sin(t * 0.5 + i) * 25;
+          const caust = ctx!.createRadialGradient(cx, cy, 0, cx, cy, crad);
+          caust.addColorStop(0, `rgba(${mr},${mg},${mb},0.9)`);
+          caust.addColorStop(0.6, `rgba(${mr},${mg},${mb},0.3)`);
+          caust.addColorStop(1, "rgba(0,0,0,0)");
+          ctx!.fillStyle = caust;
+          ctx!.fillRect(0, 0, w, h * 0.4);
+        }
         ctx!.restore();
       }
 
-      // ── Surface ripple shimmer ────────────────────────────────────────────
-      ctx!.save();
-      ctx!.globalAlpha = 0.06;
-      for (let i = 0; i < 10; i++) {
-        const sx =
-          ((i * w * 0.11 + t * 28 * (i % 2 === 0 ? 1 : -1)) % (w + 60)) - 30;
-        const sw = 20 + Math.sin(t * 0.5 + i) * 10;
-        const sg = ctx!.createLinearGradient(sx - sw, 2, sx + sw, 2);
-        sg.addColorStop(0, "rgba(255,255,255,0)");
-        sg.addColorStop(0.5, `rgba(${mr},${mg},${mb},1)`);
-        sg.addColorStop(1, "rgba(255,255,255,0)");
-        ctx!.fillStyle = sg;
-        ctx!.fillRect(sx - sw, 0, sw * 2, 5);
+      // ── Light shafts from surface ─────────────────────────────────────────
+      if (showLightShafts) {
+        for (let i = 0; i < 5; i++) {
+          const rx = w * 0.17 * i + 60 + Math.sin(t * 0.2 + i * 2.1) * 40;
+          const shaftAlpha = 0.022 + Math.sin(t * 0.3 + i) * 0.008;
+          const shaft = ctx!.createLinearGradient(rx, 0, rx, h * 0.7);
+          shaft.addColorStop(0, `rgba(${mr},${mg},${mb},${shaftAlpha * 4})`);
+          shaft.addColorStop(0.4, `rgba(${mr},${mg},${mb},${shaftAlpha})`);
+          shaft.addColorStop(1, "rgba(0,0,0,0)");
+          ctx!.save();
+          ctx!.globalAlpha = 1;
+          ctx!.beginPath();
+          ctx!.moveTo(rx - 10, 0);
+          ctx!.lineTo(rx - 50, h * 0.7);
+          ctx!.lineTo(rx + 50, h * 0.7);
+          ctx!.lineTo(rx + 10, 0);
+          ctx!.closePath();
+          ctx!.fillStyle = shaft;
+          ctx!.fill();
+          ctx!.restore();
+        }
+
+        // ── Surface ripple shimmer ──────────────────────────────────────────
+        ctx!.save();
+        ctx!.globalAlpha = 0.06;
+        for (let i = 0; i < 10; i++) {
+          const sx =
+            ((i * w * 0.11 + t * 28 * (i % 2 === 0 ? 1 : -1)) % (w + 60)) - 30;
+          const sw = 20 + Math.sin(t * 0.5 + i) * 10;
+          const sg = ctx!.createLinearGradient(sx - sw, 2, sx + sw, 2);
+          sg.addColorStop(0, "rgba(255,255,255,0)");
+          sg.addColorStop(0.5, `rgba(${mr},${mg},${mb},1)`);
+          sg.addColorStop(1, "rgba(255,255,255,0)");
+          ctx!.fillStyle = sg;
+          ctx!.fillRect(sx - sw, 0, sw * 2, 5);
+        }
+        ctx!.restore();
       }
-      ctx!.restore();
 
       // ── Seaweed silhouettes at the very bottom ────────────────────────────
       const FLOOR = h;
-      for (const w2 of weeds) {
-        drawWeed(ctx!, w2, t, FLOOR);
+      if (showSeaweed) {
+        for (const w2 of weeds) {
+          drawWeed(ctx!, w2, t, FLOOR);
+        }
       }
 
       // ── Deep vignette at bottom — hides weed roots cleanly ───────────────
@@ -448,53 +466,55 @@ export function FishtankBackground({
       ctx!.fillRect(0, h * 0.82, w, h * 0.18);
 
       // ── Bubbles ───────────────────────────────────────────────────────────
-      for (const b of bubbles) {
-        b.y -= b.speed;
-        if (b.y < -b.r * 2) {
-          b.y = h + 10;
-          b.x = Math.random() * w;
-        }
-        drawBubble(ctx!, b, t);
-      }
-
-      // ── Schools ───────────────────────────────────────────────────────────
-      for (const sc of schools) {
-        sc.x += sc.vx;
-        sc.vy += (Math.random() - 0.5) * 0.015;
-        sc.vy *= 0.98;
-        sc.y = Math.max(60, Math.min(h - 160, sc.y + sc.vy));
-        if (sc.x > w + 120) sc.x = -120;
-        if (sc.x < -120) sc.x = w + 120;
-
-        for (const m of sc.members) {
-          const fx = sc.x + m.dx + Math.sin(t * 1.8 + m.phase) * 5;
-          const fy = sc.y + m.dy + Math.cos(t * 1.4 + m.phase) * 3;
-          drawFish(
-            ctx!,
-            fx,
-            fy,
-            sc.vx,
-            m.size,
-            sc.r,
-            sc.g,
-            sc.b,
-            t,
-            m.phase,
-            0.72,
-          );
+      if (showBubbles) {
+        for (const b of bubbles) {
+          b.y -= b.speed;
+          if (b.y < -b.r * 2) {
+            b.y = h + 10;
+            b.x = Math.random() * w;
+          }
+          drawBubble(ctx!, b, t);
         }
       }
 
-      // ── Solo fish ─────────────────────────────────────────────────────────
-      for (const f of fish) {
-        f.x += f.vx;
-        f.y = f.baseY + Math.sin(t * f.frequency + f.phase) * f.amplitude;
-        const margin = f.size * 2;
-        if (f.x > w + margin) f.x = -margin;
-        if (f.x < -margin) f.x = w + margin;
-        // Wrap baseY if it drifts out of range
-        f.baseY = Math.max(h * 0.1, Math.min(h * 0.85, f.baseY));
-        drawFish(ctx!, f.x, f.y, f.vx, f.size, f.r, f.g, f.b, t, f.phase);
+      // ── Schools + Solo fish ───────────────────────────────────────────────
+      if (showFish) {
+        for (const sc of schools) {
+          sc.x += sc.vx;
+          sc.vy += (Math.random() - 0.5) * 0.015;
+          sc.vy *= 0.98;
+          sc.y = Math.max(60, Math.min(h - 160, sc.y + sc.vy));
+          if (sc.x > w + 120) sc.x = -120;
+          if (sc.x < -120) sc.x = w + 120;
+
+          for (const m of sc.members) {
+            const fx = sc.x + m.dx + Math.sin(t * 1.8 + m.phase) * 5;
+            const fy = sc.y + m.dy + Math.cos(t * 1.4 + m.phase) * 3;
+            drawFish(
+              ctx!,
+              fx,
+              fy,
+              sc.vx,
+              m.size,
+              sc.r,
+              sc.g,
+              sc.b,
+              t,
+              m.phase,
+              0.72,
+            );
+          }
+        }
+
+        for (const f of fish) {
+          f.x += f.vx;
+          f.y = f.baseY + Math.sin(t * f.frequency + f.phase) * f.amplitude;
+          const margin = f.size * 2;
+          if (f.x > w + margin) f.x = -margin;
+          if (f.x < -margin) f.x = w + margin;
+          f.baseY = Math.max(h * 0.1, Math.min(h * 0.85, f.baseY));
+          drawFish(ctx!, f.x, f.y, f.vx, f.size, f.r, f.g, f.b, t, f.phase);
+        }
       }
 
       if (!paused) animId = requestAnimationFrame(draw);
@@ -503,14 +523,14 @@ export function FishtankBackground({
     draw();
     return () => {
       cancelAnimationFrame(animId);
-      window.removeEventListener("resize", resize);
+      if (!preview) window.removeEventListener("resize", resize);
     };
-  }, [colorLeft, colorMiddle, colorRight]);
+  }, [colorLeft, colorMiddle, colorRight, showFish, showBubbles, showSeaweed, showCaustics, showLightShafts]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 z-0 opacity-60 pointer-events-none"
+      className={`${preview ? "absolute" : "fixed"} inset-0 z-0 opacity-60 pointer-events-none`}
     />
   );
 }

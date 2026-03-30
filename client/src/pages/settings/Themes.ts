@@ -145,5 +145,6 @@ export const applyTheme = (
     context.setColorMiddle(theme.colorMiddle);
     context.setColorRight(theme.colorRight);
     context.setAnimationKey(theme.animationKey ?? null);
+    context.setEffectMix(null);
   }
 };

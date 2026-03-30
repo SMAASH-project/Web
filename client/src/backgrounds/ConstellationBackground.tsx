@@ -5,6 +5,9 @@ interface Props {
   colorMiddle: string;
   colorRight: string;
   paused?: boolean;
+  preview?: boolean;
+  showStars?: boolean;
+  showConstellationLines?: boolean;
 }
 
 interface Star {
@@ -38,7 +41,7 @@ const MAX_CONNECT_DIST = 190;
 // Max lines to avoid clutter
 const MAX_LINES = 55;
 
-export function ConstellationBackground({ colorLeft, colorMiddle, colorRight, paused = false }: Props) {
+export function ConstellationBackground({ colorLeft, colorMiddle, colorRight, paused = false, preview = false, showStars = true, showConstellationLines = true }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pausedRef = useRef(paused);
 
@@ -60,11 +63,11 @@ export function ConstellationBackground({ colorLeft, colorMiddle, colorRight, pa
     let lastTime = performance.now();
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width = preview ? (canvas.parentElement?.offsetWidth ?? 320) : window.innerWidth;
+      canvas.height = preview ? (canvas.parentElement?.offsetHeight ?? 200) : window.innerHeight;
     };
     resize();
-    window.addEventListener("resize", resize);
+    if (!preview) window.addEventListener("resize", resize);
 
     // Build stars
     const stars: Star[] = Array.from({ length: STAR_COUNT }, () => ({
@@ -125,30 +128,30 @@ export function ConstellationBackground({ colorLeft, colorMiddle, colorRight, pa
       }
 
       // Draw constellation lines
-      for (const line of lines) {
-        line.phase += line.cycleSpeed * dt;
-        // Fade in and out on a slow sinusoidal cycle
-        const alpha = Math.max(0, 0.5 + 0.5 * Math.sin(line.phase)) * 0.28;
-        if (alpha < 0.005) continue;
+      if (showConstellationLines) {
+        for (const line of lines) {
+          line.phase += line.cycleSpeed * dt;
+          const alpha = Math.max(0, 0.5 + 0.5 * Math.sin(line.phase)) * 0.28;
+          if (alpha < 0.005) continue;
 
-        const sa = stars[line.a];
-        const sb = stars[line.b];
+          const sa = stars[line.a];
+          const sb = stars[line.b];
 
-        // Gradient line from star a color to star b color
-        const grad = ctx.createLinearGradient(sa.x, sa.y, sb.x, sb.y);
-        grad.addColorStop(0, `rgba(${mr},${mg},${mb},${alpha.toFixed(3)})`);
-        grad.addColorStop(1, `rgba(${rr},${rg},${rb},${alpha.toFixed(3)})`);
+          const grad = ctx.createLinearGradient(sa.x, sa.y, sb.x, sb.y);
+          grad.addColorStop(0, `rgba(${mr},${mg},${mb},${alpha.toFixed(3)})`);
+          grad.addColorStop(1, `rgba(${rr},${rg},${rb},${alpha.toFixed(3)})`);
 
-        ctx.beginPath();
-        ctx.moveTo(sa.x, sa.y);
-        ctx.lineTo(sb.x, sb.y);
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = 0.8;
-        ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(sa.x, sa.y);
+          ctx.lineTo(sb.x, sb.y);
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
       }
 
       // Draw stars
-      for (const s of stars) {
+      if (showStars) for (const s of stars) {
         const twinkle = 0.6 + 0.4 * Math.sin(s.twinklePhase);
         const alpha = s.brightness * twinkle;
 
@@ -191,14 +194,14 @@ export function ConstellationBackground({ colorLeft, colorMiddle, colorRight, pa
     animId = requestAnimationFrame(draw);
     return () => {
       cancelAnimationFrame(animId);
-      window.removeEventListener("resize", resize);
+      if (!preview) window.removeEventListener("resize", resize);
     };
-  }, [colorLeft, colorMiddle, colorRight]);
+  }, [colorLeft, colorMiddle, colorRight, showStars, showConstellationLines]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 z-0 opacity-90 pointer-events-none"
+      className={`${preview ? "absolute" : "fixed"} inset-0 z-0 opacity-90 pointer-events-none`}
     />
   );
 }

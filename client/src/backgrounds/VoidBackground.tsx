@@ -5,6 +5,11 @@ interface Props {
   colorMiddle: string;
   colorRight: string;
   paused?: boolean;
+  preview?: boolean;
+  showDepthBlobs?: boolean;
+  showJellyfish?: boolean;
+  showAmbientOrbs?: boolean;
+  showMarineSnow?: boolean;
 }
 
 // Deep-sea bioluminescent palette
@@ -73,7 +78,7 @@ function makeTentacles(count: number): Tentacle[] {
   }));
 }
 
-export function VoidBackground({ paused = false }: Props) {
+export function VoidBackground({ paused = false, preview = false, showDepthBlobs = true, showJellyfish = true, showAmbientOrbs = true, showMarineSnow = true }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pausedRef = useRef(paused);
   const timeRef = useRef(0);
@@ -93,11 +98,11 @@ export function VoidBackground({ paused = false }: Props) {
     timeRef.current = 0;
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width = preview ? (canvas.parentElement?.offsetWidth ?? 320) : window.innerWidth;
+      canvas.height = preview ? (canvas.parentElement?.offsetHeight ?? 200) : window.innerHeight;
     };
     resize();
-    window.addEventListener("resize", resize);
+    if (!preview) window.addEventListener("resize", resize);
 
     // Background depth blobs (3) — pure radial glow, no silhouette
     const blobs: Blob[] = Array.from({ length: 3 }, (_, i) => {
@@ -168,63 +173,69 @@ export function VoidBackground({ paused = false }: Props) {
       ctx.clearRect(0, 0, w, h);
 
       // --- Background depth blobs ---
-      for (const bl of blobs) {
-        bl.phase += bl.pulseSpeed * dt;
-        const pulse = 0.5 + 0.5 * Math.sin(bl.phase);
-        const alpha = 0.025 + pulse * 0.065;
-        const grad = ctx.createRadialGradient(bl.x, bl.y, 0, bl.x, bl.y, bl.radius);
-        grad.addColorStop(0, `rgba(${bl.r},${bl.g},${bl.b},${alpha.toFixed(3)})`);
-        grad.addColorStop(0.5, `rgba(${bl.r},${bl.g},${bl.b},${(alpha * 0.4).toFixed(3)})`);
-        grad.addColorStop(1, `rgba(${bl.r},${bl.g},${bl.b},0)`);
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(bl.x, bl.y, bl.radius, 0, Math.PI * 2);
-        ctx.fill();
-        bl.x += bl.vx;
-        bl.y += bl.vy;
-        if (bl.x < -bl.radius) bl.x = w + bl.radius;
-        else if (bl.x > w + bl.radius) bl.x = -bl.radius;
-        if (bl.y < -bl.radius) bl.y = h + bl.radius;
-        else if (bl.y > h + bl.radius) bl.y = -bl.radius;
+      if (showDepthBlobs) {
+        for (const bl of blobs) {
+          bl.phase += bl.pulseSpeed * dt;
+          const pulse = 0.5 + 0.5 * Math.sin(bl.phase);
+          const alpha = 0.025 + pulse * 0.065;
+          const grad = ctx.createRadialGradient(bl.x, bl.y, 0, bl.x, bl.y, bl.radius);
+          grad.addColorStop(0, `rgba(${bl.r},${bl.g},${bl.b},${alpha.toFixed(3)})`);
+          grad.addColorStop(0.5, `rgba(${bl.r},${bl.g},${bl.b},${(alpha * 0.4).toFixed(3)})`);
+          grad.addColorStop(1, `rgba(${bl.r},${bl.g},${bl.b},0)`);
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(bl.x, bl.y, bl.radius, 0, Math.PI * 2);
+          ctx.fill();
+          bl.x += bl.vx;
+          bl.y += bl.vy;
+          if (bl.x < -bl.radius) bl.x = w + bl.radius;
+          else if (bl.x > w + bl.radius) bl.x = -bl.radius;
+          if (bl.y < -bl.radius) bl.y = h + bl.radius;
+          else if (bl.y > h + bl.radius) bl.y = -bl.radius;
+        }
       }
 
       // --- Ambient orbs ---
-      for (const orb of orbs) {
-        orb.phase += orb.pulseSpeed * dt;
-        const pulse = 0.5 + 0.5 * Math.sin(orb.phase);
-        const alpha = 0.05 + pulse * 0.15;
-        const gr = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius * 2.5);
-        gr.addColorStop(0, `rgba(${orb.r},${orb.g},${orb.b},${(alpha * 0.9).toFixed(3)})`);
-        gr.addColorStop(0.4, `rgba(${orb.r},${orb.g},${orb.b},${(alpha * 0.35).toFixed(3)})`);
-        gr.addColorStop(1, `rgba(${orb.r},${orb.g},${orb.b},0)`);
-        ctx.fillStyle = gr;
-        ctx.beginPath();
-        ctx.arc(orb.x, orb.y, orb.radius * 2.5, 0, Math.PI * 2);
-        ctx.fill();
-        orb.x += orb.vx;
-        orb.y += orb.vy;
-        const pad = orb.radius * 3;
-        if (orb.x < -pad) orb.x = w + pad;
-        else if (orb.x > w + pad) orb.x = -pad;
-        if (orb.y < -pad) orb.y = h + pad;
-        else if (orb.y > h + pad) orb.y = -pad;
+      if (showAmbientOrbs) {
+        for (const orb of orbs) {
+          orb.phase += orb.pulseSpeed * dt;
+          const pulse = 0.5 + 0.5 * Math.sin(orb.phase);
+          const alpha = 0.05 + pulse * 0.15;
+          const gr = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius * 2.5);
+          gr.addColorStop(0, `rgba(${orb.r},${orb.g},${orb.b},${(alpha * 0.9).toFixed(3)})`);
+          gr.addColorStop(0.4, `rgba(${orb.r},${orb.g},${orb.b},${(alpha * 0.35).toFixed(3)})`);
+          gr.addColorStop(1, `rgba(${orb.r},${orb.g},${orb.b},0)`);
+          ctx.fillStyle = gr;
+          ctx.beginPath();
+          ctx.arc(orb.x, orb.y, orb.radius * 2.5, 0, Math.PI * 2);
+          ctx.fill();
+          orb.x += orb.vx;
+          orb.y += orb.vy;
+          const pad = orb.radius * 3;
+          if (orb.x < -pad) orb.x = w + pad;
+          else if (orb.x > w + pad) orb.x = -pad;
+          if (orb.y < -pad) orb.y = h + pad;
+          else if (orb.y > h + pad) orb.y = -pad;
+        }
       }
 
       // --- Marine snow ---
-      for (const flake of snow) {
-        flake.x += Math.sin(t * 0.4 + flake.swayOffset) * 0.25;
-        flake.y += flake.vy;
-        if (flake.y > h + 5) flake.y = -5;
-        if (flake.x < -5) flake.x = w + 5;
-        else if (flake.x > w + 5) flake.x = -5;
-        ctx.beginPath();
-        ctx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(180,220,255,${flake.alpha.toFixed(3)})`;
-        ctx.fill();
+      if (showMarineSnow) {
+        for (const flake of snow) {
+          flake.x += Math.sin(t * 0.4 + flake.swayOffset) * 0.25;
+          flake.y += flake.vy;
+          if (flake.y > h + 5) flake.y = -5;
+          if (flake.x < -5) flake.x = w + 5;
+          else if (flake.x > w + 5) flake.x = -5;
+          ctx.beginPath();
+          ctx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(180,220,255,${flake.alpha.toFixed(3)})`;
+          ctx.fill();
+        }
       }
 
       // --- Jellyfish ---
-      for (const jelly of jellies) {
+      if (showJellyfish) for (const jelly of jellies) {
         jelly.phase += jelly.pulseSpeed * dt;
         const bellPulse = 0.92 + 0.08 * Math.sin(jelly.phase); // subtle bell pulse
         const alpha = jelly.baseAlpha;
@@ -330,14 +341,14 @@ export function VoidBackground({ paused = false }: Props) {
 
     return () => {
       cancelAnimationFrame(animId);
-      window.removeEventListener("resize", resize);
+      if (!preview) window.removeEventListener("resize", resize);
     };
-  }, []);
+  }, [showDepthBlobs, showJellyfish, showAmbientOrbs, showMarineSnow]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 z-0 opacity-95 pointer-events-none"
+      className={`${preview ? "absolute" : "fixed"} inset-0 z-0 opacity-95 pointer-events-none`}
     />
   );
 }

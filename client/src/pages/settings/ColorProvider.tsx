@@ -1,6 +1,6 @@
 import { type ReactNode, useState, useEffect } from "react";
-import { ColorContext } from "./ColorContext";
-import { type AnimationKey } from "@/lib/animationTypes";
+import { ColorContext, type CustomTheme } from "./ColorContext";
+import { type AnimationKey, type EffectLayerConfig } from "@/lib/animationTypes";
 
 export function ColorProvider({ children }: { children: ReactNode }) {
   const STORAGE_KEY = "color-settings";
@@ -9,6 +9,8 @@ export function ColorProvider({ children }: { children: ReactNode }) {
     colorMiddle: "#000000",
     colorRight: "#616161",
     animationKey: null as AnimationKey | null,
+    effectMix: null as EffectLayerConfig | null,
+    customTheme: null as CustomTheme | null,
   };
 
   // Lazy initializer reads localStorage synchronously on first render
@@ -23,6 +25,8 @@ export function ColorProvider({ children }: { children: ReactNode }) {
         colorMiddle: parsed?.colorMiddle ?? defaults.colorMiddle,
         colorRight: parsed?.colorRight ?? defaults.colorRight,
         animationKey: (parsed?.animationKey ?? null) as AnimationKey | null,
+        effectMix: (parsed?.effectMix ?? null) as EffectLayerConfig | null,
+        customTheme: (parsed?.customTheme ?? null) as CustomTheme | null,
       };
     } catch {
       return defaults;
@@ -35,6 +39,12 @@ export function ColorProvider({ children }: { children: ReactNode }) {
   const [animationKey, setAnimationKey] = useState<AnimationKey | null>(
     initial.animationKey,
   );
+  const [effectMix, setEffectMix] = useState<EffectLayerConfig | null>(
+    initial.effectMix,
+  );
+  const [customTheme, setCustomTheme] = useState<CustomTheme | null>(
+    initial.customTheme,
+  );
 
   // Persist changes to localStorage across sessions
   useEffect(() => {
@@ -45,12 +55,14 @@ export function ColorProvider({ children }: { children: ReactNode }) {
         colorMiddle,
         colorRight,
         animationKey,
+        effectMix,
+        customTheme,
       });
       localStorage.setItem(STORAGE_KEY, payload);
     } catch {
       // ignore write errors
     }
-  }, [colorLeft, colorMiddle, colorRight, animationKey]);
+  }, [colorLeft, colorMiddle, colorRight, animationKey, effectMix, customTheme]);
 
   return (
     <ColorContext.Provider
@@ -59,10 +71,14 @@ export function ColorProvider({ children }: { children: ReactNode }) {
         colorMiddle,
         colorRight,
         animationKey,
+        effectMix,
+        customTheme,
         setColorLeft,
         setColorMiddle,
         setColorRight,
         setAnimationKey,
+        setEffectMix,
+        setCustomTheme,
       }}
     >
       {children}

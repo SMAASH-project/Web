@@ -5,6 +5,9 @@ interface Props {
   colorMiddle: string;
   colorRight: string;
   paused?: boolean;
+  preview?: boolean;
+  showParticles?: boolean;
+  showConnections?: boolean;
 }
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -29,7 +32,7 @@ interface Particle {
   baseY: number;
 }
 
-export function ParticleWebBackground({ colorLeft, colorMiddle, colorRight, paused = false }: Props) {
+export function ParticleWebBackground({ colorLeft, colorMiddle, colorRight, paused = false, preview = false, showParticles = true, showConnections = true }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef({ x: -9999, y: -9999 });
 
@@ -59,14 +62,19 @@ export function ParticleWebBackground({ colorLeft, colorMiddle, colorRight, paus
     let t = 0;
     const DT = 1 / 60;
 
-    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    const resize = () => {
+      canvas.width = preview ? (canvas.parentElement?.offsetWidth ?? 320) : window.innerWidth;
+      canvas.height = preview ? (canvas.parentElement?.offsetHeight ?? 200) : window.innerHeight;
+    };
     resize();
-    window.addEventListener("resize", resize);
+    if (!preview) window.addEventListener("resize", resize);
 
     const onMouse = (e: MouseEvent) => { mouseRef.current = { x: e.clientX, y: e.clientY }; };
     const onLeave = () => { mouseRef.current = { x: -9999, y: -9999 }; };
-    window.addEventListener("mousemove", onMouse);
-    window.addEventListener("mouseleave", onLeave);
+    if (!preview) {
+      window.addEventListener("mousemove", onMouse);
+      window.addEventListener("mouseleave", onLeave);
+    }
 
     const COUNT = 80;
     const CONNECTION_DIST = 160;
@@ -127,47 +135,48 @@ export function ParticleWebBackground({ colorLeft, colorMiddle, colorRight, paus
       }
 
       // ── Draw connections ─────────────────────────────────────────────────
-      for (let i = 0; i < COUNT; i++) {
-        const a = particles[i];
-        for (let j = i + 1; j < COUNT; j++) {
-          const b = particles[j];
-          const dx = a.x - b.x;
-          const dy = a.y - b.y;
-          const dist = Math.hypot(dx, dy);
+      if (showConnections) {
+        for (let i = 0; i < COUNT; i++) {
+          const a = particles[i];
+          for (let j = i + 1; j < COUNT; j++) {
+            const b = particles[j];
+            const dx = a.x - b.x;
+            const dy = a.y - b.y;
+            const dist = Math.hypot(dx, dy);
 
-          if (dist < CONNECTION_DIST) {
-            const alpha = (1 - dist / CONNECTION_DIST) * 0.45;
-            // Color: blend between the two particle colors
-            const cr = Math.round((a.r + b.r) / 2);
-            const cg = Math.round((a.g + b.g) / 2);
-            const cb = Math.round((a.b + b.b) / 2);
+            if (dist < CONNECTION_DIST) {
+              const alpha = (1 - dist / CONNECTION_DIST) * 0.45;
+              const cr = Math.round((a.r + b.r) / 2);
+              const cg = Math.round((a.g + b.g) / 2);
+              const cb = Math.round((a.b + b.b) / 2);
 
+              ctx!.beginPath();
+              ctx!.moveTo(a.x, a.y);
+              ctx!.lineTo(b.x, b.y);
+              ctx!.strokeStyle = `rgba(${cr},${cg},${cb},${alpha})`;
+              ctx!.lineWidth = 0.8 * (1 - dist / CONNECTION_DIST);
+              ctx!.stroke();
+            }
+          }
+
+          // Mouse connections — within MOUSE_DIST
+          const mdx = a.x - mx;
+          const mdy = a.y - my;
+          const mdist = Math.hypot(mdx, mdy);
+          if (mdist < MOUSE_DIST) {
+            const alpha = (1 - mdist / MOUSE_DIST) * 0.6;
             ctx!.beginPath();
             ctx!.moveTo(a.x, a.y);
-            ctx!.lineTo(b.x, b.y);
-            ctx!.strokeStyle = `rgba(${cr},${cg},${cb},${alpha})`;
-            ctx!.lineWidth = 0.8 * (1 - dist / CONNECTION_DIST);
+            ctx!.lineTo(mx, my);
+            ctx!.strokeStyle = `rgba(${a.r},${a.g},${a.b},${alpha})`;
+            ctx!.lineWidth = 1.2 * (1 - mdist / MOUSE_DIST);
             ctx!.stroke();
           }
-        }
-
-        // Mouse connections — within MOUSE_DIST
-        const mdx = a.x - mx;
-        const mdy = a.y - my;
-        const mdist = Math.hypot(mdx, mdy);
-        if (mdist < MOUSE_DIST) {
-          const alpha = (1 - mdist / MOUSE_DIST) * 0.6;
-          ctx!.beginPath();
-          ctx!.moveTo(a.x, a.y);
-          ctx!.lineTo(mx, my);
-          ctx!.strokeStyle = `rgba(${a.r},${a.g},${a.b},${alpha})`;
-          ctx!.lineWidth = 1.2 * (1 - mdist / MOUSE_DIST);
-          ctx!.stroke();
         }
       }
 
       // ── Draw particles ───────────────────────────────────────────────────
-      for (const p of particles) {
+      if (showParticles) for (const p of particles) {
         // Pulse size
         const pulse = p.size + Math.sin(t * 1.5 + p.baseX * 0.01) * 0.4;
 
@@ -208,11 +217,13 @@ export function ParticleWebBackground({ colorLeft, colorMiddle, colorRight, paus
     draw();
     return () => {
       cancelAnimationFrame(animId);
-      window.removeEventListener("resize", resize);
-      window.removeEventListener("mousemove", onMouse);
-      window.removeEventListener("mouseleave", onLeave);
+      if (!preview) {
+        window.removeEventListener("resize", resize);
+        window.removeEventListener("mousemove", onMouse);
+        window.removeEventListener("mouseleave", onLeave);
+      }
     };
-  }, [colorLeft, colorMiddle, colorRight]);
+  }, [colorLeft, colorMiddle, colorRight, showParticles, showConnections]);
 
-  return <canvas ref={canvasRef} className="fixed inset-0 z-0 opacity-70 pointer-events-none" />;
+  return <canvas ref={canvasRef} className={`${preview ? "absolute" : "fixed"} inset-0 z-0 opacity-70 pointer-events-none`} />;
 }

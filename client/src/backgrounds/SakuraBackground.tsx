@@ -5,6 +5,9 @@ interface Props {
   colorMiddle: string;
   colorRight: string;
   paused?: boolean;
+  preview?: boolean;
+  showPetals?: boolean;
+  showBokeh?: boolean;
 }
 
 const KEYFRAMES = `
@@ -34,6 +37,9 @@ export function SakuraBackground({
   colorMiddle,
   colorRight,
   paused = false,
+  preview = false,
+  showPetals = true,
+  showBokeh = true,
 }: Props) {
   const colors = [
     colorLeft,
@@ -72,11 +78,10 @@ export function SakuraBackground({
     <>
       <style>{KEYFRAMES}</style>
 
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        {petals.map((p, i) => (
+      <div className={`${preview ? "absolute" : "fixed"} inset-0 z-0 pointer-events-none overflow-hidden`}>
+        {showPetals && petals.map((p, i) => (
           <div
             key={i}
-            // Static classes; all per-petal dynamic values go in style
             className="absolute -top-15 blur-[0.4px] will-change-[transform,opacity]"
             style={{
               left: `${p.left}vw`,
@@ -86,7 +91,6 @@ export function SakuraBackground({
               borderRadius: p.borderRadius,
               opacity: p.opacity,
               transform: `rotate(${p.rotate}deg)`,
-              // CSS custom properties consumed by the keyframes
               ["--drift" as string]: `${p.drift}px`,
               ["--rot-end" as string]: `${p.rotEnd}deg`,
               ["--sway" as string]: `${p.sway}px`,
@@ -99,7 +103,7 @@ export function SakuraBackground({
         ))}
 
         {/* Bokeh circles */}
-        {Array.from({ length: 12 }, (_, i) => (
+        {showBokeh && Array.from({ length: 12 }, (_, i) => (
           <div
             key={`bokeh-${i}`}
             className="absolute rounded-full blur-[18px]"

@@ -3,6 +3,9 @@ interface Props {
   colorMiddle: string;
   colorRight: string;
   paused?: boolean;
+  preview?: boolean;
+  showBlobs?: boolean;
+  showHighlight?: boolean;
 }
 
 const KEYFRAMES = `
@@ -98,6 +101,9 @@ export function LavaLampBackground({
   colorMiddle,
   colorRight,
   paused = false,
+  preview = false,
+  showBlobs = true,
+  showHighlight = true,
 }: Props) {
   const blobColors = [
     colorLeft,
@@ -112,7 +118,7 @@ export function LavaLampBackground({
     <>
       <style>{KEYFRAMES}</style>
 
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+      <div className={`${preview ? "absolute" : "fixed"} inset-0 z-0 pointer-events-none overflow-hidden`}>
         {/* Warm base glow at bottom */}
         <div
           className="absolute bottom-0 inset-x-0 h-[30%] opacity-35"
@@ -122,7 +128,7 @@ export function LavaLampBackground({
         />
 
         {/* Blobs */}
-        {BLOB_CONFIG.map((cfg, i) => (
+        {showBlobs && BLOB_CONFIG.map((cfg, i) => (
           <div
             key={i}
             className={[
@@ -141,21 +147,23 @@ export function LavaLampBackground({
             }}
           >
             {/* Inner shimmer highlight */}
-            <div
-              className="absolute inset-0 rounded-[inherit] overflow-hidden"
-              style={{
-                animation: "highlight-sweep 4s ease-in-out infinite",
-                animationPlayState: paused ? "paused" : "running",
-              }}
-            >
+            {showHighlight && (
               <div
-                className="absolute top-[8%] left-[-30%] w-[45%] h-[55%] rounded-full"
+                className="absolute inset-0 rounded-[inherit] overflow-hidden"
                 style={{
-                  background: "rgba(255,255,255,0.28)",
-                  filter: "blur(12px)",
+                  animation: "highlight-sweep 4s ease-in-out infinite",
+                  animationPlayState: paused ? "paused" : "running",
                 }}
-              />
-            </div>
+              >
+                <div
+                  className="absolute top-[8%] left-[-30%] w-[45%] h-[55%] rounded-full"
+                  style={{
+                    background: "rgba(255,255,255,0.28)",
+                    filter: "blur(12px)",
+                  }}
+                />
+              </div>
+            )}
           </div>
         ))}
 

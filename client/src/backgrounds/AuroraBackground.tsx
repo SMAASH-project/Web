@@ -5,6 +5,11 @@ interface Props {
   colorMiddle: string;
   colorRight: string;
   paused?: boolean;
+  preview?: boolean;
+  showColorBands?: boolean;
+  showFibers?: boolean;
+  showStars?: boolean;
+  showMoon?: boolean;
 }
 
 const STAR_TWINKLE = `
@@ -103,6 +108,11 @@ export function AuroraBackground({
   colorMiddle,
   colorRight,
   paused = false,
+  preview = false,
+  showColorBands = true,
+  showFibers = true,
+  showStars = true,
+  showMoon = true,
 }: Props) {
   const colors = [colorLeft, colorMiddle, colorRight];
 
@@ -110,12 +120,12 @@ export function AuroraBackground({
     <>
       <style>{STAR_TWINKLE}</style>
 
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+      <div className={`${preview ? "absolute" : "fixed"} inset-0 z-0 pointer-events-none overflow-hidden`}>
         {/* Dark sky — makes aurora pop */}
         <div className="absolute inset-0 bg-linear-to-b from-[#020818] via-[#050d1c] to-[#0a1428] opacity-75" />
 
         {/* Wide diffuse color bands */}
-        {BAND_CONFIG.map((cfg, i) => (
+        {showColorBands && BAND_CONFIG.map((cfg, i) => (
           <motion.div
             key={`band-${i}`}
             className={`absolute -left-[8%] w-[116%] rounded-full will-change-[transform,opacity] ${cfg.blur}`}
@@ -136,7 +146,7 @@ export function AuroraBackground({
         ))}
 
         {/* Vertical curtain fibers */}
-        {FIBER_CONFIG.map((f, i) => (
+        {showFibers && FIBER_CONFIG.map((f, i) => (
           <motion.div
             key={`fiber-${i}`}
             className="absolute will-change-[transform,opacity]"
@@ -173,7 +183,7 @@ export function AuroraBackground({
         ))}
 
         {/* Stars — twinkling via CSS custom property */}
-        {STARS.map((s, i) => (
+        {showStars && STARS.map((s, i) => (
           <div
             key={`star-${i}`}
             className="absolute rounded-full bg-white"
@@ -191,15 +201,17 @@ export function AuroraBackground({
         ))}
 
         {/* Faint moon */}
-        <div
-          className="absolute top-[6%] right-[8%] w-10 h-10 rounded-full"
-          style={{
-            background:
-              "radial-gradient(circle at 35% 35%, #fffde0, #e8ddb5 60%, transparent 100%)",
-            boxShadow: "0 0 18px 6px rgba(255,253,200,0.18)",
-            opacity: 0.55,
-          }}
-        />
+        {showMoon && (
+          <div
+            className="absolute top-[6%] right-[8%] w-10 h-10 rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle at 35% 35%, #fffde0, #e8ddb5 60%, transparent 100%)",
+              boxShadow: "0 0 18px 6px rgba(255,253,200,0.18)",
+              opacity: 0.55,
+            }}
+          />
+        )}
       </div>
     </>
   );

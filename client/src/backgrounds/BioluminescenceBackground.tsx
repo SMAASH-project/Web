@@ -5,6 +5,10 @@ interface Props {
   colorMiddle: string;
   colorRight: string;
   paused?: boolean;
+  preview?: boolean;
+  showOrbs?: boolean;
+  showPulses?: boolean;
+  showVignette?: boolean;
 }
 
 interface Orb {
@@ -37,7 +41,7 @@ const PALETTE: [number, number, number][] = [
 
 const ORB_COUNT = 38;
 
-export function BioluminescenceBackground({ paused = false }: Props) {
+export function BioluminescenceBackground({ paused = false, preview = false, showOrbs = true, showPulses = true, showVignette = true }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pausedRef = useRef(paused);
 
@@ -55,11 +59,11 @@ export function BioluminescenceBackground({ paused = false }: Props) {
     let lastTime = performance.now();
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width = preview ? (canvas.parentElement?.offsetWidth ?? 320) : window.innerWidth;
+      canvas.height = preview ? (canvas.parentElement?.offsetHeight ?? 200) : window.innerHeight;
     };
     resize();
-    window.addEventListener("resize", resize);
+    if (!preview) window.addEventListener("resize", resize);
 
     // Build orbs
     const orbs: Orb[] = Array.from({ length: ORB_COUNT }, (_, i) => {
@@ -92,26 +96,30 @@ export function BioluminescenceBackground({ paused = false }: Props) {
         const pulse = 0.5 + 0.5 * Math.sin(orb.phase);
         const alpha = 0.06 + pulse * 0.46;
 
-        // Glow: large soft outer halo + brighter inner core
-        const halo = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius * 2.8);
-        halo.addColorStop(0,   `rgba(${orb.r},${orb.g},${orb.b},${(alpha * 0.9).toFixed(3)})`);
-        halo.addColorStop(0.35,`rgba(${orb.r},${orb.g},${orb.b},${(alpha * 0.4).toFixed(3)})`);
-        halo.addColorStop(1,   `rgba(${orb.r},${orb.g},${orb.b},0)`);
-        ctx.fillStyle = halo;
-        ctx.beginPath();
-        ctx.arc(orb.x, orb.y, orb.radius * 2.8, 0, Math.PI * 2);
-        ctx.fill();
+        if (showOrbs) {
+          // Glow: large soft outer halo
+          const halo = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius * 2.8);
+          halo.addColorStop(0,   `rgba(${orb.r},${orb.g},${orb.b},${(alpha * 0.9).toFixed(3)})`);
+          halo.addColorStop(0.35,`rgba(${orb.r},${orb.g},${orb.b},${(alpha * 0.4).toFixed(3)})`);
+          halo.addColorStop(1,   `rgba(${orb.r},${orb.g},${orb.b},0)`);
+          ctx.fillStyle = halo;
+          ctx.beginPath();
+          ctx.arc(orb.x, orb.y, orb.radius * 2.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
 
-        // Bright core
-        const core = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius * 0.5);
-        core.addColorStop(0, `rgba(255,255,255,${(alpha * 0.35).toFixed(3)})`);
-        core.addColorStop(1, `rgba(${orb.r},${orb.g},${orb.b},0)`);
-        ctx.fillStyle = core;
-        ctx.beginPath();
-        ctx.arc(orb.x, orb.y, orb.radius * 0.5, 0, Math.PI * 2);
-        ctx.fill();
+        if (showPulses) {
+          // Bright core
+          const core = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius * 0.5);
+          core.addColorStop(0, `rgba(255,255,255,${(alpha * 0.35).toFixed(3)})`);
+          core.addColorStop(1, `rgba(${orb.r},${orb.g},${orb.b},0)`);
+          ctx.fillStyle = core;
+          ctx.beginPath();
+          ctx.arc(orb.x, orb.y, orb.radius * 0.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
 
-        // Drift — wrap at edges
+        // Drift — wrap at edges (always advance position)
         orb.x += orb.vx;
         orb.y += orb.vy;
         const pad = orb.radius * 3;
@@ -121,12 +129,14 @@ export function BioluminescenceBackground({ paused = false }: Props) {
         else if (orb.y > h + pad) orb.y = -pad;
       }
 
-      // Deep vignette to reinforce the abyssal feel
-      const vg = ctx.createRadialGradient(w / 2, h / 2, h * 0.15, w / 2, h / 2, h * 0.85);
-      vg.addColorStop(0, "rgba(0,0,0,0)");
-      vg.addColorStop(1, "rgba(0,0,0,0.55)");
-      ctx.fillStyle = vg;
-      ctx.fillRect(0, 0, w, h);
+      if (showVignette) {
+        // Deep vignette to reinforce the abyssal feel
+        const vg = ctx.createRadialGradient(w / 2, h / 2, h * 0.15, w / 2, h / 2, h * 0.85);
+        vg.addColorStop(0, "rgba(0,0,0,0)");
+        vg.addColorStop(1, "rgba(0,0,0,0.55)");
+        ctx.fillStyle = vg;
+        ctx.fillRect(0, 0, w, h);
+      }
     }
 
     function draw(now: number) {
@@ -142,14 +152,14 @@ export function BioluminescenceBackground({ paused = false }: Props) {
     animId = requestAnimationFrame(draw);
     return () => {
       cancelAnimationFrame(animId);
-      window.removeEventListener("resize", resize);
+      if (!preview) window.removeEventListener("resize", resize);
     };
-  }, []);
+  }, [showOrbs, showPulses, showVignette]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 z-0 opacity-90 pointer-events-none"
+      className={`${preview ? "absolute" : "fixed"} inset-0 z-0 opacity-90 pointer-events-none`}
     />
   );
 }

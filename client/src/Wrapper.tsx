@@ -8,8 +8,9 @@ import {
   toRgbaColor,
 } from "./lib/utils";
 
-import { type AnimationKey } from "@/lib/animationTypes";
+import { type AnimationKey, hasEnabledEffects } from "@/lib/animationTypes";
 import { AnimatedBackground } from "@/backgrounds/AnimatedBackground";
+import { CompositeBackground } from "@/backgrounds/CompositeBackground";
 
 interface WrapperProps {
   children: React.ReactNode;
@@ -70,23 +71,42 @@ export function Wrapper({ children }: WrapperProps) {
   let resolvedAnimation: AnimationKey | null = null;
   if (settings.animationOverride === null) {
     resolvedAnimation = context?.animationKey ?? null;
-  } else if (settings.animationOverride !== "none") {
+  } else if (
+    settings.animationOverride !== "none" &&
+    settings.animationOverride !== "custom"
+  ) {
     resolvedAnimation = settings.animationOverride as AnimationKey;
   }
+
+  const effectMix = context?.effectMix ?? null;
+  const useComposite =
+    settings.animationOverride === "custom" &&
+    effectMix !== null &&
+    hasEnabledEffects(effectMix);
 
   return (
     <div
       className={`${textColor} w-screen min-h-screen absolute top-0 left-0 flex items-center justify-center transition-[background-image] duration-600 ease-in-out`}
       style={{ backgroundImage: currentGradient, ...cssVars }}
     >
-      {resolvedAnimation && (
-        <AnimatedBackground
-          animationKey={resolvedAnimation}
+      {useComposite ? (
+        <CompositeBackground
+          effectMix={effectMix}
           colorLeft={colorLeft}
           colorMiddle={colorMiddle}
           colorRight={colorRight}
           paused={!settings.useAnimations}
         />
+      ) : (
+        resolvedAnimation && (
+          <AnimatedBackground
+            animationKey={resolvedAnimation}
+            colorLeft={colorLeft}
+            colorMiddle={colorMiddle}
+            colorRight={colorRight}
+            paused={!settings.useAnimations}
+          />
+        )
       )}
       {children}
     </div>

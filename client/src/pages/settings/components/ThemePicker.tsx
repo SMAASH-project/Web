@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { useSettings } from "@/pages/settings/SettingsContext";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { getTextColor, getTextShadow, getButtonClasses } from "@/lib/utils";
+import { EffectMixDialog } from "./EffectMixDialog";
 
 export const ThemePicker = memo(function ThemePicker() {
   const context = useContext(ColorContext);
@@ -20,6 +21,7 @@ export const ThemePicker = memo(function ThemePicker() {
     setColorLeft,
     setColorMiddle,
     setColorRight,
+    setCustomTheme,
   } = context;
 
   const [pendingColorLeft, setPendingColorLeft] = useState<string | null>(null);
@@ -35,9 +37,13 @@ export const ThemePicker = memo(function ThemePicker() {
   const displayColorRight = pendingColorRight ?? colorRight;
 
   const handleApplyChanges = useCallback(() => {
+    const newLeft = pendingColorLeft ?? colorLeft;
+    const newMiddle = pendingColorMiddle ?? colorMiddle;
+    const newRight = pendingColorRight ?? colorRight;
     if (pendingColorLeft !== null) setColorLeft(pendingColorLeft);
     if (pendingColorMiddle !== null) setColorMiddle(pendingColorMiddle);
     if (pendingColorRight !== null) setColorRight(pendingColorRight);
+    setCustomTheme({ colorLeft: newLeft, colorMiddle: newMiddle, colorRight: newRight });
     setPendingColorLeft(null);
     setPendingColorMiddle(null);
     setPendingColorRight(null);
@@ -45,9 +51,13 @@ export const ThemePicker = memo(function ThemePicker() {
     pendingColorLeft,
     pendingColorMiddle,
     pendingColorRight,
+    colorLeft,
+    colorMiddle,
+    colorRight,
     setColorLeft,
     setColorMiddle,
     setColorRight,
+    setCustomTheme,
   ]);
 
   const { textColor, textShadow, buttonClass } = useMemo(
@@ -86,6 +96,7 @@ export const ThemePicker = memo(function ThemePicker() {
       >
         Apply changes
       </Button>
+      <EffectMixDialog />
     </div>
   );
 });
