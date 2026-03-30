@@ -76,13 +76,8 @@ export function BioluminescenceBackground({ paused = false }: Props) {
       };
     });
 
-    function draw(now: number) {
-      animId = requestAnimationFrame(draw);
-      if (pausedRef.current) return;
+    function renderFrame(dt: number) {
       if (!canvas || !ctx) return;
-
-      const dt = Math.min((now - lastTime) / 1000, 0.05);
-      lastTime = now;
 
       const w = canvas.width;
       const h = canvas.height;
@@ -134,6 +129,16 @@ export function BioluminescenceBackground({ paused = false }: Props) {
       ctx.fillRect(0, 0, w, h);
     }
 
+    function draw(now: number) {
+      animId = requestAnimationFrame(draw);
+      if (pausedRef.current) return;
+      const dt = Math.min((now - lastTime) / 1000, 0.05);
+      lastTime = now;
+      renderFrame(dt);
+    }
+
+    // Paint one static frame immediately so the background is visible even when paused
+    renderFrame(0);
     animId = requestAnimationFrame(draw);
     return () => {
       cancelAnimationFrame(animId);

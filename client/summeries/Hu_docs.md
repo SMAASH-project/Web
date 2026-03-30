@@ -244,6 +244,7 @@ sectionStyle(animReady, delayMs)
 | Abyss     | bioluminescence          |
 | Starmap   | constellation            |
 | Nebula    | particleweb              |
+| Void      | void                     |
 
 ---
 
@@ -265,17 +266,20 @@ Minden háttér canvas komponens, amely `fixed inset-0 z-0 pointer-events-none` 
 | `puddleripples`   | `PuddleRipplesBackground`   | Felülnézetből eső éri a sötét vizet. Koncentrikus tágulő gyűrűk (3 db/csepp) véletlenszerű helyeken jelennek meg ~280ms-enként, 2,8s alatt 55–100px sugarúra tágulnak, kúposodó vonalszélességgel és elhalványuló átlátszósággal. Canvas.                                      |
 | `bioluminescence` | `BioluminescenceBackground` | 38 izzó gömb türkiz/kék/zöld palettán lassan sodródik mélyfekete háttéren. Minden gömbnek radiális halo gradiens + fényes fehér mag van, átlátszósága független szinuszos cikluson pulzál (0,06–0,52 alfa). Canvas.                                                             |
 | `constellation`   | `ConstellationBackground`   | 110 villogó csillag lassú parallaxis sodródással. A közeli csillagokat (80–190px távolságon belül) gradiens vonalak kötik össze, amelyek független lassú ciklusokon halványodnak be és ki. A nagyobb csillagok puha fényt bocsátanak ki. Canvas.                                |
+| `void`            | `VoidBackground`            | Mélytengeri biolumineszcens jelenet. 3 nagy háttér-mélységi folt (tiszta radiális fény-homály), 12 ambiens gömb, 70 részecskéből álló tengeri hó, és 4 előtéri medúza (lapított kuppola + bezier csáp, fölfelé sodródás, felső szélnél újraindul). Minden medúza ~10–22 másodpercenként finom tágulógyűrű-villámot bocsát ki. Erős széli vignet. Canvas. |
 | `particleweb`     | `ParticleWebBackground`     | 80 lebegő részecske. Vonalak rajzolódnak a 160px-en belüli részecskék között. Az egérkurzor csomópontként viselkedik (200px-en belül vonalakat húz, 60px-en belül taszít). A részecskék pulzálnak és puha fényt bocsátanak ki. Színek interpolálva a teljes téma-gradiensen. |
 
 ### Animáció-feloldás (`Wrapper.tsx`)
 
 ```
-useAnimations = false           → nincs animáció
+useAnimations = false           → a háttér egyetlen statikus képkockát renderel (befagyasztva)
 useAnimations = true
   animationOverride = null      → Theme.animationKey használata
   animationOverride = "none"    → kényszer kikapcsolás
   animationOverride = <kulcs>   → rögzítés témától függetlenül
 ```
+
+> **Statikus mód:** Minden canvas-alapú háttér egyszer meghívja a `renderFrame(0)`-t mountoláskor, az rAF-ciklus indítása előtt, így `useAnimations = false` esetén is megjelenik egy befagyasztott pillanatkép. Az rAF-ciklus fut tovább, de `paused = true` esetén kihagyja a renderelést — az animáció azonnal folytatódik, ha újra engedélyezik.
 
 ### Új háttér hozzáadása
 

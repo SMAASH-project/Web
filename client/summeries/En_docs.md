@@ -245,6 +245,7 @@ sectionStyle(animReady, delayMs)
 | Abyss     | bioluminescence   |
 | Starmap   | constellation     |
 | Nebula    | particleweb       |
+| Void      | void              |
 
 ---
 
@@ -266,17 +267,20 @@ Each background is a canvas component that renders as `fixed inset-0 z-0 pointer
 | `puddleripples`    | `PuddleRipplesBackground`    | Top-down rain hitting dark water. Concentric expanding rings (3 per drop) spawn at random positions every ~280ms, expanding to 55–100px radius over 2.8s with tapering stroke width and fading opacity. Canvas.                                            |
 | `bioluminescence`  | `BioluminescenceBackground`  | 38 glowing orbs in teal/blue/green palette drift slowly across a deep black background. Each orb has a radial halo gradient + bright white core, pulsing opacity on an independent sinusoidal cycle (0.06–0.52 alpha). Canvas.                             |
 | `constellation`    | `ConstellationBackground`    | 110 twinkling stars with slow parallax drift. Nearby stars (80–190px apart) connected by gradient lines that fade in/out on independent slow cycles. Larger stars emit a soft glow. Canvas.                                                                |
+| `void`             | `VoidBackground`             | Deep-sea bioluminescent scene. 3 large background depth blobs (pure radial glow haze), 12 ambient orbs, 70-particle marine snow drifting downward, and 4 foreground jellyfish (squashed dome bell + bezier tentacles, upward drift, wrap at top). Each jellyfish emits a subtle expanding ring pulse every ~10–22 s. Heavy edge vignette. Canvas. |
 | `particleweb`      | `ParticleWebBackground`      | 80 drifting particles. Lines drawn between particles within 160px. Mouse cursor acts as an additional node (draws lines within 200px, repels within 60px). Particles pulse in size with a soft glow. Colours interpolated across the full theme gradient.  |
 
 ### Animation Resolution (`Wrapper.tsx`)
 
 ```
-useAnimations = false           → no animation rendered
+useAnimations = false           → background renders a single static frame (frozen)
 useAnimations = true
   animationOverride = null      → use Theme.animationKey (theme default)
   animationOverride = "none"    → force no animation
   animationOverride = <key>     → pin to that animation regardless of theme
 ```
+
+> **Static mode:** All canvas backgrounds call `renderFrame(0)` once on mount before starting the rAF loop, so they display a frozen snapshot even when `useAnimations = false`. The rAF loop continues running but skips rendering while `paused = true`, meaning the scene unfreezes instantly when animations are re-enabled.
 
 ### Adding a New Background
 

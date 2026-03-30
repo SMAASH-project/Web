@@ -9,7 +9,8 @@ export type AnimationKey =
   | "particleweb"
   | "puddleripples"
   | "bioluminescence"
-  | "constellation";
+  | "constellation"
+  | "void";
 
 export const ANIMATION_LABELS: Record<AnimationKey, string> = {
   fishtank: "Fishtank",
@@ -23,6 +24,7 @@ export const ANIMATION_LABELS: Record<AnimationKey, string> = {
   puddleripples: "Puddle Ripples",
   bioluminescence: "Bioluminescence",
   constellation: "Constellation",
+  void: "Void",
 };
 
 export const ALL_ANIMATION_KEYS = Object.keys(

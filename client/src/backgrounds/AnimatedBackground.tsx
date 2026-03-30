@@ -12,6 +12,7 @@ import { ParticleWebBackground } from "./ParticleWebBackground";
 import { PuddleRipplesBackground } from "./PuddleRipplesBackground";
 import { BioluminescenceBackground } from "./BioluminescenceBackground";
 import { ConstellationBackground } from "./ConstellationBackground";
+import { VoidBackground } from "./VoidBackground";
 
 interface Props {
   animationKey: AnimationKey;
@@ -61,6 +62,8 @@ function makeBackground(
       return <BioluminescenceBackground {...shared} />;
     case "constellation":
       return <ConstellationBackground {...shared} />;
+    case "void":
+      return <VoidBackground {...shared} />;
     default:
       return null;
   }

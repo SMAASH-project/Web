@@ -127,6 +127,13 @@ export const THEMES: Theme[] = [
     colorRight: "#10103a",
     animationKey: "constellation",
   },
+  {
+    name: "Void",
+    colorLeft: "#000a12",
+    colorMiddle: "#00121f",
+    colorRight: "#001a10",
+    animationKey: "void",
+  },
 ];
 
 export const applyTheme = (
