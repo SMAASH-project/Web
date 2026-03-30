@@ -5,6 +5,7 @@ import UserDetail from "./components/UserDetail";
 import ProfilesPanel from "./components/ProfilesPanel";
 import BanDialog from "./components/BanDialog";
 import { useAdminPageLogic } from "@/pages/admin/useAdminPageLogic";
+import { useSettings } from "@/pages/settings/SettingsContext";
 
 const colTransition = (delay: number): Transition => ({
   duration: 0.4,
@@ -18,6 +19,8 @@ export function AdminPageContent({
   animReady?: boolean;
 }) {
   const logic = useAdminPageLogic();
+  const { settings } = useSettings();
+  const { useAnimations } = settings;
   const cardBg = animReady
     ? logic.cardBg
     : logic.cardBg.replace(/backdrop-blur-\S+/g, "");
@@ -30,30 +33,48 @@ export function AdminPageContent({
       <div
         className={`z-0 flex flex-col xl:flex-row w-full max-w-7xl p-4 sm:p-6 gap-4 sm:gap-6 min-h-150 rounded-xl ${cardBg}`}
       >
-        <motion.div
-          initial={hidden}
-          animate={animReady ? visible : hidden}
-          transition={colTransition(0.05)}
-        >
-          <UserList logic={logic} />
-        </motion.div>
+        {useAnimations ? (
+          <motion.div
+            initial={hidden}
+            animate={animReady ? visible : hidden}
+            transition={colTransition(0.05)}
+          >
+            <UserList logic={logic} />
+          </motion.div>
+        ) : (
+          <div>
+            <UserList logic={logic} />
+          </div>
+        )}
 
-        <motion.div
-          className="flex-1 flex flex-col gap-4 min-w-0"
-          initial={hidden}
-          animate={animReady ? visible : hidden}
-          transition={colTransition(0.18)}
-        >
-          <UserDetail logic={logic} />
-        </motion.div>
+        {useAnimations ? (
+          <motion.div
+            className="flex-1 flex flex-col gap-4 min-w-0"
+            initial={hidden}
+            animate={animReady ? visible : hidden}
+            transition={colTransition(0.18)}
+          >
+            <UserDetail logic={logic} />
+          </motion.div>
+        ) : (
+          <div className="flex-1 flex flex-col gap-4 min-w-0">
+            <UserDetail logic={logic} />
+          </div>
+        )}
 
-        <motion.div
-          initial={hidden}
-          animate={animReady ? visible : hidden}
-          transition={colTransition(0.31)}
-        >
-          <ProfilesPanel logic={logic} />
-        </motion.div>
+        {useAnimations ? (
+          <motion.div
+            initial={hidden}
+            animate={animReady ? visible : hidden}
+            transition={colTransition(0.31)}
+          >
+            <ProfilesPanel logic={logic} />
+          </motion.div>
+        ) : (
+          <div>
+            <ProfilesPanel logic={logic} />
+          </div>
+        )}
       </div>
 
       {logic.selectedUser && (

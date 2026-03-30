@@ -29,48 +29,60 @@ const ProfileAvatar = memo(function ProfileAvatar({
   settings: SettingsState;
   onProfileClick: (name: string) => void;
 }) {
+  const avatarContent = (
+    <>
+      <Avatar
+        size="lg"
+        onClick={() => onProfileClick(profile.name)}
+        className={`text-white cursor-pointer ${settings.useLiquidGlass ? `${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} border-2 ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} ${isManaging ? "border-red-400" : settings.useDarkMode ? "border-black/40" : "border-white/30"}` : `${isManaging ? "border-red-500" : "border-(--theme-accent)"} border-2 bg-amber-200`}`}
+      >
+        <AvatarImage src={profile.avatar} alt={profile.name} />
+        <span
+          aria-hidden
+          className={cn(
+            "absolute inset-0 flex items-center justify-center rounded-full bg-gray-700/70 opacity-0 transition-opacity duration-150 pointer-events-none",
+            "group-hover/avatar:opacity-100",
+          )}
+        >
+          {isManaging ? (
+            <Trash2 className={cn("size-10 text-white opacity-100")} />
+          ) : (
+            <Play className={cn("size-10 text-white opacity-100")} />
+          )}
+        </span>
+        <AvatarFallback>
+          {profile.name
+            ? profile.name
+                .split(" ")
+                .map((n) => n[0])
+                .slice(0, 2)
+                .join("")
+            : "NA"}
+        </AvatarFallback>
+      </Avatar>
+      <span
+        className={`block text-center text-white ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+      >
+        {profile.name}
+      </span>
+    </>
+  );
+
   return (
     <div className="flex flex-col items-center gap-2">
-      <motion.div
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        className="cursor-pointer group/avatar"
-      >
-        <Avatar
-          size="lg"
-          onClick={() => onProfileClick(profile.name)}
-          className={`text-white cursor-pointer ${settings.useLiquidGlass ? `${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} border-2 ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} ${isManaging ? "border-red-400" : settings.useDarkMode ? "border-black/40" : "border-white/30"}` : `${isManaging ? "border-red-500" : "border-(--theme-accent)"} border-2 bg-amber-200`}`}
+      {settings.useAnimations ? (
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          className="cursor-pointer group/avatar"
         >
-          <AvatarImage src={profile.avatar} alt={profile.name} />
-          <span
-            aria-hidden
-            className={cn(
-              "absolute inset-0 flex items-center justify-center rounded-full bg-gray-700/70 opacity-0 transition-opacity duration-150 pointer-events-none",
-              "group-hover/avatar:opacity-100",
-            )}
-          >
-            {isManaging ? (
-              <Trash2 className={cn("size-10 text-white opacity-100")} />
-            ) : (
-              <Play className={cn("size-10 text-white opacity-100")} />
-            )}
-          </span>
-          <AvatarFallback>
-            {profile.name
-              ? profile.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .slice(0, 2)
-                  .join("")
-              : "NA"}
-          </AvatarFallback>
-        </Avatar>
-        <span
-          className={`block text-center text-white ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
-        >
-          {profile.name}
-        </span>
-      </motion.div>
+          {avatarContent}
+        </motion.div>
+      ) : (
+        <div className="cursor-pointer group/avatar">
+          {avatarContent}
+        </div>
+      )}
     </div>
   );
 });
@@ -115,6 +127,15 @@ export function ProfileSelectorPage() {
     [isManaging, removeProfile, selectProfile, navigate],
   );
 
+  const wrap = (content: React.ReactNode) =>
+    settings.useAnimations ? (
+      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+        {content}
+      </motion.div>
+    ) : (
+      <div>{content}</div>
+    );
+
   return (
     <div className="flex-1 flex items-center justify-center flex-col gap-5">
       <div className="mb-4 z-1">
@@ -139,38 +160,33 @@ export function ProfileSelectorPage() {
                 onProfileClick={handleProfileClick}
               />
             ))}
-            {profileCount < 5 && (
-              <motion.div
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <div className="flex flex-col items-center gap-2">
-                  <button
-                    onClick={() => setShowAddProfile(true)}
-                    className="w-12 h-12 rounded-full bg-gray-600 border-2 border-gray-500 flex items-center justify-center cursor-pointer hover:bg-gray-700 transition-colors"
-                  >
-                    <Plus className="size-6 text-white" />
-                  </button>
-                  <span
-                    className={`text-white text-sm ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
-                  >
-                    Add New
-                  </span>
-                </div>
-              </motion.div>
+            {profileCount < 5 && wrap(
+              <div className="flex flex-col items-center gap-2">
+                <button
+                  onClick={() => setShowAddProfile(true)}
+                  className="w-12 h-12 rounded-full bg-gray-600 border-2 border-gray-500 flex items-center justify-center cursor-pointer hover:bg-gray-700 transition-colors"
+                >
+                  <Plus className="size-6 text-white" />
+                </button>
+                <span
+                  className={`text-white text-sm ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
+                >
+                  Add New
+                </span>
+              </div>
             )}
           </div>
         </div>
         <div className="mb-4 z-1 flex gap-3">
-          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+          {wrap(
             <Button
               onClick={() => setIsManaging((prev) => !prev)}
               className={`text-white ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} rounded-lg cursor-pointer`}
             >
               {isManaging ? t("selector.done") : t("selector.manage")}
             </Button>
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+          )}
+          {wrap(
             <Button
               onClick={handleLogout}
               disabled={logoutMutation.isPending}
@@ -179,7 +195,7 @@ export function ProfileSelectorPage() {
               <LogOut className="size-4" />
               {logoutMutation.isPending ? "..." : t("selector.logout")}
             </Button>
-          </motion.div>
+          )}
         </div>
       </div>
       <AddNewProfileDialog open={showAddProfile} onOpenChange={setShowAddProfile} />
