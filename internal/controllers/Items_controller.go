@@ -5,7 +5,6 @@ import (
 	"net/http"
 	dtos "smaash-web/internal/DTOs"
 	"smaash-web/internal/middlewares"
-	"smaash-web/internal/models"
 	"smaash-web/internal/repository"
 	"smaash-web/internal/utils"
 
@@ -15,20 +14,20 @@ import (
 )
 
 type ItemsController struct {
-	itemsBaseRepo repository.BaseRepository[models.Item]
-	rarityRepo    repository.RarityRepository
-	categoryRepo  repository.CategoryRepository
+	itemsRepo    repository.Itemsepository
+	rarityRepo   repository.RarityRepository
+	categoryRepo repository.CategoryRepository
 }
 
 func NewItemsController(
-	itemsBaseRepo repository.BaseRepository[models.Item],
+	itemsRepo repository.Itemsepository,
 	rarityRepo repository.RarityRepository,
 	categoryRepo repository.CategoryRepository,
 ) *ItemsController {
 	return &ItemsController{
-		itemsBaseRepo: itemsBaseRepo,
-		rarityRepo:    rarityRepo,
-		categoryRepo:  categoryRepo,
+		itemsRepo:    itemsRepo,
+		rarityRepo:   rarityRepo,
+		categoryRepo: categoryRepo,
 	}
 }
 
@@ -47,7 +46,7 @@ func (ic ItemsController) Create(c *gin.Context) {
 		return
 	}
 
-	if err := ic.itemsBaseRepo.Create(c.Request.Context(), newItem); err != nil {
+	if err := ic.itemsRepo.Create(c.Request.Context(), newItem); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			c.JSON(http.StatusConflict, dtos.NewErrResp("Item with given name already exists", path))
 			return
@@ -56,28 +55,35 @@ func (ic ItemsController) Create(c *gin.Context) {
 		return
 	}
 
-	withIncludes, _ := ic.itemsBaseRepo.ReadByID(c.Request.Context(), newItem.ID, "Rarity", "Categories")
+	withIncludes, _ := ic.itemsRepo.ReadByID(c.Request.Context(), newItem.ID, "Rarity", "Categories")
 
 	c.JSON(http.StatusCreated, dtos.ItemToDTO(withIncludes))
 }
 
 func (ic ItemsController) ReadAll(c *gin.Context) {
+	path := c.Request.URL.Path
 	page, _ := c.Get("page")
 	size, _ := c.Get("size")
-	items, err := ic.itemsBaseRepo.ReadAllPaginated(c.Request.Context(), page.(int), size.(int), "Rarity", "Categories")
+
+	var body dtos.ItemWithOwnedReqDTO
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
+	}
+
+	items, err := ic.itemsRepo.ReadAllWithOwnedPaginated(c.Request.Context(), body.ProfileID, page.(int), size.(int), "Rarity", "Categories")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
 		return
 	}
 
-	c.JSON(http.StatusOK, utils.Map(items, dtos.ItemToDTO))
+	c.JSON(http.StatusOK, utils.Map(items, dtos.ItemWithOwnedToDTO))
 }
 
 func (ic ItemsController) ReadByID(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
 
-	item, err := ic.itemsBaseRepo.ReadByID(c.Request.Context(), id.(uint), "Rarity", "Categories")
+	item, err := ic.itemsRepo.ReadByID(c.Request.Context(), id.(uint), "Rarity", "Categories")
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Item with given id not found", path))
@@ -111,7 +117,7 @@ func (ic ItemsController) Update(c *gin.Context) {
 		return
 	}
 
-	if err := ic.itemsBaseRepo.Update(c.Request.Context(), *updatedItem); err != nil {
+	if err := ic.itemsRepo.Update(c.Request.Context(), *updatedItem); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Item with provided id not found", path))
 			return
@@ -131,7 +137,7 @@ func (ic ItemsController) Delete(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
 
-	if err := ic.itemsBaseRepo.Delete(c.Request.Context(), id.(uint)); err != nil {
+	if err := ic.itemsRepo.Delete(c.Request.Context(), id.(uint)); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Item with given id not found", path))
 			return
