@@ -71,7 +71,7 @@ client/
     │                           #   colorMath, classnames, extractErrorMessage,
     │                           #   sectionStyle
     ├── locales/
-    │   ├── en/                 # English — 9 namespace files
+    │   ├── en/                 # English — 10 namespace files
     │   └── hu/                 # Hungarian — same structure
     ├── pages/
     │   ├── admin/
@@ -204,7 +204,7 @@ The theme is driven by three gradient colours in `ColorContext` + `localStorage`
 | `useDarkMode`       | `false` | Dark variants of all themed classes                       |
 | `useAnimations`     | `true`  | `false` freezes backgrounds to a static frame             |
 | `language`          | `"en"`  | i18next language (`"en"` or `"hu"`)                       |
-| `animationOverride` | `null`  | `null` = theme default · `"none"` = force off · key = pin |
+| `animationOverride` | `null`  | `null` = theme default · `"none"` = force off · key = pin · `"custom"` = use effectMix layer stack |
 
 ### Theme Helper Functions
 
@@ -227,6 +227,10 @@ sectionStyle(animReady, delayMs)
 ```
 
 ### Preset Themes (`Themes.ts`)
+
+> **`applyTheme()`** updates `colorLeft/Middle/Right` and `animationKey` only. It does **not** clear `effectMix` — any active custom effect combo is preserved across theme switches. `animationOverride` is also left untouched, so if the user had `"custom"` active, the custom effect continues to display with the new colour palette.
+
+
 
 | Theme     | Default Animation |
 | --------- | ----------------- |
@@ -278,9 +282,45 @@ useAnimations = true
   animationOverride = null      → use Theme.animationKey (theme default)
   animationOverride = "none"    → force no animation
   animationOverride = <key>     → pin to that animation regardless of theme
+  animationOverride = "custom"  → CompositeBackground renders the effectMix layer stack
 ```
 
 > **Static mode:** All canvas backgrounds call `renderFrame(0)` once on mount before starting the rAF loop, so they display a frozen snapshot even when `useAnimations = false`. The rAF loop continues running but skips rendering while `paused = true`, meaning the scene unfreezes instantly when animations are re-enabled.
+
+### Effect Mixing (`EffectMixDialog` / `CompositeBackground`)
+
+Custom effect combos are stored in `ColorContext.effectMix` (`EffectLayerConfig | null`) and persisted to `localStorage`. When `animationOverride === "custom"`, `CompositeBackground` renders instead of `AnimatedBackground`, layering all enabled effects simultaneously.
+
+**`EffectLayerConfig`** — `Partial<SubEffectMap>`. Presence of a key means that effect is enabled; absence means disabled. Each value is the effect's sub-effects record.
+
+**`CompositeBackground`** (`src/backgrounds/CompositeBackground.tsx`) layers all enabled effects using fixed z-index stacking:
+
+| Z | Effect          | Sub-effects (all boolean, all default `true`)                                         |
+|---|-----------------|---------------------------------------------------------------------------------------|
+| 1 | `deepspace`     | showStars · showMilkyWay · showNebulae · showShootingStars                            |
+| 2 | `aurora`        | showColorBands · showFibers · showStars · showMoon                                    |
+| 3 | `void`          | showDepthBlobs · showJellyfish · showAmbientOrbs · showMarineSnow                     |
+| 4 | `bioluminescence` | showOrbs · showPulses · showVignette                                                |
+| 5 | `constellation` | showStars · showConstellationLines                                                     |
+| 6 | `lavalamp`      | showBlobs · showHighlight                                                              |
+| 7 | `synthwave`     | showSky · showSun · showGrid · showScanlines                                          |
+| 8 | `puddleripples` | showRipples                                                                            |
+| 9 | `fishtank`      | showFish · showBubbles · showSeaweed · showCaustics · showLightShafts                 |
+|10 | `particleweb`   | showParticles · showConnections                                                        |
+|11 | `storm`         | showRain · showLightning · showClouds · showGroundShimmer                             |
+|12 | `sakura`        | showPetals · showBokeh                                                                 |
+
+Props: `effectMix`, `colorLeft/Middle/Right`, `paused`, `preview?`. When `preview={true}` uses `absolute` positioning instead of `fixed`.
+
+**`EffectMixDialog`** (`src/pages/settings/components/EffectMixDialog.tsx`) — opened from the Settings page:
+
+- **Left panel:** accordion of all 12 effects, each with an on/off `Switch` and per-sub-effect `Switch` rows.
+- **Right panel:** live-animating `CompositeBackground` preview (`w-80`, `min-h-100`) showing the `pendingMix` against the current colour gradient. Animations play live (not paused) so every effect is visible.
+- **Apply:** persists `pendingMix` to `context.effectMix` + sets `animationOverride = "custom"`.
+- **Clear:** sets `effectMix = null`, clears `animationOverride` if it was `"custom"`.
+- Dialog state is initialised from `context.effectMix` on open; cancelled changes are discarded.
+
+> **Tip:** `DEFAULT_SUB_EFFECTS` (from `animationTypes.ts`) is used when an effect is toggled on so all sub-effects start enabled.
 
 ### Adding a New Background
 
@@ -353,13 +393,16 @@ const {
   colorMiddle,
   colorRight,
   animationKey,
+  effectMix,          // EffectLayerConfig | null — custom layered effect combo
   setColorLeft,
   setColorMiddle,
   setColorRight,
   setAnimationKey,
+  setEffectMix,       // (mix: EffectLayerConfig | null) => void
 } = useContext(ColorContext);
 // Persisted under localStorage key "color-settings"
-// animationKey: AnimationKey | null — set by applyTheme()
+// animationKey: AnimationKey | null — set by applyTheme(); ignored when animationOverride === "custom"
+// effectMix: null by default; set by EffectMixDialog; NOT cleared by applyTheme()
 ```
 
 ---
@@ -508,7 +551,7 @@ Live data: coins, last seen, profile ID. Placeholder (dimmed): wins, losses, win
 
 ### Settings (`/app/settings`)
 
-Toggles (Animations, Liquid Glass, Dark Mode, Language), theme preset picker, custom 3-stop colour picker, animation override row. `sectionStyle` staggered sections (0/80/160/240ms). `animReady` prop: while `false`, `backdrop-blur-*` stripped from card + sections stay invisible; flips to `true` after `CardAnimation` spring completes.
+Toggles (Animations, Liquid Glass, Dark Mode, Language), theme preset picker, custom 3-stop colour picker, animation override row with a **Mix Effects** button (opens `EffectMixDialog`). `sectionStyle` staggered sections (0/80/160/240ms). `animReady` prop: while `false`, `backdrop-blur-*` stripped from card + sections stay invisible; flips to `true` after `CardAnimation` spring completes.
 
 ---
 
@@ -632,13 +675,14 @@ Dialog: display name + optional avatar. Limit: 5 profiles per user. Fully transl
 | `news.json`     | News page                                                                    |
 | `webstore.json` | Webstore page                                                                |
 | `admin.json`    | Admin panel, ban dialog                                                      |
+| `debug.json`    | Debug panel                                                                  |
 | `common.json`   | 404 page, shared labels                                                      |
 
 Language stored in `SettingsContext`. `updateSetting("language", "hu")` automatically calls `i18n.changeLanguage()`.
 
 ### Adding a New Language
 
-1. Create `src/locales/<code>/` with the same 9 JSON files
+1. Create `src/locales/<code>/` with the same 10 JSON files
 2. Import in `src/lib/i18n.ts` and add to `resources`
 3. Add button in `SettingsPageContent.tsx` and `LanguageToggle.tsx`
 4. Add the code to the `Language` type in `SettingsContext.tsx`

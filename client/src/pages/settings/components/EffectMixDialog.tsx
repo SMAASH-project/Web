@@ -138,7 +138,7 @@ export function EffectMixDialog() {
           <DialogTitle className={textColor}>Mix Effects</DialogTitle>
         </DialogHeader>
 
-        <div className="flex gap-4 min-h-[300px]">
+        <div className="flex gap-4 min-h-100">
           {/* Left — effect accordion list */}
           <div className="flex-1 overflow-y-auto max-h-[60vh] min-w-0 pr-1">
             <Accordion
@@ -203,7 +203,7 @@ export function EffectMixDialog() {
 
           {/* Right — live preview (paused) */}
           <div
-            className="w-[220px] shrink-0 self-stretch rounded-lg overflow-hidden relative [&_*]:[animation-play-state:paused]"
+            className="w-80 shrink-0 self-stretch rounded-lg overflow-hidden relative"
             style={{
               backgroundImage: `linear-gradient(to right, ${colorLeft}, ${colorMiddle}, ${colorRight})`,
             }}
@@ -213,7 +213,7 @@ export function EffectMixDialog() {
               colorLeft={colorLeft}
               colorMiddle={colorMiddle}
               colorRight={colorRight}
-              paused={true}
+              paused={false}
               preview={true}
             />
           </div>

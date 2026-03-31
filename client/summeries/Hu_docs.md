@@ -71,7 +71,7 @@ client/
     │                           #   colorMath, classnames, extractErrorMessage,
     │                           #   sectionStyle
     ├── locales/
-    │   ├── en/                 # Angol — 9 névtér-fájl
+    │   ├── en/                 # Angol — 10 névtér-fájl
     │   └── hu/                 # Magyar — azonos struktúra
     ├── pages/
     │   ├── admin/
@@ -204,7 +204,7 @@ A témát a `ColorContext`-ben és `localStorage`-ban tárolt három gradiens-sz
 | `useDarkMode`       | `false`         | Az összes témázott osztály sötét változata                        |
 | `useAnimations`     | `true`          | `false` = hátterek statikus képkockára fagyasztva                 |
 | `language`          | `"en"`          | i18next nyelv (`"en"` vagy `"hu"`)                                |
-| `animationOverride` | `null`          | `null` = téma alapértelmezett · `"none"` = ki · kulcs = rögzített |
+| `animationOverride` | `null`          | `null` = téma alapértelmezett · `"none"` = ki · kulcs = rögzített · `"custom"` = effectMix rétegkészlet |
 
 ### Téma segédfüggvények
 
@@ -226,6 +226,10 @@ sectionStyle(animReady, delayMs)
 ```
 
 ### Előre beállított témák (`Themes.ts`)
+
+> **Az `applyTheme()`** csak a `colorLeft/Middle/Right` és az `animationKey` értékeket frissíti. Az `effectMix`-et **nem törli** — az egyéni effektus-kombináció megmarad témák közötti váltáskor. Az `animationOverride` értéke szintén változatlan marad, így ha `"custom"` volt aktív, az egyéni effektus az új palettával együtt tovább fut.
+
+
 
 | Téma      | Alapértelmezett animáció |
 | --------- | ------------------------ |
@@ -272,14 +276,50 @@ Minden háttér canvas komponens, amely `fixed inset-0 z-0 pointer-events-none` 
 ### Animáció-feloldás (`Wrapper.tsx`)
 
 ```
-useAnimations = false           → a háttér egyetlen statikus képkockát renderel (befagyasztva)
+useAnimations = false              → a háttér egyetlen statikus képkockát renderel (befagyasztva)
 useAnimations = true
-  animationOverride = null      → Theme.animationKey használata
-  animationOverride = "none"    → kényszer kikapcsolás
-  animationOverride = <kulcs>   → rögzítés témától függetlenül
+  animationOverride = null         → Theme.animationKey használata
+  animationOverride = "none"       → kényszer kikapcsolás
+  animationOverride = <kulcs>      → rögzítés témától függetlenül
+  animationOverride = "custom"     → CompositeBackground rendereli az effectMix rétegkészletet
 ```
 
 > **Statikus mód:** Minden canvas-alapú háttér egyszer meghívja a `renderFrame(0)`-t mountoláskor, az rAF-ciklus indítása előtt, így `useAnimations = false` esetén is megjelenik egy befagyasztott pillanatkép. Az rAF-ciklus fut tovább, de `paused = true` esetén kihagyja a renderelést — az animáció azonnal folytatódik, ha újra engedélyezik.
+
+### Effektus-keverés (`EffectMixDialog` / `CompositeBackground`)
+
+Az egyéni effektus-kombinációk a `ColorContext.effectMix`-ben (`EffectLayerConfig | null`) tárolódnak, és `localStorage`-ba perzisztálódnak. Ha `animationOverride === "custom"`, a `CompositeBackground` renderel az `AnimatedBackground` helyett, egyszerre több effektust rétegezve.
+
+**`EffectLayerConfig`** — `Partial<SubEffectMap>`. Egy kulcs jelenléte az effektus engedélyezettségét jelenti; hiánya = letiltott.
+
+**`CompositeBackground`** (`src/backgrounds/CompositeBackground.tsx`) rögzített z-index sorrendben rétegezi az engedélyezett effektusokat:
+
+| Z | Effektus          | Al-effektusok (mind boolean, mind `true` alapból)                                        |
+|---|-------------------|------------------------------------------------------------------------------------------|
+| 1 | `deepspace`       | showStars · showMilkyWay · showNebulae · showShootingStars                               |
+| 2 | `aurora`          | showColorBands · showFibers · showStars · showMoon                                       |
+| 3 | `void`            | showDepthBlobs · showJellyfish · showAmbientOrbs · showMarineSnow                        |
+| 4 | `bioluminescence` | showOrbs · showPulses · showVignette                                                     |
+| 5 | `constellation`   | showStars · showConstellationLines                                                        |
+| 6 | `lavalamp`        | showBlobs · showHighlight                                                                 |
+| 7 | `synthwave`       | showSky · showSun · showGrid · showScanlines                                             |
+| 8 | `puddleripples`   | showRipples                                                                               |
+| 9 | `fishtank`        | showFish · showBubbles · showSeaweed · showCaustics · showLightShafts                    |
+|10 | `particleweb`     | showParticles · showConnections                                                           |
+|11 | `storm`           | showRain · showLightning · showClouds · showGroundShimmer                                |
+|12 | `sakura`          | showPetals · showBokeh                                                                    |
+
+Propok: `effectMix`, `colorLeft/Middle/Right`, `paused`, `preview?`. Ha `preview={true}`, `absolute` elhelyezést használ `fixed` helyett.
+
+**`EffectMixDialog`** (`src/pages/settings/components/EffectMixDialog.tsx`) — a Beállítások oldalról nyitható meg:
+
+- **Bal panel:** mind a 12 effektus accordion listája, effektusonként be/ki `Switch` kapcsolóval és al-effektus kapcsolókkal.
+- **Jobb panel:** élő animációs `CompositeBackground` előnézet (`w-80`, `min-h-100`), amely a `pendingMix`-et mutatja az aktuális szín-gradiensen. Az animációk élőben futnak (nem szünetelnek), hogy minden effektus látható legyen.
+- **Alkalmazás:** a `pendingMix`-et elmenti a `context.effectMix`-be + `animationOverride = "custom"`-ra állítja.
+- **Törlés:** az `effectMix`-et `null`-ra állítja, és törli az `animationOverride`-ot, ha `"custom"` volt.
+- A párbeszédpanel állapota nyitáskor a `context.effectMix`-ből inicializálódik; a meg nem erősített változtatások elvetődnek.
+
+> **Tipp:** A `DEFAULT_SUB_EFFECTS` (az `animationTypes.ts`-ből) az effektus bekapcsolásakor automatikusan kerül alkalmazásra, így minden al-effektus alapból engedélyezett.
 
 ### Új háttér hozzáadása
 
@@ -352,13 +392,16 @@ const {
   colorMiddle,
   colorRight,
   animationKey,
+  effectMix,          // EffectLayerConfig | null — egyéni rétegzett effektus-kombináció
   setColorLeft,
   setColorMiddle,
   setColorRight,
   setAnimationKey,
+  setEffectMix,       // (mix: EffectLayerConfig | null) => void
 } = useContext(ColorContext);
 // localStorage "color-settings" kulcs alatt tárolódik
-// animationKey: AnimationKey | null — az applyTheme() állítja be
+// animationKey: AnimationKey | null — az applyTheme() állítja be; figyelmen kívül marad, ha animationOverride === "custom"
+// effectMix: alapértelmezetten null; az EffectMixDialog állítja; az applyTheme() NEM törli
 ```
 
 ---
@@ -505,7 +548,7 @@ Háromoszlopos elrendezés:
 
 ### Beállítások (`/app/settings`)
 
-Kapcsolók (Animációk, Folyékony üveg, Sötét mód, Nyelv), téma-presetek, egyéni 3-megállós színválasztó, animáció-felülbírálat sor. `sectionStyle` lépcsőzetes szekciók (0/80/160/240ms). Az `animReady` prop: amíg `false`, a `backdrop-blur-*` el van távolítva a kártyából + a szekciók láthatatlanok; `true`-ra vált a `CardAnimation` spring befejezése után.
+Kapcsolók (Animációk, Folyékony üveg, Sötét mód, Nyelv), téma-presetek, egyéni 3-megállós színválasztó, animáció-felülbírálat sor **Effektus-keverés** gombbal (megnyitja az `EffectMixDialog`-ot). `sectionStyle` lépcsőzetes szekciók (0/80/160/240ms). Az `animReady` prop: amíg `false`, a `backdrop-blur-*` el van távolítva a kártyából + a szekciók láthatatlanok; `true`-ra vált a `CardAnimation` spring befejezése után.
 
 ---
 
@@ -629,13 +672,14 @@ A `src/lib/i18n.ts`-t a `main.tsx`-ben minden komponens renderelése előtt impo
 | `news.json`     | Hírek oldal                                                                                |
 | `webstore.json` | Webáruház oldal                                                                            |
 | `admin.json`    | Admin panel, kitiltási párbeszédpanel                                                      |
+| `debug.json`    | Debug panel                                                                                |
 | `common.json`   | 404 oldal, megosztott feliratok                                                            |
 
 A nyelv a `SettingsContext`-ben tárolódik. Az `updateSetting("language", "hu")` automatikusan meghívja az `i18n.changeLanguage()`-t.
 
 ### Új nyelv hozzáadása
 
-1. Hozz létre `src/locales/<kód>/` mappát ugyanazzal a 9 JSON fájllal
+1. Hozz létre `src/locales/<kód>/` mappát ugyanazzal a 10 JSON fájllal
 2. Importáld az `src/lib/i18n.ts`-ben és add hozzá a `resources` objektumhoz
 3. Adj hozzá gombot a `SettingsPageContent.tsx`-ben és `LanguageToggle.tsx`-ben
 4. Add hozzá a kódot a `Language` típushoz a `SettingsContext.tsx`-ben

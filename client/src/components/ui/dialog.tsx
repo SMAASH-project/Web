@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 
-import { cn } from "@/lib/utils";
+import { cn, getTextColor } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
 import { useSettings } from "@/pages/settings/SettingsContext";
@@ -75,13 +75,7 @@ function DialogContent({
               className="absolute top-2 right-2"
               size="icon-sm"
             >
-              <XIcon
-                className={
-                  settings.useDarkMode || settings.useLiquidGlass
-                    ? "text-white"
-                    : undefined
-                }
-              />
+              <XIcon className={getTextColor(settings.useLiquidGlass, settings.useDarkMode)} />
               <span className="sr-only">Close</span>
             </Button>
           </DialogPrimitive.Close>
