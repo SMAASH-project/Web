@@ -1,9 +1,12 @@
 import { useContext } from "react";
-import { useSettings } from "../pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
+import { motion } from "motion/react";
+import { useScrollDirection } from "@/hooks/useScrollDirection";
+import { useDebugSettings } from "@/hooks/useDebugSettings";
 import { NavMenu } from "./NavMenu";
 import AccountMenu from "./AccountMenu";
 import { MobileNavMenu } from "./MobileNavMenu";
-import { useProfiles } from "../forms/addNewProfile/useProfiles";
+import { useProfiles } from "@/pages/profile-selector/useProfiles";
 import { Link, useNavigate } from "react-router-dom";
 import { useMediaQuery } from "./navLogic/useMediaQuery";
 import { useLogoutMutation } from "@/hooks/useQueryHooks";
@@ -20,6 +23,12 @@ import {
 
 const Navbar = () => {
   const { settings } = useSettings();
+  const scrollHidden = useScrollDirection();
+  const { settings: dbg } = useDebugSettings();
+  const hidden =
+    dbg.navbarOverride === "show" ? false
+    : dbg.navbarOverride === "hide" ? true
+    : scrollHidden;
   const { selectedProfile } = useProfiles();
   const username = selectedProfile?.name ?? "PlaceholderUserName";
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -62,9 +71,9 @@ const Navbar = () => {
     }
   };
 
-  return (
+  const navContent = (
     <nav
-      className={`absolute top-0 left-0 right-0 flex justify-between items-center p-4 max-w-full w-full border-b border-transparent z-50 ${navBackground}`}
+      className={`flex justify-between items-center p-4 max-w-full w-full border-b border-transparent ${navBackground}`}
       style={{
         borderBottomColor: "var(--theme-nav-border)",
         boxShadow: "0 8px 18px -14px var(--theme-nav-shadow)",
@@ -142,6 +151,20 @@ const Navbar = () => {
         </>
       )}
     </nav>
+  );
+
+  return settings.useAnimations ? (
+    <motion.div
+      className="fixed top-0 left-0 right-0 z-50"
+      animate={{ y: hidden ? -80 : 0 }}
+      transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
+    >
+      {navContent}
+    </motion.div>
+  ) : (
+    <div className="fixed top-0 left-0 right-0 z-50">
+      {navContent}
+    </div>
   );
 };
 

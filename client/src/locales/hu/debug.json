@@ -1,0 +1,50 @@
+{
+  "title": "Debug",
+  "roles": {
+    "admin": "Adminisztrátor",
+    "support": "Támogatás"
+  },
+  "tabs": {
+    "system": "Rendszer",
+    "cache": "Gyorsítótár",
+    "endpoints": "Végpontok",
+    "game": "Játékadatok",
+    "sight": "Vizuális"
+  },
+  "refresh": "Frissítés",
+  "sight": {
+    "animation": {
+      "title": "Animáció",
+      "speedNote": "CSS átmeneteket skálázza. A Motion rugó animációkra nincs hatással.",
+      "forceReplay": "Újrajátszás",
+      "reload": "Újratöltés",
+      "navbar": "Navigációs sáv",
+      "navAuto": "Automatikus",
+      "navShow": "Megjelenít",
+      "navHide": "Elrejt"
+    },
+    "visual": {
+      "title": "Vizuális",
+      "disableBlur": "Háttér homályosítás letiltása",
+      "layoutBorders": "Elrendezési szegélyek",
+      "elementInspector": "Elem-vizsgáló"
+    },
+    "overlays": {
+      "title": "Feliratok",
+      "fps": "FPS számláló",
+      "scroll": "Görgetési pozíció"
+    },
+    "toast": {
+      "title": "Értesítés teszt",
+      "success": "Sikeres",
+      "error": "Hiba",
+      "info": "Információ",
+      "msgSuccess": "Teszt sikeres értesítés",
+      "msgError": "Teszt hibaértesítés",
+      "msgInfo": "Teszt infó értesítés"
+    },
+    "cssVars": {
+      "title": "CSS változók"
+    }
+  }
+}

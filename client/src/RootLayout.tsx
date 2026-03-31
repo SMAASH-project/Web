@@ -4,12 +4,18 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { AuthProvider } from "./context/AuthProvider";
-import { SettingsProvider } from "./components/pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { SettingsProvider } from "@/pages/settings/SettingsContext";
 import { NavbarProvider } from "./context/NavbarContext";
-import { ColorProvider } from "./components/pages/profileDependents/settings/settingsLogic/color/ColorProvider";
-import { ProfileProvider } from "@/components/forms/addNewProfile/ProfilesContext";
+import { ColorProvider } from "@/pages/settings/ColorProvider";
+import { ProfileProvider } from "@/pages/profile-selector/ProfilesContext";
 import { Wrapper } from "./Wrapper";
-import { Suspense } from "react";
+import { Toaster } from "@/components/ui/toaster";
+import { Suspense, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { MotionConfig } from "motion/react";
+import { useDebugSettings } from "@/hooks/useDebugSettings";
+import { useSettings } from "@/pages/settings/SettingsContext";
+import { ColorContext } from "@/pages/settings/ColorContext";
+import { getAverageHexColor, getBackgroundClasses, getTextColor, getSubtextColor } from "@/lib/utils";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,12 +38,237 @@ const persister = createSyncStoragePersister({
   storage: window.localStorage,
 });
 
+const SPEED_TO_MOTION: Record<number, number> = { 0.25: 2, 0.5: 0.8, 1: 0.3, 2: 0.1, 4: 0.05 };
+
+const INSPECTOR_PROPS = [
+  "display", "position", "width", "height",
+  "color", "backgroundColor", "fontSize",
+  "fontWeight", "zIndex", "opacity", "borderRadius",
+] as const;
+
+type InspectorProp = typeof INSPECTOR_PROPS[number];
+
+interface HoverTarget {
+  tag: string;
+  id: string;
+  classes: string[];
+  css: Record<InspectorProp, string>;
+  x: number;
+  y: number;
+}
+
+const CARD_W = 240;
+const CARD_H = 300;
+const CARD_OFFSET = 14;
+
+function hexLuminance(hex: string): number {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.slice(0, 2), 16) / 255;
+  const g = parseInt(h.slice(2, 4), 16) / 255;
+  const b = parseInt(h.slice(4, 6), 16) / 255;
+  return 0.299 * r + 0.587 * g + 0.114 * b;
+}
+
+const SPEED_TO_CSS: Record<number, number> = { 0.25: 3, 0.5: 1.5, 2: 0.075, 4: 0.03 };
+
+function DebugEffects() {
+  const { settings } = useDebugSettings();
+  const colorCtx = useContext(ColorContext);
+  const colorLeft   = colorCtx?.colorLeft   ?? "#616161";
+  const colorMiddle = colorCtx?.colorMiddle ?? "#000000";
+  const colorRight  = colorCtx?.colorRight  ?? "#616161";
+
+  useEffect(() => {
+    document.body.classList.toggle("debug-no-blur", settings.noBackdropBlur);
+  }, [settings.noBackdropBlur]);
+
+  useEffect(() => {
+    document.body.classList.toggle("debug-layout", settings.layoutBorders);
+    if (!settings.layoutBorders) return;
+    const avg = getAverageHexColor([colorLeft, colorMiddle, colorRight]);
+    const lum = hexLuminance(avg);
+    // High luminance (light background) → dark indigo outline; dark background → bright cyan
+    const color = lum > 0.45
+      ? "rgba(67, 56, 202, 0.80)"   // indigo-700 — contrasts on light
+      : "rgba(34, 211, 238, 0.75)"; // cyan-400   — contrasts on dark
+    document.documentElement.style.setProperty("--debug-layout-color", color);
+  }, [settings.layoutBorders, colorLeft, colorMiddle, colorRight]);
+
+  useEffect(() => {
+    const tag = document.getElementById("debug-speed");
+    const duration = SPEED_TO_CSS[settings.animationSpeed];
+    if (!duration) {
+      tag?.remove();
+      return;
+    }
+    const style = tag ?? document.createElement("style");
+    style.id = "debug-speed";
+    style.textContent = `* { transition-duration: ${duration}s !important; }`;
+    if (!tag) document.head.appendChild(style);
+  }, [settings.animationSpeed]);
+
+  return null;
+}
+
+function DebugOverlay() {
+  const { settings } = useDebugSettings();
+  const [fps, setFps] = useState<number | null>(null);
+  const [scrollY, setScrollY] = useState(0);
+  const lastTime = useRef<number>(performance.now());
+  const frameRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (!settings.showFps) return;
+    const loop = (now: number) => {
+      const delta = now - lastTime.current;
+      if (delta > 0) setFps(Math.round(1000 / delta));
+      lastTime.current = now;
+      frameRef.current = requestAnimationFrame(loop);
+    };
+    frameRef.current = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, [settings.showFps]);
+
+  useEffect(() => {
+    if (!settings.showScrollPos) return;
+    const onScroll = () => setScrollY(Math.round(window.scrollY));
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [settings.showScrollPos]);
+
+  if (!settings.showFps && !settings.showScrollPos) return null;
+
+  return (
+    <div className="fixed bottom-4 left-4 z-9999 flex flex-col gap-1.5 pointer-events-none">
+      {settings.showFps && fps !== null && (
+        <span className="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-full backdrop-blur-md bg-black/50 text-green-400">
+          {fps} fps
+        </span>
+      )}
+      {settings.showScrollPos && (
+        <span className="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-full backdrop-blur-md bg-black/50 text-blue-400">
+          Y: {scrollY}px
+        </span>
+      )}
+    </div>
+  );
+}
+
+function ElementInspectorOverlay() {
+  const { settings: debug } = useDebugSettings();
+  const { settings } = useSettings();
+  const { useLiquidGlass, useDarkMode } = settings;
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const [target, setTarget] = useState<HoverTarget | null>(null);
+
+  // ── Theme-aware style tokens ───────────────────────────────────────────────
+  const cardBg   = getBackgroundClasses(useLiquidGlass, useDarkMode, "strong");
+  const tagColor = useLiquidGlass
+    ? (useDarkMode ? "text-violet-300" : "text-violet-200")
+    : (useDarkMode ? "text-violet-400" : "text-violet-700");
+  const idColor = useLiquidGlass
+    ? (useDarkMode ? "text-amber-300" : "text-amber-200")
+    : (useDarkMode ? "text-amber-400" : "text-amber-700");
+  const badgeStyle = useLiquidGlass
+    ? (useDarkMode ? "bg-white/10 text-white/70" : "bg-white/20 text-white/80")
+    : (useDarkMode ? "bg-white/10 text-gray-300" : "bg-gray-100 text-gray-600");
+  const divider = useLiquidGlass
+    ? (useDarkMode ? "border-white/10" : "border-white/25")
+    : (useDarkMode ? "border-gray-700"  : "border-gray-200");
+  const propLabel = useLiquidGlass
+    ? (useDarkMode ? "text-white/40" : "text-white/50")
+    : (useDarkMode ? "text-gray-500"  : "text-gray-400");
+  const propValue = useLiquidGlass
+    ? (useDarkMode ? "text-white/80" : "text-white/90")
+    : (useDarkMode ? "text-gray-100"  : "text-gray-800");
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    const el = e.target as Element;
+    if (overlayRef.current?.contains(el) || el === overlayRef.current) return;
+
+    const cs = window.getComputedStyle(el);
+    const css = {} as Record<InspectorProp, string>;
+    for (const prop of INSPECTOR_PROPS) {
+      css[prop] = cs.getPropertyValue(prop.replace(/([A-Z])/g, "-$1").toLowerCase());
+    }
+
+    setTarget({
+      tag: el.tagName.toLowerCase(),
+      id: el.id,
+      classes: Array.from(el.classList).slice(0, 6),
+      css,
+      x: e.clientX,
+      y: e.clientY,
+    });
+  }, []);
+
+  const handleMouseLeave = useCallback(() => setTarget(null), []);
+
+  useEffect(() => {
+    if (!debug.elementInspector) { setTarget(null); return; }
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseleave", handleMouseLeave);
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, [debug.elementInspector, handleMouseMove, handleMouseLeave]);
+
+  if (!debug.elementInspector || !target) return null;
+
+  const flipX = target.x + CARD_OFFSET + CARD_W > window.innerWidth;
+  const flipY = target.y + CARD_OFFSET + CARD_H > window.innerHeight;
+  const left = flipX ? target.x - CARD_W - CARD_OFFSET : target.x + CARD_OFFSET;
+  const top  = flipY ? target.y - CARD_H - CARD_OFFSET : target.y + CARD_OFFSET;
+
+  return (
+    <div
+      ref={overlayRef}
+      data-element-inspector="true"
+      className="fixed z-9999 pointer-events-none"
+      style={{ left, top }}
+    >
+      <div className={`rounded-xl p-3 w-60 flex flex-col gap-1.5 ${cardBg}`}>
+        <div className={`flex items-baseline gap-1.5 border-b ${divider} pb-1.5`}>
+          <span className={`text-[11px] font-mono font-bold ${tagColor}`}>&lt;{target.tag}&gt;</span>
+          {target.id && <span className={`text-[10px] font-mono ${idColor} truncate`}>#{target.id}</span>}
+        </div>
+        {target.classes.length > 0 && (
+          <div className={`flex flex-wrap gap-1 border-b ${divider} pb-1.5`}>
+            {target.classes.map((c) => (
+              <span key={c} className={`text-[9px] font-mono px-1 py-0.5 rounded truncate max-w-40 ${badgeStyle}`}>.{c}</span>
+            ))}
+          </div>
+        )}
+        <div className="flex flex-col gap-0.5">
+          {INSPECTOR_PROPS.map((prop) => (
+            <div key={prop} className="flex justify-between gap-2 items-baseline">
+              <span className={`text-[9px] shrink-0 ${propLabel}`}>{prop.replace(/([A-Z])/g, "-$1").toLowerCase()}</span>
+              <span className={`text-[9px] font-mono truncate text-right max-w-30 ${propValue}`}>{target.css[prop] || "—"}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /**
  * Root layout rendered by React Router.
  *
  * GoogleReCaptchaProvider is NOT here — it lives only inside SignUpForm so the
  * reCAPTCHA badge and script are only active on the signup page.
  */
+function MotionWrapper({ children }: { children: React.ReactNode }) {
+  const { settings } = useDebugSettings();
+  const duration = SPEED_TO_MOTION[settings.animationSpeed] ?? 0.3;
+  return (
+    <MotionConfig transition={{ duration }}>
+      {children}
+    </MotionConfig>
+  );
+}
+
 export function RootLayout() {
   return (
     <PersistQueryClientProvider
@@ -49,17 +280,23 @@ export function RootLayout() {
           <NavbarProvider>
             <ColorProvider>
               <ProfileProvider>
-                <Wrapper>
-                  <Suspense
-                    fallback={
-                      <div className="flex items-center justify-center min-h-screen">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
-                      </div>
-                    }
-                  >
-                    <Outlet />
-                  </Suspense>
-                </Wrapper>
+                <MotionWrapper>
+                  <Wrapper>
+                    <Suspense
+                      fallback={
+                        <div className="flex items-center justify-center min-h-screen">
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+                        </div>
+                      }
+                    >
+                      <Outlet />
+                    </Suspense>
+                  </Wrapper>
+                  <Toaster />
+                  <DebugEffects />
+                  <DebugOverlay />
+                  <ElementInspectorOverlay />
+                </MotionWrapper>
               </ProfileProvider>
             </ColorProvider>
           </NavbarProvider>

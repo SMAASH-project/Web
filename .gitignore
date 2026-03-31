@@ -39,4 +39,7 @@ build/
 .DS_Store
 **/.DS_Store
 
+# Claude Code — settings, memory, active worktrees (matches at root and inside worktrees)
+.claude/
+
 uploads/

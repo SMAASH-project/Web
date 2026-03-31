@@ -5,7 +5,7 @@ import {
   getLiquidGlassDialogClasses,
   getLiquidGlassControlClasses,
 } from "@/lib/utils";
-import { useForwardedRef } from "@/lib/use-forwarded-ref";
+import { useForwardedRef } from "@/lib/useForwardedRef";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import {
   Popover,
@@ -13,7 +13,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import { useSettings } from "@/components/pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 
 interface ColorPickerProps {
   value: string;
