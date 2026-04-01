@@ -24,3 +24,8 @@ type BestPlayersResult struct {
 	PlayerProfile
 	CountOfWins uint
 }
+
+type ItemsWithOwned struct {
+	Item
+	Owned bool
+}

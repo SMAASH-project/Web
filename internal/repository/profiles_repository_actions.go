@@ -10,6 +10,7 @@ import (
 type ProfilesRepository interface {
 	BaseRepository[models.PlayerProfile]
 	ReadByUserID(context.Context, uint) ([]models.PlayerProfile, error)
+	HardDelete(context.Context, uint) error
 }
 
 type ProfilesRepositoryActions struct {
@@ -26,4 +27,8 @@ func NewProfilesRepositoryActions(conn *gorm.DB) ProfilesRepository {
 
 func (pra ProfilesRepositoryActions) ReadByUserID(c context.Context, userID uint) ([]models.PlayerProfile, error) {
 	return gorm.G[models.PlayerProfile](pra.conn).Where("user_id = ?", userID).Find(c)
+}
+
+func (pra ProfilesRepositoryActions) HardDelete(c context.Context, id uint) error {
+	return pra.conn.Unscoped().Model(&models.PlayerProfile{}).Where("id = ?", id).Delete(&models.PlayerProfile{}).Error
 }

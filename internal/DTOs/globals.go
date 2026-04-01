@@ -12,7 +12,7 @@ type ErrResp struct {
 
 func NewErrResp(err, path string) *ErrResp {
 	return &ErrResp{
-		Timestamp: time.Now().Format(time.StampMilli),
+		Timestamp: time.Now().Format(TIMESTAMP_FORMAT),
 		Error:     err,
 		Path:      path,
 	}

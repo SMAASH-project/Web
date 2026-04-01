@@ -17,6 +17,15 @@ type ItemReadDTO struct {
 	Categories  []string `json:"categories"`
 }
 
+type ItemWithOwnedReadDTO struct {
+	ItemReadDTO
+	Owned bool `json:"owned"`
+}
+
+type ItemWithOwnedReqDTO struct {
+	ProfileID uint `json:"profile_id"`
+}
+
 type ItemCreateDTO struct {
 	Name        string   `json:"name" binding:"required,max=20"`
 	Description string   `json:"description" binding:"required,max=50"`
@@ -92,4 +101,11 @@ func UpdateDTOToItem(
 			return category
 		}),
 	}, nil
+}
+
+func ItemWithOwnedToDTO(item models.ItemsWithOwned) ItemWithOwnedReadDTO {
+	return ItemWithOwnedReadDTO{
+		ItemReadDTO: ItemToDTO(item.Item),
+		Owned:       item.Owned,
+	}
 }

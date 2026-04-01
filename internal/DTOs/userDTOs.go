@@ -48,11 +48,11 @@ func UserToDTO(user models.User) UserReadDTO {
 		Email:     user.Email,
 		Role:      user.Role.Name,
 		IsBanned:  user.IsBanned,
-		LastLogin: user.LastLogin.Format(DateFormat),
+		LastLogin: user.LastLogin.Format(DATE_TIME_FORMAT),
 	}
 
 	if user.BannedUntil != nil {
-		dto.BannedUntil = user.BannedUntil.Format(DateFormat)
+		dto.BannedUntil = user.BannedUntil.Format(DATE_TIME_FORMAT)
 	}
 
 	return dto

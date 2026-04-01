@@ -13,7 +13,16 @@ import (
 )
 
 func (s *Server) MountRoutes() *Server {
-	r := gin.Default()
+	appEnv := os.Getenv("APP_ENV")
+	if appEnv == "" || strings.ToLower(appEnv) == "release" {
+		appEnv = "release"
+	} else {
+		appEnv = "debug"
+	}
+
+	if appEnv == "release" {
+		gin.SetMode(gin.ReleaseMode)
+	}
 
 	allowedOrigins := strings.Split(os.Getenv("ALLOWED_ORIGINS"), ",")
 	if len(allowedOrigins) == 1 && allowedOrigins[0] == "" {
@@ -23,6 +32,8 @@ func (s *Server) MountRoutes() *Server {
 	for i := range allowedOrigins {
 		allowedOrigins[i] = strings.TrimSpace(allowedOrigins[i])
 	}
+
+	r := gin.Default()
 
 	// NOTE: this is for develompent only, the built project is running on one server
 	r.Use(cors.New(cors.Config{
@@ -43,8 +54,10 @@ func (s *Server) MountRoutes() *Server {
 		c.MountRoutes(api)
 	}
 
-	swagger.SwaggerInfo.BasePath = "/api"
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	if appEnv == "debug" {
+		swagger.SwaggerInfo.BasePath = "/api"
+		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	}
 
 	// SPA fallback
 	r.NoRoute(func(c *gin.Context) {
