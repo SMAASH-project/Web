@@ -169,7 +169,7 @@ func (pc PlayerProfileController) Delete(c *gin.Context) {
 	id, _ := c.Get("id")
 	path := c.Request.URL.Path
 
-	if err := pc.profilesRepo.Delete(c.Request.Context(), id.(uint)); err != nil {
+	if err := pc.profilesRepo.HardDelete(c.Request.Context(), id.(uint)); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Record not found", path))
 			return
