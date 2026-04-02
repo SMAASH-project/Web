@@ -498,9 +498,4 @@ If something is unclear or broken:
 
 1. **Check the debug panel** (`/app/debug`) for system state and error logs
 2. **Review existing page implementations** — there's usually a similar pattern elsewhere
-3. **Ask in code comments** — we appreciate clear questions
-4. **Update this doc** if you learn something new
-
----
-
-_Happy coding! This is a living document—update it as you learn more about the codebase._
+3. **Update this doc** if you learn something new

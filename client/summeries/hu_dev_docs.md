@@ -1,32 +1,44 @@
-# SMAASH Kliens — Fejlesztői Dokumentáció (Egyesített)
+# SMAASH kliens — fejlesztői dokumentáció
 
-Frissítve: 2026-04-02
+**Frissítve:** 2026-04-02 (rev 2)
 
-## 1) Stack és architektúra
+> Ez az összefoglaló a kliens architektúráját, a közös mintákat és a legfontosabb fejlesztési szabályokat foglalja össze. Nem csak azt mondja meg, _mit_ használunk, hanem azt is, _miért_ így.
 
-- React 19 + TypeScript + Vite
-- Tailwind CSS 4 + közös téma segédfüggvények (`src/lib/utils/*`)
-- Motion (`motion/react`) animációkhoz
-- React Query + Axios API állapothoz
-- i18next (`en` / `hu`) lokalizációhoz
+---
 
-Fő belépési pontok:
+## Stack és alaparchitektúra
 
-- `src/main.tsx`: routing, lazy loading, error boundary wrapping
-- `src/RootLayout.tsx`: provider-ek, query kliens, perzisztencia, toaster
-- `src/Wrapper.tsx`: gradient + CSS változók + háttér animációk
+- **React 19** + **TypeScript** + **Vite**
+- **Tailwind CSS 4** + közös téma- és stílussegédfüggvények (`src/lib/utils/*`)
+- **motion/react** animációkhoz és átmenetekhez
+- **React Query** + **Axios** az API állapot és a hálózati réteg kezelésére
+- **i18next** az angol / magyar lokalizációhoz
 
-## 2) Routing és jogosultság
+### Fő belépési pontok
 
-- Nyilvános: login, signup, reset-password
-- Védett: minden `/app/*` route (`RequireAuth`)
-- Szerepkör-alapú oldalak:
-  - `/app/admin`: csak admin
-  - `/app/debug`: admin + support
+- `src/main.tsx` — routing, lazy loading, error boundary-k
+- `src/RootLayout.tsx` — provider-ek, query kliens, perzisztencia, toaster, globális debug effektusok
+- `src/Wrapper.tsx` — téma-gradiens, CSS változók, háttéranimációk és layout keret
 
-## 3) Provider-réteg
+---
 
-Sorrend:
+## Routing és jogosultságmodell
+
+- **Nyilvános oldalak:** login, signup, reset-password
+- **Védett oldalak:** minden `/app/*` route a `RequireAuth` alatt fut
+- **Szerepkör-alapú oldalak:**
+  - `/app/admin` — csak admin
+  - `/app/debug` — admin + support
+
+### Fontos megjegyzés
+
+A feature oldalak jellemzően **lazy-loaded** formában érkeznek. Ez csökkenti az első betöltés súlyát, de az első navigációkor külön chunk letöltési költséggel jár.
+
+---
+
+## Provider-réteg és állapotkezelés
+
+### Provider sorrend
 
 1. React Query persist provider
 2. `AuthProvider`
@@ -35,112 +47,178 @@ Sorrend:
 5. `ColorProvider`
 6. `ProfileProvider`
 
-Perzisztált állapotok:
+### Perzisztált állapotok
 
 - `settings`
 - `color-settings`
 - `selected_profile_<userId>`
 
-## 4) Téma és vizuális rendszer
+### Miért fontos ez a sorrend?
 
-- Központosított helper-ek a `themeClasses` és kapcsolódó util fájlokban.
-- Fontos CSS változók:
+A felsőbb provider-ek biztosítják, hogy az alatta lévő UI elemek már kész állapotot kapjanak. Például a téma- és profil-információk hamar elérhetők, így a renderelt felület nem villog át feleslegesen alapállapotba.
+
+---
+
+## Téma- és vizuális rendszer
+
+- A közös stíluslogika a `src/lib/utils/themeClasses.ts` és rokon fájlok alatt él.
+- A CSS változók a téma színeiből épülnek fel:
   - `--theme-accent`
   - `--theme-accent-hover`
   - `--theme-accent-soft`
   - `--theme-nav-border`
   - `--theme-nav-shadow`
 
-Fő kapcsolók:
+### Fő vizuális kapcsolók
 
 - `useLiquidGlass`
 - `useDarkMode`
 - `useAnimations`
 - `animationOverride`
 
-## 5) Animációs/háttér rendszer
+### Irányelv
 
-- A háttér effektet `AnimationKey` választja.
-- `animationOverride` módok:
-  - `null`: témát követi
-  - `none`: kikapcsol
-  - konkrét kulcs: fix effekt
-  - `custom`: több réteg egyben (`CompositeBackground`)
+Ha valami „téma-szerűen” néz ki, először a közös helper-eket keresd, és csak utána nyúlj inline ternary-khez.
 
-Teljesítmény:
+---
 
-- késleltetett háttér fade-in a nehéz oldalakon
+## Animációs és háttérrendszer
+
+- A háttér-effektet `AnimationKey` választja ki.
+- Az `animationOverride` módok:
+  - `null` — követi a témát
+  - `none` — kikapcsolja az animált hátteret
+  - konkrét kulcs — egy fix effektet kényszerít
+  - `custom` — rétegezett összetett háttér (`CompositeBackground`)
+
+### Teljesítmény és vizuális viselkedés
+
+- késleltetett háttér fade-in a nehezebb oldalakon
 - crossfade effektváltáskor
-- statikus képkocka, ha az animációk le vannak tiltva
+- statikus fallback, ha az animációk le vannak tiltva
 
-## 6) API és React Query konvenciók
+---
 
-`apiClient`:
+## API és React Query konvenciók
+
+### `apiClient`
 
 - base URL: `/api`
 - `withCredentials: true`
 - központi 401 kezelés
 
-React Query:
+### React Query minták
 
 - központi query key stratégia
 - célzott invalidálás mutációk után
 - feature-szintű stale/cache finomhangolás
 
-## 7) Fő funkciók röviden
+### Debug / network megjegyzés
+
+A debug emulációs mód hálózati késleltetést is tud szimulálni. Ez fejlesztés közben hasznos, ha azt akarod látni, hogyan viselkedik a felület lassabb API mellett.
+
+---
+
+## Fő funkciók röviden
 
 ### Admin panel
 
-- Felhasználó lista + részletek + profil panel + tiltás dialógus
-- Kliensoldali keresés fallback, amíg a backend oldali keresés teljes
+- felhasználólista, részletek, profil panel, tiltás dialógus
+- kliensoldali keresési fallback, amíg a backend keresés nem teljes
 
 ### Debug panel
 
-- Tabok: system, cache, endpoints, game data, sight
-- Endpont tesztelés + cache introspekció
+- tabok: system, cache, endpoints, game data, visual, emulation, diagnostics
+- Sight részek: vizuális kapcsolók, viewport/network emuláció, diagnosztika
+- `useDebugSettings` lokálisan perzisztál, és `CustomEvent("debug-settings")` eseménnyel jelzi a változásokat
+- globális debug effektusok a `RootLayout.tsx`-ben futnak
+- JS viewport emuláció: `window.innerWidth/Height` és `window.matchMedia` patch-elésével segíti a JS-alapú responsive logikát
+- Tailwind breakpoints nem változnak ettől, mert azok build-time CSS médiaquery-k
 
 ### Profil oldal
 
-- Név/email szerkesztés működik
-- Jelszócsere backend függő
-- Match history és game stat endpoint-függő
+- név- és e-mail szerkesztés működik
+- jelszócsere backend függő
+- match history és statok endpoint-függők
 
 ### Webstore
 
-- Item lista + vásárlás + tulajdon státusz merge
-- Coin érték kiválasztott profilból
+- itemlista + vásárlás + tulajdonállapot merge
+- coin érték a kiválasztott profilból
 
-## 8) i18n
+---
+
+## i18n
 
 - Locale fájlok:
   - `src/locales/en/*`
   - `src/locales/hu/*`
-- Nyelv a settingsben tárolva, i18next szinkronizációval.
+- A nyelv a settingsben tárolódik, és i18next szinkronizálja.
 
-## 9) Optimalizációs állapot
+---
 
-Kész:
+## Optimalizációs állapot
+
+### Már kész
 
 - route lazy loading
 - suspense fallback
 - manuális vendor chunkolás
 - build stat vizualizáció
+- leaderboard skeleton loading a spinner helyett
+- kisebb panel stagger az olvashatóbb betöltéshez
 
-Hátralévő:
+### Még szóba jöhet
 
-- képformátum optimalizáció
+- képformátum-optimalizáció
 - nagy listák virtualizációja
-- opcionális PWA/offline réteg
+- opcionális PWA / offline réteg
 
-## 10) Ismert backend függőségek
+### Leaderboard megjegyzés
 
-- profil meccs előzmény endpoint hiányzik
+A leaderboardon több statisztikai lekérdezés fut párhuzamosan. A React Query ezt nem sorban végzi, de a teljes látható betöltés mindig a leglassabb endpointon múlik. Emiatt a skeleton UI sokkal jobb élményt ad, mint egy egyszerű spinner.
+
+---
+
+## Ismert backend függőségek
+
+- profil meccs-előzmény endpoint hiányzik
 - jelszócsere endpoint hiányzik
 - admin keresés/pagináció backend oldalon bővítendő
 
-## 11) Fejlesztői irányelvek
+---
 
-- Mindig közös téma helper-eket használj.
-- API hívásokhoz typed query/mutation hook-okat használj.
+## Közös UI komponensek
+
+- `src/components/ui/styled-select.tsx` — theme-aware dropdown a `DropdownMenu` alapjain. Ezt használd natív `<select>` helyett, ha a kinézetet illeszteni kell a felülethez.
+- `src/components/ui/skeleton.tsx` — egyszerű pulse skeleton betöltési állapotokhoz
+- `src/components/ui/dialog.tsx` — közös dialog shell, most már `max-h-[90svh]` és görgethető tartalom támogatással
+
+---
+
+## Navbar és layout szerződés
+
+- A Navbar `position: fixed` és `z-50`, tehát **nincs** dokumentumfolyambeli magassága.
+- Minden oldalnak, amely Navbar alatt jelenik meg, legalább `mt-20` vagy `pt-20` offsetet kell adnia az első tartalmi blokknak.
+- A `flex items-center justify-center` layout önmagában nem elég; rövid viewporton is kell a felső padding.
+- Mobilon a debug oldal már hamburger + sheet mintát használ, hogy a tartalom ne szűküljön össze túlzottan.
+
+### Ellenőrzött oldalak
+
+- gallery
+- leaderboard
+- webstore
+- news
+- releases
+- admin / debug
+- settings / profile
+
+---
+
+## Konvenciók hozzájárulóknak
+
+- Mindig a közös téma helper-eket használd, ne duplikáld az inline színlogikát.
+- API hívásokhoz typed React Query hook-okat használj.
 - Route/page szinten legyen explicit jogosultságellenőrzés.
-- UI változtatásnál lokalizáció és dokumentáció is frissítendő.
+- UI változtatásnál a lokalizációt és a dokumentációt is frissíteni kell.
+- Reszponzív viselkedésnél előbb a meglévő shadcn komponenseket nézd meg, és csak utána vezess be új UI elemet.

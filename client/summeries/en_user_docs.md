@@ -210,10 +210,6 @@ Try:
 
 ## Need Help?
 
-- **Something isn't working?** Refresh the page first; 9 times out of 10 it helps.
-- **Lost track of something?** Use the top navigation—every section is labeled clearly.
-- **Have feedback?** Admins are listening; bug reports and feature requests help us make the app better.
-
----
-
-_Enjoy SMAASH! 🎮_
+- **Something isn't working?** Refresh the page first; 9 times out of 10 it helps. Or if all else fails, yap about it to claude code because you can't be fucked to do your research
+- **Have feedback?** Admins are not listening; bug reports and feature requests help us make the app better, but we dont really give a shit.
+- **Nosey Little Cunt ya are raight?** Fuck you dipstick.

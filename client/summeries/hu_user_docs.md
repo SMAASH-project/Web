@@ -1,98 +1,215 @@
-# SMAASH Kliens — Felhasználói Dokumentáció
+# SMAASH kliens — felhasználói útmutató
 
-Frissítve: 2026-04-02
+**Frissítve:** 2026-04-02 (rev 2)
 
-## 1) Kezdés
+> Ez az útmutató röviden, érthetően vezet végig az app fő részein, a beállításokon és a leggyakoribb teendőkön.
 
-1. Nyisd meg az alkalmazást és jelentkezz be a `/app/login` oldalon.
-2. Ha nincs fiókod, használd a `/app/signup` oldalt.
-3. Bejelentkezés után az app fő felületére kerülsz.
+---
 
-## 2) Fő navigáció
+## Első lépések
 
-Felül elérhető menük:
+### Új felhasználóként
 
-- Releases
-- News
-- Webstore
-- Leaderboard
-- Gallery
-- Profile
-- Profile Selector
-- Settings
+1. Nyisd meg az alkalmazást, és válaszd a **Regisztráció** lehetőséget, ha még nincs fiókod.
+2. Add meg az e-mail címedet és hozz létre egy jelszót.
+3. Jelentkezz be a megadott adatokkal.
+4. Belépés után az app általában a Hírek vagy a Releases felületre visz.
 
-Admin felhasználók látnak **Admin** menüt is.
-Support/admin felhasználók látnak **Debug** menüt is.
+### Visszatérő felhasználóként
 
-## 3) Profilválasztó
+Elég csak bejelentkezned — a kiválasztott profilod és a legtöbb beállításod automatikusan megmarad.
 
-- Aktív játékprofilt lehet kiválasztani.
-- Új profil a hozzáadás párbeszédablakkal hozható létre.
-- A kiválasztás fiókonként mentődik.
+---
 
-## 4) Profil oldal
+## Navigáció röviden
 
-- Avatar, megjelenített név, coin mennyiség és alap statisztikák láthatók.
-- Szerkesztő panelben módosítható:
-  - megjelenített név
-  - e-mail cím
-- Jelszó módosítás itt backend támogatástól függően letiltott lehet.
+A felső navigáció az app központi vezérlője. Innen eléred a fő felületeket.
 
-## 5) Webstore
+| Szekció                 | Mit találsz itt                      | Mire jó                                |
+| ----------------------- | ------------------------------------ | -------------------------------------- |
+| **Kezdőlap / Releases** | Új verziók és kiadási jegyzetek      | Ha azt akarod látni, mi frissült       |
+| **News**                | Közösségi posztok, bejelentések      | Ha követnéd az újdonságokat            |
+| **Webstore**            | Tárgyak, skinek, vásárlás            | Ha testre szabnád a játékos profilod   |
+| **Leaderboard**         | Ranglisták és statisztikák           | Ha kíváncsi vagy, hol állsz            |
+| **Gallery**             | Média, képek, játékos tartalmak      | Ha böngésznél egy kicsit               |
+| **Profile**             | Fiók, statisztikák, személyes adatok | Ha a saját profilodat kezeled          |
+| **Settings**            | Téma, nyelv, animációk               | Ha kényelmesebbé akarod tenni az appot |
 
-- Itemek böngészése típus/ritkaság/keresés alapján.
-- Vásárlás elérhető megfelelő jogosultság és profil esetén.
-- A coin érték az aktív profilból érkezik.
+**Adminoknak:** megjelenik még az **Admin** és a **Debug** is.
 
-## 6) News
+---
 
-- Hírek olvasása.
-- Szűrés és keresés támogatott.
-- Admin jogosultsággal hír létrehozás/szerkesztés/törlés is elérhető.
+## Profilkezelés
 
-## 7) Releases
+### Játékprofil kiválasztása
 
-- Release kártyák böngészése.
-- Platform szerinti szűrés és keresés.
-- Letöltés csak akkor aktív, ha az adott platformhoz van URL.
+Amikor először használod az appot, a **Profile Selector** segítségével választasz aktív játékprofilt. Ez lesz az a profil, amivel a játékos műveletek kapcsolódnak.
 
-## 8) Leaderboard
+**Profilváltás menete:**
 
-Fő statisztika blokkok:
+1. Nyisd meg a **Profile** vagy **Profile Selector** részt
+2. Válassz egy másik profilt
+3. Az app megjegyzi a választásodat
 
-- győzelmi ranglista
-- legaktívabb játékosok
-- legtöbbet játszott pályák
-- legtöbbet vásárolt itemek
+### Fiókadatok módosítása
 
-Lassú betöltés esetén jellemzően a statisztikai backend lekérdezések futási ideje a szűk keresztmetszet.
+A **Profile** oldalon ezt láthatod és módosíthatod:
 
-## 9) Gallery
+- **Megjelenített név** — ez látszik más játékosoknak
+- **E-mail cím** — fiókazonosításhoz és visszaállításhoz
+- **Statisztikák** — alapadatok és fejlődési információk
 
-- Képi/hang/média tartalom böngészése.
-- Előre/hátra vezérlők elérhetők ahol támogatott.
+---
 
-## 10) Settings
+## Webstore
 
-Itt módosítható:
+### Böngészés
 
-- nyelv (angol/magyar)
-- megjelenítés (dark/light, liquid glass)
-- animációs működés
-- téma színek és effektusok
+A tárgyakat szűrheted **típus**, **ritkaság** és **keresés** alapján. Így gyorsabban megtalálod, amit keresel.
 
-## 11) Debug oldal (support/admin)
+### Vásárlás
 
-Tabok:
+1. Válassz ki egy tárgyat
+2. Nyomd meg a **Buy / Purchase** gombot
+3. A coin egyenleg a kiválasztott profilból kerül levonásra
+4. A tárgy azonnal megjelenik a gyűjteményedben
 
-- System: futásidejű diagnosztika
-- Cache: query cache megtekintés és invalidálás
-- Endpoints: kézi API hívások
-- Game Data: domain adatok áttekintése
-- Sight: vizuális debug kapcsolók
+**Fontos:** a coin egyenleg az aktív profilhoz tartozik. Ha profilt váltasz, az egyenleg is változhat.
 
-## 12) Hibaelhárítás
+---
 
-- Hosszabb inaktivitás után hibáknál jelentkezz be újra.
-- Elavult adatoknál frissíts oldalt vagy invalidáld a cache-t.
-- Profilhoz kötött eltérésnél válaszd ki újra az aktív profilt.
+## Hírek
+
+A **News** részben találod:
+
+- a friss bejelentéseket
+- játékváltozásokat
+- eseményeket
+- közösségi tartalmakat
+
+Kereshetsz kulcsszavakra, és szűrhetsz is. Adminok új hírt is létrehozhatnak vagy szerkeszthetnek.
+
+---
+
+## Releases
+
+A **Releases** oldal a játék különböző verzióit mutatja.
+
+**Itt ezt tudod megnézni:**
+
+- verziótörténet
+- platform szerinti letöltések
+- kiadási megjegyzések
+
+**A letöltés gomb nem aktív, ha:**
+
+- az adott platformhoz nincs beállított letöltési link
+- a verzió még nem érhető el az adott eszközre
+
+---
+
+## Ranglisták
+
+A **Leaderboard** több különböző statisztikát mutat:
+
+1. **Játékosok** — győzelmek, rangsor, aktív teljesítmény
+2. **Pályák** — legtöbbet játszott vagy legnépszerűbb pályák
+3. **Itemek** — legtöbbet vásárolt vagy legritkább tárgyak
+4. **Globális statisztikák** — egyéb összesített mutatók
+
+Ha a számok lassan jelennek meg, az általában azt jelenti, hogy a szerver még számolja az aggregált adatokat. Ilyenkor érdemes egy pillanatot várni, majd frissíteni.
+
+---
+
+## Gallery
+
+A **Gallery** oldalon játékos média, képek és közösségi tartalmak között böngészhetsz. Ahol támogatott, ott előre-hátra gombokkal is navigálhatsz.
+
+---
+
+## Saját stílus beállítása
+
+### Settings áttekintés
+
+A **Settings** részben úgy alakíthatod az appot, hogy jobban passzoljon hozzád.
+
+#### Nyelv
+
+Válthatsz **angol** és **magyar** között.
+
+#### Vizuális megjelenés
+
+- **Dark Mode** — sötétebb, szemkímélőbb felület
+- **Light Mode** — világos, nagyobb kontrasztú megjelenés
+- **Liquid Glass** — üveghatású stílus modern böngészőkhöz
+
+#### Animációk
+
+- **Animációk bekapcsolása** — gördülékenyebb átmenetek és mozgások
+- **Animációk kikapcsolása** — statikusabb, gyorsabb érzetű felület
+
+#### Téma és effektusok
+
+- **Gradiens színek** — a felület fő színvilágának testreszabása
+- **Háttéreffektusok** — különböző animált háttérstílusok
+- **Összetett effektek** — több háttérréteg kombinálása
+
+A beállításaid fiókszinten mentődnek, így más eszközön is ugyanazt a kinézetet kaphatod.
+
+---
+
+## Hasznos tippek
+
+| Művelet             | Tipp                                                        |
+| ------------------- | ----------------------------------------------------------- |
+| Keresés fókuszálása | Sok oldalon működik a gyorskereső, érdemes kipróbálni       |
+| Sötét mód           | A **Settings** alatt kapcsolható                            |
+| Vissza a főoldalra  | Kattints a logóra bal felül                                 |
+| Mobilos használat   | Az app reszponzív, telefonon és tableten is jól használható |
+
+---
+
+## Hibaelhárítás
+
+### „Kijelentkeztetett az app”
+
+Ez általában hosszabb inaktivitás után történik. Jelentkezz be újra — az adataid megmaradnak.
+
+### „Régi adatokat látok”
+
+Próbáld meg:
+
+1. Az oldal frissítését
+2. Egy kis várakozást, ha statisztikai oldalról van szó
+3. Ha továbbra is gond van, fordulj supporthoz
+
+### „Nem a jó profil coinját látom”
+
+Ellenőrizd, hogy a megfelelő profilt választottad-e ki a **Profile Selector** felületen. Minden profil külön coin-egyenleggel rendelkezik.
+
+### „Valami elromlott, de nem tudom mi”
+
+Ilyenkor ezeket próbáld:
+
+1. Frissítsd az oldalt
+2. Ellenőrizd az internetkapcsolatot
+3. Jelentkezz ki és vissza
+4. Ha kell, küldj leírást a supportnak arról, mit csináltál
+
+---
+
+## Rövid tippek a jobb élményhez
+
+1. **Állítsd be a témát** — néhány perc alatt sokkal barátságosabb lesz az app
+2. **Kapcsold ki az animációkat, ha zavaróak** — ez teljesen rendben van
+3. **Nézd a News részt rendszeresen** — ott jönnek a fontos közlemények
+4. **Használd gyakran a Profile Selector-t** — ha több profilod van, ez nagyon hasznos
+5. **Add a kedvenceidhez a gyakran használt oldalakat** — gyorsabb lesz a navigáció
+
+---
+
+## Segítségre van szükséged?
+
+- **Valami nem működik?** Először frissítsd az oldalt — sokszor ez elég. Ha nem sírj máshol.
+
+- **Van visszajelzésed?** A bugreportok és ötletek tényleg segítenek jobbá tenni az appot, kár hogy kurvára nem kérdezett téged senki.
