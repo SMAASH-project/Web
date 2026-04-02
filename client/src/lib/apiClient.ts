@@ -10,7 +10,31 @@ const apiClient = axios.create({
   withCredentials: true, // Include cookies in requests
 });
 
-apiClient.interceptors.request.use((config) => {
+function getDebugNetworkDelayMs(): number {
+  try {
+    const raw = localStorage.getItem("debug-settings");
+    if (!raw) return 0;
+    const parsed = JSON.parse(raw) as {
+      networkDelayMs?: number;
+      networkJitterMs?: number;
+    };
+    const base = Math.max(0, Number(parsed.networkDelayMs ?? 0));
+    const jitter = Math.max(0, Number(parsed.networkJitterMs ?? 0));
+    if (base <= 0 && jitter <= 0) return 0;
+
+    const jitterOffset = jitter > 0 ? (Math.random() * 2 - 1) * jitter : 0;
+    return Math.max(0, Math.round(base + jitterOffset));
+  } catch {
+    return 0;
+  }
+}
+
+apiClient.interceptors.request.use(async (config) => {
+  const debugDelayMs = getDebugNetworkDelayMs();
+  if (debugDelayMs > 0) {
+    await new Promise((resolve) => setTimeout(resolve, debugDelayMs));
+  }
+
   const isFormData =
     typeof FormData !== "undefined" && config.data instanceof FormData;
 

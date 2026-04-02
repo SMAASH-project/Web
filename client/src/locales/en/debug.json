@@ -9,7 +9,10 @@
     "cache": "Cache",
     "endpoints": "Endpoints",
     "game": "Game Data",
-    "sight": "Sight"
+    "sight": "Sight",
+    "visual": "Visual",
+    "emulation": "Emulation",
+    "diagnostics": "Diagnostics"
   },
   "refresh": "Refresh",
   "sight": {

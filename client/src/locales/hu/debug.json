@@ -9,7 +9,10 @@
     "cache": "Gyorsítótár",
     "endpoints": "Végpontok",
     "game": "Játékadatok",
-    "sight": "Vizuális"
+    "sight": "Vizuális",
+    "visual": "Vizuális",
+    "emulation": "Emuláció",
+    "diagnostics": "Diagnosztika"
   },
   "refresh": "Frissítés",
   "sight": {

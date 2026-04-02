@@ -8,6 +8,8 @@ import {
   RefreshCw,
   Bug,
   Eye,
+  Smartphone,
+  Activity,
 } from "lucide-react";
 import { useSettings } from "@/pages/settings/SettingsContext";
 import {
@@ -29,14 +31,23 @@ import { SightTab } from "./tabs/SightTab";
 
 // ─── Tab definition ───────────────────────────────────────────────────────────
 
-type Tab = "system" | "cache" | "endpoints" | "game" | "sight";
+type Tab =
+  | "system"
+  | "cache"
+  | "endpoints"
+  | "game"
+  | "visual"
+  | "emulation"
+  | "diagnostics";
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "system", label: "System", icon: <Monitor size={14} /> },
-  { id: "cache", label: "Cache", icon: <Database size={14} /> },
   { id: "endpoints", label: "Endpoints", icon: <Terminal size={14} /> },
+  { id: "cache", label: "Cache", icon: <Database size={14} /> },
   { id: "game", label: "Game Data", icon: <Gamepad2 size={14} /> },
-  { id: "sight", label: "Sight", icon: <Eye size={14} /> },
+  { id: "visual", label: "Visual", icon: <Eye size={14} /> },
+  { id: "emulation", label: "Emulation", icon: <Smartphone size={14} /> },
+  { id: "diagnostics", label: "Diagnostics", icon: <Activity size={14} /> },
 ];
 
 // ─── Animation helpers (mirrors AdminPageContent) ────────────────────────────
@@ -119,9 +130,7 @@ export function DebugPageContent({
       {/* Refresh at bottom */}
       <div className="mt-auto pt-3 border-t border-current/10">
         <button
-          onClick={() =>
-            queryClient.invalidateQueries({ queryKey: ["debug"] })
-          }
+          onClick={() => queryClient.invalidateQueries({ queryKey: ["debug"] })}
           className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-all duration-200 ${subtextColor} hover:bg-current/8`}
         >
           <RefreshCw size={13} />
@@ -164,11 +173,31 @@ export function DebugPageContent({
           panelBg={panelBg}
         />
       )}
-      {activeTab === "sight" && (
+      {activeTab === "visual" && (
         <SightTab
           textColor={textColor}
           subtextColor={subtextColor}
           panelBg={panelBg}
+          inputClass={inputClass}
+          mode="visual"
+        />
+      )}
+      {activeTab === "emulation" && (
+        <SightTab
+          textColor={textColor}
+          subtextColor={subtextColor}
+          panelBg={panelBg}
+          inputClass={inputClass}
+          mode="emulation"
+        />
+      )}
+      {activeTab === "diagnostics" && (
+        <SightTab
+          textColor={textColor}
+          subtextColor={subtextColor}
+          panelBg={panelBg}
+          inputClass={inputClass}
+          mode="diagnostics"
         />
       )}
     </>
