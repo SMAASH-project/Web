@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { StyledSelect } from "@/components/ui/styled-select";
 import apiClient from "@/lib/apiClient";
 
 type Method = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
@@ -42,11 +43,13 @@ export function EndpointsTab({
   subtextColor,
   panelBg,
   inputClass,
+  bgClass,
 }: {
   textColor: string;
   subtextColor: string;
   panelBg: string;
   inputClass: string;
+  bgClass: string;
 }) {
   const [method, setMethod] = useState<Method>("GET");
   const [path, setPath] = useState("/users/whoami");
@@ -113,17 +116,18 @@ export function EndpointsTab({
       {/* Request */}
       <div className={`rounded-xl p-3 flex flex-col gap-2 ${panelBg}`}>
         <div className="flex gap-2">
-          <select
+          <StyledSelect
             value={method}
-            onChange={(e) => setMethod(e.target.value as Method)}
-            className={`text-xs px-2 py-1.5 rounded-lg shrink-0 ${inputClass} ${METHOD_COLORS[method]}`}
-          >
-            {METHODS.map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
-          </select>
+            options={METHODS}
+            onChange={setMethod}
+            inputClass={inputClass}
+            textColor={textColor}
+            bgClass={bgClass}
+            className="shrink-0 w-auto min-w-20"
+            renderOption={(m) => (
+              <span className={METHOD_COLORS[m]}>{m}</span>
+            )}
+          />
           <input
             type="text"
             value={path}

@@ -11,6 +11,7 @@ import {
   Copy,
   Network,
 } from "lucide-react";
+import { StyledSelect } from "@/components/ui/styled-select";
 import { Switch } from "@/components/ui/switch";
 import { useDebugSettings } from "@/hooks/useDebugSettings";
 import { toast } from "@/lib/toast";
@@ -48,12 +49,14 @@ export function SightTab({
   subtextColor,
   panelBg,
   inputClass,
+  bgClass,
   mode = "visual",
 }: {
   textColor: string;
   subtextColor: string;
   panelBg: string;
   inputClass: string;
+  bgClass: string;
   mode?: "visual" | "emulation" | "diagnostics";
 }) {
   const { settings, update } = useDebugSettings();
@@ -446,17 +449,17 @@ export function SightTab({
 
               <div className="flex flex-col gap-1">
                 <span className={`text-[10px] ${subtextColor}`}>Preset</span>
-                <select
+                <StyledSelect
                   value={settings.forceViewportPreset}
-                  onChange={(e) => applyViewportPreset(e.target.value)}
-                  className={`text-xs px-2 py-1.5 rounded-lg ${inputClass}`}
-                >
-                  {VIEWPORT_PRESETS.map((preset) => (
-                    <option key={preset.id} value={preset.id}>
-                      {preset.label}
-                    </option>
-                  ))}
-                </select>
+                  options={VIEWPORT_PRESETS.map((p) => p.id)}
+                  onChange={applyViewportPreset}
+                  inputClass={inputClass}
+                  textColor={textColor}
+                  bgClass={bgClass}
+                  renderOption={(id) =>
+                    VIEWPORT_PRESETS.find((p) => p.id === id)?.label ?? id
+                  }
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-2">

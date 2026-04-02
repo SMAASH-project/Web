@@ -18,19 +18,16 @@ export function ProfilePage() {
     <div
       className={`min-h-screen w-full self-start flex flex-col items-center ${textColor}`}
     >
-      <div className="w-full ">
-        {/* {settings.useAnimations ? <AnimatedNavbar /> : <Navbar />} */}
-        <Navbar />
-      </div>
+      <Navbar />
       {settings.useAnimations ? (
         <CardAnimation
-          className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 flex items-center justify-center"
+          className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 pt-20 flex items-center justify-center"
           onAnimationComplete={handleAnimationComplete}
         >
           <ProfilePageContent animReady={animDone} />
         </CardAnimation>
       ) : (
-        <div className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 flex items-center justify-center">
+        <div className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 pt-20 flex items-center justify-center">
           <ProfilePageContent animReady={true} />
         </div>
       )}

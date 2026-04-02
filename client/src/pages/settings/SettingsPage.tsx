@@ -21,20 +21,17 @@ export function SettingsPage() {
     <div
       className={`min-h-screen w-full self-start flex flex-col items-center ${textColor}`}
     >
-      <div className="w-full">
-        {/* {settings.useAnimations ? <AnimatedNavbar /> : <Navbar />} */}
-        <Navbar />
-      </div>
+      <Navbar />
       {settings.useAnimations ? (
         <CardAnimation
-          className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 flex items-center justify-center"
+          className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 pt-20 flex items-center justify-center"
           onAnimationComplete={handleAnimationComplete}
         >
           {/* Pass animDone so SettingsPageContent can skip backdrop-blur during animation */}
           <SettingsPageContent animReady={animDone} />
         </CardAnimation>
       ) : (
-        <div className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 flex items-center justify-center">
+        <div className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 pt-20 flex items-center justify-center">
           <SettingsPageContent animReady={true} />
         </div>
       )}

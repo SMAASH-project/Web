@@ -123,7 +123,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
         </Button>
       </DialogTrigger>
       <DialogContent
-        className={`w-full max-w-4xl! sm:max-w-4xl! overflow-visible ${dialogClass} ${textShadow}`}
+        className={`w-full sm:max-w-2xl max-w-full ${dialogClass} ${textShadow}`}
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >

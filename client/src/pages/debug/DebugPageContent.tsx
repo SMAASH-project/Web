@@ -10,6 +10,8 @@ import {
   Eye,
   Smartphone,
   Activity,
+  Menu,
+  X,
 } from "lucide-react";
 import { useSettings } from "@/pages/settings/SettingsContext";
 import {
@@ -23,6 +25,7 @@ import type { Transition } from "motion/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AuthContext } from "@/context/AuthContext";
 import { useTranslation } from "react-i18next";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SystemTab } from "./tabs/SystemTab";
 import { CacheTab } from "./tabs/CacheTab";
 import { EndpointsTab } from "./tabs/EndpointsTab";
@@ -73,6 +76,7 @@ export function DebugPageContent({
   const queryClient = useQueryClient();
   const { t } = useTranslation("debug");
   const [activeTab, setActiveTab] = useState<Tab>("system");
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const cardBg = getBackgroundClasses(useLiquidGlass, useDarkMode);
   const panelBg = getBackgroundClasses(useLiquidGlass, useDarkMode, "light");
@@ -164,6 +168,7 @@ export function DebugPageContent({
           subtextColor={subtextColor}
           panelBg={panelBg}
           inputClass={inputClass}
+          bgClass={cardBg}
         />
       )}
       {activeTab === "game" && isAdmin && (
@@ -179,6 +184,7 @@ export function DebugPageContent({
           subtextColor={subtextColor}
           panelBg={panelBg}
           inputClass={inputClass}
+          bgClass={cardBg}
           mode="visual"
         />
       )}
@@ -188,6 +194,7 @@ export function DebugPageContent({
           subtextColor={subtextColor}
           panelBg={panelBg}
           inputClass={inputClass}
+          bgClass={cardBg}
           mode="emulation"
         />
       )}
@@ -197,6 +204,7 @@ export function DebugPageContent({
           subtextColor={subtextColor}
           panelBg={panelBg}
           inputClass={inputClass}
+          bgClass={cardBg}
           mode="diagnostics"
         />
       )}
@@ -205,27 +213,111 @@ export function DebugPageContent({
 
   return (
     <div
-      className={`z-0 flex w-full max-w-6xl rounded-xl overflow-hidden flex-1 ${
+      className={`z-0 flex flex-col w-full max-w-6xl rounded-xl overflow-hidden flex-1 md:flex-row ${
         animReady ? cardBg : cardBg.replace(/backdrop-blur-\S+/g, "")
       }`}
     >
-      {/* ── Left sidebar ───────────────────────────────────────────────── */}
+      {/* ── Mobile hamburger + drawer ────────────────────────────────── */}
+      <div className="md:hidden flex items-center gap-3 p-3 border-b border-current/10">
+        <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
+          <SheetTrigger asChild>
+            <button
+              className={`p-1.5 rounded-lg transition-colors ${subtextColor} hover:bg-current/8`}
+            >
+              <Menu size={18} />
+            </button>
+          </SheetTrigger>
+          <SheetContent side="left" className={`w-52 p-0 ${cardBg}`}>
+            <div className="flex flex-col gap-1 p-3 h-full">
+              {/* Logo */}
+              <div className="flex items-center gap-2 px-2 py-2 mb-2">
+                <Bug size={15} className={subtextColor} />
+                <div>
+                  <p className={`text-xs font-bold ${textColor} ${textShadow}`}>
+                    {t("title")}
+                  </p>
+                  <p className={`text-[10px] ${subtextColor} leading-none`}>
+                    {isAdmin ? t("roles.admin") : t("roles.support")}
+                  </p>
+                </div>
+              </div>
+
+              {/* Tab buttons */}
+              <div className="flex flex-col gap-0.5">
+                {visibleTabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => {
+                      setActiveTab(tab.id);
+                      setDrawerOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 text-left ${
+                      tab.id === activeTab
+                        ? useLiquidGlass
+                          ? useDarkMode
+                            ? "bg-white/20 text-white"
+                            : "bg-black/15 text-black"
+                          : useDarkMode
+                            ? "bg-gray-700 text-white"
+                            : "bg-white text-gray-900 shadow-sm"
+                        : `${subtextColor} hover:bg-current/8`
+                    }`}
+                  >
+                    <span
+                      className={
+                        tab.id === activeTab ? textColor : subtextColor
+                      }
+                    >
+                      {tab.icon}
+                    </span>
+                    {t(`tabs.${tab.id}`)}
+                  </button>
+                ))}
+              </div>
+
+              {/* Refresh at bottom */}
+              <div className="mt-auto pt-3 border-t border-current/10">
+                <button
+                  onClick={() => {
+                    queryClient.invalidateQueries({ queryKey: ["debug"] });
+                    setDrawerOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-all duration-200 ${subtextColor} hover:bg-current/8`}
+                >
+                  <RefreshCw size={13} />
+                  {t("refresh")}
+                </button>
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
+
+        {/* Title on mobile */}
+        <div>
+          <p className={`text-sm font-bold ${textColor} ${textShadow}`}>
+            {t("title")}
+          </p>
+        </div>
+      </div>
+
+      {/* ── Desktop sidebar (hidden on mobile) ──────────────────────────── */}
       {useAnimations ? (
         <motion.div
           initial={hidden}
           animate={animReady ? visible : hidden}
           transition={colTransition(0.05)}
-          className="flex flex-col gap-1 p-3 w-44 shrink-0 border-r border-current/10"
+          className="hidden md:flex flex-col gap-1 p-3 w-44 shrink-0 border-r border-current/10"
         >
           {sidebarContent}
         </motion.div>
       ) : (
-        <div className="flex flex-col gap-1 p-3 w-44 shrink-0 border-r border-current/10">
+        <div className="hidden md:flex flex-col gap-1 p-3 w-44 shrink-0 border-r border-current/10">
           {sidebarContent}
         </div>
       )}
 
-      {/* ── Right content area ─────────────────────────────────────────── */}
+      {/* ── Content area (responsive) ──────────────────────────────────── */}
       {useAnimations ? (
         <motion.div
           initial={hidden}

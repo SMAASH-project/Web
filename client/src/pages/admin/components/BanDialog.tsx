@@ -133,7 +133,7 @@ export default function BanDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
-          "max-w-lg sm:max-w-2xl lg:max-w-4xl xl:max-w-5xl w-full p-0 overflow-hidden",
+          "sm:max-w-2xl w-full p-0 flex flex-col",
           dialogClass,
           textColor,
           textShadow,

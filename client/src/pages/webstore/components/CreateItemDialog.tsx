@@ -9,18 +9,13 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Field, FieldGroup } from "@/components/ui/field";
+import { StyledSelect } from "@/components/ui/styled-select";
 import { useSettings } from "@/pages/settings/SettingsContext";
-import { Plus, Loader2, ChevronDown, Check } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import {
   getButtonClasses,
   getInputClasses,
@@ -54,64 +49,6 @@ interface CreateItemDialogProps {
     price: number;
   }) => void;
   isLoading?: boolean;
-}
-
-// ─── Reusable styled dropdown ──────────────────────────────────────────────────
-
-interface StyledSelectProps<T extends string> {
-  value: T;
-  options: readonly T[];
-  onChange: (val: T) => void;
-  inputClass: string;
-  textColor: string;
-  bgClass: string;
-  renderOption?: (opt: T) => React.ReactNode;
-}
-
-function StyledSelect<T extends string>({
-  value,
-  options,
-  onChange,
-  inputClass,
-  textColor,
-  bgClass,
-  renderOption,
-}: StyledSelectProps<T>) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className={`w-full flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm shadow-xs outline-none transition-colors cursor-pointer ${inputClass}`}
-        >
-          <span className={`${textColor} flex items-center gap-2`}>
-            {renderOption ? renderOption(value) : value}
-          </span>
-          <ChevronDown
-            className={`w-3.5 h-3.5 shrink-0 opacity-50 ${textColor}`}
-          />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className={`min-w-(--radix-dropdown-menu-trigger-width) ${bgClass} border-none shadow-xl`}
-        align="start"
-        sideOffset={4}
-      >
-        {options.map((opt) => (
-          <DropdownMenuItem
-            key={opt}
-            onClick={() => onChange(opt)}
-            className={`flex items-center justify-between gap-2 cursor-pointer ${textColor} hover:opacity-80`}
-          >
-            <span className="flex items-center gap-2">
-              {renderOption ? renderOption(opt) : opt}
-            </span>
-            {opt === value && <Check className="w-3.5 h-3.5 opacity-60" />}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
 }
 
 // ─── Main component ────────────────────────────────────────────────────────────

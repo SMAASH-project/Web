@@ -19,10 +19,10 @@ import {
   Users,
   BarChart3,
   ShoppingBag,
-  Loader2,
   Coins,
   Medal,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CardAnimation } from "@/animations/CardAnimation";
 import { LoadPost } from "@/animations/LoadPost";
 
@@ -61,8 +61,14 @@ function StatPanel({
         </p>
       </div>
       {isLoading ? (
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className={`w-5 h-5 animate-spin ${subtextColor}`} />
+        <div className="flex flex-col gap-1.5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3 px-3 py-2">
+              <Skeleton className="w-3.5 h-3.5 rounded-full shrink-0" />
+              <Skeleton className="flex-1 h-3 rounded" />
+              <Skeleton className="w-16 h-3 rounded" />
+            </div>
+          ))}
         </div>
       ) : (
         children
@@ -164,7 +170,7 @@ export function LeaderboardPage() {
           panelBg={panelBg}
           subtextColor={subtextColor}
           animReady={ready}
-          delayMs={80}
+          delayMs={40}
         >
           {leaderboard.length === 0 ? (
             emptyMsg
@@ -204,7 +210,7 @@ export function LeaderboardPage() {
           panelBg={panelBg}
           subtextColor={subtextColor}
           animReady={ready}
-          delayMs={160}
+          delayMs={80}
         >
           {topPlayers.length === 0 ? (
             emptyMsg
@@ -235,7 +241,7 @@ export function LeaderboardPage() {
           panelBg={panelBg}
           subtextColor={subtextColor}
           animReady={ready}
-          delayMs={240}
+          delayMs={120}
         >
           {topLevels.length === 0 ? (
             emptyMsg
@@ -266,7 +272,7 @@ export function LeaderboardPage() {
           panelBg={panelBg}
           subtextColor={subtextColor}
           animReady={ready}
-          delayMs={320}
+          delayMs={160}
         >
           {topItems.length === 0 ? (
             emptyMsg
