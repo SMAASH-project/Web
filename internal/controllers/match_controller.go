@@ -25,7 +25,7 @@ func (mc *MatchController) Create(c *gin.Context) {
 
 	var body dtos.MatchCreateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
 		return
 	}
 
@@ -36,7 +36,7 @@ func (mc *MatchController) Create(c *gin.Context) {
 	}
 
 	if endedAt.Before(startedAt) {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp("ended_at cannot be earlier than started_at", path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp("ended_at cannot be earlier than started_at", path))
 		return
 	}
 

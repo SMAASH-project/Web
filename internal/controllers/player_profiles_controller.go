@@ -83,7 +83,7 @@ func (pc PlayerProfileController) Create(c *gin.Context) {
 	path := c.Request.URL.Path
 	var body dtos.PlayerProfileCreateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
 	}
 
 	currentProfiles, err := pc.profilesRepo.ReadByUserID(c.Request.Context(), body.UserID)
@@ -130,7 +130,7 @@ func (pc PlayerProfileController) Update(c *gin.Context) {
 
 	var body dtos.PlayerProfileUpdateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
 		return
 	}
 

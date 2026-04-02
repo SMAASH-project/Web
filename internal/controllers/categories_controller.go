@@ -37,7 +37,7 @@ func (cc CategoriesController) Create(c *gin.Context) {
 
 	var body dtos.CategoryCreateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
 		return
 	}
 
@@ -121,7 +121,7 @@ func (cc CategoriesController) Update(c *gin.Context) {
 
 	var body dtos.CategoryUpdateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
 		return
 	}
 

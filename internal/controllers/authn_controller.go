@@ -34,7 +34,7 @@ func (a AuthnController) SignUp(c *gin.Context) {
 	path := c.Request.URL.Path
 	var body dtos.UserCreateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
 	}
 
@@ -73,7 +73,7 @@ func (a AuthnController) SignUp(c *gin.Context) {
 func (a AuthnController) Login(c *gin.Context) {
 	var body dtos.UserLoginDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
 	}
 

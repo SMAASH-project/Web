@@ -36,7 +36,7 @@ func NewLevelsController(levelsBaseRepo repository.BaseRepository[models.Level])
 func (lc *LevelsController) Create(c *gin.Context) {
 	var body dtos.LevelCreateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
 	}
 
@@ -114,7 +114,7 @@ func (lc *LevelsController) Update(c *gin.Context) {
 
 	var body dtos.LevelUpdateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
 	}
 

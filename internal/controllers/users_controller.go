@@ -70,7 +70,6 @@ func (uc *UserController) ReadByID(c *gin.Context) {
 	c.JSON(http.StatusOK, dtos.UserToDTO(user))
 }
 
-// SMAASH godoc
 // NOTE: You can't change the password here, that requires separate functionality
 // @description Updates the user with the given id. (Cannot modify the users password)
 // @tags users
@@ -92,7 +91,7 @@ func (uc *UserController) Update(c *gin.Context) {
 
 	var body dtos.UserUpdateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
 		return
 	}
 
@@ -162,7 +161,7 @@ func (uc *UserController) AddProfileToUser(c *gin.Context) {
 
 	var body dtos.PlayerProfileAppendDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
 		return
 	}
 

@@ -26,7 +26,7 @@ func (rc RaritiesController) Create(c *gin.Context) {
 
 	var body dtos.RarityCreateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
 		return
 	}
 
@@ -76,7 +76,7 @@ func (rc RaritiesController) Update(c *gin.Context) {
 
 	var body dtos.RarityUpdateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
 		return
 	}
 

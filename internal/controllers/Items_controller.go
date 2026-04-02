@@ -37,7 +37,7 @@ func (ic ItemsController) Create(c *gin.Context) {
 	var body dtos.ItemCreateDTO
 
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
 		return
 	}
 
@@ -69,6 +69,7 @@ func (ic ItemsController) ReadAll(c *gin.Context) {
 	var body dtos.ItemWithOwnedReqDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
+		return
 	}
 
 	items, err := ic.itemsRepo.ReadAllWithOwnedPaginated(c.Request.Context(), body.ProfileID, page.(int), size.(int), "Rarity", "Categories")
@@ -103,7 +104,7 @@ func (ic ItemsController) Update(c *gin.Context) {
 
 	var body dtos.ItemUpdateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
 		return
 	}
 
