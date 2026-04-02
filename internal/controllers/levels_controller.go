@@ -36,7 +36,7 @@ func NewLevelsController(levelsBaseRepo repository.BaseRepository[models.Level])
 func (lc *LevelsController) Create(c *gin.Context) {
 	var body dtos.LevelCreateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
 	}
 
@@ -114,7 +114,7 @@ func (lc *LevelsController) Update(c *gin.Context) {
 
 	var body dtos.LevelUpdateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
 	}
 
@@ -164,6 +164,17 @@ func (lc *LevelsController) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// @description Uploads an image for level with given id
+// @tags levels
+// @accept mpfd
+// @produce json
+// @param id path int true "id of desired level"
+// @success 201 {object} string "returns newly created image's URI"
+// @failure 400 {object} dtos.ErrResp "no file sent"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 415 {object} dtos.ErrResp "invalid media type"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /levels/{id}/img [post]
 func (lc LevelsController) UploadImg(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
@@ -192,6 +203,14 @@ func (lc LevelsController) UploadImg(c *gin.Context) {
 	c.String(http.StatusCreated, *uri)
 }
 
+// @description Returns an uploaded level image
+// @tags levels
+// @accept json
+// @produce mpfd
+// @param id path int true "id of desired level"
+// @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /levels/{id}/img [get]
 func (lc LevelsController) ReadImg(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")

@@ -19,7 +19,14 @@ func NewStatsController(statsRepo repository.StatsRepository) *StatsController {
 	return &StatsController{statsRepo: statsRepo}
 }
 
-// Most active players
+// @description Reads the most active players
+// @tags stats
+// @accept json
+// @produce json
+// @success 200 {array} dtos.TopPlayersDTO "returns players ordered by matches played"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /stats/top/players [get]
 func (sc StatsController) ReadMostActivePlayers(c *gin.Context) {
 	res, err := sc.statsRepo.ReadMostActivePlayers(c.Request.Context())
 	if err != nil {
@@ -30,7 +37,14 @@ func (sc StatsController) ReadMostActivePlayers(c *gin.Context) {
 	c.JSON(http.StatusOK, utils.Map(res, dtos.TopPlayersToDTO))
 }
 
-// Most popular Items in store
+// @description Reads the most popular items
+// @tags stats
+// @accept json
+// @produce json
+// @success 200 {array} dtos.TopItemsDTO "returns items ordered by count of purchsases"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /stats/top/items [get]
 func (sc StatsController) ReadMostPopularItems(c *gin.Context) {
 	res, err := sc.statsRepo.ReadMostPopularItems(c.Request.Context())
 	if err != nil {
@@ -41,7 +55,15 @@ func (sc StatsController) ReadMostPopularItems(c *gin.Context) {
 	c.JSON(http.StatusOK, utils.Map(res, dtos.TopItemsToDTO))
 }
 
-// Players favourite characters
+// @description Reads the most popular items
+// @tags stats
+// @accept json
+// @produce json
+// @param id path int true "the id of the desired profile"
+// @success 200 {array} dtos.FavouriteCharactersDTO "returns characyers ordered by matches played with said characyers by given profile"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /profiles/{id}/favourite [get]
 func (sc StatsController) ReadFavouriteCharactersOfPlayer(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
@@ -58,7 +80,14 @@ func (sc StatsController) ReadFavouriteCharactersOfPlayer(c *gin.Context) {
 	c.JSON(http.StatusOK, utils.Map(res, dtos.FavouriteCharacterToDTO))
 }
 
-// Most played levels
+// @description Reads the most played levels
+// @tags stats
+// @accept json
+// @produce json
+// @success 200 {array} dtos.TopLevelsDTO "returns levels ordered by count of matches played"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /stats/top/levels [get]
 func (sc StatsController) ReadMostPlayedLevels(c *gin.Context) {
 	res, err := sc.statsRepo.ReadMostPlayedLevels(c.Request.Context())
 	if err != nil {
@@ -69,6 +98,14 @@ func (sc StatsController) ReadMostPlayedLevels(c *gin.Context) {
 	c.JSON(http.StatusOK, utils.Map(res, dtos.TopLevelsToDTO))
 }
 
+// @description Reads profiles with most wins
+// @tags stats
+// @accept json
+// @produce json
+// @success 200 {array} dtos.BestPlayersDTO "returns profiles ordered by count of wins"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /stats/leaderboard [get]
 func (sc StatsController) ReadPlayersWithMostWins(c *gin.Context) {
 	res, err := sc.statsRepo.ReadPlayersWithMostWins(c.Request.Context())
 	if err != nil {

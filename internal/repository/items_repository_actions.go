@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type Itemsepository interface {
+type ItemsRepository interface {
 	BaseRepository[models.Item]
 	ReadAllWithOwnedPaginated(c context.Context, userID uint, page int, pageSize int, preloads ...string) ([]models.ItemsWithOwned, error)
 }
@@ -19,8 +19,8 @@ type ItemsRepositoryActions struct {
 	conn *gorm.DB
 }
 
-func NewItemsRepositoryActions(conn *gorm.DB) Itemsepository {
-	return ItemsRepositoryActions{conn: conn}
+func NewItemsRepositoryActions(conn *gorm.DB) ItemsRepository {
+	return ItemsRepositoryActions{conn: conn, BaseRepository: NewBaseRepositoryActions[models.Item](conn)}
 }
 
 func (pra ItemsRepositoryActions) ReadAllWithOwnedPaginated(c context.Context, profileID uint, page int, pageSize int, preloads ...string) ([]models.ItemsWithOwned, error) {

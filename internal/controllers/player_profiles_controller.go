@@ -83,7 +83,7 @@ func (pc PlayerProfileController) Create(c *gin.Context) {
 	path := c.Request.URL.Path
 	var body dtos.PlayerProfileCreateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
 	}
 
 	currentProfiles, err := pc.profilesRepo.ReadByUserID(c.Request.Context(), body.UserID)
@@ -130,7 +130,7 @@ func (pc PlayerProfileController) Update(c *gin.Context) {
 
 	var body dtos.PlayerProfileUpdateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
 		return
 	}
 
@@ -259,6 +259,18 @@ func (pc PlayerProfileController) GetPFP(c *gin.Context) {
 	c.File(profile.PfpUri)
 }
 
+// @description Reads all purchases of given profile
+// @tags profiles
+// @accept json
+// @produce json
+// @param user_id path int true "ID of the profile whose purchases you attempt to fetch"
+// @success 201 {array} dtos.PurchaseReadDTO "returns purchases of the given profile"
+// @failure 404 {object} dtos.ErrResp "user with given ID not found"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 409 {object} dtos.ErrResp "unique key violation"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /profiles/{id}/purchases [get]
 func (pc PlayerProfileController) ReadPurchases(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")

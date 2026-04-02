@@ -26,15 +26,15 @@ func NewAuthnController(authService services.Authentication, rolesRepo repositor
 // @produce json
 // @param user_create_dto body dtos.UserCreateDTO true "dto for creating a new user"
 // @success 201 {object} dtos.UserReadDTO "returns newly created user"
-// @failure 400 {object} dtos.ErrResp "request body in wrong format"
 // @failure 409 {object} dtos.ErrResp "unique key violation"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
 // @failure 500 {object} dtos.ErrResp "internal server error"
 // @router /auth/signup [post]
 func (a AuthnController) SignUp(c *gin.Context) {
 	path := c.Request.URL.Path
 	var body dtos.UserCreateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
 	}
 
@@ -65,15 +65,15 @@ func (a AuthnController) SignUp(c *gin.Context) {
 // @produce json
 // @param user_login_dto body dtos.UserLoginDTO true "dto for logging in a user"
 // @success 200 {int} int "returns the id of the logged in user"
-// @failure 400 {object} dtos.ErrResp "request body in wrong format"
 // @failure 401 {object} dtos.ErrResp "unauthorized"
 // @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
 // @failure 500 {object} dtos.ErrResp "internal server error"
 // @router /auth/login [post]
 func (a AuthnController) Login(c *gin.Context) {
 	var body dtos.UserLoginDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
 	}
 
