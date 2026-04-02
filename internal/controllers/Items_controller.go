@@ -15,13 +15,13 @@ import (
 )
 
 type ItemsController struct {
-	itemsRepo    repository.Itemsepository
+	itemsRepo    repository.ItemsRepository
 	rarityRepo   repository.RarityRepository
 	categoryRepo repository.CategoryRepository
 }
 
 func NewItemsController(
-	itemsRepo repository.Itemsepository,
+	itemsRepo repository.ItemsRepository,
 	rarityRepo repository.RarityRepository,
 	categoryRepo repository.CategoryRepository,
 ) *ItemsController {
