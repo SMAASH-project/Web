@@ -22,6 +22,17 @@ func NewCharactersController(charactersBaseRepo repository.BaseRepository[models
 	return &CharactersController{charactersBaseRepo: charactersBaseRepo}
 }
 
+// @description Creates a new character
+// @tags characters
+// @accept json
+// @produce json
+// @param character_create_dto body dtos.CharacterCreateDTO true "dto for creating a new character"
+// @success 201 {object} dtos.CharacterReadDTO "returns newly created character"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 409 {object} dtos.ErrResp "unique key violation"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /characters [post]
 func (cc CharactersController) Create(c *gin.Context) {
 	path := c.Request.URL.Path
 
@@ -44,6 +55,14 @@ func (cc CharactersController) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, dtos.CharacterToDTO(*newCharacter))
 }
 
+// @description Reads characters
+// @tags characters
+// @accept json
+// @produce json
+// @success 200 {array} dtos.CharacterReadDTO "returns all characters"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /characters [get]
 func (cc CharactersController) ReadAll(c *gin.Context) {
 	characters, err := cc.charactersBaseRepo.ReadAll(c.Request.Context())
 	if err != nil {
@@ -54,6 +73,16 @@ func (cc CharactersController) ReadAll(c *gin.Context) {
 	c.JSON(http.StatusOK, utils.Map(characters, dtos.CharacterToDTO))
 }
 
+// @description Reads a character by it's id
+// @tags characters
+// @accept json
+// @produce json
+// @param id path int true "the id of the desired character"
+// @success 200 {object} dtos.CharacterReadDTO "returns the desired character"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /characters/{id} [get]
 func (cc CharactersController) ReadByID(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
@@ -71,6 +100,20 @@ func (cc CharactersController) ReadByID(c *gin.Context) {
 	c.JSON(http.StatusOK, dtos.CharacterToDTO(character))
 }
 
+// @description Updates the character with the given id
+// @tags characters
+// @accept json
+// @produce json
+// @param character_update_dto body dtos.CharacterUpdateDTO true "dto for updating a character"
+// @param id path int true "id of desired character"
+// @success 204 {} nil "doesn't return anything"
+// @failure 400 {object} dtos.ErrResp "id from url and id from request body doesn't match"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 409 {object} dtos.ErrResp "unique key violation"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /characters/{id} [put]
 func (cc CharactersController) Update(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
@@ -102,6 +145,16 @@ func (cc CharactersController) Update(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// @description Deletes a character with the given id
+// @tags characters
+// @accept json
+// @produce json
+// @param id path int true "id of desired character"
+// @success 204 {} nil "doesn't return anything"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /characters/{id} [delete]
 func (cc CharactersController) Delete(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
@@ -118,6 +171,17 @@ func (cc CharactersController) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// @description Uploads an image for the character with given id
+// @tags characters
+// @accept mpfd
+// @produce json
+// @param id path int true "id of desired character"
+// @success 201 {object} string "returns newly created image's URI"
+// @failure 400 {object} dtos.ErrResp "no file sent"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 415 {object} dtos.ErrResp "invalid media type"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /characters/{id}/img [post]
 func (cc CharactersController) UploadImg(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
@@ -146,6 +210,14 @@ func (cc CharactersController) UploadImg(c *gin.Context) {
 	c.String(http.StatusCreated, *uri)
 }
 
+// @description Returns an uploaded character image
+// @tags characters
+// @accept json
+// @produce mpfd
+// @param id path int true "id of desired character"
+// @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /characters/{id}/img [get]
 func (cc CharactersController) ReadImg(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")

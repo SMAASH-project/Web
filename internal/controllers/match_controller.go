@@ -20,6 +20,17 @@ func NewMatchController(conn *gorm.DB) *MatchController {
 	return &MatchController{conn: conn}
 }
 
+// @description Creates a new match
+// @tags matches
+// @accept json
+// @produce json
+// @param match_create_dto body dtos.MatchCreateDTO true "dto for creating a new match"
+// @success 201 {object} dtos.MatchReadDTO "returns newly created match"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 409 {object} dtos.ErrResp "unique key violation"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /matches [post]
 func (mc *MatchController) Create(c *gin.Context) {
 	path := c.Request.URL.Path
 

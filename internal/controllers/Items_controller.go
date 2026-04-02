@@ -32,6 +32,17 @@ func NewItemsController(
 	}
 }
 
+// @description Creates a new item
+// @tags items
+// @accept json
+// @produce json
+// @param item_create_dto body dtos.ItemCreateDTO true "dto for creating a new item"
+// @success 201 {object} dtos.ItemReadDTO "returns newly created item"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 409 {object} dtos.ErrResp "unique key violation"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /items [post]
 func (ic ItemsController) Create(c *gin.Context) {
 	path := c.Request.URL.Path
 	var body dtos.ItemCreateDTO
@@ -61,6 +72,16 @@ func (ic ItemsController) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, dtos.ItemToDTO(withIncludes))
 }
 
+// @description Reads items (owned by a profile)
+// @tags items
+// @accept json
+// @produce json
+// @param item_with_owned_req_dto body dtos.ItemWithOwnedReqDTO true "dto for reading an item with an owned field"
+// @success 200 {array} dtos.ItemWithOwnedReadDTO "returns all categories"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /items [get]
 func (ic ItemsController) ReadAll(c *gin.Context) {
 	path := c.Request.URL.Path
 	page, _ := c.Get("page")
@@ -81,6 +102,16 @@ func (ic ItemsController) ReadAll(c *gin.Context) {
 	c.JSON(http.StatusOK, utils.Map(items, dtos.ItemWithOwnedToDTO))
 }
 
+// @description Reads an item by it's id
+// @tags items
+// @accept json
+// @produce json
+// @param id path int true "the id of the desired item"
+// @success 200 {object} dtos.ItemReadDTO "returns the desired item"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /items/{id} [get]
 func (ic ItemsController) ReadByID(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
@@ -98,6 +129,20 @@ func (ic ItemsController) ReadByID(c *gin.Context) {
 	c.JSON(http.StatusOK, dtos.ItemToDTO(item))
 }
 
+// @description Updates the item with the given id
+// @tags items
+// @accept json
+// @produce json
+// @param item_update_dto body dtos.ItemUpdateDTO true "dto for updating an item"
+// @param id path int true "id of desired item"
+// @success 204 {} nil "doesn't return anything"
+// @failure 400 {object} dtos.ErrResp "id from url and id from request body doesn't match"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 409 {object} dtos.ErrResp "unique key violation"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /items/{id} [put]
 func (ic ItemsController) Update(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
@@ -135,6 +180,16 @@ func (ic ItemsController) Update(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// @description Deletes an item with the given id
+// @tags items
+// @accept json
+// @produce json
+// @param id path int true "id of desired item"
+// @success 204 {} nil "doesn't return anything"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /items/{id} [delete]
 func (ic ItemsController) Delete(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
@@ -151,6 +206,17 @@ func (ic ItemsController) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// @description Uploads an image for item with given id
+// @tags items
+// @accept mpfd
+// @produce json
+// @param id path int true "id of desired items"
+// @success 201 {object} string "returns newly created image's URI"
+// @failure 400 {object} dtos.ErrResp "no file sent"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 415 {object} dtos.ErrResp "invalid media type"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /items/{id}/pfp [post]
 func (ic ItemsController) UploadImg(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
@@ -179,6 +245,14 @@ func (ic ItemsController) UploadImg(c *gin.Context) {
 	c.String(http.StatusCreated, *uri)
 }
 
+// @description Returns an uploaded item image
+// @tags items
+// @accept json
+// @produce mpfd
+// @param id path int true "id of desired item"
+// @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /items/{id}/pfp [get]
 func (ic ItemsController) ReadImg(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")

@@ -149,10 +149,10 @@ func (uc *UserController) Delete(c *gin.Context) {
 // @param profile_append_dto body dtos.PlayerProfileAppendDTO true "dto for creating a new profile for a given user"
 // @param user_id path int true "ID of the user to whose profiles you attempt to append"
 // @success 201 {object} dtos.PlayerProfileReadDTO "returns newly created profile"
-// @failure 400 {object} dtos.ErrResp "request body in wrong format"
 // @failure 404 {object} dtos.ErrResp "user with given ID not found"
 // @failure 401 {object} dtos.ErrResp "unauthorized"
 // @failure 409 {object} dtos.ErrResp "unique key violation"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
 // @failure 500 {object} dtos.ErrResp "internal server error"
 // @router /users/{id}/profiles [post]
 func (uc *UserController) AddProfileToUser(c *gin.Context) {
@@ -207,10 +207,10 @@ func (uc *UserController) AddProfileToUser(c *gin.Context) {
 // @produce json
 // @param user_id path int true "ID of the user whose profiles you attempt to fetch"
 // @success 201 {array} dtos.PlayerProfileReadDTO "returns profiles of the given user"
-// @failure 400 {object} dtos.ErrResp "request body in wrong format"
 // @failure 404 {object} dtos.ErrResp "user with given ID not found"
 // @failure 401 {object} dtos.ErrResp "unauthorized"
 // @failure 409 {object} dtos.ErrResp "unique key violation"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
 // @failure 500 {object} dtos.ErrResp "internal server error"
 // @router /users/{id}/profiles [get]
 func (uc *UserController) ReadUsersProfiles(c *gin.Context) {
@@ -235,6 +235,14 @@ func (uc *UserController) ReadUsersProfiles(c *gin.Context) {
 	c.JSON(http.StatusOK, utils.Map(profiles, dtos.PlayerProfileToReadDTO))
 }
 
+// @description Tells the caller who they're logged in as based on their jwt
+// @tags users
+// @accept json
+// @produce json
+// @success 200 {array} dtos.UserReadDTO "returns the user you're logged in as"
+// @failure 404 {object} dtos.ErrResp "user with given ID not found"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /users/whoami [get]
 func (uc UserController) WhoAmI(c *gin.Context) {
 	caller_id, _ := c.Get("caller_id")
 	user, err := uc.userRepo.ReadByID(c.Request.Context(), caller_id.(uint), "Role")
@@ -251,6 +259,19 @@ func (uc UserController) WhoAmI(c *gin.Context) {
 	c.JSON(http.StatusOK, dtos.UserToDTO(user))
 }
 
+// @description Bans a given user
+// @tags users
+// @accept json
+// @produce json
+// @param user_ban_dto body dtos.UserBanDTO true "dto for banning a user"
+// @param id path int true "id of desired user"
+// @success 200 {object} nil "returns the period of the ban"
+// @failure 400 {object} dtos.ErrResp "id from url and id from request body doesn't match"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /users/ban [post]
 func (uc UserController) Ban(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
@@ -285,6 +306,17 @@ func (uc UserController) Ban(c *gin.Context) {
 	})
 }
 
+// @description Unbans a given user
+// @tags users
+// @accept json
+// @produce json
+// @param id path int true "id of desired user"
+// @success 204 {} nil "doesn't return anything"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /users/unban [post]
 func (uc UserController) Unban(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
@@ -301,6 +333,19 @@ func (uc UserController) Unban(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// @description Promotes a given user to an elevated privilage
+// @tags users
+// @accept json
+// @produce json
+// @param user_promote_dto body dtos.UserPromoteDTO true "dto for promoting a user"
+// @param id path int true "id of desired user"
+// @success 204 {} nil "doesn't return anything"
+// @failure 400 {object} dtos.ErrResp "id from url and id from request body doesn't match"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /users/promote [post]
 func (uc UserController) Promote(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
@@ -328,6 +373,17 @@ func (uc UserController) Promote(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// @description Demonted a user to the minimum level of privilage
+// @tags users
+// @accept json
+// @produce json
+// @param id path int true "id of desired user"
+// @success 204 {} nil "doesn't return anything"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /users/demote [post]
 func (uc UserController) Demote(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")

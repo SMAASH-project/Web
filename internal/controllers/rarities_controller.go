@@ -21,6 +21,17 @@ func NewRaritiesController(raritiesBaseRepo repository.BaseRepository[models.Rar
 	return &RaritiesController{raritiesBaseRepo: raritiesBaseRepo}
 }
 
+// @description Creates a new rarity
+// @tags rarities
+// @accept json
+// @produce json
+// @param rarity_create_dto body dtos.RarityCreateDTO true "dto for creating a new rarity"
+// @success 201 {object} dtos.RarityReadDTO "returns newly created rarity"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 409 {object} dtos.ErrResp "unique key violation"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /rarities [post]
 func (rc RaritiesController) Create(c *gin.Context) {
 	path := c.Request.URL.Path
 
@@ -43,6 +54,14 @@ func (rc RaritiesController) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, dtos.RarityToDTO(*newRarity))
 }
 
+// @description Reads all rarities
+// @tags rarities
+// @accept json
+// @produce json
+// @success 200 {array} dtos.RarityReadDTO "returns all rarities"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /rarities [get]
 func (rc RaritiesController) ReadAll(c *gin.Context) {
 	rarities, err := rc.raritiesBaseRepo.ReadAll(c)
 	if err != nil {
@@ -53,6 +72,16 @@ func (rc RaritiesController) ReadAll(c *gin.Context) {
 	c.JSON(http.StatusOK, utils.Map(rarities, dtos.RarityToDTO))
 }
 
+// @description Reads a rarity by it's id
+// @tags rarities
+// @accept json
+// @produce json
+// @param id path int true "the id of the desired rarity"
+// @success 200 {object} dtos.RarityReadDTO "returns the desired rarity"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /rarities/{id} [get]
 func (rc RaritiesController) ReadByID(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
@@ -70,6 +99,20 @@ func (rc RaritiesController) ReadByID(c *gin.Context) {
 	c.JSON(http.StatusOK, dtos.RarityToDTO(rarity))
 }
 
+// @description Updates the rarity with the given id
+// @tags rarities
+// @accept json
+// @produce json
+// @param rarity_update_dto body dtos.RarityUpdateDTO true "dto for updating a rarity"
+// @param id path int true "id of desired rarity"
+// @success 204 {} nil "doesn't return anything"
+// @failure 400 {object} dtos.ErrResp "id from url and id from request body doesn't match"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 409 {object} dtos.ErrResp "unique key violation"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /rarities/{id} [put]
 func (rc RaritiesController) Update(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
@@ -101,6 +144,16 @@ func (rc RaritiesController) Update(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// @description Deletes a rarity with the given id
+// @tags rarities
+// @accept json
+// @produce json
+// @param id path int true "id of desired rarity"
+// @success 204 {} nil "doesn't return anything"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /rarities/{id} [delete]
 func (rc RaritiesController) Delete(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")

@@ -27,9 +27,9 @@ func NewCategoriesController(categoryBaseRepo repository.BaseRepository[models.C
 // @produce json
 // @param category_create_dto body dtos.CategoryCreateDTO true "dto for creating a new category"
 // @success 201 {object} dtos.CategoryReadDTO "returns newly created category"
-// @failure 400 {object} dtos.ErrResp "request body in wrong format"
 // @failure 401 {object} dtos.ErrResp "unauthorized"
 // @failure 409 {object} dtos.ErrResp "unique key violation"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
 // @failure 500 {object} dtos.ErrResp "internal server error"
 // @router /categories [post]
 func (cc CategoriesController) Create(c *gin.Context) {
@@ -108,11 +108,11 @@ func (cc CategoriesController) ReadByID(c *gin.Context) {
 // @param category_update_dto body dtos.CategoryUpdateDTO true "dto for updating a category"
 // @param id path int true "id of desired category"
 // @success 204 {} nil "doesn't return anything"
-// @failure 400 {object} dtos.ErrResp "request body in wrong format"
 // @failure 400 {object} dtos.ErrResp "id from url and id from request body doesn't match"
 // @failure 401 {object} dtos.ErrResp "unauthorized"
 // @failure 404 {object} dtos.ErrResp "record not found"
 // @failure 409 {object} dtos.ErrResp "unique key violation"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
 // @failure 500 {object} dtos.ErrResp "internal server error"
 // @router /categories/{id} [put]
 func (cc CategoriesController) Update(c *gin.Context) {

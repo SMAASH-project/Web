@@ -259,6 +259,18 @@ func (pc PlayerProfileController) GetPFP(c *gin.Context) {
 	c.File(profile.PfpUri)
 }
 
+// @description Reads all purchases of given profile
+// @tags profiles
+// @accept json
+// @produce json
+// @param user_id path int true "ID of the profile whose purchases you attempt to fetch"
+// @success 201 {array} dtos.PurchaseReadDTO "returns purchases of the given profile"
+// @failure 404 {object} dtos.ErrResp "user with given ID not found"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 409 {object} dtos.ErrResp "unique key violation"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /profiles/{id}/purchases [get]
 func (pc PlayerProfileController) ReadPurchases(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
