@@ -3,6 +3,7 @@ package controllers
 import (
 	"errors"
 	"net/http"
+	"os"
 	dtos "smaash-web/internal/DTOs"
 	"smaash-web/internal/middlewares"
 	"smaash-web/internal/repository"
@@ -149,6 +150,65 @@ func (ic ItemsController) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+func (ic ItemsController) UploadImg(c *gin.Context) {
+	path := c.Request.URL.Path
+	id, _ := c.Get("id")
+
+	file, err := c.FormFile("ItemImage")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dtos.NewErrResp("No file uploaded", path))
+		return
+	}
+
+	uri, err := utils.SaveFileToDisc(c, file, utils.ITEM_IMAGE)
+	if err != nil {
+		if errors.Is(err, utils.ErrUnsupportedMediaType) {
+			c.JSON(http.StatusUnsupportedMediaType, dtos.NewErrResp(err.Error(), path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	if err := ic.itemsRepo.UpdateOne(c.Request.Context(), id.(uint), "img_uri", uri); err != nil {
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	c.String(http.StatusCreated, *uri)
+}
+
+func (ic ItemsController) ReadImg(c *gin.Context) {
+	path := c.Request.URL.Path
+	id, _ := c.Get("id")
+
+	item, err := ic.itemsRepo.ReadByID(c.Request.Context(), id.(uint))
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("Item with given id not found", path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	if item.ImgUri == "" {
+		c.JSON(http.StatusNotFound, dtos.NewErrResp("Given item has no uploaded image", path))
+		return
+	}
+
+	if _, err := os.Stat(item.ImgUri); err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("Image of given item cannot be found", path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp("File is corrupt: "+err.Error(), path))
+		return
+	}
+
+	c.File(item.ImgUri)
+}
+
 func (ic ItemsController) MountRoutes(apiGroup *gin.RouterGroup) {
 	items := apiGroup.Group("/items")
 	items.POST("", middlewares.Authorize(middlewares.ADMIN), ic.Create)
@@ -156,4 +216,6 @@ func (ic ItemsController) MountRoutes(apiGroup *gin.RouterGroup) {
 	items.GET("/:id", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, ic.ReadByID)
 	items.PUT("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, ic.Update)
 	items.DELETE("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, ic.Delete)
+	items.POST("/:id/img", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, ic.UploadImg)
+	items.GET("/:id/img", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, ic.ReadImg)
 }

@@ -32,6 +32,7 @@ const (
 	PROFILE_PICTURE FileUploadKind = "pfps"
 	CHARACTER_IMAGE FileUploadKind = "characters"
 	LEVEL_IMAGE     FileUploadKind = "levels"
+	ITEM_IMAGE      FileUploadKind = "items"
 )
 
 var (
