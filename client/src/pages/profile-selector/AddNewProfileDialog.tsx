@@ -16,6 +16,7 @@ import { FormAlert } from "@/components/ui/form-alert";
 import { generateRandomUsername } from "@/lib/generateUsername";
 import { useProfiles } from "./useProfiles";
 import { useEffect, useState } from "react";
+import { AxiosError } from "axios";
 
 interface AddNewProfileProps {
   open: boolean;
@@ -31,17 +32,17 @@ export function AddNewProfileDialog({ open, onOpenChange }: AddNewProfileProps) 
 
   // Generate a username that's not already in `profiles`.
   const generateUniqueUsername = () => {
-    const existing = new Set(profiles.map((p) => p.name));
+    const existing = new Set(profiles.map((p) => p.name.toLowerCase()));
     for (let i = 0; i < 20; i++) {
       const r = generateRandomUsername();
       const candidate = `${r.prefix}${r.suffix}`;
-      if (!existing.has(candidate)) return candidate;
+      if (!existing.has(candidate.toLowerCase())) return candidate;
     }
     let counter = 1;
     while (true) {
       const r = generateRandomUsername();
       const candidate = `${r.prefix}${r.suffix}-${counter}`;
-      if (!existing.has(candidate)) return candidate;
+      if (!existing.has(candidate.toLowerCase())) return candidate;
       counter++;
     }
   };
@@ -73,7 +74,12 @@ export function AddNewProfileDialog({ open, onOpenChange }: AddNewProfileProps) 
       return;
     }
 
-    if (profiles.some((p) => p.name === normalizedUsername)) {
+    if (profiles.length >= 5) {
+      setError(t("addProfile.errorMaxProfiles"));
+      return;
+    }
+
+    if (profiles.some((p) => p.name.toLowerCase() === normalizedUsername.toLowerCase())) {
       setError(t("addProfile.errorUsernameTaken"));
       setUsername(generateUniqueUsername());
       return;
@@ -92,7 +98,29 @@ export function AddNewProfileDialog({ open, onOpenChange }: AddNewProfileProps) 
       setProfilePicture(null);
     } catch (err) {
       console.error("Failed to add profile:", err);
-      setError(t("addProfile.errorSaveFailed"));
+      const axiosError = err as AxiosError<{ error?: string; message?: string }>;
+      const status = axiosError.response?.status;
+      const backendMessage =
+        axiosError.response?.data?.error ?? axiosError.response?.data?.message ?? "";
+      const backendMessageLower = backendMessage.toLowerCase();
+
+      if (
+        status === 403 ||
+        backendMessageLower.includes("max") ||
+        backendMessageLower.includes("limit")
+      ) {
+        setError(t("addProfile.errorMaxProfiles"));
+      } else if (
+        status === 409 ||
+        backendMessageLower.includes("taken") ||
+        backendMessageLower.includes("exists") ||
+        backendMessageLower.includes("duplicate")
+      ) {
+        setError(t("addProfile.errorUsernameTaken"));
+        setUsername(generateUniqueUsername());
+      } else {
+        setError(t("addProfile.errorSaveFailed"));
+      }
     } finally {
       setIsSubmitting(false);
     }

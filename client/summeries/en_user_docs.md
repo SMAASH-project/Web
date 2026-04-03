@@ -1,6 +1,6 @@
 # SMAASH Client — User Guide
 
-**Last updated:** 2026-04-03 (rev 3)
+**Last updated:** 2026-04-03 (rev 4)
 
 > Welcome! This guide walks you through SMAASH's features, settings, and common tasks. Think of it as a companion while you explore.
 
@@ -65,7 +65,7 @@ From the **Profile** page, you can:
 
 ### Browsing Items
 
-Items are organized by **type** (character, skin, weapon) and **rarity** (common to legendary). Use the filters and search to find what you're looking for.
+Items are organized by **type** (character, skin), **combat style** (melee/ranged for characters), and **rarity** (common to legendary). Use filters and search to find what you need.
 
 ### Buying Items
 
@@ -154,15 +154,14 @@ Switch between **English** and **Hungarian**.
 - **Choose an effect** — animated backgrounds (aurora, matrix, particles, etc.)
 - **Layer effects** — combine multiple animations for a unique vibe
 
-All your settings sync across devices automatically (they're saved in your account).
+Your settings are saved in your current browser (local device storage).
 
 ---
 
 ## Keyboard Shortcuts & Tips
 
-| Action            | Shortcut / Tip                                          |
+| Action            | Tip                                                     |
 | ----------------- | ------------------------------------------------------- |
-| Focus search      | Press `Ctrl + K` (or `Cmd + K` on Mac) in most pages    |
 | Dark mode         | Available in Settings → Visual Style                    |
 | Back to home      | Tap the logo in the top-left                            |
 | Responsive design | Works great on phone, tablet, and desktop—try resizing! |
@@ -215,7 +214,7 @@ We've made the app faster and smoother:
 - **Smaller download size:** Optimized assets; app loads quicker on slower connections
 - **Smoother theme switching:** Background animations now respond instantly to your settings changes
 - **Better performance:** Less CPU usage when animations are playing, especially on mobile devices
-- **Improved type safety:** Backend API changes are caught earlier, reducing bugs
+- **More stable profile creation feedback:** clearer errors when a name is already taken or profile limits are reached
 
 You might not notice these changes directly, but they mean the app should feel snappier overall.
 
@@ -224,5 +223,5 @@ You might not notice these changes directly, but they mean the app should feel s
 ## Need Help?
 
 - **Something isn't working?** Try refreshing the page first. Most issues clear up this way. If you still have trouble, contact support.
-- **Have feedback or found a bug?** We'd love to hear about it! Use the feedback form in Settings or reach out to the admin team.
+- **Have feedback or found a bug?** Reach out to support or your admin team with steps to reproduce.
 - **Performance issues on your device?** Try turning off animations in Settings — it can help on older phones or slower connections.

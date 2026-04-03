@@ -1,6 +1,6 @@
 # SMAASH kliens — felhasználói útmutató
 
-**Frissítve:** 2026-04-03 (rev 3)
+**Frissítve:** 2026-04-03 (rev 4)
 
 > Ez az útmutató röviden, érthetően vezet végig az app fő részein, a beállításokon és a leggyakoribb teendőkön.
 
@@ -65,7 +65,7 @@ A **Profile** oldalon ezt láthatod és módosíthatod:
 
 ### Böngészés
 
-A tárgyakat szűrheted **típus**, **ritkaság** és **keresés** alapján. Így gyorsabban megtalálod, amit keresel.
+A tárgyakat szűrheted **típus** (Character/Skin), **harcstílus** (Melee/Ranged – karaktereknél), **ritkaság** és **keresés** alapján. Így gyorsabban megtalálod, amit keresel.
 
 ### Vásárlás
 
@@ -154,7 +154,7 @@ Válthatsz **angol** és **magyar** között.
 - **Háttéreffektusok** — különböző animált háttérstílusok
 - **Összetett effektek** — több háttérréteg kombinálása
 
-A beállításaid fiókszinten mentődnek, így más eszközön is ugyanazt a kinézetet kaphatod.
+A beállításaid a jelenlegi böngészőben mentődnek (helyi eszköztárolás).
 
 ---
 
@@ -208,14 +208,14 @@ Ilyenkor ezeket próbáld:
 
 ---
 
-## Nemrégiben Bevezetett Javítások (2026. április)
+## Nemrégiben bevezetett javítások (2026. április)
 
 Az alkalmazás gyorsabbá és simábbá vált:
 
 - **Kisebb letöltési méret:** Optimalizált eszközök; gyorsabb betöltés lassú kapcsolaton
 - **Zökkenőmentesebb témavá ltás:** A háttéranimációk azonnal reagálnak a beállítások változására
 - **Jobb teljesítmény:** Kevesebb CPU-használat az animációk lejátszásakor
-- **Jobb típusbiztonság:** A háttérrendszer API-módosításai korábbi szakaszban kerülnek feltárásra
+- **Stabilabb profil-létrehozási visszajelzések:** tisztább hibaüzenetek, ha a név foglalt vagy elérted a profil-limitet
 
 Lehet, hogy közvetlenül nem figyeled meg ezeket a változásokat, de az app összességében gyorsabbnak, simábbnak fogja érezni magát.
 
@@ -223,10 +223,6 @@ Lehet, hogy közvetlenül nem figyeled meg ezeket a változásokat, de az app ö
 
 ## Segítségre van szükséged?
 
-- **Valami nem működik?** Először frissítsd az oldalt — sokszor ez elég. Ha nem működik, keress egy adminisztrátor vagy support tag.
-- **Van visszajelzésed vagy hibát találtál?** Nagyon szeretnénk erről hallani! A Settings-ben van egy feedback forma, vagy elérhetsz egy admin-t.
-- **Teljesítményprobléma az eszközödön?** Próbáld ki az animációk kikapcsolását a Settings-ben — különösen mobil telefonokon segíthet.
-
-- **Valami nem működik?** Először frissítsd az oldalt — sokszor ez elég. Ha nem sírj máshol.
-
-- **Van visszajelzésed?** A bugreportok és ötletek tényleg segítenek jobbá tenni az appot, kár hogy kurvára nem kérdezett téged senki.
+- **Valami nem működik?** Először frissítsd az oldalt — sokszor ez elég. Ha nem működik, keress egy adminisztrátort vagy support tagot.
+- **Van visszajelzésed vagy hibát találtál?** Küldd el supportnak vagy az admin csapatnak, lehetőleg rövid reprodukciós lépésekkel.
+- **Teljesítményprobléma az eszközödön?** Próbáld ki az animációk kikapcsolását a Settings-ben — különösen mobilon sokat segíthet.

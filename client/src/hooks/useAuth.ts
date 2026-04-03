@@ -1,20 +1,24 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient";
 import { AxiosError } from "axios";
-import type { DtosUserLoginDTO, DtosUserReadDTO } from "@/lib/api.generated";
 
-export type LoginPayload = DtosUserLoginDTO;
+export interface LoginPayload {
+  email: string;
+  password: string;
+}
 
 export interface LoginResponse {
   id: number;
   role: string;
 }
 
-type RequiredWhoAmIFields = Required<
-  Pick<DtosUserReadDTO, "id" | "email" | "role" | "is_banned" | "last_login">
->;
-
-export type WhoAmIResponse = RequiredWhoAmIFields;
+export interface WhoAmIResponse {
+  id: number;
+  email: string;
+  role: string;
+  is_banned: boolean;
+  last_login: string;
+}
 
 export interface SignupPayload {
   email: string;
@@ -42,7 +46,10 @@ export function useWhoAmIQuery() {
 export function useLoginMutation() {
   return useMutation<LoginResponse, AxiosError, LoginPayload>({
     mutationFn: async (payload) => {
-      const { data } = await apiClient.post<LoginResponse>("/auth/login", payload);
+      const { data } = await apiClient.post<LoginResponse>(
+        "/auth/login",
+        payload,
+      );
       return data;
     },
   });

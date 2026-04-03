@@ -4,7 +4,6 @@
  */
 
 import axios from "axios";
-import { validateKnownApiResponse } from "@/lib/apiSchemas";
 
 const apiClient = axios.create({
   baseURL: "/api",
@@ -36,7 +35,8 @@ apiClient.interceptors.request.use(async (config) => {
     await new Promise((resolve) => setTimeout(resolve, debugDelayMs));
   }
 
-  const isFormData = typeof FormData !== "undefined" && config.data instanceof FormData;
+  const isFormData =
+    typeof FormData !== "undefined" && config.data instanceof FormData;
 
   // Let the browser set multipart boundaries for FormData automatically.
   if (isFormData) {
@@ -48,7 +48,8 @@ apiClient.interceptors.request.use(async (config) => {
 
   config.headers = config.headers ?? {};
   if (!("Content-Type" in config.headers)) {
-    (config.headers as Record<string, unknown>)["Content-Type"] = "application/json";
+    (config.headers as Record<string, unknown>)["Content-Type"] =
+      "application/json";
   }
 
   return config;
@@ -64,19 +65,7 @@ apiClient.interceptors.request.use(async (config) => {
  * automatically so there's nothing else to tear down.
  */
 apiClient.interceptors.response.use(
-  (response) => {
-    const validation = validateKnownApiResponse(
-      response.config.method,
-      response.config.url,
-      response.data,
-    );
-
-    if (validation.matched) {
-      response.data = validation.data;
-    }
-
-    return response;
-  },
+  (response) => response,
   (error) => {
     // Pass through network errors without modification
     if (!error.response) {
@@ -87,7 +76,8 @@ apiClient.interceptors.response.use(
     // Auth endpoints are excluded to avoid a redirect loop when a user simply
     // enters the wrong password (which also returns 401).
     const requestUrl: string = error.config?.url ?? "";
-    const isAuthEndpoint = requestUrl.includes("/auth/") || requestUrl.includes("/users/whoami");
+    const isAuthEndpoint =
+      requestUrl.includes("/auth/") || requestUrl.includes("/users/whoami");
     if (error.response.status === 401 && !isAuthEndpoint) {
       window.location.href = "/app/login";
       // Return a promise that never resolves so no downstream error handler

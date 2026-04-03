@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-import type { DtosLevelReadDTO, DtosCategoryReadDTO } from "@/lib/api.generated";
 import Navbar from "@/components/nav/Navbar";
 import { useSettings } from "@/pages/settings/SettingsContext";
 import {
@@ -15,7 +14,14 @@ import {
   useTopLevelsQuery,
   useLeaderboardQuery,
 } from "@/hooks/useDebug";
-import { Trophy, Users, BarChart3, ShoppingBag, Coins, Medal } from "lucide-react";
+import {
+  Trophy,
+  Users,
+  BarChart3,
+  ShoppingBag,
+  Coins,
+  Medal,
+} from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CardAnimation } from "@/animations/CardAnimation";
 import { LoadPost } from "@/animations/LoadPost";
@@ -43,20 +49,24 @@ function StatPanel({
 }) {
   return (
     <div
-      className={`flex flex-col gap-4 rounded-xl p-5 ${panelBg}`}
+      className={`rounded-xl p-5 flex flex-col gap-4 ${panelBg}`}
       style={sectionStyle(animReady, delayMs)}
     >
       <div className="flex items-center gap-2">
         <span className={subtextColor}>{icon}</span>
-        <p className={`text-xs font-semibold tracking-wider uppercase ${subtextColor}`}>{title}</p>
+        <p
+          className={`text-xs font-semibold uppercase tracking-wider ${subtextColor}`}
+        >
+          {title}
+        </p>
       </div>
       {isLoading ? (
         <div className="flex flex-col gap-1.5">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3 px-3 py-2">
-              <Skeleton className="h-3.5 w-3.5 shrink-0 rounded-full" />
-              <Skeleton className="h-3 flex-1 rounded" />
-              <Skeleton className="h-3 w-16 rounded" />
+              <Skeleton className="w-3.5 h-3.5 rounded-full shrink-0" />
+              <Skeleton className="flex-1 h-3 rounded" />
+              <Skeleton className="w-16 h-3 rounded" />
             </div>
           ))}
         </div>
@@ -86,9 +96,12 @@ export function LeaderboardPage() {
   const handleAnimationComplete = useCallback(() => setAnimDone(true), []);
 
   const { data: topItems = [], isLoading: itemsLoading } = useTopItemsQuery();
-  const { data: topPlayers = [], isLoading: playersLoading } = useTopPlayersQuery();
-  const { data: topLevels = [], isLoading: levelsLoading } = useTopLevelsQuery();
-  const { data: leaderboard = [], isLoading: leaderboardLoading } = useLeaderboardQuery();
+  const { data: topPlayers = [], isLoading: playersLoading } =
+    useTopPlayersQuery();
+  const { data: topLevels = [], isLoading: levelsLoading } =
+    useTopLevelsQuery();
+  const { data: leaderboard = [], isLoading: leaderboardLoading } =
+    useLeaderboardQuery();
 
   const panelBg = getBackgroundClasses(useLiquidGlass, useDarkMode, "light");
   const textColor = getTextColor(useLiquidGlass, useDarkMode);
@@ -110,7 +123,9 @@ export function LeaderboardPage() {
   } transition-colors duration-150`;
 
   const emptyMsg = (
-    <p className={`py-6 text-center text-xs opacity-50 ${subtextColor}`}>No data yet</p>
+    <p className={`text-xs text-center py-6 opacity-50 ${subtextColor}`}>
+      No data yet
+    </p>
   );
 
   // Wrap a row list in LoadPost stagger — only when animations are on
@@ -129,17 +144,24 @@ export function LeaderboardPage() {
     );
 
   const inner = (
-    <div className="z-0 mx-auto mt-20 flex w-full max-w-6xl flex-col items-center justify-start gap-6 pb-8">
+    <div className="mt-20 z-0 flex flex-col items-center justify-start gap-6 w-full max-w-6xl mx-auto pb-8">
       {/* Header */}
-      <div className="flex w-full flex-col gap-1" style={sectionStyle(ready, 0)}>
-        <h1 className={`text-2xl font-bold ${textColor} tracking-tight ${textShadow}`}>
+      <div
+        className="flex flex-col gap-1 w-full"
+        style={sectionStyle(ready, 0)}
+      >
+        <h1
+          className={`text-2xl font-bold ${textColor} tracking-tight ${textShadow}`}
+        >
           Leaderboard
         </h1>
-        <p className={`text-sm ${subtextColor}`}>Community stats and top performers</p>
+        <p className={`text-sm ${subtextColor}`}>
+          Community stats and top performers
+        </p>
       </div>
 
       {/* 2×2 panel grid */}
-      <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
         {/* Win leaderboard */}
         <StatPanel
           title="Win Leaderboard"
@@ -157,14 +179,20 @@ export function LeaderboardPage() {
               {animatedRows(leaderboard.slice(0, 10), (p, i) => (
                 <div className={rowCard}>
                   <Medal size={14} className={rankColor(i)} />
-                  <span className={`flex-1 truncate text-sm font-medium ${textColor}`}>
+                  <span
+                    className={`flex-1 text-sm font-medium truncate ${textColor}`}
+                  >
                     {p.display_name}
                   </span>
-                  <span className={`flex items-center gap-1 text-xs font-semibold ${subtextColor}`}>
+                  <span
+                    className={`text-xs font-semibold flex items-center gap-1 ${subtextColor}`}
+                  >
                     <Trophy size={10} className="text-amber-400" />
                     {p.count_of_wins.toLocaleString()} W
                   </span>
-                  <span className={`flex items-center gap-1 text-xs ${subtextColor}`}>
+                  <span
+                    className={`text-xs flex items-center gap-1 ${subtextColor}`}
+                  >
                     <Coins size={10} className="text-amber-400" />
                     {p.coins.toLocaleString()}
                   </span>
@@ -191,7 +219,9 @@ export function LeaderboardPage() {
               {animatedRows(topPlayers.slice(0, 10), (p, i) => (
                 <div className={rowCard}>
                   <Medal size={14} className={rankColor(i)} />
-                  <span className={`flex-1 truncate text-sm font-medium ${textColor}`}>
+                  <span
+                    className={`flex-1 text-sm font-medium truncate ${textColor}`}
+                  >
                     {p.display_name}
                   </span>
                   <span className={`text-xs font-semibold ${subtextColor}`}>
@@ -220,7 +250,9 @@ export function LeaderboardPage() {
               {animatedRows(topLevels.slice(0, 10), (l, i) => (
                 <div className={rowCard}>
                   <Medal size={14} className={rankColor(i)} />
-                  <span className={`flex-1 truncate text-sm font-medium ${textColor}`}>
+                  <span
+                    className={`flex-1 text-sm font-medium truncate ${textColor}`}
+                  >
                     {l.name}
                   </span>
                   <span className={`text-xs font-semibold ${subtextColor}`}>
@@ -249,7 +281,9 @@ export function LeaderboardPage() {
               {animatedRows(topItems.slice(0, 10), (item, i) => (
                 <div className={rowCard}>
                   <Medal size={14} className={rankColor(i)} />
-                  <span className={`flex-1 truncate text-sm font-medium ${textColor}`}>
+                  <span
+                    className={`flex-1 text-sm font-medium truncate ${textColor}`}
+                  >
                     {item.name}
                   </span>
                   <span className={`text-xs font-semibold ${subtextColor}`}>
@@ -265,10 +299,15 @@ export function LeaderboardPage() {
   );
 
   return (
-    <div className={`flex min-h-screen w-full flex-col self-start p-4 ${textColor}`}>
+    <div
+      className={`p-4 min-h-screen w-full self-start flex flex-col ${textColor}`}
+    >
       <Navbar />
       {useAnimations ? (
-        <CardAnimation className="w-full flex-1" onAnimationComplete={handleAnimationComplete}>
+        <CardAnimation
+          className="flex-1 w-full"
+          onAnimationComplete={handleAnimationComplete}
+        >
           {inner}
         </CardAnimation>
       ) : (

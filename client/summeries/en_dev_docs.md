@@ -53,11 +53,11 @@ Role checks happen at the route level, but also re-verified at component entry p
 
 ### How Auth Works
 
-1. User logs in → server returns JWT
-2. JWT stored in localStorage via `AuthProvider`
-3. Every request includes JWT via Axios interceptor
-4. If 401 returned → auto-redirect to login, clear localStorage
-5. `AuthContext` provides current `userId`, `userRole`, etc. to components
+1. User logs in via `/auth/login`
+2. Session is maintained by HTTP-only cookies (`withCredentials: true`)
+3. `AuthProvider` resolves identity via `GET /users/whoami`
+4. `AuthContext` exposes `userId`, `isAdmin`, `isSupport`, and `isLoggedIn`
+5. For non-auth endpoints, 401 responses trigger redirect to `/app/login`
 
 ---
 
@@ -197,41 +197,6 @@ const response = await axios.get("/api/users/me");
 - Credentials: included (for auth cookies if needed)
 - 401 errors: auto-redirect to login
 
-### Generated API Types (Apr 2026)
-
-To reduce DTO drift between frontend and backend, API types are **generated from the backend Swagger spec**:
-
-**Generated file:** `src/lib/api.generated.ts` (1000+ lines of type definitions)
-
-**How to use:**
-
-```typescript
-// Import generated types
-import type {
-  DtosUserLoginDTO,
-  DtosUserReadDTO,
-  DtosPlayerProfileReadDTO,
-  DtosLevelReadDTO,
-  DtosCategoryReadDTO,
-} from "@/lib/api.generated";
-
-// Use in hook signatures
-export type LoginPayload = DtosUserLoginDTO;
-export type UserInfo = DtosUserReadDTO;
-```
-
-**To regenerate after backend changes:**
-
-```bash
-npm run api:types
-```
-
-This runs: `swagger-typescript-api generate --path ../docs/swagger/swagger.json --output src/lib --name api.generated.ts`
-
-**Current coverage:** Auth, users, profiles, roles, categories, levels (partial). Items and purchases not yet in Swagger spec; keep hand-written DTOs for now.
-
-**Important:** Runtime validation via Zod (`src/lib/apiSchemas.ts`) is **still active**—generated types are a complement, not a replacement. Both layers protect the app.
-
 ### React Query Conventions
 
 All data fetching uses React Query for consistency. Define hooks like this:
@@ -256,7 +221,7 @@ Benefits:
 
 ### Key Factory Pattern
 
-Instead of hardcoding query keys everywhere, use a factory (see `src/hooks/queryKeys.ts`):
+Instead of hardcoding query keys everywhere, use a factory (see `src/lib/queryKeys.ts`):
 
 ```typescript
 // Define once
@@ -294,34 +259,44 @@ Admins manage users, apply bans, and monitor platform health.
 
 Available to admins and support staff for system diagnostics.
 
-**Three tabs:**
+**Core tabs:**
 
-1. **Visual** — UI debugging
-   - Animation speed control
-   - Navbar override (useful for testing mobile behavior)
-   - Backdrop blur toggle
-   - Layout borders (highlight elements)
-   - Element inspector (hover-highlight DOM nodes)
-   - Overlay controls: FPS counter, scroll position, breakpoint badge
-   - Toast test (fire sample notifications)
-   - CSS variable explorer with color swatches
+1. **System** — runtime/system-level diagnostics
+2. **Endpoints** — manual endpoint testing
+3. **Cache** — React Query cache inspection/invalidation
+4. **Game Data** — admin-only game data tools
+5. **Visual** — UI debugging
+6. **Emulation** — responsive testing & network simulation
+7. **Diagnostics** — performance & accessibility insights
 
-2. **Emulation** — Responsive testing & network simulation
-   - Reduced motion toggle (respects OS preference, can override)
-   - Compact density (smaller fonts/spacing)
-   - Safe-area outlines (highlights safe-inset areas on notch devices)
-   - **Force JS Viewport** — emulate device sizes for responsive testing
-     - Presets: Desktop 1280, Desktop 1920, Tablet 768, Mobile 390, Mobile 360
-     - Custom width/height input
-     - **Note:** Tailwind CSS classes are compile-time; only JS-driven media queries respond to viewport forcing
-   - Network simulation (delay + jitter in milliseconds)
+Detailed highlights:
 
-3. **Diagnostics** — Performance & accessibility insights
-   - A11y contrast checker (CSS variables vs. white/black backgrounds)
-   - Focus ring preview
-   - Render diagnostics (component render count, React Query fetch/mutate operations)
-   - Click target size inspector
-   - z-index stack viewer
+- **Visual** — UI debugging
+  - Animation speed control
+  - Navbar override (useful for testing mobile behavior)
+  - Backdrop blur toggle
+  - Layout borders (highlight elements)
+  - Element inspector (hover-highlight DOM nodes)
+  - Overlay controls: FPS counter, scroll position, breakpoint badge
+  - Toast test (fire sample notifications)
+  - CSS variable explorer with color swatches
+
+- **Emulation** — Responsive testing & network simulation
+  - Reduced motion toggle (respects OS preference, can override)
+  - Compact density (smaller fonts/spacing)
+  - Safe-area outlines (highlights safe-inset areas on notch devices)
+  - **Force JS Viewport** — emulate device sizes for responsive testing
+    - Presets: Desktop 1280, Desktop 1920, Tablet 768, Mobile 390, Mobile 360
+    - Custom width/height input
+    - **Note:** Tailwind CSS classes are compile-time; only JS-driven media queries respond to viewport forcing
+  - Network simulation (delay + jitter in milliseconds)
+
+- **Diagnostics** — Performance & accessibility insights
+  - A11y contrast checker (CSS variables vs. white/black backgrounds)
+  - Focus ring preview
+  - Render diagnostics (component render count, React Query fetch/mutate operations)
+  - Click target size inspector
+  - z-index stack viewer
 
 **Viewport Override Technical Details:**
 
@@ -524,63 +499,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 - **Virtualization:** Large data grids (admin user list) could use react-window
 - **Prefetching:** Route hover → prefetch leaderboard queries
 - **PWA:** If offline support becomes a requirement
-
----
-
-## Performance & Optimizations (Apr 2026 Sprint)
-
-Recent work focused on bundle reduction and rendering efficiency:
-
-### Asset Optimization
-
-**Favicon (PNG → SVG):**
-
-- Changed from 1.4 MB PNG to ~1 KB SVG reference in `index.html`
-- Eliminates oversized asset from critical path
-
-**Android Logo (PNG → SVG):**
-
-- Updated `src/pages/releases/components/SelectOs.tsx` to use `.svg` instead of `.png`
-- Size reduction: 111 KB → 49.68 KB (bundle) / 22.75 KB (gzipped) — **55% reduction**
-
-### Component Memoization
-
-All background animation components now wrapped with `React.memo()`:
-
-- `AuroraBackground`, `BioluminescenceBackground`, `ConstellationBackground`
-- `DeepSpaceBackground`, `FishtankBackground`, `LavaLampBackground`
-- `ParticleWebBackground`, `PuddleRipplesBackground`, `SakuraBackground`
-- `StormBackground`, `SynthwaveBackground`, `VoidBackground`
-- `AnimatedBackground`, `CompositeBackground`
-
-**Why:** These are expensive (canvas, animation frames). Memoization prevents re-renders when parent props haven't changed, especially during theme/setting toggles.
-
-### Bundle Metrics
-
-After optimizations:
-
-```
-Build time: 10.12s
-HTML: 1.33 kB (gzip: 0.55 kB)
-CSS: 146.42 kB (gzip: 21.82 kB)
-Total JS: ~1.6 MB raw → ~400 KB gzipped
-
-Largest chunks:
-  ops-pages: 437.83 kB (121.80 gzip) — admin/gallery/settings
-  react-vendor: 279.78 kB (89.70 gzip)
-  markdown-vendor: 156.62 kB (47.41 gzip)
-  ui-vendor: 143.17 kB (47.74 gzip)
-```
-
-**No regressions:** All chunk sizes stable; memoization is transparent.
-
-### Future Optimization Opportunities
-
-- **Code-splitting:** NewsPage (80 kB) could split markdown editor into sub-chunk
-- **Virtualization:** Admin user list (15 rows) could benefit from react-window
-- **Image optimization:** Convert remaining PNGs to modern formats
-- **Lazy background loading:** Load background components only when needed in settings
-- **Service worker:** Cache static assets for faster repeat visits
 
 ---
 

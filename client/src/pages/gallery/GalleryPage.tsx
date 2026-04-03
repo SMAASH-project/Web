@@ -1,7 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import Navbar from "@/components/nav/Navbar";
 import { useSettings } from "@/pages/settings/SettingsContext";
-import { getBackgroundClasses, getTextColor, getSubtextColor, getTextShadow } from "@/lib/utils";
+import {
+  getBackgroundClasses,
+  getTextColor,
+  getSubtextColor,
+  getTextShadow,
+} from "@/lib/utils";
 import { useDebugCharactersQuery } from "@/hooks/useDebug";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient";
@@ -195,10 +200,13 @@ function OstPlayer({
   if (OST_TRACKS.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-24 opacity-50">
-        <Music2 className={`h-12 w-12 ${subtextColor}`} />
+        <Music2 className={`w-12 h-12 ${subtextColor}`} />
         <p className={`text-sm ${subtextColor}`}>No tracks yet</p>
-        <p className={`max-w-64 text-center text-xs ${subtextColor} opacity-70`}>
-          Add .mp3 files to <code className="font-mono">build/client/assets/music/</code> and
+        <p
+          className={`text-xs text-center max-w-64 ${subtextColor} opacity-70`}
+        >
+          Add .mp3 files to{" "}
+          <code className="font-mono">build/client/assets/music/</code> and
           register them in the OST_TRACKS list in GalleryPage.tsx
         </p>
       </div>
@@ -206,15 +214,15 @@ function OstPlayer({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
+    <div className="flex flex-col gap-4 w-full max-w-2xl mx-auto">
       <audio ref={audioRef} preload="metadata" />
 
       {/* Now playing card */}
-      <div className={`flex flex-col gap-5 rounded-2xl p-6 ${panelBg}`}>
+      <div className={`rounded-2xl p-6 flex flex-col gap-5 ${panelBg}`}>
         {/* Track info */}
         <div className="flex flex-col items-center gap-1 text-center">
           <div
-            className={`mb-2 flex h-20 w-20 items-center justify-center rounded-2xl ${
+            className={`w-20 h-20 rounded-2xl flex items-center justify-center mb-2 ${
               useLiquidGlass
                 ? useDarkMode
                   ? "bg-white/10"
@@ -225,7 +233,7 @@ function OstPlayer({
             }`}
           >
             <Music2
-              className={`h-8 w-8 ${isPlaying ? "text-amber-400" : subtextColor} transition-colors`}
+              className={`w-8 h-8 ${isPlaying ? "text-amber-400" : subtextColor} transition-colors`}
             />
           </div>
           <p className={`text-base font-semibold ${textColor} ${textShadow}`}>
@@ -237,7 +245,7 @@ function OstPlayer({
         {/* Scrubber */}
         <div className="flex flex-col gap-1">
           <div
-            className={`relative h-1.5 cursor-pointer rounded-full ${scrubberBg}`}
+            className={`relative h-1.5 rounded-full cursor-pointer ${scrubberBg}`}
             onClick={(e) => {
               const rect = e.currentTarget.getBoundingClientRect();
               const pct = (e.clientX - rect.left) / rect.width;
@@ -247,7 +255,7 @@ function OstPlayer({
             onMouseUp={() => setIsDragging(false)}
           >
             <div
-              className="absolute top-0 left-0 h-full rounded-full bg-amber-400 transition-all"
+              className="absolute left-0 top-0 h-full rounded-full bg-amber-400 transition-all"
               style={{
                 width: `${duration ? (currentTime / duration) * 100 : 0}%`,
               }}
@@ -255,17 +263,26 @@ function OstPlayer({
           </div>
           <div className={`flex justify-between text-[10px] ${subtextColor}`}>
             <span>{formatTime(currentTime)}</span>
-            <span>{duration ? formatTime(duration) : (track?.durationLabel ?? "—")}</span>
+            <span>
+              {duration ? formatTime(duration) : (track?.durationLabel ?? "—")}
+            </span>
           </div>
         </div>
 
         {/* Controls */}
         <div className="flex items-center justify-center gap-2">
-          <button className={controlBtn} onClick={prev} disabled={currentIdx === 0}>
-            <SkipBack size={18} className={currentIdx === 0 ? "opacity-30" : textColor} />
+          <button
+            className={controlBtn}
+            onClick={prev}
+            disabled={currentIdx === 0}
+          >
+            <SkipBack
+              size={18}
+              className={currentIdx === 0 ? "opacity-30" : textColor}
+            />
           </button>
           <button
-            className={`cursor-pointer rounded-full bg-amber-500 p-3 text-black shadow-md transition-colors hover:bg-amber-400`}
+            className={`p-3 rounded-full bg-amber-500 hover:bg-amber-400 text-black transition-colors cursor-pointer shadow-md`}
             onClick={togglePlay}
           >
             {isPlaying ? <Pause size={20} /> : <Play size={20} />}
@@ -277,7 +294,9 @@ function OstPlayer({
           >
             <SkipForward
               size={18}
-              className={currentIdx === OST_TRACKS.length - 1 ? "opacity-30" : textColor}
+              className={
+                currentIdx === OST_TRACKS.length - 1 ? "opacity-30" : textColor
+              }
             />
           </button>
         </div>
@@ -292,15 +311,17 @@ function OstPlayer({
             )}
           </button>
           <div
-            className={`relative h-1 flex-1 cursor-pointer rounded-full ${scrubberBg}`}
+            className={`relative flex-1 h-1 rounded-full cursor-pointer ${scrubberBg}`}
             onClick={(e) => {
               const rect = e.currentTarget.getBoundingClientRect();
-              setVolume(Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)));
+              setVolume(
+                Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)),
+              );
               setMuted(false);
             }}
           >
             <div
-              className="absolute top-0 left-0 h-full rounded-full bg-amber-400"
+              className="absolute left-0 top-0 h-full rounded-full bg-amber-400"
               style={{ width: `${(muted ? 0 : volume) * 100}%` }}
             />
           </div>
@@ -308,9 +329,9 @@ function OstPlayer({
       </div>
 
       {/* Track list */}
-      <div className={`overflow-hidden rounded-2xl ${panelBg}`}>
+      <div className={`rounded-2xl overflow-hidden ${panelBg}`}>
         <div
-          className={`px-4 py-2.5 text-[10px] font-semibold tracking-wider uppercase ${subtextColor} border-b border-current/10`}
+          className={`px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider ${subtextColor} border-b border-current/10`}
         >
           Tracklist
         </div>
@@ -322,27 +343,29 @@ function OstPlayer({
                 setCurrentIdx(i);
                 setIsPlaying(true);
               }}
-              className={`flex cursor-pointer items-center gap-3 border-b border-current/5 px-4 py-3 text-left transition-colors last:border-0 ${
+              className={`flex items-center gap-3 px-4 py-3 text-left transition-colors cursor-pointer border-b border-current/5 last:border-0 ${
                 i === currentIdx ? activeBg : "hover:bg-current/5"
               }`}
             >
               <span
-                className={`w-5 shrink-0 text-center font-mono text-xs ${
+                className={`text-xs font-mono w-5 text-center shrink-0 ${
                   i === currentIdx ? "text-amber-400" : subtextColor
                 }`}
               >
                 {i === currentIdx && isPlaying ? "▶" : i + 1}
               </span>
-              <div className="min-w-0 flex-1">
+              <div className="flex-1 min-w-0">
                 <p
-                  className={`truncate text-sm font-medium ${i === currentIdx ? "text-amber-400" : textColor}`}
+                  className={`text-sm font-medium truncate ${i === currentIdx ? "text-amber-400" : textColor}`}
                 >
                   {t.title}
                 </p>
                 <p className={`text-xs ${subtextColor}`}>{t.artist}</p>
               </div>
               {t.durationLabel && (
-                <span className={`text-xs ${subtextColor} shrink-0`}>{t.durationLabel}</span>
+                <span className={`text-xs ${subtextColor} shrink-0`}>
+                  {t.durationLabel}
+                </span>
               )}
             </button>
           ))}
@@ -372,31 +395,39 @@ function CharacterCard({
   const [imgError, setImgError] = useState(false);
   const card = (
     <div
-      className={`flex flex-col overflow-hidden rounded-xl ${panelBg} transition-all duration-200 hover:scale-[1.02] hover:shadow-xl`}
+      className={`rounded-xl overflow-hidden flex flex-col ${panelBg} transition-all duration-200 hover:scale-[1.02] hover:shadow-xl`}
     >
-      <div className="relative aspect-square overflow-hidden bg-black/10">
+      <div className="relative aspect-square bg-black/10 overflow-hidden">
         {!imgError ? (
           <img
             src={`/api/characters/${character.id}/img`}
             alt={character.name}
-            className="h-full w-full object-cover"
+            className="w-full h-full object-cover"
             onError={() => setImgError(true)}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <Swords className={`h-10 w-10 opacity-20 ${subtextColor}`} />
+          <div className="w-full h-full flex items-center justify-center">
+            <Swords className={`w-10 h-10 opacity-20 ${subtextColor}`} />
           </div>
         )}
       </div>
-      <div className="flex items-center justify-between gap-2 px-3 py-2.5">
-        <p className={`truncate text-sm font-semibold ${textColor}`}>{character.name}</p>
-        <span className={`shrink-0 font-mono text-[10px] opacity-40 ${subtextColor}`}>
+      <div className="px-3 py-2.5 flex items-center justify-between gap-2">
+        <p className={`text-sm font-semibold truncate ${textColor}`}>
+          {character.name}
+        </p>
+        <span
+          className={`text-[10px] font-mono shrink-0 opacity-40 ${subtextColor}`}
+        >
           #{character.id}
         </span>
       </div>
     </div>
   );
-  return animate ? <LoadPost index={index}>{card}</LoadPost> : <div>{card}</div>;
+  return animate ? (
+    <LoadPost index={index}>{card}</LoadPost>
+  ) : (
+    <div>{card}</div>
+  );
 }
 
 // ─── Skin card ────────────────────────────────────────────────────────────────
@@ -419,15 +450,17 @@ function SkinCard({
   const rarityColor = RARITY_COLORS[item.rarity] ?? "#9ca3af";
   const card = (
     <div
-      className={`flex flex-col overflow-hidden rounded-xl ${panelBg} transition-all duration-200 hover:scale-[1.02] hover:shadow-xl`}
+      className={`rounded-xl overflow-hidden flex flex-col ${panelBg} transition-all duration-200 hover:scale-[1.02] hover:shadow-xl`}
       style={{ boxShadow: `inset 0 0 0 1px ${rarityColor}30` }}
     >
       <div className="h-1" style={{ backgroundColor: rarityColor }} />
       <div className="flex flex-col gap-2 p-3">
         <div className="flex items-start justify-between gap-2">
-          <p className={`text-sm leading-tight font-semibold ${textColor}`}>{item.name}</p>
+          <p className={`text-sm font-semibold leading-tight ${textColor}`}>
+            {item.name}
+          </p>
           <span
-            className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase"
+            className="text-[10px] uppercase font-semibold tracking-wider px-2 py-0.5 rounded-full shrink-0"
             style={{
               backgroundColor: `${rarityColor}20`,
               color: rarityColor,
@@ -437,13 +470,19 @@ function SkinCard({
             {item.rarity}
           </span>
         </div>
-        <p className={`line-clamp-2 text-xs leading-relaxed opacity-60 ${subtextColor}`}>
+        <p
+          className={`text-xs leading-relaxed line-clamp-2 opacity-60 ${subtextColor}`}
+        >
           {item.description}
         </p>
       </div>
     </div>
   );
-  return animate ? <LoadPost index={index}>{card}</LoadPost> : <div>{card}</div>;
+  return animate ? (
+    <LoadPost index={index}>{card}</LoadPost>
+  ) : (
+    <div>{card}</div>
+  );
 }
 
 // ─── Tab button ───────────────────────────────────────────────────────────────
@@ -484,13 +523,13 @@ function TabButton({
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${active ? `${activeClass} ${textColor}` : `${inactiveClass} ${subtextColor}`}`}
+      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${active ? `${activeClass} ${textColor}` : `${inactiveClass} ${subtextColor}`}`}
     >
       {icon}
       {label}
       {count !== undefined && count > 0 && (
         <span
-          className={`rounded-full px-1.5 py-0.5 text-[10px] ${useLiquidGlass ? "bg-white/15" : useDarkMode ? "bg-gray-600" : "bg-gray-100"}`}
+          className={`text-[10px] px-1.5 py-0.5 rounded-full ${useLiquidGlass ? "bg-white/15" : useDarkMode ? "bg-gray-600" : "bg-gray-100"}`}
         >
           {count}
         </span>
@@ -511,34 +550,47 @@ export function GalleryPage() {
   const textShadow = getTextShadow(useLiquidGlass, useDarkMode);
   const panelBg = getBackgroundClasses(useLiquidGlass, useDarkMode, "light");
 
-  const { data: characters = [], isLoading: charsLoading } = useDebugCharactersQuery();
+  const { data: characters = [], isLoading: charsLoading } =
+    useDebugCharactersQuery();
 
-  const { data: skins = [], isLoading: skinsLoading } = useQuery<ItemReadDTO[]>({
-    queryKey: ["gallery", "skins"],
-    queryFn: async () => {
-      const { data } = await apiClient.get<ItemReadDTO[]>("/items", {
-        params: { page: 1, page_size: 100 },
-      });
-      return (data ?? []).filter((item) => item.categories.includes("Skin"));
+  const { data: skins = [], isLoading: skinsLoading } = useQuery<ItemReadDTO[]>(
+    {
+      queryKey: ["gallery", "skins"],
+      queryFn: async () => {
+        const { data } = await apiClient.get<ItemReadDTO[]>("/items", {
+          params: { page: 1, page_size: 100 },
+        });
+        return (data ?? []).filter((item) => item.categories.includes("Skin"));
+      },
+      staleTime: 5 * 60 * 1000,
     },
-    staleTime: 5 * 60 * 1000,
-  });
+  );
 
   const isLoading =
-    activeTab === "characters" ? charsLoading : activeTab === "skins" ? skinsLoading : false;
+    activeTab === "characters"
+      ? charsLoading
+      : activeTab === "skins"
+        ? skinsLoading
+        : false;
 
   return (
-    <div className="flex min-h-screen w-full flex-col self-start p-4">
+    <div className="p-4 min-h-screen w-full self-start flex flex-col">
       <Navbar />
-      <div className="z-0 mx-auto mt-20 flex w-full max-w-6xl flex-col items-center justify-start gap-6 pb-8">
-        <div className="flex w-full flex-col gap-1">
-          <h1 className={`text-2xl font-bold ${textColor} tracking-tight ${textShadow}`}>
+      <div className="mt-20 z-0 flex flex-col items-center justify-start gap-6 w-full max-w-6xl mx-auto pb-8">
+        <div className="flex flex-col gap-1 w-full">
+          <h1
+            className={`text-2xl font-bold ${textColor} tracking-tight ${textShadow}`}
+          >
             Gallery
           </h1>
-          <p className={`text-sm ${subtextColor}`}>Characters, skins, and original soundtrack</p>
+          <p className={`text-sm ${subtextColor}`}>
+            Characters, skins, and original soundtrack
+          </p>
         </div>
 
-        <div className={`flex items-center gap-1 self-start rounded-2xl p-1 ${panelBg}`}>
+        <div
+          className={`flex items-center gap-1 p-1 rounded-2xl self-start ${panelBg}`}
+        >
           <TabButton
             active={activeTab === "characters"}
             onClick={() => setActiveTab("characters")}
@@ -584,17 +636,17 @@ export function GalleryPage() {
             useDarkMode={useDarkMode}
           />
         ) : isLoading ? (
-          <div className="flex w-full items-center justify-center py-24">
-            <Loader2 className={`h-6 w-6 animate-spin ${subtextColor}`} />
+          <div className="flex items-center justify-center w-full py-24">
+            <Loader2 className={`w-6 h-6 animate-spin ${subtextColor}`} />
           </div>
         ) : activeTab === "characters" ? (
           characters.length === 0 ? (
-            <div className="mt-16 flex flex-col items-center justify-center gap-3 opacity-50">
-              <Swords className={`h-12 w-12 ${subtextColor}`} />
+            <div className="flex flex-col items-center justify-center gap-3 mt-16 opacity-50">
+              <Swords className={`w-12 h-12 ${subtextColor}`} />
               <p className={`text-sm ${subtextColor}`}>No characters yet</p>
             </div>
           ) : (
-            <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full">
               {characters.map((c, i) => (
                 <CharacterCard
                   key={c.id}
@@ -609,12 +661,12 @@ export function GalleryPage() {
             </div>
           )
         ) : skins.length === 0 ? (
-          <div className="mt-16 flex flex-col items-center justify-center gap-3 opacity-50">
-            <Paintbrush className={`h-12 w-12 ${subtextColor}`} />
+          <div className="flex flex-col items-center justify-center gap-3 mt-16 opacity-50">
+            <Paintbrush className={`w-12 h-12 ${subtextColor}`} />
             <p className={`text-sm ${subtextColor}`}>No skins yet</p>
           </div>
         ) : (
-          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
             {skins.map((item, i) => (
               <SkinCard
                 key={item.id}
