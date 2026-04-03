@@ -34,27 +34,19 @@ export function ReleasesPage() {
   } = useReleases(selectedOs);
 
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
-  const textShadow = getTextShadow(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const subtextColor = getSubtextColor(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
+  const textShadow = getTextShadow(settings.useLiquidGlass, settings.useDarkMode);
+  const subtextColor = getSubtextColor(settings.useLiquidGlass, settings.useDarkMode);
 
   return (
-    <div className="p-4 min-h-screen w-full self-start flex flex-col">
+    <div className="flex min-h-screen w-full flex-col self-start p-4">
       <Navbar />
-      <div className="mt-20 z-0 flex flex-col items-center justify-start gap-6 w-full max-w-4xl mx-auto pb-8">
+      <div className="z-0 mx-auto mt-20 flex w-full max-w-4xl flex-col items-center justify-start gap-6 pb-8">
         {/* Header section */}
-        <div className="flex flex-col gap-5 w-full">
+        <div className="flex w-full flex-col gap-5">
           {/* Title + OS selector row */}
-          <div className="flex items-center justify-between w-full">
+          <div className="flex w-full items-center justify-between">
             <div className="flex flex-col gap-1">
-              <h1
-                className={`text-2xl font-bold ${textColor} tracking-tight ${textShadow}`}
-              >
+              <h1 className={`text-2xl font-bold ${textColor} tracking-tight ${textShadow}`}>
                 {t("title")}
               </h1>
               <p className={`text-sm ${subtextColor}`}>{t("subtitle")}</p>

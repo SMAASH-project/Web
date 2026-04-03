@@ -48,26 +48,16 @@ export function Releases({
 }: ReleasesProps) {
   const { settings } = useSettings();
   const glass = settings.useLiquidGlass;
-  const bgClass = getBackgroundClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-    "light",
-  );
-  const textShadow = getTextShadow(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
+  const bgClass = getBackgroundClasses(settings.useLiquidGlass, settings.useDarkMode, "light");
+  const textShadow = getTextShadow(settings.useLiquidGlass, settings.useDarkMode);
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
-  const subtextColor = getSubtextColor(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
+  const subtextColor = getSubtextColor(settings.useLiquidGlass, settings.useDarkMode);
 
   return (
-    <div className="flex flex-col gap-3 w-full" ref={containerRef}>
+    <div className="flex w-full flex-col gap-3" ref={containerRef}>
       {visibleReleases.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-3 mt-16 opacity-60">
-          <Package className={`w-12 h-12 ${subtextColor}`} />
+        <div className="mt-16 flex flex-col items-center justify-center gap-3 opacity-60">
+          <Package className={`h-12 w-12 ${subtextColor}`} />
           <p className={`${subtextColor} text-base ${textShadow}`}>
             No releases found for {selectedOs}.
           </p>
@@ -89,15 +79,15 @@ export function Releases({
             >
               {/* Accent bar on left */}
               <div
-                className="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg"
+                className="absolute top-0 bottom-0 left-0 w-1 rounded-l-lg"
                 style={{ backgroundColor: accentColor }}
               />
 
-              <div className="flex items-center justify-between gap-4 py-4 pl-6 pr-5">
+              <div className="flex items-center justify-between gap-4 py-4 pr-5 pl-6">
                 {/* Left: version info */}
-                <div className="flex items-center gap-4 min-w-0">
+                <div className="flex min-w-0 items-center gap-4">
                   <div
-                    className={`flex items-center justify-center w-10 h-10 rounded-lg shrink-0 ${
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
                       glass
                         ? settings.useDarkMode
                           ? "bg-black/10"
@@ -105,9 +95,9 @@ export function Releases({
                         : "bg-gray-700/60"
                     }`}
                   >
-                    <Package className={`w-5 h-5 ${subtextColor}`} />
+                    <Package className={`h-5 w-5 ${subtextColor}`} />
                   </div>
-                  <div className="flex flex-col gap-1 min-w-0">
+                  <div className="flex min-w-0 flex-col gap-1">
                     <div className="flex items-center gap-2.5">
                       <span
                         className={`text-base font-semibold ${textColor} tracking-tight ${textShadow}`}
@@ -115,7 +105,7 @@ export function Releases({
                         v{release.version}
                       </span>
                       <Badge
-                        className="text-[10px] uppercase font-semibold tracking-wider px-2 py-0"
+                        className="px-2 py-0 text-[10px] font-semibold tracking-wider uppercase"
                         style={{
                           backgroundColor: `${accentColor}20`,
                           color: accentColor,
@@ -127,10 +117,7 @@ export function Releases({
                     </div>
                     <div className="flex items-center gap-2">
                       {release.supports.map((os) => (
-                        <span
-                          key={os}
-                          className={`text-xs ${subtextColor} font-medium`}
-                        >
+                        <span key={os} className={`text-xs ${subtextColor} font-medium`}>
                           {os}
                         </span>
                       ))}
@@ -143,7 +130,7 @@ export function Releases({
                 </div>
 
                 {/* Right: actions */}
-                <div className="flex items-center gap-1.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
+                <div className="flex shrink-0 items-center gap-1.5 opacity-60 transition-opacity group-hover:opacity-100">
                   <DownloadReleaseButton
                     version={release.version}
                     downloadUrl={release.downloadUrls[selectedOs]}
@@ -168,13 +155,8 @@ export function Releases({
       )}
       {/* Sentinel element observed by IntersectionObserver to trigger loading more */}
       {hasMore && (
-        <div
-          ref={sentinelRef}
-          className="flex items-center justify-center py-4 w-full shrink-0"
-        >
-          {isLoading && (
-            <Loader2 className={`w-5 h-5 ${subtextColor} animate-spin`} />
-          )}
+        <div ref={sentinelRef} className="flex w-full shrink-0 items-center justify-center py-4">
+          {isLoading && <Loader2 className={`h-5 w-5 ${subtextColor} animate-spin`} />}
         </div>
       )}
     </div>

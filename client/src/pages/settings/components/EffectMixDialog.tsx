@@ -25,12 +25,7 @@ import {
 } from "@/components/ui/accordion";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import {
-  getButtonClasses,
-  getDialogClasses,
-  getTextColor,
-  getTextShadow,
-} from "@/lib/utils";
+import { getButtonClasses, getDialogClasses, getTextColor, getTextShadow } from "@/lib/utils";
 import { useSettings } from "@/pages/settings/SettingsContext";
 
 export function EffectMixDialog() {
@@ -73,19 +68,18 @@ export function EffectMixDialog() {
     [pendingMix],
   );
 
-  const toggleSubEffect = useCallback(
-    (effectKey: AnimationKey, subKey: string) => {
-      setPendingMix((prev) => {
-        const current = (prev[effectKey] ??
-          DEFAULT_SUB_EFFECTS[effectKey]) as unknown as Record<string, boolean>;
-        return {
-          ...prev,
-          [effectKey]: { ...current, [subKey]: !current[subKey] },
-        } as EffectLayerConfig;
-      });
-    },
-    [],
-  );
+  const toggleSubEffect = useCallback((effectKey: AnimationKey, subKey: string) => {
+    setPendingMix((prev) => {
+      const current = (prev[effectKey] ?? DEFAULT_SUB_EFFECTS[effectKey]) as unknown as Record<
+        string,
+        boolean
+      >;
+      return {
+        ...prev,
+        [effectKey]: { ...current, [subKey]: !current[subKey] },
+      } as EffectLayerConfig;
+    });
+  }, []);
 
   const handleApply = useCallback(() => {
     const hasEffects = Object.keys(pendingMix).length > 0;
@@ -110,14 +104,8 @@ export function EffectMixDialog() {
     () => ({
       textColor: getTextColor(settings.useLiquidGlass, settings.useDarkMode),
       textShadow: getTextShadow(settings.useLiquidGlass, settings.useDarkMode),
-      buttonClass: getButtonClasses(
-        settings.useLiquidGlass,
-        settings.useDarkMode,
-      ),
-      dialogClass: getDialogClasses(
-        settings.useLiquidGlass,
-        settings.useDarkMode,
-      ),
+      buttonClass: getButtonClasses(settings.useLiquidGlass, settings.useDarkMode),
+      dialogClass: getDialogClasses(settings.useLiquidGlass, settings.useDarkMode),
     }),
     [settings.useLiquidGlass, settings.useDarkMode],
   );
@@ -129,32 +117,23 @@ export function EffectMixDialog() {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button className={`cursor-pointer ${buttonClass} ${textShadow}`}>
-          Mix Effects
-        </Button>
+        <Button className={`cursor-pointer ${buttonClass} ${textShadow}`}>Mix Effects</Button>
       </DialogTrigger>
       <DialogContent className={`sm:max-w-2xl ${dialogClass} ${textColor}`}>
         <DialogHeader>
           <DialogTitle className={textColor}>Mix Effects</DialogTitle>
         </DialogHeader>
 
-        <div className="flex gap-4 min-h-100">
+        <div className="flex min-h-100 gap-4">
           {/* Left — effect accordion list */}
-          <div className="flex-1 overflow-y-auto max-h-[60vh] min-w-0 pr-1">
-            <Accordion
-              type="multiple"
-              value={openItems}
-              onValueChange={setOpenItems}
-            >
+          <div className="max-h-[60vh] min-w-0 flex-1 overflow-y-auto pr-1">
+            <Accordion type="multiple" value={openItems} onValueChange={setOpenItems}>
               {ALL_ANIMATION_KEYS.map((key) => {
                 const isEnabled = key in pendingMix;
-                const subLabels = SUB_EFFECT_LABELS[key] as Record<
-                  string,
-                  string
-                >;
-                const subValues = (
-                  isEnabled ? pendingMix[key] : DEFAULT_SUB_EFFECTS[key]
-                ) as unknown as Record<string, boolean>;
+                const subLabels = SUB_EFFECT_LABELS[key] as Record<string, string>;
+                const subValues = (isEnabled
+                  ? pendingMix[key]
+                  : DEFAULT_SUB_EFFECTS[key]) as unknown as Record<string, boolean>;
 
                 return (
                   <AccordionItem key={key} value={key} className="border-white/20">
@@ -166,31 +145,23 @@ export function EffectMixDialog() {
                         onClick={(e) => e.stopPropagation()}
                         className="shrink-0"
                       />
-                      <span className="text-sm font-medium">
-                        {ANIMATION_LABELS[key]}
-                      </span>
+                      <span className="text-sm font-medium">{ANIMATION_LABELS[key]}</span>
                     </AccordionTrigger>
                     <AccordionContent>
-                      <div className="flex flex-col gap-2 pl-8 pb-1">
+                      <div className="flex flex-col gap-2 pb-1 pl-8">
                         {Object.entries(subLabels).map(([subKey, label]) => (
                           <div
                             key={subKey}
                             className={`flex items-center gap-2 transition-opacity ${
-                              !isEnabled
-                                ? "opacity-40 pointer-events-none"
-                                : ""
+                              !isEnabled ? "pointer-events-none opacity-40" : ""
                             }`}
                           >
                             <Switch
                               size="sm"
                               checked={subValues[subKey] ?? true}
-                              onCheckedChange={() =>
-                                toggleSubEffect(key, subKey)
-                              }
+                              onCheckedChange={() => toggleSubEffect(key, subKey)}
                             />
-                            <span className={`text-xs ${textColor}`}>
-                              {label}
-                            </span>
+                            <span className={`text-xs ${textColor}`}>{label}</span>
                           </div>
                         ))}
                       </div>
@@ -203,7 +174,7 @@ export function EffectMixDialog() {
 
           {/* Right — live preview (paused) */}
           <div
-            className="w-80 shrink-0 self-stretch rounded-lg overflow-hidden relative"
+            className="relative w-80 shrink-0 self-stretch overflow-hidden rounded-lg"
             style={{
               backgroundImage: `linear-gradient(to right, ${colorLeft}, ${colorMiddle}, ${colorRight})`,
             }}
@@ -227,10 +198,7 @@ export function EffectMixDialog() {
           >
             Clear
           </Button>
-          <Button
-            className={`cursor-pointer ${buttonClass}`}
-            onClick={handleApply}
-          >
+          <Button className={`cursor-pointer ${buttonClass}`} onClick={handleApply}>
             Apply
           </Button>
         </DialogFooter>

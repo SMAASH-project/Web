@@ -18,20 +18,18 @@ export function SettingsPage() {
   const handleAnimationComplete = useCallback(() => setAnimDone(true), []);
 
   return (
-    <div
-      className={`min-h-screen w-full self-start flex flex-col items-center ${textColor}`}
-    >
+    <div className={`flex min-h-screen w-full flex-col items-center self-start ${textColor}`}>
       <Navbar />
       {settings.useAnimations ? (
         <CardAnimation
-          className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 pt-20 flex items-center justify-center"
+          className="z-0 flex w-full flex-1 items-center justify-center px-4 pt-20 sm:px-6 lg:px-10"
           onAnimationComplete={handleAnimationComplete}
         >
           {/* Pass animDone so SettingsPageContent can skip backdrop-blur during animation */}
           <SettingsPageContent animReady={animDone} />
         </CardAnimation>
       ) : (
-        <div className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 pt-20 flex items-center justify-center">
+        <div className="z-0 flex w-full flex-1 items-center justify-center px-4 pt-20 sm:px-6 lg:px-10">
           <SettingsPageContent animReady={true} />
         </div>
       )}

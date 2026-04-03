@@ -93,17 +93,12 @@ export function AnimatedBackground({
     const newId = ++layerIdRef.current;
 
     // Add new layer (invisible) alongside the current one
-    setLayers((prev) => [
-      ...prev,
-      { id: newId, key: animationKey, visible: false },
-    ]);
+    setLayers((prev) => [...prev, { id: newId, key: animationKey, visible: false }]);
 
     // On the next paint: fade in new, fade out old
     const fadeId = setTimeout(() => {
       setLayers((prev) =>
-        prev.map((l) =>
-          l.id === newId ? { ...l, visible: true } : { ...l, visible: false },
-        ),
+        prev.map((l) => (l.id === newId ? { ...l, visible: true } : { ...l, visible: false })),
       );
     }, 20); // one rAF tick is enough
 
@@ -123,7 +118,7 @@ export function AnimatedBackground({
   const shared = { colorLeft, colorMiddle, colorRight, paused };
 
   return (
-    <div className="fixed inset-0 z-0 pointer-events-none">
+    <div className="pointer-events-none fixed inset-0 z-0">
       {layers.map((layer) => (
         // Inner layer: crossfade wrapper per animation
         <div

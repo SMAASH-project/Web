@@ -33,12 +33,12 @@ export function StyledSelect<T extends string>({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className={`flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm shadow-xs outline-none transition-colors cursor-pointer ${inputClass} ${className}`}
+          className={`flex cursor-pointer items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm shadow-xs transition-colors outline-none ${inputClass} ${className}`}
         >
           <span className={`${textColor} flex items-center gap-2 text-xs`}>
             {renderOption ? renderOption(value) : value}
           </span>
-          <ChevronDown className={`w-3.5 h-3.5 shrink-0 opacity-50 ${textColor}`} />
+          <ChevronDown className={`h-3.5 w-3.5 shrink-0 opacity-50 ${textColor}`} />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -50,12 +50,12 @@ export function StyledSelect<T extends string>({
           <DropdownMenuItem
             key={opt}
             onClick={() => onChange(opt)}
-            className={`flex items-center justify-between gap-2 cursor-pointer text-xs ${textColor} hover:opacity-80`}
+            className={`flex cursor-pointer items-center justify-between gap-2 text-xs ${textColor} hover:opacity-80`}
           >
             <span className="flex items-center gap-2">
               {renderOption ? renderOption(opt) : opt}
             </span>
-            {opt === value && <Check className="w-3.5 h-3.5 opacity-60 shrink-0" />}
+            {opt === value && <Check className="h-3.5 w-3.5 shrink-0 opacity-60" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

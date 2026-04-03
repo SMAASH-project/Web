@@ -30,9 +30,7 @@ export function CacheTab({
   const filtered = useMemo(() => {
     const q = filter.trim().toLowerCase();
     return q
-      ? queries.filter((qr) =>
-          JSON.stringify(qr.queryKey).toLowerCase().includes(q),
-        )
+      ? queries.filter((qr) => JSON.stringify(qr.queryKey).toLowerCase().includes(q))
       : queries;
   }, [queries, filter]);
 
@@ -45,11 +43,11 @@ export function CacheTab({
 
   const statusIcon = (s: string) =>
     s === "success" ? (
-      <CheckCircle2 size={10} className="text-green-400 shrink-0" />
+      <CheckCircle2 size={10} className="shrink-0 text-green-400" />
     ) : s === "error" ? (
-      <XCircle size={10} className="text-red-400 shrink-0" />
+      <XCircle size={10} className="shrink-0 text-red-400" />
     ) : s === "pending" ? (
-      <Loader2 size={10} className="animate-spin text-amber-400 shrink-0" />
+      <Loader2 size={10} className="shrink-0 animate-spin text-amber-400" />
     ) : null;
 
   const fmtAge = (ts: number) => {
@@ -61,52 +59,47 @@ export function CacheTab({
   };
 
   return (
-    <div className="flex flex-col gap-2 h-full">
+    <div className="flex h-full flex-col gap-2">
       <div className="flex items-center gap-2">
         <input
           type="text"
           placeholder="Filter…"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className={`flex-1 text-xs px-3 py-1.5 rounded-lg ${inputClass}`}
+          className={`flex-1 rounded-lg px-3 py-1.5 text-xs ${inputClass}`}
         />
         <button
           onClick={() => {
             queryClient.invalidateQueries();
             forceUpdate((n) => n + 1);
           }}
-          className={`text-[10px] px-2.5 py-1.5 rounded-lg border border-current/20 ${subtextColor} hover:border-current/40 flex items-center gap-1`}
+          className={`rounded-lg border border-current/20 px-2.5 py-1.5 text-[10px] ${subtextColor} flex items-center gap-1 hover:border-current/40`}
         >
           <Trash2 size={10} /> Clear
         </button>
         <button
           onClick={() => forceUpdate((n) => n + 1)}
-          className={`text-[10px] px-2.5 py-1.5 rounded-lg border border-current/20 ${subtextColor} hover:border-current/40`}
+          className={`rounded-lg border border-current/20 px-2.5 py-1.5 text-[10px] ${subtextColor} hover:border-current/40`}
         >
           <RefreshCw size={10} />
         </button>
       </div>
-      <div className={`rounded-xl overflow-auto flex-1 ${panelBg}`}>
+      <div className={`flex-1 overflow-auto rounded-xl ${panelBg}`}>
         {filtered.length === 0 ? (
-          <p className={`text-xs text-center py-8 ${subtextColor}`}>
-            No cache entries
-          </p>
+          <p className={`py-8 text-center text-xs ${subtextColor}`}>No cache entries</p>
         ) : (
           <div className="divide-y divide-current/5">
             {filtered.map((query) => {
               const keyStr = JSON.stringify(query.queryKey);
               const isOpen = expanded.has(keyStr);
               const state = query.state;
-              const dataStr =
-                state.data !== undefined
-                  ? JSON.stringify(state.data, null, 2)
-                  : null;
+              const dataStr = state.data !== undefined ? JSON.stringify(state.data, null, 2) : null;
               return (
                 <div key={keyStr}>
                   <button
                     type="button"
                     onClick={() => toggle(keyStr)}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-current/5"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-current/5"
                   >
                     {isOpen ? (
                       <ChevronDown size={10} className={subtextColor} />
@@ -114,9 +107,7 @@ export function CacheTab({
                       <ChevronRight size={10} className={subtextColor} />
                     )}
                     {statusIcon(state.status)}
-                    <span
-                      className={`flex-1 text-[11px] font-mono truncate ${textColor}`}
-                    >
+                    <span className={`flex-1 truncate font-mono text-[11px] ${textColor}`}>
                       {keyStr}
                     </span>
                     <span className={`text-[10px] ${subtextColor} shrink-0`}>
@@ -126,20 +117,18 @@ export function CacheTab({
                   {isOpen && (
                     <div className="px-3 pb-3">
                       {state.error && (
-                        <p className="text-[10px] text-red-400 mb-1">
+                        <p className="mb-1 text-[10px] text-red-400">
                           Error: {String(state.error)}
                         </p>
                       )}
                       {dataStr && (
                         <pre
-                          className={`text-[10px] font-mono rounded-lg p-2 overflow-auto max-h-32 ${subtextColor} bg-black/10`}
+                          className={`max-h-32 overflow-auto rounded-lg p-2 font-mono text-[10px] ${subtextColor} bg-black/10`}
                         >
-                          {dataStr.length > 1500
-                            ? dataStr.slice(0, 1500) + "\n…"
-                            : dataStr}
+                          {dataStr.length > 1500 ? dataStr.slice(0, 1500) + "\n…" : dataStr}
                         </pre>
                       )}
-                      <div className="flex gap-2 mt-2">
+                      <div className="mt-2 flex gap-2">
                         <button
                           onClick={() => {
                             queryClient.invalidateQueries({
@@ -147,7 +136,7 @@ export function CacheTab({
                             });
                             forceUpdate((n) => n + 1);
                           }}
-                          className={`text-[10px] px-2 py-0.5 rounded border border-current/20 ${subtextColor} hover:border-current/40`}
+                          className={`rounded border border-current/20 px-2 py-0.5 text-[10px] ${subtextColor} hover:border-current/40`}
                         >
                           Invalidate
                         </button>
@@ -158,7 +147,7 @@ export function CacheTab({
                             });
                             forceUpdate((n) => n + 1);
                           }}
-                          className="text-[10px] px-2 py-0.5 rounded border border-red-500/30 text-red-400 hover:border-red-500/60"
+                          className="rounded border border-red-500/30 px-2 py-0.5 text-[10px] text-red-400 hover:border-red-500/60"
                         >
                           Remove
                         </button>
@@ -171,7 +160,7 @@ export function CacheTab({
           </div>
         )}
       </div>
-      <p className={`text-[10px] text-center ${subtextColor} opacity-50`}>
+      <p className={`text-center text-[10px] ${subtextColor} opacity-50`}>
         {filtered.length} / {queries.length} entries
       </p>
     </div>

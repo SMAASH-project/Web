@@ -17,14 +17,8 @@ export const SettingToggle = memo(function SettingToggle() {
   const { t } = useTranslation("settings");
 
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
-  const textShadow = getTextShadow(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const subtextColor = getSubtextColor(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
+  const textShadow = getTextShadow(settings.useLiquidGlass, settings.useDarkMode);
+  const subtextColor = getSubtextColor(settings.useLiquidGlass, settings.useDarkMode);
 
   return (
     <FieldGroup className="w-full max-w-md">
@@ -41,9 +35,7 @@ export const SettingToggle = memo(function SettingToggle() {
           <Switch
             id="switch-animations"
             checked={settings.useAnimations}
-            onCheckedChange={(checked) =>
-              updateSetting("useAnimations", checked)
-            }
+            onCheckedChange={(checked) => updateSetting("useAnimations", checked)}
           />
         </Field>
       </FieldLabel>
@@ -60,9 +52,7 @@ export const SettingToggle = memo(function SettingToggle() {
           <Switch
             id="switch-liquid-glass"
             checked={settings.useLiquidGlass}
-            onCheckedChange={(checked) =>
-              updateSetting("useLiquidGlass", checked)
-            }
+            onCheckedChange={(checked) => updateSetting("useLiquidGlass", checked)}
           />
         </Field>
       </FieldLabel>

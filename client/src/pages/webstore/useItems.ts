@@ -1,11 +1,4 @@
-import {
-  useState,
-  useEffect,
-  useRef,
-  useMemo,
-  useCallback,
-  useContext,
-} from "react";
+import { useState, useEffect, useRef, useMemo, useCallback, useContext } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DateTime } from "luxon";
 import apiClient from "@/lib/apiClient";
@@ -46,13 +39,9 @@ interface PurchaseReadDTO {
 // ─── Mapping helpers ──────────────────────────────────────────────────────────
 
 function itemDTOToWebstoreItem(dto: ItemReadDTO): WebstoreItem {
-  const kind: WebstoreItem["kind"] = dto.categories.includes("Character")
-    ? "Character"
-    : "Skin";
+  const kind: WebstoreItem["kind"] = dto.categories.includes("Character") ? "Character" : "Skin";
 
-  const combatType: WebstoreItem["combatType"] = dto.categories.includes(
-    "Melee",
-  )
+  const combatType: WebstoreItem["combatType"] = dto.categories.includes("Melee")
     ? "Melee"
     : dto.categories.includes("Ranged")
       ? "Ranged"
@@ -90,9 +79,7 @@ export function useItems() {
   const profileId = selectedProfile?.id ?? null;
 
   // ── Fetch all items ──────────────────────────────────────────────────────
-  const { data: fetchedItems = [], isLoading: itemsLoading } = useQuery<
-    WebstoreItem[]
-  >({
+  const { data: fetchedItems = [], isLoading: itemsLoading } = useQuery<WebstoreItem[]>({
     queryKey: queryKeys.items.all,
     queryFn: async () => {
       const { data } = await apiClient.get<ItemReadDTO[]>("/items", {
@@ -118,10 +105,7 @@ export function useItems() {
   });
 
   // Build a set of owned item names from purchase history
-  const ownedNames = useMemo(
-    () => new Set((purchases ?? []).map((p) => p.item)),
-    [purchases],
-  );
+  const ownedNames = useMemo(() => new Set((purchases ?? []).map((p) => p.item)), [purchases]);
 
   // Merge ownership into items
   const allItems = useMemo(
@@ -158,8 +142,7 @@ export function useItems() {
       toast.success("Item unlocked!");
     },
     onError: (err) => {
-      const msg =
-        (err as any)?.response?.data?.error ?? err?.message ?? "Purchase failed.";
+      const msg = (err as any)?.response?.data?.error ?? err?.message ?? "Purchase failed.";
       toast.error(msg);
     },
   });
@@ -195,8 +178,7 @@ export function useItems() {
       toast.success("Item created.");
     },
     onError: (err) => {
-      const msg =
-        (err as any)?.response?.data?.error ?? err?.message ?? "Failed to create item.";
+      const msg = (err as any)?.response?.data?.error ?? err?.message ?? "Failed to create item.";
       toast.error(msg);
     },
   });
@@ -208,9 +190,7 @@ export function useItems() {
     },
     onMutate: async (itemId) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.items.all });
-      const previousItems = queryClient.getQueryData<WebstoreItem[]>(
-        queryKeys.items.all,
-      );
+      const previousItems = queryClient.getQueryData<WebstoreItem[]>(queryKeys.items.all);
       queryClient.setQueryData<WebstoreItem[]>(queryKeys.items.all, (old) =>
         (old ?? []).filter((item) => item.id !== itemId),
       );
@@ -242,14 +222,7 @@ export function useItems() {
   const loadTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const kinds: string[] = ["All", "Character", "Skin"];
-  const rarities: string[] = [
-    "All",
-    "Common",
-    "Uncommon",
-    "Rare",
-    "Epic",
-    "Legendary",
-  ];
+  const rarities: string[] = ["All", "Common", "Uncommon", "Rare", "Epic", "Legendary"];
   const combatTypes: string[] = ["All", "Melee", "Ranged"];
   const ownershipOptions: string[] = ["All", "Owned", "Unowned"];
 
@@ -259,8 +232,7 @@ export function useItems() {
   const filteredItems = useMemo(() => {
     return allItems.filter((item) => {
       const matchesKind = selectedKind === "All" || item.kind === selectedKind;
-      const matchesRarity =
-        selectedRarity === "All" || item.rarity === selectedRarity;
+      const matchesRarity = selectedRarity === "All" || item.rarity === selectedRarity;
       const matchesCombatType =
         selectedCombatType === "All" ||
         item.kind !== "Character" ||
@@ -269,17 +241,9 @@ export function useItems() {
         selectedOwnership === "All" ||
         (selectedOwnership === "Owned" && item.owned) ||
         (selectedOwnership === "Unowned" && !item.owned);
-      return (
-        matchesKind && matchesRarity && matchesCombatType && matchesOwnership
-      );
+      return matchesKind && matchesRarity && matchesCombatType && matchesOwnership;
     });
-  }, [
-    allItems,
-    selectedKind,
-    selectedRarity,
-    selectedCombatType,
-    selectedOwnership,
-  ]);
+  }, [allItems, selectedKind, selectedRarity, selectedCombatType, selectedOwnership]);
 
   const hasMore = useMemo(() => {
     if (searchQuery) return false;
@@ -289,9 +253,7 @@ export function useItems() {
   const visibleItems = useMemo(() => {
     let items = filteredItems;
     if (searchQuery) {
-      items = items.filter((item) =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
+      items = items.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
       return items;
     }
     return items.slice(0, page * PAGE_SIZE);
@@ -409,13 +371,9 @@ export function useItems() {
     isDeleting: deleteMutation.isPending,
     isPurchasing: purchaseMutation.isPending,
     createError:
-      (createMutation.error as any)?.response?.data?.error ??
-      createMutation.error?.message ??
-      null,
+      (createMutation.error as any)?.response?.data?.error ?? createMutation.error?.message ?? null,
     deleteError:
-      (deleteMutation.error as any)?.response?.data?.error ??
-      deleteMutation.error?.message ??
-      null,
+      (deleteMutation.error as any)?.response?.data?.error ?? deleteMutation.error?.message ?? null,
     purchaseError:
       (purchaseMutation.error as any)?.response?.data?.error ??
       purchaseMutation.error?.message ??

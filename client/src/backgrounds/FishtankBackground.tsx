@@ -115,12 +115,7 @@ function drawFish(
   ctx.fill();
 
   // Iridescent sheen
-  const sheenGrad = ctx.createLinearGradient(
-    -s * 0.3,
-    -s * 0.4,
-    s * 0.3,
-    s * 0.4,
-  );
+  const sheenGrad = ctx.createLinearGradient(-s * 0.3, -s * 0.4, s * 0.3, s * 0.4);
   sheenGrad.addColorStop(0, `rgba(255,255,255,0.18)`);
   sheenGrad.addColorStop(0.5, `rgba(255,255,255,0.04)`);
   sheenGrad.addColorStop(1, `rgba(255,255,255,0.12)`);
@@ -132,12 +127,7 @@ function drawFish(
   // Dorsal fin
   ctx.beginPath();
   ctx.moveTo(-s * 0.15, -s * 0.38);
-  ctx.quadraticCurveTo(
-    s * 0.2,
-    -s * 0.85 + wag * s * 0.15,
-    s * 0.45,
-    -s * 0.38,
-  );
+  ctx.quadraticCurveTo(s * 0.2, -s * 0.85 + wag * s * 0.15, s * 0.45, -s * 0.38);
   ctx.closePath();
   ctx.fillStyle = `rgba(${r},${g},${b},0.5)`;
   ctx.fill();
@@ -231,12 +221,7 @@ interface Weed {
   dark: number;
 }
 
-function drawWeed(
-  ctx: CanvasRenderingContext2D,
-  w: Weed,
-  t: number,
-  floorY: number,
-) {
+function drawWeed(ctx: CanvasRenderingContext2D, w: Weed, t: number, floorY: number) {
   const segH = w.h / w.segs;
   ctx.save();
   ctx.strokeStyle = `rgba(20,${50 + w.dark},30,0.7)`;
@@ -341,15 +326,12 @@ export function FishtankBackground({
         r,
         g,
         b,
-        members: Array.from(
-          { length: 10 + Math.floor(Math.random() * 8) },
-          () => ({
-            dx: (Math.random() - 0.5) * 70,
-            dy: (Math.random() - 0.5) * 35,
-            phase: Math.random() * Math.PI * 2,
-            size: 6 + Math.random() * 7,
-          }),
-        ),
+        members: Array.from({ length: 10 + Math.floor(Math.random() * 8) }, () => ({
+          dx: (Math.random() - 0.5) * 70,
+          dy: (Math.random() - 0.5) * 35,
+          phase: Math.random() * Math.PI * 2,
+          size: 6 + Math.random() * 7,
+        })),
       };
     });
 
@@ -397,8 +379,7 @@ export function FishtankBackground({
         ctx!.save();
         ctx!.globalAlpha = 0.07;
         for (let i = 0; i < 7; i++) {
-          const cx =
-            ((i * w * 0.16 + t * 18 * (i % 2 === 0 ? 1 : -0.7)) % (w + 80)) - 40;
+          const cx = ((i * w * 0.16 + t * 18 * (i % 2 === 0 ? 1 : -0.7)) % (w + 80)) - 40;
           const cy = h * 0.12 + Math.sin(t * 0.8 + i * 1.1) * h * 0.06;
           const crad = 80 + Math.sin(t * 0.5 + i) * 25;
           const caust = ctx!.createRadialGradient(cx, cy, 0, cx, cy, crad);
@@ -437,8 +418,7 @@ export function FishtankBackground({
         ctx!.save();
         ctx!.globalAlpha = 0.06;
         for (let i = 0; i < 10; i++) {
-          const sx =
-            ((i * w * 0.11 + t * 28 * (i % 2 === 0 ? 1 : -1)) % (w + 60)) - 30;
+          const sx = ((i * w * 0.11 + t * 28 * (i % 2 === 0 ? 1 : -1)) % (w + 60)) - 30;
           const sw = 20 + Math.sin(t * 0.5 + i) * 10;
           const sg = ctx!.createLinearGradient(sx - sw, 2, sx + sw, 2);
           sg.addColorStop(0, "rgba(255,255,255,0)");
@@ -490,19 +470,7 @@ export function FishtankBackground({
           for (const m of sc.members) {
             const fx = sc.x + m.dx + Math.sin(t * 1.8 + m.phase) * 5;
             const fy = sc.y + m.dy + Math.cos(t * 1.4 + m.phase) * 3;
-            drawFish(
-              ctx!,
-              fx,
-              fy,
-              sc.vx,
-              m.size,
-              sc.r,
-              sc.g,
-              sc.b,
-              t,
-              m.phase,
-              0.72,
-            );
+            drawFish(ctx!, fx, fy, sc.vx, m.size, sc.r, sc.g, sc.b, t, m.phase, 0.72);
           }
         }
 
@@ -525,12 +493,21 @@ export function FishtankBackground({
       cancelAnimationFrame(animId);
       if (!preview) window.removeEventListener("resize", resize);
     };
-  }, [colorLeft, colorMiddle, colorRight, showFish, showBubbles, showSeaweed, showCaustics, showLightShafts]);
+  }, [
+    colorLeft,
+    colorMiddle,
+    colorRight,
+    showFish,
+    showBubbles,
+    showSeaweed,
+    showCaustics,
+    showLightShafts,
+  ]);
 
   return (
     <canvas
       ref={canvasRef}
-      className={`${preview ? "absolute" : "fixed"} inset-0 z-0 opacity-60 pointer-events-none`}
+      className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 opacity-60`}
     />
   );
 }

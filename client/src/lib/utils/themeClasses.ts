@@ -1,10 +1,7 @@
 /**
  * Get primary text color for any element
  */
-export function getTextColor(
-  useLiquidGlass: boolean,
-  useDarkMode: boolean,
-): string {
+export function getTextColor(useLiquidGlass: boolean, useDarkMode: boolean): string {
   if (useLiquidGlass) {
     return "text-white";
   }
@@ -14,10 +11,7 @@ export function getTextColor(
 /**
  * Get subtext/muted text color
  */
-export function getSubtextColor(
-  useLiquidGlass: boolean,
-  useDarkMode: boolean,
-): string {
+export function getSubtextColor(useLiquidGlass: boolean, useDarkMode: boolean): string {
   if (useLiquidGlass) {
     return "text-white/60";
   }
@@ -27,10 +21,7 @@ export function getSubtextColor(
 /**
  * Get text shadow for better readability
  */
-export function getTextShadow(
-  useLiquidGlass: boolean,
-  useDarkMode: boolean,
-): string {
+export function getTextShadow(useLiquidGlass: boolean, useDarkMode: boolean): string {
   if (useLiquidGlass) {
     return useDarkMode
       ? "[text-shadow:0_2px_4px_rgba(32,32,32,0.8)]"
@@ -118,10 +109,7 @@ export function getButtonClasses(
 /**
  * Get input/form control styling classes
  */
-export function getInputClasses(
-  useLiquidGlass: boolean,
-  useDarkMode: boolean,
-): string {
+export function getInputClasses(useLiquidGlass: boolean, useDarkMode: boolean): string {
   if (useLiquidGlass) {
     return useDarkMode
       ? "bg-black/20 backdrop-blur-xl border border-black/30 shadow-lg shadow-black/10 text-white placeholder:text-white/45 focus-visible:ring-black/40 focus-visible:border-black/55"
@@ -136,10 +124,7 @@ export function getInputClasses(
 /**
  * Get dialog/modal styling classes
  */
-export function getDialogClasses(
-  useLiquidGlass: boolean,
-  useDarkMode: boolean,
-): string {
+export function getDialogClasses(useLiquidGlass: boolean, useDarkMode: boolean): string {
   if (useLiquidGlass) {
     return useDarkMode
       ? "bg-black/45 backdrop-blur-2xl border border-black/45 shadow-2xl shadow-black/55"
@@ -154,10 +139,7 @@ export function getDialogClasses(
 /**
  * Get dialog footer styling classes
  */
-export function getDialogFooterClasses(
-  useLiquidGlass: boolean,
-  useDarkMode: boolean,
-): string {
+export function getDialogFooterClasses(useLiquidGlass: boolean, useDarkMode: boolean): string {
   if (useLiquidGlass) {
     return useDarkMode
       ? "mt-4 pt-4 border-t border-black/35"

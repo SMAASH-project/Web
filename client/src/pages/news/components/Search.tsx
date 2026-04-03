@@ -30,31 +30,12 @@ export function Search({ onSearch }: { onSearch: (query: string) => void }) {
   const { settings } = useSettings();
   const { t } = useTranslation("news");
   const [query, setQuery] = useState("");
-  const buttonClass = getButtonClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-    "primary",
-  );
-  const inputClass = getInputClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const dialogClass = getDialogClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const footerClass = getDialogFooterClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const textShadow = getTextShadow(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const subtextColor = getSubtextColor(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
+  const buttonClass = getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "primary");
+  const inputClass = getInputClasses(settings.useLiquidGlass, settings.useDarkMode);
+  const dialogClass = getDialogClasses(settings.useLiquidGlass, settings.useDarkMode);
+  const footerClass = getDialogFooterClasses(settings.useLiquidGlass, settings.useDarkMode);
+  const textShadow = getTextShadow(settings.useLiquidGlass, settings.useDarkMode);
+  const subtextColor = getSubtextColor(settings.useLiquidGlass, settings.useDarkMode);
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
 
   const handleSearch = () => {
@@ -64,18 +45,14 @@ export function Search({ onSearch }: { onSearch: (query: string) => void }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button
-          className={`${buttonClass} ${textShadow} rounded-lg cursor-pointer`}
-        >
+        <Button className={`${buttonClass} ${textShadow} cursor-pointer rounded-lg`}>
           <SearchIcon />
         </Button>
       </DialogTrigger>
       <DialogContent className={`${dialogClass} ${textShadow}`}>
         <DialogHeader>
           <DialogTitle className={textColor}>{t("search.title")}</DialogTitle>
-          <DialogDescription className={subtextColor}>
-            {t("search.description")}
-          </DialogDescription>
+          <DialogDescription className={subtextColor}>{t("search.description")}</DialogDescription>
         </DialogHeader>
         <FieldGroup>
           <Field>

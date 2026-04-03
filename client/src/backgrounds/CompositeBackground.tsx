@@ -29,23 +29,29 @@ interface Props {
 
 // Z-index order: lower = further back in the stack
 const LAYER_Z_INDEX: Record<AnimationKey, number> = {
-  deepspace:       1,
-  aurora:          2,
-  void:            3,
+  deepspace: 1,
+  aurora: 2,
+  void: 3,
   bioluminescence: 4,
-  constellation:   5,
-  lavalamp:        6,
-  synthwave:       7,
-  puddleripples:   8,
-  fishtank:        9,
-  particleweb:     10,
-  storm:           11,
-  sakura:          12,
+  constellation: 5,
+  lavalamp: 6,
+  synthwave: 7,
+  puddleripples: 8,
+  fishtank: 9,
+  particleweb: 10,
+  storm: 11,
+  sakura: 12,
 };
 
 function renderEffect(
   key: AnimationKey,
-  shared: { colorLeft: string; colorMiddle: string; colorRight: string; paused: boolean; preview?: boolean },
+  shared: {
+    colorLeft: string;
+    colorMiddle: string;
+    colorRight: string;
+    paused: boolean;
+    preview?: boolean;
+  },
   subEffects: EffectLayerConfig[AnimationKey],
 ) {
   const defaults = DEFAULT_SUB_EFFECTS[key];
@@ -93,13 +99,9 @@ export function CompositeBackground({
   const enabledKeys = ALL_ANIMATION_KEYS.filter((k) => k in effectMix);
 
   return (
-    <div className={`${preview ? "absolute" : "fixed"} inset-0 z-0 pointer-events-none`}>
+    <div className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0`}>
       {enabledKeys.map((key) => (
-        <div
-          key={key}
-          className="absolute inset-0"
-          style={{ zIndex: LAYER_Z_INDEX[key] }}
-        >
+        <div key={key} className="absolute inset-0" style={{ zIndex: LAYER_Z_INDEX[key] }}>
           {renderEffect(key, shared, effectMix[key])}
         </div>
       ))}

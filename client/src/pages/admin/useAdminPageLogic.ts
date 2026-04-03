@@ -7,10 +7,7 @@ import {
   useDemoteUserMutation,
   type AdminUserDTO,
 } from "@/hooks/useAdmin";
-import {
-  useProfilesQuery,
-  useUpdateProfileMutation,
-} from "@/hooks/useQueryHooks";
+import { useProfilesQuery, useUpdateProfileMutation } from "@/hooks/useQueryHooks";
 import { useSettings } from "@/pages/settings/SettingsContext";
 import {
   getBackgroundClasses,
@@ -43,8 +40,7 @@ export function useAdminPageLogic() {
     [users, selectedUserId],
   );
 
-  const { data: profiles = [], isLoading: profilesLoading } =
-    useProfilesQuery(selectedUserId);
+  const { data: profiles = [], isLoading: profilesLoading } = useProfilesQuery(selectedUserId);
 
   const selectedProfile = profiles[selectedProfileIdx] ?? null;
 
@@ -54,9 +50,7 @@ export function useAdminPageLogic() {
     const q = search.trim().toLowerCase();
     if (!q) return users;
     return users.filter(
-      (u) =>
-        u.username?.toLowerCase().includes(q) ||
-        u.email.toLowerCase().includes(q),
+      (u) => u.username?.toLowerCase().includes(q) || u.email.toLowerCase().includes(q),
     );
   }, [users, search]);
 
@@ -66,10 +60,7 @@ export function useAdminPageLogic() {
   }, [search]);
 
   const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
-  const paginatedUsers = filteredUsers.slice(
-    (page - 1) * PAGE_SIZE,
-    page * PAGE_SIZE,
-  );
+  const paginatedUsers = filteredUsers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const handleUserSelect = (id: number) => {
     setSelectedUserId(id);
@@ -124,11 +115,7 @@ export function useAdminPageLogic() {
     }
   };
 
-  const handleUpdateCoins = async (
-    profileId: number,
-    displayName: string,
-    coins: number,
-  ) => {
+  const handleUpdateCoins = async (profileId: number, displayName: string, coins: number) => {
     try {
       await updateProfileMutation.mutateAsync({
         profileId,

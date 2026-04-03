@@ -1,27 +1,13 @@
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { FormAlert } from "@/components/ui/form-alert";
 import { cn } from "@/lib/utils";
 import { Link, useNavigate } from "react-router-dom";
 import React from "react";
 import { useSignupMutation } from "@/hooks/useQueryHooks";
-import {
-  useGoogleReCaptcha,
-  GoogleReCaptchaProvider,
-} from "react-google-recaptcha-v3";
+import { useGoogleReCaptcha, GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { useTranslation } from "react-i18next";
 import { useSettings } from "@/pages/settings/SettingsContext";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
@@ -92,15 +78,12 @@ function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
   const errorMessage =
     validationError ||
     (signupMutation.isError
-      ? extractErrorMessage(
-          signupMutation.error as AxiosError,
-          t("signup.failed"),
-        )
+      ? extractErrorMessage(signupMutation.error as AxiosError, t("signup.failed"))
       : "");
 
   return (
     <div className={cn("relative z-10 w-full max-w-md px-4 sm:px-0", className)} {...props}>
-      <div className="flex justify-end mb-2">
+      <div className="mb-2 flex justify-end">
         <LanguageToggle
           language={settings.language}
           onChange={(lang) => updateSetting("language", lang)}
@@ -146,10 +129,7 @@ function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
                 <FieldDescription>{t("signup.passwordHint")}</FieldDescription>
               </Field>
               <Field>
-                <FieldLabel
-                  htmlFor="confirm-password"
-                  className="text-gray-900!"
-                >
+                <FieldLabel htmlFor="confirm-password" className="text-gray-900!">
                   {t("signup.confirmPassword")}
                 </FieldLabel>
                 <Input
@@ -163,28 +143,17 @@ function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
                   disabled={signupMutation.isPending}
                   required
                 />
-                <FieldDescription>
-                  {t("signup.confirmPasswordHint")}
-                </FieldDescription>
+                <FieldDescription>{t("signup.confirmPasswordHint")}</FieldDescription>
               </Field>
 
-              {errorMessage && (
-                <FormAlert variant="error" message={errorMessage} />
-              )}
+              {errorMessage && <FormAlert variant="error" message={errorMessage} />}
 
               <Field>
-                <Button
-                  type="submit"
-                  className="text-white"
-                  disabled={signupMutation.isPending}
-                >
-                  {signupMutation.isPending
-                    ? t("signup.submitting")
-                    : t("signup.submit")}
+                <Button type="submit" className="text-white" disabled={signupMutation.isPending}>
+                  {signupMutation.isPending ? t("signup.submitting") : t("signup.submit")}
                 </Button>
                 <FieldDescription className="px-6 text-center">
-                  {t("signup.hasAccount")}{" "}
-                  <Link to="/app/login">{t("signup.signIn")}</Link>
+                  {t("signup.hasAccount")} <Link to="/app/login">{t("signup.signIn")}</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

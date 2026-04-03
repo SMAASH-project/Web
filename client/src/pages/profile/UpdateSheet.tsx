@@ -54,9 +54,7 @@ export function UpdateSheet() {
   const [open, setOpen] = useState(false);
 
   // Feedback state
-  const [saveStatus, setSaveStatus] = useState<
-    "idle" | "saving" | "success" | "error"
-  >("idle");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
   // Sync fields from real data every time the sheet opens
@@ -76,8 +74,7 @@ export function UpdateSheet() {
     setSaveStatus("saving");
     setErrorMsg("");
 
-    const displayNameChanged =
-      displayName.trim() !== (selectedProfile?.name ?? "");
+    const displayNameChanged = displayName.trim() !== (selectedProfile?.name ?? "");
     const emailChanged = email.trim() !== (whoAmI?.email ?? "");
 
     try {
@@ -138,8 +135,7 @@ export function UpdateSheet() {
 
   const isSaving = saveStatus === "saving";
   const hasChanged =
-    displayName.trim() !== (selectedProfile?.name ?? "") ||
-    email.trim() !== (whoAmI?.email ?? "");
+    displayName.trim() !== (selectedProfile?.name ?? "") || email.trim() !== (whoAmI?.email ?? "");
 
   return (
     <div className="z-101">
@@ -160,7 +156,7 @@ export function UpdateSheet() {
             </SheetDescription>
           </SheetHeader>
 
-          <div className="flex-1 flex flex-col gap-6 px-6 overflow-y-auto">
+          <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-6">
             {/* Display name */}
             <div className="flex flex-col gap-2">
               <Label
@@ -178,9 +174,7 @@ export function UpdateSheet() {
                 disabled={isSaving}
                 placeholder={t("sheet.displayNamePlaceholder")}
               />
-              <p className={cn("text-xs", subtextColor)}>
-                {t("sheet.displayNameHint")}
-              </p>
+              <p className={cn("text-xs", subtextColor)}>{t("sheet.displayNameHint")}</p>
             </div>
 
             {/* Email */}
@@ -201,9 +195,7 @@ export function UpdateSheet() {
                 disabled={isSaving}
                 placeholder={t("sheet.emailPlaceholder")}
               />
-              <p className={cn("text-xs", subtextColor)}>
-                {t("sheet.emailHint")}
-              </p>
+              <p className={cn("text-xs", subtextColor)}>{t("sheet.emailHint")}</p>
             </div>
 
             {/* Password — disabled, TODO wired when backend supports it */}
@@ -211,7 +203,7 @@ export function UpdateSheet() {
               <Label
                 htmlFor="sheet-password"
                 className={cn(
-                  "text-sm font-medium flex items-center gap-1.5",
+                  "flex items-center gap-1.5 text-sm font-medium",
                   textColor,
                   textShadow,
                 )}
@@ -242,12 +234,7 @@ export function UpdateSheet() {
               />
               <p className={cn("text-xs", subtextColor)}>
                 {t("sheet.passwordHint")}{" "}
-                <span
-                  className={cn(
-                    "underline underline-offset-2 cursor-default",
-                    subtextColor,
-                  )}
-                >
+                <span className={cn("cursor-default underline underline-offset-2", subtextColor)}>
                   {t("sheet.passwordReset")}
                 </span>
               </p>
@@ -260,18 +247,15 @@ export function UpdateSheet() {
                   "flex items-start gap-2 rounded-xl px-3 py-2.5 text-sm",
                   useLiquidGlass
                     ? useDarkMode
-                      ? "bg-red-500/15 border border-red-500/25"
-                      : "bg-red-500/10 border border-red-500/20"
+                      ? "border border-red-500/25 bg-red-500/15"
+                      : "border border-red-500/20 bg-red-500/10"
                     : useDarkMode
-                      ? "bg-red-950 border border-red-800"
-                      : "bg-red-50 border border-red-200",
+                      ? "border border-red-800 bg-red-950"
+                      : "border border-red-200 bg-red-50",
                 )}
               >
-                <AlertCircle
-                  size={15}
-                  className="text-red-400 shrink-0 mt-0.5"
-                />
-                <span className="text-red-400 text-xs">{errorMsg}</span>
+                <AlertCircle size={15} className="mt-0.5 shrink-0 text-red-400" />
+                <span className="text-xs text-red-400">{errorMsg}</span>
               </div>
             )}
 
@@ -282,28 +266,22 @@ export function UpdateSheet() {
                   "flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm",
                   useLiquidGlass
                     ? useDarkMode
-                      ? "bg-green-500/15 border border-green-500/25"
-                      : "bg-green-500/10 border border-green-500/20"
+                      ? "border border-green-500/25 bg-green-500/15"
+                      : "border border-green-500/20 bg-green-500/10"
                     : useDarkMode
-                      ? "bg-green-950 border border-green-800"
-                      : "bg-green-50 border border-green-200",
+                      ? "border border-green-800 bg-green-950"
+                      : "border border-green-200 bg-green-50",
                 )}
               >
-                <CheckCircle2 size={15} className="text-green-400 shrink-0" />
-                <span className="text-green-400 text-xs">
-                  {t("sheet.saved")}
-                </span>
+                <CheckCircle2 size={15} className="shrink-0 text-green-400" />
+                <span className="text-xs text-green-400">{t("sheet.saved")}</span>
               </div>
             )}
           </div>
 
-          <SheetFooter className="px-6 py-4 flex flex-row gap-2 justify-end">
+          <SheetFooter className="flex flex-row justify-end gap-2 px-6 py-4">
             <SheetClose asChild>
-              <Button
-                variant="outline"
-                className={cn(buttonClass, textColor)}
-                disabled={isSaving}
-              >
+              <Button variant="outline" className={cn(buttonClass, textColor)} disabled={isSaving}>
                 {t("sheet.cancel")}
               </Button>
             </SheetClose>
@@ -314,7 +292,7 @@ export function UpdateSheet() {
                 "transition-all duration-200",
                 hasChanged && !isSaving
                   ? buttonClass
-                  : cn(buttonClass, "opacity-40 cursor-not-allowed"),
+                  : cn(buttonClass, "cursor-not-allowed opacity-40"),
                 textColor,
               )}
             >

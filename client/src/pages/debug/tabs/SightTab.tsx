@@ -63,12 +63,8 @@ export function SightTab({
   const { t } = useTranslation("debug");
   const [cssVars, setCssVars] = useState<Record<string, string>>({});
   const [delayText, setDelayText] = useState(String(settings.networkDelayMs));
-  const [jitterText, setJitterText] = useState(
-    String(settings.networkJitterMs),
-  );
-  const [viewportWidthText, setViewportWidthText] = useState(
-    String(settings.forceViewportWidth),
-  );
+  const [jitterText, setJitterText] = useState(String(settings.networkJitterMs));
+  const [viewportWidthText, setViewportWidthText] = useState(String(settings.forceViewportWidth));
   const [viewportHeightText, setViewportHeightText] = useState(
     String(settings.forceViewportHeight),
   );
@@ -132,10 +128,7 @@ export function SightTab({
       return 0.2126 * R + 0.7152 * G + 0.0722 * B;
     };
 
-    const contrast = (
-      a: [number, number, number],
-      b: [number, number, number],
-    ) => {
+    const contrast = (a: [number, number, number], b: [number, number, number]) => {
       const L1 = toLuminance(a);
       const L2 = toLuminance(b);
       const [maxL, minL] = L1 > L2 ? [L1, L2] : [L2, L1];
@@ -154,10 +147,7 @@ export function SightTab({
           },
         ];
       }),
-    ) as Record<
-      string,
-      { ratioOnWhite: number | null; ratioOnBlack: number | null }
-    >;
+    ) as Record<string, { ratioOnWhite: number | null; ratioOnBlack: number | null }>;
   }, [cssVars]);
 
   const pillBase = `text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all duration-150 cursor-pointer`;
@@ -165,7 +155,7 @@ export function SightTab({
   const pillInactive = `${subtextColor} hover:bg-white/10`;
 
   const row = (label: string, value: boolean, key: keyof typeof settings) => (
-    <div className="flex items-center justify-between py-1.5 border-b border-current/5 last:border-0">
+    <div className="flex items-center justify-between border-b border-current/5 py-1.5 last:border-0">
       <span className={`text-xs ${subtextColor}`}>{label}</span>
       <Switch checked={value} onCheckedChange={(v) => update({ [key]: v })} />
     </div>
@@ -175,12 +165,8 @@ export function SightTab({
     const delay = Number(delayText);
     const jitter = Number(jitterText);
     update({
-      networkDelayMs: Number.isFinite(delay)
-        ? Math.max(0, Math.round(delay))
-        : 0,
-      networkJitterMs: Number.isFinite(jitter)
-        ? Math.max(0, Math.round(jitter))
-        : 0,
+      networkDelayMs: Number.isFinite(delay) ? Math.max(0, Math.round(delay)) : 0,
+      networkJitterMs: Number.isFinite(jitter) ? Math.max(0, Math.round(jitter)) : 0,
     });
     toast.success("Network simulation updated");
   };
@@ -190,12 +176,8 @@ export function SightTab({
     const height = Number(viewportHeightText);
     update({
       forceViewportPreset: "custom",
-      forceViewportWidth: Number.isFinite(width)
-        ? Math.max(320, Math.round(width))
-        : 1280,
-      forceViewportHeight: Number.isFinite(height)
-        ? Math.max(320, Math.round(height))
-        : 720,
+      forceViewportWidth: Number.isFinite(width) ? Math.max(320, Math.round(width)) : 1280,
+      forceViewportHeight: Number.isFinite(height) ? Math.max(320, Math.round(height)) : 720,
     });
     toast.success("Custom viewport applied");
   };
@@ -224,7 +206,7 @@ export function SightTab({
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 auto-rows-min">
+    <div className="grid auto-rows-min grid-cols-1 gap-3 sm:grid-cols-2">
       {/* ── Visual mode ───────────────────────────────────────────────────── */}
       {mode === "visual" && (
         <>
@@ -236,7 +218,7 @@ export function SightTab({
             subtextColor={subtextColor}
           >
             <div className="flex flex-col gap-2 py-1">
-              <div className="flex gap-1 flex-wrap">
+              <div className="flex flex-wrap gap-1">
                 {SPEEDS.map((s) => (
                   <button
                     key={s}
@@ -251,22 +233,20 @@ export function SightTab({
                 {t("sight.animation.speedNote")}
               </p>
 
-              <div className="flex items-center justify-between pt-1 border-t border-current/5">
+              <div className="flex items-center justify-between border-t border-current/5 pt-1">
                 <span className={`text-xs ${subtextColor}`}>
                   {t("sight.animation.forceReplay")}
                 </span>
                 <button
                   onClick={() => window.location.reload()}
-                  className={`flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full ${subtextColor} hover:bg-white/10 transition-colors`}
+                  className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold ${subtextColor} transition-colors hover:bg-white/10`}
                 >
                   <RefreshCw size={10} /> {t("sight.animation.reload")}
                 </button>
               </div>
 
-              <div className="flex items-center justify-between pt-1 border-t border-current/5">
-                <span className={`text-xs ${subtextColor}`}>
-                  {t("sight.animation.navbar")}
-                </span>
+              <div className="flex items-center justify-between border-t border-current/5 pt-1">
+                <span className={`text-xs ${subtextColor}`}>{t("sight.animation.navbar")}</span>
                 <div className="flex gap-1">
                   {NAV_PILLS.map(({ value, key }) => (
                     <button
@@ -289,24 +269,12 @@ export function SightTab({
             panelBg={panelBg}
             subtextColor={subtextColor}
           >
-            {row(
-              t("sight.visual.disableBlur"),
-              settings.noBackdropBlur,
-              "noBackdropBlur",
-            )}
-            {row(
-              t("sight.visual.layoutBorders"),
-              settings.layoutBorders,
-              "layoutBorders",
-            )}
-            {row(
-              t("sight.visual.elementInspector"),
-              settings.elementInspector,
-              "elementInspector",
-            )}
-            <p className={`text-[10px] leading-tight pt-1 ${subtextColor}`}>
-              Element inspector: hover any element to inspect its tag, classes,
-              and computed CSS properties.
+            {row(t("sight.visual.disableBlur"), settings.noBackdropBlur, "noBackdropBlur")}
+            {row(t("sight.visual.layoutBorders"), settings.layoutBorders, "layoutBorders")}
+            {row(t("sight.visual.elementInspector"), settings.elementInspector, "elementInspector")}
+            <p className={`pt-1 text-[10px] leading-tight ${subtextColor}`}>
+              Element inspector: hover any element to inspect its tag, classes, and computed CSS
+              properties.
             </p>
           </Section>
 
@@ -318,19 +286,11 @@ export function SightTab({
             subtextColor={subtextColor}
           >
             {row(t("sight.overlays.fps"), settings.showFps, "showFps")}
-            {row(
-              t("sight.overlays.scroll"),
-              settings.showScrollPos,
-              "showScrollPos",
-            )}
-            {row(
-              "Breakpoint badge",
-              settings.showBreakpointBadge,
-              "showBreakpointBadge",
-            )}
-            <p className={`text-[10px] leading-tight pt-1 ${subtextColor}`}>
-              Breakpoint badge shows the active Tailwind screen size and window
-              width in the bottom-right corner.
+            {row(t("sight.overlays.scroll"), settings.showScrollPos, "showScrollPos")}
+            {row("Breakpoint badge", settings.showBreakpointBadge, "showBreakpointBadge")}
+            <p className={`pt-1 text-[10px] leading-tight ${subtextColor}`}>
+              Breakpoint badge shows the active Tailwind screen size and window width in the
+              bottom-right corner.
             </p>
           </Section>
 
@@ -341,22 +301,22 @@ export function SightTab({
             panelBg={panelBg}
             subtextColor={subtextColor}
           >
-            <div className="flex gap-2 pt-1 flex-wrap">
+            <div className="flex flex-wrap gap-2 pt-1">
               <button
                 onClick={() => toast.success(t("sight.toast.msgSuccess"))}
-                className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-green-500/20 text-green-400 hover:bg-green-500/30 transition-colors"
+                className="rounded-full bg-green-500/20 px-2.5 py-1 text-[10px] font-semibold text-green-400 transition-colors hover:bg-green-500/30"
               >
                 {t("sight.toast.success")}
               </button>
               <button
                 onClick={() => toast.error(t("sight.toast.msgError"))}
-                className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
+                className="rounded-full bg-red-500/20 px-2.5 py-1 text-[10px] font-semibold text-red-400 transition-colors hover:bg-red-500/30"
               >
                 {t("sight.toast.error")}
               </button>
               <button
                 onClick={() => toast.info(t("sight.toast.msgInfo"))}
-                className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
+                className="rounded-full bg-blue-500/20 px-2.5 py-1 text-[10px] font-semibold text-blue-400 transition-colors hover:bg-blue-500/30"
               >
                 {t("sight.toast.info")}
               </button>
@@ -373,23 +333,21 @@ export function SightTab({
             {CSS_VARS.map((v) => (
               <div
                 key={v}
-                className="flex items-center gap-2 py-1.5 border-b border-current/5 last:border-0"
+                className="flex items-center gap-2 border-b border-current/5 py-1.5 last:border-0"
               >
                 <span
-                  className="size-3 rounded-full border border-white/30 shrink-0"
+                  className="size-3 shrink-0 rounded-full border border-white/30"
                   style={{ backgroundColor: cssVars[v] ?? "transparent" }}
                 />
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className={`text-[10px] ${subtextColor}`}>{v}</p>
-                  <p
-                    className={`text-[10px] font-mono truncate ${textColor}`}
-                  >
+                  <p className={`truncate font-mono text-[10px] ${textColor}`}>
                     {cssVars[v] ?? "…"}
                   </p>
                 </div>
                 <button
                   onClick={() => copyToClipboard(cssVars[v] ?? "")}
-                  className="text-[10px] px-2 py-1 rounded border border-current/20 hover:border-current/40"
+                  className="rounded border border-current/20 px-2 py-1 text-[10px] hover:border-current/40"
                   title="Copy variable value"
                 >
                   <Copy size={11} />
@@ -410,30 +368,19 @@ export function SightTab({
             panelBg={panelBg}
             subtextColor={subtextColor}
           >
-            {row(
-              "Force reduced motion",
-              settings.forceReducedMotion,
-              "forceReducedMotion",
-            )}
+            {row("Force reduced motion", settings.forceReducedMotion, "forceReducedMotion")}
             {row("Compact density", settings.compactDensity, "compactDensity")}
-            <p className={`text-[10px] leading-tight -mt-0.5 mb-1 ${subtextColor}`}>
+            <p className={`-mt-0.5 mb-1 text-[10px] leading-tight ${subtextColor}`}>
               Reduces font size and spacing for a denser information display.
             </p>
-            {row(
-              "Safe-area outlines",
-              settings.safeAreaOutlines,
-              "safeAreaOutlines",
-            )}
-            <p className={`text-[10px] leading-tight -mt-0.5 ${subtextColor}`}>
-              Draws colored borders representing device safe-area insets (notch,
-              home bar).
+            {row("Safe-area outlines", settings.safeAreaOutlines, "safeAreaOutlines")}
+            <p className={`-mt-0.5 text-[10px] leading-tight ${subtextColor}`}>
+              Draws colored borders representing device safe-area insets (notch, home bar).
             </p>
 
-            <div className="pt-2 mt-1 border-t border-current/5 flex flex-col gap-2">
+            <div className="mt-1 flex flex-col gap-2 border-t border-current/5 pt-2">
               <div className="flex items-center justify-between">
-                <span className={`text-xs ${subtextColor}`}>
-                  Force JS viewport
-                </span>
+                <span className={`text-xs ${subtextColor}`}>Force JS viewport</span>
                 <Switch
                   checked={settings.forceViewportEnabled}
                   onCheckedChange={(v) => update({ forceViewportEnabled: v })}
@@ -441,10 +388,9 @@ export function SightTab({
               </div>
 
               <p className={`text-[10px] leading-tight ${subtextColor}`}>
-                Overrides <code>window.innerWidth/Height</code> and{" "}
-                <code>matchMedia</code> so JS-driven responsive logic (e.g.
-                Navbar breakpoints) reacts to the emulated size. Tailwind CSS
-                classes are compile-time and are not affected.
+                Overrides <code>window.innerWidth/Height</code> and <code>matchMedia</code> so
+                JS-driven responsive logic (e.g. Navbar breakpoints) reacts to the emulated size.
+                Tailwind CSS classes are compile-time and are not affected.
               </p>
 
               <div className="flex flex-col gap-1">
@@ -456,9 +402,7 @@ export function SightTab({
                   inputClass={inputClass}
                   textColor={textColor}
                   bgClass={bgClass}
-                  renderOption={(id) =>
-                    VIEWPORT_PRESETS.find((p) => p.id === id)?.label ?? id
-                  }
+                  renderOption={(id) => VIEWPORT_PRESETS.find((p) => p.id === id)?.label ?? id}
                 />
               </div>
 
@@ -471,7 +415,7 @@ export function SightTab({
                     max={4096}
                     value={viewportWidthText}
                     onChange={(e) => setViewportWidthText(e.target.value)}
-                    className={`text-xs px-2 py-1.5 rounded-lg ${inputClass}`}
+                    className={`rounded-lg px-2 py-1.5 text-xs ${inputClass}`}
                   />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -482,7 +426,7 @@ export function SightTab({
                     max={4096}
                     value={viewportHeightText}
                     onChange={(e) => setViewportHeightText(e.target.value)}
-                    className={`text-xs px-2 py-1.5 rounded-lg ${inputClass}`}
+                    className={`rounded-lg px-2 py-1.5 text-xs ${inputClass}`}
                   />
                 </div>
               </div>
@@ -490,7 +434,7 @@ export function SightTab({
               <div className="flex justify-end">
                 <button
                   onClick={applyViewportCustomSize}
-                  className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-violet-500/20 text-violet-300 hover:bg-violet-500/30 transition-colors"
+                  className="rounded-full bg-violet-500/20 px-2.5 py-1 text-[10px] font-semibold text-violet-300 transition-colors hover:bg-violet-500/30"
                 >
                   Apply custom
                 </button>
@@ -505,45 +449,40 @@ export function SightTab({
             panelBg={panelBg}
             subtextColor={subtextColor}
           >
-            <p className={`text-[10px] leading-tight mb-2 ${subtextColor}`}>
-              Adds artificial latency to all Axios API requests to simulate slow
-              connections.
+            <p className={`mb-2 text-[10px] leading-tight ${subtextColor}`}>
+              Adds artificial latency to all Axios API requests to simulate slow connections.
             </p>
             <div className="grid grid-cols-2 gap-2">
               <div className="flex flex-col gap-1">
-                <span className={`text-[10px] ${subtextColor}`}>
-                  Base delay (ms)
-                </span>
+                <span className={`text-[10px] ${subtextColor}`}>Base delay (ms)</span>
                 <input
                   type="number"
                   min={0}
                   max={10000}
                   value={delayText}
                   onChange={(e) => setDelayText(e.target.value)}
-                  className={`text-xs px-2 py-1.5 rounded-lg ${inputClass}`}
+                  className={`rounded-lg px-2 py-1.5 text-xs ${inputClass}`}
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <span className={`text-[10px] ${subtextColor}`}>
-                  Jitter ± (ms)
-                </span>
+                <span className={`text-[10px] ${subtextColor}`}>Jitter ± (ms)</span>
                 <input
                   type="number"
                   min={0}
                   max={3000}
                   value={jitterText}
                   onChange={(e) => setJitterText(e.target.value)}
-                  className={`text-xs px-2 py-1.5 rounded-lg ${inputClass}`}
+                  className={`rounded-lg px-2 py-1.5 text-xs ${inputClass}`}
                 />
               </div>
             </div>
-            <div className="flex items-center justify-between pt-2 border-t border-current/5">
+            <div className="flex items-center justify-between border-t border-current/5 pt-2">
               <span className={`text-[10px] ${subtextColor}`}>
                 Jitter adds random variance (±) to each request delay.
               </span>
               <button
                 onClick={saveNetwork}
-                className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 transition-colors"
+                className="rounded-full bg-blue-500/20 px-2.5 py-1 text-[10px] font-semibold text-blue-300 transition-colors hover:bg-blue-500/30"
               >
                 Apply
               </button>
@@ -565,36 +504,25 @@ export function SightTab({
             {CSS_VARS.map((v) => {
               const score = parsedVars[v];
               return (
-                <div
-                  key={`a11y-${v}`}
-                  className="py-1 border-b border-current/5 last:border-0"
-                >
+                <div key={`a11y-${v}`} className="border-b border-current/5 py-1 last:border-0">
                   <div className="flex items-center justify-between gap-2">
                     <span className={`text-[10px] ${subtextColor}`}>{v}</span>
-                    <span
-                      className={`text-[10px] font-mono ${subtextColor}`}
-                    >
-                      W{" "}
-                      {score.ratioOnWhite
-                        ? score.ratioOnWhite.toFixed(2)
-                        : "—"}{" "}
-                      · B{" "}
-                      {score.ratioOnBlack
-                        ? score.ratioOnBlack.toFixed(2)
-                        : "—"}
+                    <span className={`font-mono text-[10px] ${subtextColor}`}>
+                      W {score.ratioOnWhite ? score.ratioOnWhite.toFixed(2) : "—"} · B{" "}
+                      {score.ratioOnBlack ? score.ratioOnBlack.toFixed(2) : "—"}
                     </span>
                   </div>
                 </div>
               );
             })}
 
-            <div className="pt-2 border-t border-current/5 flex items-center justify-between gap-2">
-              <button className="text-xs px-3 py-1.5 rounded-md border border-current/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
+            <div className="flex items-center justify-between gap-2 border-t border-current/5 pt-2">
+              <button className="rounded-md border border-current/20 px-3 py-1.5 text-xs focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">
                 Focus ring preview
               </button>
               <input
                 placeholder="Tab into me"
-                className="h-8 px-2 rounded-md text-xs bg-black/10 border border-current/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+                className="h-8 rounded-md border border-current/20 bg-black/10 px-2 text-xs focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none"
               />
             </div>
           </Section>
@@ -627,20 +555,12 @@ export function SightTab({
               subtextColor={subtextColor}
               mono
             />
-            {row(
-              "Click target checker",
-              settings.clickTargetChecker,
-              "clickTargetChecker",
-            )}
-            {row(
-              "Z-index inspector",
-              settings.zIndexInspector,
-              "zIndexInspector",
-            )}
-            <p className={`text-[10px] leading-tight pt-1 ${subtextColor}`}>
-              Click target: flags elements smaller than 44×44 px (WCAG touch
-              target). Z-index: shows the stacking order of elements under the
-              cursor. Both require Element inspector to be on.
+            {row("Click target checker", settings.clickTargetChecker, "clickTargetChecker")}
+            {row("Z-index inspector", settings.zIndexInspector, "zIndexInspector")}
+            <p className={`pt-1 text-[10px] leading-tight ${subtextColor}`}>
+              Click target: flags elements smaller than 44×44 px (WCAG touch target). Z-index: shows
+              the stacking order of elements under the cursor. Both require Element inspector to be
+              on.
             </p>
           </Section>
         </>

@@ -36,15 +36,9 @@ export function ColorProvider({ children }: { children: ReactNode }) {
   const [colorLeft, setColorLeft] = useState(initial.colorLeft);
   const [colorMiddle, setColorMiddle] = useState(initial.colorMiddle);
   const [colorRight, setColorRight] = useState(initial.colorRight);
-  const [animationKey, setAnimationKey] = useState<AnimationKey | null>(
-    initial.animationKey,
-  );
-  const [effectMix, setEffectMix] = useState<EffectLayerConfig | null>(
-    initial.effectMix,
-  );
-  const [customTheme, setCustomTheme] = useState<CustomTheme | null>(
-    initial.customTheme,
-  );
+  const [animationKey, setAnimationKey] = useState<AnimationKey | null>(initial.animationKey);
+  const [effectMix, setEffectMix] = useState<EffectLayerConfig | null>(initial.effectMix);
+  const [customTheme, setCustomTheme] = useState<CustomTheme | null>(initial.customTheme);
 
   // Persist changes to localStorage across sessions
   useEffect(() => {

@@ -1,12 +1,7 @@
 import { useTranslation } from "react-i18next";
 import * as React from "react";
 import { Ban, MessageSquare } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/pages/settings/SettingsContext";
 import {
@@ -44,11 +39,7 @@ interface BanDialogProps {
   open: boolean;
   onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
   user: AdminUserDTO;
-  onConfirm: (
-    type: "permanent" | "temporary",
-    until?: string,
-    reason?: string,
-  ) => void;
+  onConfirm: (type: "permanent" | "temporary", until?: string, reason?: string) => void;
   isLoading?: boolean;
 }
 
@@ -125,46 +116,32 @@ export default function BanDialog({
 
   const permanentPreset = logic.PRESETS.find((p) => p.id === "permanent")!;
   const timeouts = logic.PRESETS.filter((p) => p.section === "timeout");
-  const timedBans = logic.PRESETS.filter(
-    (p) => p.section === "ban" && p.id !== "permanent",
-  );
+  const timedBans = logic.PRESETS.filter((p) => p.section === "ban" && p.id !== "permanent");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className={cn(
-          "sm:max-w-2xl w-full p-0 flex flex-col",
-          dialogClass,
-          textColor,
-          textShadow,
-        )}
+        className={cn("flex w-full flex-col p-0 sm:max-w-2xl", dialogClass, textColor, textShadow)}
         showCloseButton
       >
         {/* Header */}
         <DialogHeader className="px-6 pt-6 pb-4">
-          <DialogTitle
-            className={cn("text-base font-semibold", textColor, textShadow)}
-          >
+          <DialogTitle className={cn("text-base font-semibold", textColor, textShadow)}>
             <span className="flex items-center gap-2">
               <Ban size={16} className="text-red-400" />
               {t("ban.title", { name: user.username || user.email })}
             </span>
           </DialogTitle>
-          <p className={cn("text-xs mt-1", subtextColor)}>
-            {t("ban.description")}
-          </p>
+          <p className={cn("mt-1 text-xs", subtextColor)}>{t("ban.description")}</p>
         </DialogHeader>
 
-        <div className="px-6 pb-0 flex flex-col lg:flex-row gap-6">
+        <div className="flex flex-col gap-6 px-6 pb-0 lg:flex-row">
           {/* ── Left: presets + reason ─────────────────────────────────── */}
-          <div className="flex-1 flex flex-col gap-4">
+          <div className="flex flex-1 flex-col gap-4">
             {/* Permanent */}
             <div>
               <p
-                className={cn(
-                  "text-xs font-semibold uppercase tracking-wider mb-2",
-                  subtextColor,
-                )}
+                className={cn("mb-2 text-xs font-semibold tracking-wider uppercase", subtextColor)}
               >
                 Permanent
               </p>
@@ -172,25 +149,17 @@ export default function BanDialog({
                 role="button"
                 tabIndex={0}
                 onClick={() => logic.handlePresetSelect(permanentPreset)}
-                onKeyDown={(e) =>
-                  e.key === "Enter" && logic.handlePresetSelect(permanentPreset)
-                }
+                onKeyDown={(e) => e.key === "Enter" && logic.handlePresetSelect(permanentPreset)}
                 className={cn(
-                  "flex items-center gap-3 w-full px-4 py-3 rounded-xl cursor-pointer transition-all duration-200",
+                  "flex w-full cursor-pointer items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200",
                   permanentCardClass,
-                  permanentSelected
-                    ? "ring-1 ring-red-500/60"
-                    : "ring-1 ring-red-500/25",
+                  permanentSelected ? "ring-1 ring-red-500/60" : "ring-1 ring-red-500/25",
                 )}
               >
-                <Ban size={16} className="text-red-400 shrink-0" />
+                <Ban size={16} className="shrink-0 text-red-400" />
                 <div className="text-left">
-                  <p className={cn("text-sm font-medium", textColor)}>
-                    {t("ban.permanentLabel")}
-                  </p>
-                  <p className={cn("text-xs", subtextColor)}>
-                    {t("ban.permanentDescription")}
-                  </p>
+                  <p className={cn("text-sm font-medium", textColor)}>{t("ban.permanentLabel")}</p>
+                  <p className={cn("text-xs", subtextColor)}>{t("ban.permanentDescription")}</p>
                 </div>
               </div>
             </div>
@@ -198,10 +167,7 @@ export default function BanDialog({
             {/* Timeouts */}
             <div>
               <p
-                className={cn(
-                  "text-xs font-semibold uppercase tracking-wider mb-2",
-                  subtextColor,
-                )}
+                className={cn("mb-2 text-xs font-semibold tracking-wider uppercase", subtextColor)}
               >
                 {t("ban.timeouts")}
               </p>
@@ -222,10 +188,7 @@ export default function BanDialog({
             {/* Timed bans */}
             <div>
               <p
-                className={cn(
-                  "text-xs font-semibold uppercase tracking-wider mb-2",
-                  subtextColor,
-                )}
+                className={cn("mb-2 text-xs font-semibold tracking-wider uppercase", subtextColor)}
               >
                 {t("ban.timedBans")}
               </p>
@@ -244,34 +207,26 @@ export default function BanDialog({
             </div>
 
             {/* ── Reason ──────────────────────────────────────────────── */}
-            <div className="flex-1 flex flex-col gap-2">
+            <div className="flex flex-1 flex-col gap-2">
               <p
                 className={cn(
-                  "text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5",
+                  "flex items-center gap-1.5 text-xs font-semibold tracking-wider uppercase",
                   subtextColor,
                 )}
               >
                 <MessageSquare size={11} />
                 Reason{" "}
-                <span className={cn("normal-case font-normal", subtextColor)}>
-                  (optional)
-                </span>
+                <span className={cn("font-normal normal-case", subtextColor)}>(optional)</span>
               </p>
 
               {/* Preset reason chips */}
-              <div
-                className={cn("rounded-xl p-3 flex flex-col gap-3", sectionBg)}
-              >
+              <div className={cn("flex flex-col gap-3 rounded-xl p-3", sectionBg)}>
                 <div className="flex flex-wrap gap-1.5">
                   {PRESET_REASONS.map((reason) => (
                     <button
                       key={reason}
                       type="button"
-                      onClick={() =>
-                        logic.setBanReason(
-                          logic.banReason === reason ? "" : reason,
-                        )
-                      }
+                      onClick={() => logic.setBanReason(logic.banReason === reason ? "" : reason)}
                       className={reasonChipClass(reason)}
                     >
                       {reason}
@@ -281,18 +236,13 @@ export default function BanDialog({
 
                 {/* Custom message textarea */}
                 <div className="flex flex-col gap-1">
-                  <label className={cn("text-xs", subtextColor)}>
-                    Custom message
-                  </label>
+                  <label className={cn("text-xs", subtextColor)}>Custom message</label>
                   <textarea
                     rows={3}
                     placeholder={t("ban.customMessagePlaceholder")}
                     value={logic.banReason}
                     onChange={(e) => logic.setBanReason(e.target.value)}
-                    className={cn(
-                      inputClass,
-                      "w-full resize-none text-xs leading-relaxed",
-                    )}
+                    className={cn(inputClass, "w-full resize-none text-xs leading-relaxed")}
                   />
                 </div>
               </div>
@@ -300,13 +250,10 @@ export default function BanDialog({
           </div>
 
           {/* ── Right: custom range + calendar ─────────────────────────── */}
-          <div className="flex-1 flex flex-col gap-3">
+          <div className="flex flex-1 flex-col gap-3">
             <div>
               <p
-                className={cn(
-                  "text-xs font-semibold uppercase tracking-wider mb-2",
-                  subtextColor,
-                )}
+                className={cn("mb-2 text-xs font-semibold tracking-wider uppercase", subtextColor)}
               >
                 Custom Range
               </p>
@@ -324,15 +271,12 @@ export default function BanDialog({
 
         {/* Footer */}
         <div className={cn("mx-6 mb-6", footerClass)}>
-          <div className="flex flex-col sm:flex-row gap-2 justify-end">
+          <div className="flex flex-col justify-end gap-2 sm:flex-row">
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
-              className={cn(
-                getButtonClasses(useLiquidGlass, useDarkMode, "secondary"),
-                textColor,
-              )}
+              className={cn(getButtonClasses(useLiquidGlass, useDarkMode, "secondary"), textColor)}
             >
               Cancel
             </Button>

@@ -53,50 +53,24 @@ interface CreateItemDialogProps {
 
 // ─── Main component ────────────────────────────────────────────────────────────
 
-export function CreateItemDialog({
-  onCreate,
-  isLoading = false,
-}: CreateItemDialogProps) {
+export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDialogProps) {
   const { settings } = useSettings();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [kind, setKind] = useState<(typeof KINDS)[number]>("Character");
-  const [combatType, setCombatType] =
-    useState<(typeof COMBAT_TYPES)[number]>("Melee");
+  const [combatType, setCombatType] = useState<(typeof COMBAT_TYPES)[number]>("Melee");
   const [rarity, setRarity] = useState<(typeof RARITIES)[number]>("Common");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
 
-  const buttonClass = getButtonClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const inputClass = getInputClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const dialogClass = getDialogClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const footerClass = getDialogFooterClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const textShadow = getTextShadow(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const subtextColor = getSubtextColor(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
+  const buttonClass = getButtonClasses(settings.useLiquidGlass, settings.useDarkMode);
+  const inputClass = getInputClasses(settings.useLiquidGlass, settings.useDarkMode);
+  const dialogClass = getDialogClasses(settings.useLiquidGlass, settings.useDarkMode);
+  const footerClass = getDialogFooterClasses(settings.useLiquidGlass, settings.useDarkMode);
+  const textShadow = getTextShadow(settings.useLiquidGlass, settings.useDarkMode);
+  const subtextColor = getSubtextColor(settings.useLiquidGlass, settings.useDarkMode);
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
-  const bgClass = getBackgroundClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-    "strong",
-  );
+  const bgClass = getBackgroundClasses(settings.useLiquidGlass, settings.useDarkMode, "strong");
 
   const handleSubmit = () => {
     if (!name.trim() || !description.trim() || !price) return;
@@ -118,19 +92,13 @@ export function CreateItemDialog({
   };
 
   const isFormValid =
-    name.trim() !== "" &&
-    description.trim() !== "" &&
-    price !== "" &&
-    Number(price) > 0;
+    name.trim() !== "" && description.trim() !== "" && price !== "" && Number(price) > 0;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          size="sm"
-          className={`cursor-pointer gap-2 ${buttonClass} ${textShadow}`}
-        >
-          <Plus className="w-4 h-4" />
+        <Button size="sm" className={`cursor-pointer gap-2 ${buttonClass} ${textShadow}`}>
+          <Plus className="h-4 w-4" />
           <span className="text-sm font-medium">Create Item</span>
         </Button>
       </DialogTrigger>
@@ -185,7 +153,7 @@ export function CreateItemDialog({
                 renderOption={(r) => (
                   <>
                     <span
-                      className="inline-block w-2 h-2 rounded-full shrink-0"
+                      className="inline-block h-2 w-2 shrink-0 rounded-full"
                       style={{ backgroundColor: RARITY_COLORS[r] }}
                     />
                     {r}
@@ -216,9 +184,7 @@ export function CreateItemDialog({
             <Label className={textColor}>Description</Label>
             <Input
               value={description}
-              onChange={(e) =>
-                setDescription((e.target as HTMLInputElement).value)
-              }
+              onChange={(e) => setDescription((e.target as HTMLInputElement).value)}
               placeholder="Item description"
               maxLength={50}
               className={inputClass}
@@ -241,10 +207,7 @@ export function CreateItemDialog({
 
         <DialogFooter className={footerClass}>
           <DialogClose asChild>
-            <Button
-              variant="outline"
-              className={`cursor-pointer ${buttonClass} ${textShadow}`}
-            >
+            <Button variant="outline" className={`cursor-pointer ${buttonClass} ${textShadow}`}>
               Cancel
             </Button>
           </DialogClose>
@@ -255,7 +218,7 @@ export function CreateItemDialog({
           >
             {isLoading ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 Creating…
               </>
             ) : (

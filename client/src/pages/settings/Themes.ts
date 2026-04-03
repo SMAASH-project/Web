@@ -136,10 +136,7 @@ export const THEMES: Theme[] = [
   },
 ];
 
-export const applyTheme = (
-  theme: Theme,
-  context: ColorContextType | undefined,
-) => {
+export const applyTheme = (theme: Theme, context: ColorContextType | undefined) => {
   if (context) {
     context.setColorLeft(theme.colorLeft);
     context.setColorMiddle(theme.colorMiddle);

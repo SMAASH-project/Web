@@ -54,11 +54,7 @@ const SPEED_TO_CSS: Record<number, number> = {
 
 let restoreViewportOverride: null | (() => void) = null;
 
-function evaluateMediaQueryForViewport(
-  query: string,
-  width: number,
-  height: number,
-): boolean {
+function evaluateMediaQueryForViewport(query: string, width: number, height: number): boolean {
   const q = query.toLowerCase();
 
   for (const m of q.matchAll(/min-width\s*:\s*(\d+)px/g)) {
@@ -112,22 +108,14 @@ function applyViewportOverride(width: number, height: number) {
     const mql = {
       media: query,
       matches,
-      onchange: null as
-        | ((this: MediaQueryList, ev: MediaQueryListEvent) => any)
-        | null,
-      addEventListener: (
-        type: string,
-        listener: EventListenerOrEventListenerObject,
-      ) => {
+      onchange: null as ((this: MediaQueryList, ev: MediaQueryListEvent) => any) | null,
+      addEventListener: (type: string, listener: EventListenerOrEventListenerObject) => {
         if (type !== "change") return;
         if (typeof listener === "function") {
           listeners.add(listener as (e: MediaQueryListEvent) => void);
         }
       },
-      removeEventListener: (
-        type: string,
-        listener: EventListenerOrEventListenerObject,
-      ) => {
+      removeEventListener: (type: string, listener: EventListenerOrEventListenerObject) => {
         if (type !== "change") return;
         if (typeof listener === "function") {
           listeners.delete(listener as (e: MediaQueryListEvent) => void);
@@ -167,10 +155,7 @@ export function DebugEffects() {
   const colorRight = colorCtx?.colorRight ?? "#616161";
 
   useEffect(() => {
-    document.body.classList.toggle(
-      "debug-reduced-motion",
-      settings.forceReducedMotion,
-    );
+    document.body.classList.toggle("debug-reduced-motion", settings.forceReducedMotion);
   }, [settings.forceReducedMotion]);
 
   useEffect(() => {
@@ -178,10 +163,7 @@ export function DebugEffects() {
   }, [settings.compactDensity]);
 
   useEffect(() => {
-    document.body.classList.toggle(
-      "debug-safe-area",
-      settings.safeAreaOutlines,
-    );
+    document.body.classList.toggle("debug-safe-area", settings.safeAreaOutlines);
   }, [settings.safeAreaOutlines]);
 
   useEffect(() => {
@@ -203,11 +185,7 @@ export function DebugEffects() {
         restoreViewportOverride = null;
       }
     };
-  }, [
-    settings.forceViewportEnabled,
-    settings.forceViewportWidth,
-    settings.forceViewportHeight,
-  ]);
+  }, [settings.forceViewportEnabled, settings.forceViewportWidth, settings.forceViewportHeight]);
 
   useEffect(() => {
     return () => {
@@ -280,14 +258,14 @@ export function DebugOverlay() {
   if (!settings.showFps && !settings.showScrollPos) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 z-9999 flex flex-col gap-1.5 pointer-events-none">
+    <div className="pointer-events-none fixed bottom-4 left-4 z-9999 flex flex-col gap-1.5">
       {settings.showFps && fps !== null && (
-        <span className="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-full backdrop-blur-md bg-black/50 text-green-400">
+        <span className="rounded-full bg-black/50 px-2.5 py-1 font-mono text-[11px] font-semibold text-green-400 backdrop-blur-md">
           {fps} fps
         </span>
       )}
       {settings.showScrollPos && (
-        <span className="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-full backdrop-blur-md bg-black/50 text-blue-400">
+        <span className="rounded-full bg-black/50 px-2.5 py-1 font-mono text-[11px] font-semibold text-blue-400 backdrop-blur-md">
           Y: {scrollY}px
         </span>
       )}
@@ -322,8 +300,8 @@ export function BreakpointOverlay() {
               : "xs";
 
   return (
-    <div className="fixed bottom-4 right-4 z-9999 pointer-events-none">
-      <span className="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-full backdrop-blur-md bg-black/50 text-violet-300">
+    <div className="pointer-events-none fixed right-4 bottom-4 z-9999">
+      <span className="rounded-full bg-black/50 px-2.5 py-1 font-mono text-[11px] font-semibold text-violet-300 backdrop-blur-md">
         {label} · {width}px
       </span>
     </div>
@@ -391,9 +369,7 @@ export function ElementInspectorOverlay() {
       const rect = (el as HTMLElement).getBoundingClientRect();
       const css = {} as Record<InspectorProp, string>;
       for (const prop of INSPECTOR_PROPS) {
-        css[prop] = cs.getPropertyValue(
-          prop.replace(/([A-Z])/g, "-$1").toLowerCase(),
-        );
+        css[prop] = cs.getPropertyValue(prop.replace(/([A-Z])/g, "-$1").toLowerCase());
       }
 
       const layers = debug.zIndexInspector
@@ -403,8 +379,7 @@ export function ElementInspectorOverlay() {
             .slice(0, 6)
             .map((n) => {
               const style = window.getComputedStyle(n);
-              const klass =
-                n.classList.length > 0 ? `.${Array.from(n.classList)[0]}` : "";
+              const klass = n.classList.length > 0 ? `.${Array.from(n.classList)[0]}` : "";
               return {
                 label: `${n.tagName.toLowerCase()}${n.id ? `#${n.id}` : ""}${klass}`,
                 z: style.zIndex || "auto",
@@ -454,20 +429,16 @@ export function ElementInspectorOverlay() {
     <div
       ref={overlayRef}
       data-element-inspector="true"
-      className="fixed z-9999 pointer-events-none"
+      className="pointer-events-none fixed z-9999"
       style={{ left, top }}
     >
-      <div className={`rounded-xl p-3 w-60 flex flex-col gap-1.5 ${cardBg}`}>
-        <div
-          className={`flex items-baseline gap-1.5 border-b ${divider} pb-1.5`}
-        >
-          <span className={`text-[11px] font-mono font-bold ${tagColor}`}>
+      <div className={`flex w-60 flex-col gap-1.5 rounded-xl p-3 ${cardBg}`}>
+        <div className={`flex items-baseline gap-1.5 border-b ${divider} pb-1.5`}>
+          <span className={`font-mono text-[11px] font-bold ${tagColor}`}>
             &lt;{target.tag}&gt;
           </span>
           {target.id && (
-            <span className={`text-[10px] font-mono ${idColor} truncate`}>
-              #{target.id}
-            </span>
+            <span className={`font-mono text-[10px] ${idColor} truncate`}>#{target.id}</span>
           )}
         </div>
         {target.classes.length > 0 && (
@@ -475,7 +446,7 @@ export function ElementInspectorOverlay() {
             {target.classes.map((c) => (
               <span
                 key={c}
-                className={`text-[9px] font-mono px-1 py-0.5 rounded truncate max-w-40 ${badgeStyle}`}
+                className={`max-w-40 truncate rounded px-1 py-0.5 font-mono text-[9px] ${badgeStyle}`}
               >
                 .{c}
               </span>
@@ -484,16 +455,11 @@ export function ElementInspectorOverlay() {
         )}
         <div className="flex flex-col gap-0.5">
           {INSPECTOR_PROPS.map((prop) => (
-            <div
-              key={prop}
-              className="flex justify-between gap-2 items-baseline"
-            >
-              <span className={`text-[9px] shrink-0 ${propLabel}`}>
+            <div key={prop} className="flex items-baseline justify-between gap-2">
+              <span className={`shrink-0 text-[9px] ${propLabel}`}>
                 {prop.replace(/([A-Z])/g, "-$1").toLowerCase()}
               </span>
-              <span
-                className={`text-[9px] font-mono truncate text-right max-w-30 ${propValue}`}
-              >
+              <span className={`max-w-30 truncate text-right font-mono text-[9px] ${propValue}`}>
                 {target.css[prop] || "—"}
               </span>
             </div>
@@ -505,29 +471,24 @@ export function ElementInspectorOverlay() {
             <div className="flex items-center justify-between gap-2">
               <span className={`text-[9px] ${propLabel}`}>click target</span>
               <span
-                className={`text-[9px] font-mono ${target.clickTargetPass ? "text-green-400" : "text-amber-400"}`}
+                className={`font-mono text-[9px] ${target.clickTargetPass ? "text-green-400" : "text-amber-400"}`}
               >
-                {target.width}×{target.height}px{" "}
-                {target.clickTargetPass ? "✓" : "<44"}
+                {target.width}×{target.height}px {target.clickTargetPass ? "✓" : "<44"}
               </span>
             </div>
           </div>
         )}
 
         {debug.zIndexInspector && target.layers.length > 0 && (
-          <div className={`border-t ${divider} pt-1.5 flex flex-col gap-1`}>
+          <div className={`border-t ${divider} flex flex-col gap-1 pt-1.5`}>
             <span className={`text-[9px] ${propLabel}`}>z-stack</span>
             {target.layers.map((layer, idx) => (
               <div
                 key={`${layer.label}-${idx}`}
                 className="flex items-center justify-between gap-2"
               >
-                <span className={`text-[9px] truncate ${propValue}`}>
-                  {layer.label}
-                </span>
-                <span className={`text-[9px] font-mono shrink-0 ${propLabel}`}>
-                  {layer.z}
-                </span>
+                <span className={`truncate text-[9px] ${propValue}`}>{layer.label}</span>
+                <span className={`shrink-0 font-mono text-[9px] ${propLabel}`}>{layer.z}</span>
               </div>
             ))}
           </div>

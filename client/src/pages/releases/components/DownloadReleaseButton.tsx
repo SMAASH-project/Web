@@ -16,16 +16,10 @@ interface DownloadReleaseButtonProps {
   downloadUrl: string | undefined;
 }
 
-export function DownloadReleaseButton({
-  version,
-  downloadUrl,
-}: DownloadReleaseButtonProps) {
+export function DownloadReleaseButton({ version, downloadUrl }: DownloadReleaseButtonProps) {
   const { settings } = useSettings();
   const glass = settings.useLiquidGlass;
-  const subtextColor = getSubtextColor(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
+  const subtextColor = getSubtextColor(settings.useLiquidGlass, settings.useDarkMode);
 
   const handleDownload = () => {
     if (!downloadUrl) return;
@@ -41,12 +35,8 @@ export function DownloadReleaseButton({
       size="sm"
       variant="ghost"
       disabled={!downloadUrl}
-      title={
-        downloadUrl
-          ? `Download v${version}`
-          : `No download available for this platform`
-      }
-      className={`h-8 w-8 p-0 cursor-pointer ${subtextColor} ${
+      title={downloadUrl ? `Download v${version}` : `No download available for this platform`}
+      className={`h-8 w-8 cursor-pointer p-0 ${subtextColor} ${
         glass
           ? settings.useDarkMode
             ? "hover:bg-black/15 hover:text-gray-100"
@@ -54,10 +44,10 @@ export function DownloadReleaseButton({
           : settings.useDarkMode
             ? "hover:bg-gray-600 hover:text-gray-100"
             : "hover:bg-gray-200 hover:text-gray-900"
-      } disabled:opacity-30 disabled:cursor-not-allowed`}
+      } disabled:cursor-not-allowed disabled:opacity-30`}
       onClick={handleDownload}
     >
-      <Download className="w-4 h-4" />
+      <Download className="h-4 w-4" />
     </Button>
   );
 }

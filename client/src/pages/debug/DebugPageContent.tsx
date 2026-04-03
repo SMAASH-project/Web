@@ -34,14 +34,7 @@ import { SightTab } from "./tabs/SightTab";
 
 // ─── Tab definition ───────────────────────────────────────────────────────────
 
-type Tab =
-  | "system"
-  | "cache"
-  | "endpoints"
-  | "game"
-  | "visual"
-  | "emulation"
-  | "diagnostics";
+type Tab = "system" | "cache" | "endpoints" | "game" | "visual" | "emulation" | "diagnostics";
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "system", label: "System", icon: <Monitor size={14} /> },
@@ -65,11 +58,7 @@ const colTransition = (delay: number): Transition => ({
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
-export function DebugPageContent({
-  animReady = true,
-}: {
-  animReady?: boolean;
-}) {
+export function DebugPageContent({ animReady = true }: { animReady?: boolean }) {
   const { settings } = useSettings();
   const { useLiquidGlass, useDarkMode, useAnimations } = settings;
   const { isAdmin, isSupport } = useContext(AuthContext);
@@ -94,7 +83,7 @@ export function DebugPageContent({
         key={tab.id}
         type="button"
         onClick={() => setActiveTab(tab.id)}
-        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 text-left ${
+        className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-medium transition-all duration-200 ${
           active
             ? useLiquidGlass
               ? useDarkMode
@@ -116,12 +105,10 @@ export function DebugPageContent({
   const sidebarContent = (
     <>
       {/* Logo + title */}
-      <div className="flex items-center gap-2 px-2 py-2 mb-2">
+      <div className="mb-2 flex items-center gap-2 px-2 py-2">
         <Bug size={15} className={subtextColor} />
         <div>
-          <p className={`text-xs font-bold ${textColor} ${textShadow}`}>
-            {t("title")}
-          </p>
+          <p className={`text-xs font-bold ${textColor} ${textShadow}`}>{t("title")}</p>
           <p className={`text-[10px] ${subtextColor} leading-none`}>
             {isAdmin ? t("roles.admin") : t("roles.support")}
           </p>
@@ -132,10 +119,10 @@ export function DebugPageContent({
       <div className="flex flex-col gap-0.5">{visibleTabs.map(tabBtn)}</div>
 
       {/* Refresh at bottom */}
-      <div className="mt-auto pt-3 border-t border-current/10">
+      <div className="mt-auto border-t border-current/10 pt-3">
         <button
           onClick={() => queryClient.invalidateQueries({ queryKey: ["debug"] })}
-          className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-all duration-200 ${subtextColor} hover:bg-current/8`}
+          className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs transition-all duration-200 ${subtextColor} hover:bg-current/8`}
         >
           <RefreshCw size={13} />
           {t("refresh")}
@@ -148,11 +135,7 @@ export function DebugPageContent({
   const tabContent = (
     <>
       {activeTab === "system" && (
-        <SystemTab
-          textColor={textColor}
-          subtextColor={subtextColor}
-          panelBg={panelBg}
-        />
+        <SystemTab textColor={textColor} subtextColor={subtextColor} panelBg={panelBg} />
       )}
       {activeTab === "cache" && (
         <CacheTab
@@ -172,11 +155,7 @@ export function DebugPageContent({
         />
       )}
       {activeTab === "game" && isAdmin && (
-        <GameDataTab
-          textColor={textColor}
-          subtextColor={subtextColor}
-          panelBg={panelBg}
-        />
+        <GameDataTab textColor={textColor} subtextColor={subtextColor} panelBg={panelBg} />
       )}
       {activeTab === "visual" && (
         <SightTab
@@ -213,29 +192,27 @@ export function DebugPageContent({
 
   return (
     <div
-      className={`z-0 flex flex-col w-full max-w-6xl rounded-xl overflow-hidden flex-1 md:flex-row ${
+      className={`z-0 flex w-full max-w-6xl flex-1 flex-col overflow-hidden rounded-xl md:flex-row ${
         animReady ? cardBg : cardBg.replace(/backdrop-blur-\S+/g, "")
       }`}
     >
       {/* ── Mobile hamburger + drawer ────────────────────────────────── */}
-      <div className="md:hidden flex items-center gap-3 p-3 border-b border-current/10">
+      <div className="flex items-center gap-3 border-b border-current/10 p-3 md:hidden">
         <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
           <SheetTrigger asChild>
             <button
-              className={`p-1.5 rounded-lg transition-colors ${subtextColor} hover:bg-current/8`}
+              className={`rounded-lg p-1.5 transition-colors ${subtextColor} hover:bg-current/8`}
             >
               <Menu size={18} />
             </button>
           </SheetTrigger>
           <SheetContent side="left" className={`w-52 p-0 ${cardBg}`}>
-            <div className="flex flex-col gap-1 p-3 h-full">
+            <div className="flex h-full flex-col gap-1 p-3">
               {/* Logo */}
-              <div className="flex items-center gap-2 px-2 py-2 mb-2">
+              <div className="mb-2 flex items-center gap-2 px-2 py-2">
                 <Bug size={15} className={subtextColor} />
                 <div>
-                  <p className={`text-xs font-bold ${textColor} ${textShadow}`}>
-                    {t("title")}
-                  </p>
+                  <p className={`text-xs font-bold ${textColor} ${textShadow}`}>{t("title")}</p>
                   <p className={`text-[10px] ${subtextColor} leading-none`}>
                     {isAdmin ? t("roles.admin") : t("roles.support")}
                   </p>
@@ -252,7 +229,7 @@ export function DebugPageContent({
                       setActiveTab(tab.id);
                       setDrawerOpen(false);
                     }}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 text-left ${
+                    className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-medium transition-all duration-200 ${
                       tab.id === activeTab
                         ? useLiquidGlass
                           ? useDarkMode
@@ -264,11 +241,7 @@ export function DebugPageContent({
                         : `${subtextColor} hover:bg-current/8`
                     }`}
                   >
-                    <span
-                      className={
-                        tab.id === activeTab ? textColor : subtextColor
-                      }
-                    >
+                    <span className={tab.id === activeTab ? textColor : subtextColor}>
                       {tab.icon}
                     </span>
                     {t(`tabs.${tab.id}`)}
@@ -277,13 +250,13 @@ export function DebugPageContent({
               </div>
 
               {/* Refresh at bottom */}
-              <div className="mt-auto pt-3 border-t border-current/10">
+              <div className="mt-auto border-t border-current/10 pt-3">
                 <button
                   onClick={() => {
                     queryClient.invalidateQueries({ queryKey: ["debug"] });
                     setDrawerOpen(false);
                   }}
-                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-all duration-200 ${subtextColor} hover:bg-current/8`}
+                  className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs transition-all duration-200 ${subtextColor} hover:bg-current/8`}
                 >
                   <RefreshCw size={13} />
                   {t("refresh")}
@@ -295,9 +268,7 @@ export function DebugPageContent({
 
         {/* Title on mobile */}
         <div>
-          <p className={`text-sm font-bold ${textColor} ${textShadow}`}>
-            {t("title")}
-          </p>
+          <p className={`text-sm font-bold ${textColor} ${textShadow}`}>{t("title")}</p>
         </div>
       </div>
 
@@ -307,12 +278,12 @@ export function DebugPageContent({
           initial={hidden}
           animate={animReady ? visible : hidden}
           transition={colTransition(0.05)}
-          className="hidden md:flex flex-col gap-1 p-3 w-44 shrink-0 border-r border-current/10"
+          className="hidden w-44 shrink-0 flex-col gap-1 border-r border-current/10 p-3 md:flex"
         >
           {sidebarContent}
         </motion.div>
       ) : (
-        <div className="hidden md:flex flex-col gap-1 p-3 w-44 shrink-0 border-r border-current/10">
+        <div className="hidden w-44 shrink-0 flex-col gap-1 border-r border-current/10 p-3 md:flex">
           {sidebarContent}
         </div>
       )}
@@ -323,7 +294,7 @@ export function DebugPageContent({
           initial={hidden}
           animate={animReady ? visible : hidden}
           transition={colTransition(0.18)}
-          className="flex-1 overflow-hidden relative"
+          className="relative flex-1 overflow-hidden"
         >
           <AnimatePresence mode="wait">
             <motion.div
@@ -339,10 +310,8 @@ export function DebugPageContent({
           </AnimatePresence>
         </motion.div>
       ) : (
-        <div className="flex-1 overflow-hidden relative">
-          <div className="absolute inset-0 overflow-y-auto p-4">
-            {tabContent}
-          </div>
+        <div className="relative flex-1 overflow-hidden">
+          <div className="absolute inset-0 overflow-y-auto p-4">{tabContent}</div>
         </div>
       )}
     </div>

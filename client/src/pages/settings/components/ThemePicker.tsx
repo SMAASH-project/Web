@@ -25,12 +25,8 @@ export const ThemePicker = memo(function ThemePicker() {
   } = context;
 
   const [pendingColorLeft, setPendingColorLeft] = useState<string | null>(null);
-  const [pendingColorMiddle, setPendingColorMiddle] = useState<string | null>(
-    null,
-  );
-  const [pendingColorRight, setPendingColorRight] = useState<string | null>(
-    null,
-  );
+  const [pendingColorMiddle, setPendingColorMiddle] = useState<string | null>(null);
+  const [pendingColorRight, setPendingColorRight] = useState<string | null>(null);
 
   const displayColorLeft = pendingColorLeft ?? colorLeft;
   const displayColorMiddle = pendingColorMiddle ?? colorMiddle;
@@ -64,16 +60,13 @@ export const ThemePicker = memo(function ThemePicker() {
     () => ({
       textColor: getTextColor(settings.useLiquidGlass, settings.useDarkMode),
       textShadow: getTextShadow(settings.useLiquidGlass, settings.useDarkMode),
-      buttonClass: getButtonClasses(
-        settings.useLiquidGlass,
-        settings.useDarkMode,
-      ),
+      buttonClass: getButtonClasses(settings.useLiquidGlass, settings.useDarkMode),
     }),
     [settings.useLiquidGlass, settings.useDarkMode],
   );
 
   return (
-    <div className="w-full flex items-center justify-center gap-2 flex-wrap">
+    <div className="flex w-full flex-wrap items-center justify-center gap-2">
       <Label className={`${textColor} p-1.5 ${textShadow}`}>Custom Theme</Label>
       <ColorPicker
         className="w-10 cursor-pointer"

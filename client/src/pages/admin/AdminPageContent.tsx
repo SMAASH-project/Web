@@ -13,17 +13,11 @@ const colTransition = (delay: number): Transition => ({
   delay,
 });
 
-export function AdminPageContent({
-  animReady = true,
-}: {
-  animReady?: boolean;
-}) {
+export function AdminPageContent({ animReady = true }: { animReady?: boolean }) {
   const logic = useAdminPageLogic();
   const { settings } = useSettings();
   const { useAnimations } = settings;
-  const cardBg = animReady
-    ? logic.cardBg
-    : logic.cardBg.replace(/backdrop-blur-\S+/g, "");
+  const cardBg = animReady ? logic.cardBg : logic.cardBg.replace(/backdrop-blur-\S+/g, "");
 
   const hidden = { opacity: 0, y: 18 };
   const visible = { opacity: 1, y: 0 };
@@ -31,7 +25,7 @@ export function AdminPageContent({
   return (
     <>
       <div
-        className={`z-0 flex flex-col xl:flex-row w-full max-w-7xl p-4 sm:p-6 gap-4 sm:gap-6 min-h-150 rounded-xl ${cardBg}`}
+        className={`z-0 flex min-h-150 w-full max-w-7xl flex-col gap-4 rounded-xl p-4 sm:gap-6 sm:p-6 xl:flex-row ${cardBg}`}
       >
         {useAnimations ? (
           <motion.div
@@ -49,7 +43,7 @@ export function AdminPageContent({
 
         {useAnimations ? (
           <motion.div
-            className="flex-1 flex flex-col gap-4 min-w-0"
+            className="flex min-w-0 flex-1 flex-col gap-4"
             initial={hidden}
             animate={animReady ? visible : hidden}
             transition={colTransition(0.18)}
@@ -57,7 +51,7 @@ export function AdminPageContent({
             <UserDetail logic={logic} />
           </motion.div>
         ) : (
-          <div className="flex-1 flex flex-col gap-4 min-w-0">
+          <div className="flex min-w-0 flex-1 flex-col gap-4">
             <UserDetail logic={logic} />
           </div>
         )}

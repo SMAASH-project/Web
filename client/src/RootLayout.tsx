@@ -13,12 +13,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Suspense } from "react";
 import { MotionConfig } from "motion/react";
 import { useDebugSettings } from "@/hooks/useDebugSettings";
-import {
-  DebugEffects,
-  DebugOverlay,
-  BreakpointOverlay,
-  ElementInspectorOverlay,
-} from "@/components/debug/DebugOverlays";
+import { DebugEffects } from "@/components/debug/DebugEffects";
+import { DebugOverlay, BreakpointOverlay } from "@/components/debug/DebugBadges";
+import { ElementInspectorOverlay } from "@/components/debug/ElementInspectorOverlay";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,10 +60,7 @@ function MotionWrapper({ children }: { children: React.ReactNode }) {
  */
 export function RootLayout() {
   return (
-    <PersistQueryClientProvider
-      client={queryClient}
-      persistOptions={{ persister }}
-    >
+    <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
       <AuthProvider>
         <SettingsProvider>
           <NavbarProvider>
@@ -76,8 +70,8 @@ export function RootLayout() {
                   <Wrapper>
                     <Suspense
                       fallback={
-                        <div className="flex items-center justify-center min-h-screen">
-                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+                        <div className="flex min-h-screen items-center justify-center">
+                          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-white"></div>
                         </div>
                       }
                     >
@@ -85,10 +79,14 @@ export function RootLayout() {
                     </Suspense>
                   </Wrapper>
                   <Toaster />
-                  <DebugEffects />
-                  <DebugOverlay />
-                  <BreakpointOverlay />
-                  <ElementInspectorOverlay />
+                  {import.meta.env.DEV && (
+                    <>
+                      <DebugEffects />
+                      <DebugOverlay />
+                      <BreakpointOverlay />
+                      <ElementInspectorOverlay />
+                    </>
+                  )}
                 </MotionWrapper>
               </ProfileProvider>
             </ColorProvider>

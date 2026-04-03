@@ -122,11 +122,7 @@ export function StormBackground({
             ? 10 + Math.random() * 10 // mid
             : 5 + Math.random() * 6, // background — short
       speed:
-        i < 80
-          ? 14 + Math.random() * 6
-          : i < 150
-            ? 9 + Math.random() * 5
-            : 5 + Math.random() * 4,
+        i < 80 ? 14 + Math.random() * 6 : i < 150 ? 9 + Math.random() * 5 : 5 + Math.random() * 4,
       opacity:
         i < 80
           ? 0.5 + Math.random() * 0.25
@@ -158,10 +154,7 @@ export function StormBackground({
           ctx!.lineWidth = d.width;
           ctx!.beginPath();
           ctx!.moveTo(d.x, d.y);
-          ctx!.lineTo(
-            d.x + Math.sin(ANGLE) * d.length,
-            d.y + Math.cos(ANGLE) * d.length,
-          );
+          ctx!.lineTo(d.x + Math.sin(ANGLE) * d.length, d.y + Math.cos(ANGLE) * d.length);
           ctx!.stroke();
           ctx!.restore();
         }
@@ -265,7 +258,9 @@ export function StormBackground({
     <>
       <style>{CLOUD_CSS}</style>
 
-      <div className={`${preview ? "absolute" : "fixed"} inset-0 z-0 pointer-events-none overflow-hidden`}>
+      <div
+        className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 overflow-hidden`}
+      >
         {/* Dark storm atmosphere */}
         <div className="absolute inset-0 bg-[rgba(2,4,12,0.45)]" />
 
@@ -274,44 +269,38 @@ export function StormBackground({
           <>
             {/* Cloud layer 1 — wide, low */}
             <div
-              className="absolute top-[-10%] left-[-18%] w-[85%] h-[48%] blur-[35px] animate-[cloud-drift-1_26s_ease-in-out_infinite]"
+              className="absolute top-[-10%] left-[-18%] h-[48%] w-[85%] animate-[cloud-drift-1_26s_ease-in-out_infinite] blur-[35px]"
               style={{
                 background: `radial-gradient(ellipse 100% 75% at 35% 45%, rgba(${lr},${lg},${lb},0.62) 0%, transparent 70%)`,
               }}
             />
             {/* Cloud layer 2 */}
             <div
-              className="absolute top-[-6%] left-[28%] w-[95%] h-[50%] blur-[42px] animate-[cloud-drift-2_33s_ease-in-out_infinite]"
+              className="absolute top-[-6%] left-[28%] h-[50%] w-[95%] animate-[cloud-drift-2_33s_ease-in-out_infinite] blur-[42px]"
               style={{
                 background: `radial-gradient(ellipse 100% 85% at 55% 40%, rgba(${mr},${mg},${mb},0.52) 0%, transparent 70%)`,
               }}
             />
             {/* Cloud layer 3 — lighter, further back */}
             <div
-              className="absolute top-[0%] left-[45%] w-[75%] h-[40%] blur-[28px] animate-[cloud-drift-3_40s_ease-in-out_infinite]"
+              className="absolute top-[0%] left-[45%] h-[40%] w-[75%] animate-[cloud-drift-3_40s_ease-in-out_infinite] blur-[28px]"
               style={{
                 background: `radial-gradient(ellipse 90% 70% at 50% 50%, rgba(${rr},${rg},${rb},0.40) 0%, transparent 70%)`,
               }}
             />
             {/* Underbelly darkening */}
             <div
-              className="absolute top-[25%] inset-x-0 h-[20%] blur-[50px] opacity-60"
+              className="absolute inset-x-0 top-[25%] h-[20%] opacity-60 blur-[50px]"
               style={{ background: "rgba(0,0,5,0.7)" }}
             />
           </>
         )}
 
         {/* Rain canvas */}
-        <canvas
-          ref={rainCanvasRef}
-          className="absolute inset-0 w-full h-full"
-        />
+        <canvas ref={rainCanvasRef} className="absolute inset-0 h-full w-full" />
 
         {/* Lightning bolt canvas */}
-        <canvas
-          ref={boltCanvasRef}
-          className="absolute inset-0 w-full h-full"
-        />
+        <canvas ref={boltCanvasRef} className="absolute inset-0 h-full w-full" />
 
         {/* Screen flash */}
         {showLightning && flashAlpha > 0 && (
@@ -324,7 +313,7 @@ export function StormBackground({
         {/* Ground puddle shimmer */}
         {showGroundShimmer && (
           <div
-            className="absolute bottom-0 inset-x-0 h-[8%]"
+            className="absolute inset-x-0 bottom-0 h-[8%]"
             style={{
               background: `linear-gradient(to top, rgba(${mr},${mg},${mb},0.18), transparent)`,
             }}

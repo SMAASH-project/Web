@@ -150,8 +150,8 @@
 .theme-color-interpolate,
 .theme-color-interpolate * {
   transition-property:
-    background-color, border-color, color, box-shadow, fill, stroke,
-    outline-color, text-decoration-color;
+    background-color, border-color, color, box-shadow, fill, stroke, outline-color,
+    text-decoration-color;
   transition-duration: 450ms;
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -183,10 +183,7 @@
   z-index: 10000;
   inset: 0;
   border-top: max(env(safe-area-inset-top), 6px) solid rgba(59, 130, 246, 0.45);
-  border-right: max(env(safe-area-inset-right), 6px) solid
-    rgba(16, 185, 129, 0.45);
-  border-bottom: max(env(safe-area-inset-bottom), 6px) solid
-    rgba(245, 158, 11, 0.45);
-  border-left: max(env(safe-area-inset-left), 6px) solid
-    rgba(236, 72, 153, 0.45);
+  border-right: max(env(safe-area-inset-right), 6px) solid rgba(16, 185, 129, 0.45);
+  border-bottom: max(env(safe-area-inset-bottom), 6px) solid rgba(245, 158, 11, 0.45);
+  border-left: max(env(safe-area-inset-left), 6px) solid rgba(236, 72, 153, 0.45);
 }

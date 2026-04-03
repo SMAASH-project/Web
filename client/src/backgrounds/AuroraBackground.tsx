@@ -120,90 +120,95 @@ export function AuroraBackground({
     <>
       <style>{STAR_TWINKLE}</style>
 
-      <div className={`${preview ? "absolute" : "fixed"} inset-0 z-0 pointer-events-none overflow-hidden`}>
+      <div
+        className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 overflow-hidden`}
+      >
         {/* Dark sky — makes aurora pop */}
         <div className="absolute inset-0 bg-linear-to-b from-[#020818] via-[#050d1c] to-[#0a1428] opacity-75" />
 
         {/* Wide diffuse color bands */}
-        {showColorBands && BAND_CONFIG.map((cfg, i) => (
-          <motion.div
-            key={`band-${i}`}
-            className={`absolute -left-[8%] w-[116%] rounded-full will-change-[transform,opacity] ${cfg.blur}`}
-            style={{
-              top: cfg.top,
-              height: cfg.h,
-              background: `radial-gradient(ellipse 85% 100% at 50% 50%, ${colors[cfg.colorIdx]}dd 0%, ${colors[cfg.colorIdx]}66 45%, transparent 100%)`,
-            }}
-            animate={paused ? {} : cfg.animate}
-            transition={{
-              duration: cfg.duration,
-              delay: -(i * 3.1),
-              repeat: Infinity,
-              ease: "easeInOut",
-              times: [0, 0.25, 0.5, 0.75, 1],
-            }}
-          />
-        ))}
+        {showColorBands &&
+          BAND_CONFIG.map((cfg, i) => (
+            <motion.div
+              key={`band-${i}`}
+              className={`absolute -left-[8%] w-[116%] rounded-full will-change-[transform,opacity] ${cfg.blur}`}
+              style={{
+                top: cfg.top,
+                height: cfg.h,
+                background: `radial-gradient(ellipse 85% 100% at 50% 50%, ${colors[cfg.colorIdx]}dd 0%, ${colors[cfg.colorIdx]}66 45%, transparent 100%)`,
+              }}
+              animate={paused ? {} : cfg.animate}
+              transition={{
+                duration: cfg.duration,
+                delay: -(i * 3.1),
+                repeat: Infinity,
+                ease: "easeInOut",
+                times: [0, 0.25, 0.5, 0.75, 1],
+              }}
+            />
+          ))}
 
         {/* Vertical curtain fibers */}
-        {showFibers && FIBER_CONFIG.map((f, i) => (
-          <motion.div
-            key={`fiber-${i}`}
-            className="absolute will-change-[transform,opacity]"
-            style={{
-              left: f.left,
-              top: f.top,
-              width: f.width,
-              height: f.height,
-              filter: `blur(${f.blur}px)`,
-              background: `linear-gradient(to bottom, transparent 0%, ${colors[f.colorIdx]}cc 30%, ${colors[f.colorIdx]}aa 70%, transparent 100%)`,
-            }}
-            animate={
-              paused
-                ? {}
-                : {
-                    scaleY: [1, 1.3, 0.8, 1.2, 1],
-                    scaleX: [1, 0.7, 1.2, 0.85, 1],
-                    opacity: [
-                      f.baseOpacity,
-                      f.baseOpacity * 1.8,
-                      f.baseOpacity * 0.4,
-                      f.baseOpacity * 1.5,
-                      f.baseOpacity,
-                    ],
-                  }
-            }
-            transition={{
-              duration: f.duration,
-              delay: f.delay,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-        ))}
+        {showFibers &&
+          FIBER_CONFIG.map((f, i) => (
+            <motion.div
+              key={`fiber-${i}`}
+              className="absolute will-change-[transform,opacity]"
+              style={{
+                left: f.left,
+                top: f.top,
+                width: f.width,
+                height: f.height,
+                filter: `blur(${f.blur}px)`,
+                background: `linear-gradient(to bottom, transparent 0%, ${colors[f.colorIdx]}cc 30%, ${colors[f.colorIdx]}aa 70%, transparent 100%)`,
+              }}
+              animate={
+                paused
+                  ? {}
+                  : {
+                      scaleY: [1, 1.3, 0.8, 1.2, 1],
+                      scaleX: [1, 0.7, 1.2, 0.85, 1],
+                      opacity: [
+                        f.baseOpacity,
+                        f.baseOpacity * 1.8,
+                        f.baseOpacity * 0.4,
+                        f.baseOpacity * 1.5,
+                        f.baseOpacity,
+                      ],
+                    }
+              }
+              transition={{
+                duration: f.duration,
+                delay: f.delay,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+          ))}
 
         {/* Stars — twinkling via CSS custom property */}
-        {showStars && STARS.map((s, i) => (
-          <div
-            key={`star-${i}`}
-            className="absolute rounded-full bg-white"
-            style={{
-              top: s.top,
-              left: s.left,
-              width: `${s.size}px`,
-              height: `${s.size}px`,
-              ["--star-base-opacity" as string]: s.baseOpacity,
-              opacity: s.baseOpacity,
-              animation: `star-twinkle ${s.duration} ${s.delay} ease-in-out infinite`,
-              animationPlayState: paused ? "paused" : "running",
-            }}
-          />
-        ))}
+        {showStars &&
+          STARS.map((s, i) => (
+            <div
+              key={`star-${i}`}
+              className="absolute rounded-full bg-white"
+              style={{
+                top: s.top,
+                left: s.left,
+                width: `${s.size}px`,
+                height: `${s.size}px`,
+                ["--star-base-opacity" as string]: s.baseOpacity,
+                opacity: s.baseOpacity,
+                animation: `star-twinkle ${s.duration} ${s.delay} ease-in-out infinite`,
+                animationPlayState: paused ? "paused" : "running",
+              }}
+            />
+          ))}
 
         {/* Faint moon */}
         {showMoon && (
           <div
-            className="absolute top-[6%] right-[8%] w-10 h-10 rounded-full"
+            className="absolute top-[6%] right-[8%] h-10 w-10 rounded-full"
             style={{
               background:
                 "radial-gradient(circle at 35% 35%, #fffde0, #e8ddb5 60%, transparent 100%)",

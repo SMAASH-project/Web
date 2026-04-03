@@ -90,7 +90,7 @@ export function EndpointsTab({
   };
 
   return (
-    <div className="flex flex-col gap-3 h-full">
+    <div className="flex h-full flex-col gap-3">
       {/* Quick routes */}
       <div className="flex flex-wrap gap-1.5">
         {QUICK_ROUTES.map((r) => (
@@ -103,18 +103,16 @@ export function EndpointsTab({
               setBody("");
               setResponse(null);
             }}
-            className={`text-[10px] px-2 py-0.5 rounded-full border border-current/20 hover:border-current/40 ${subtextColor}`}
+            className={`rounded-full border border-current/20 px-2 py-0.5 text-[10px] hover:border-current/40 ${subtextColor}`}
           >
-            <span className={`${METHOD_COLORS[r.method]} mr-1`}>
-              {r.method}
-            </span>
+            <span className={`${METHOD_COLORS[r.method]} mr-1`}>{r.method}</span>
             {r.label}
           </button>
         ))}
       </div>
 
       {/* Request */}
-      <div className={`rounded-xl p-3 flex flex-col gap-2 ${panelBg}`}>
+      <div className={`flex flex-col gap-2 rounded-xl p-3 ${panelBg}`}>
         <div className="flex gap-2">
           <StyledSelect
             value={method}
@@ -123,30 +121,23 @@ export function EndpointsTab({
             inputClass={inputClass}
             textColor={textColor}
             bgClass={bgClass}
-            className="shrink-0 w-auto min-w-20"
-            renderOption={(m) => (
-              <span className={METHOD_COLORS[m]}>{m}</span>
-            )}
+            className="w-auto min-w-20 shrink-0"
+            renderOption={(m) => <span className={METHOD_COLORS[m]}>{m}</span>}
           />
           <input
             type="text"
             value={path}
             onChange={(e) => setPath(e.target.value)}
             placeholder="/endpoint"
-            className={`flex-1 text-xs px-3 py-1.5 rounded-lg font-mono ${inputClass}`}
+            className={`flex-1 rounded-lg px-3 py-1.5 font-mono text-xs ${inputClass}`}
           />
           <Button
             size="sm"
             onClick={send}
             disabled={loading || !path}
-            className="h-8 px-3 bg-green-600 hover:bg-green-500 text-white text-xs flex items-center gap-1.5 shrink-0"
+            className="flex h-8 shrink-0 items-center gap-1.5 bg-green-600 px-3 text-xs text-white hover:bg-green-500"
           >
-            {loading ? (
-              <Loader2 size={11} className="animate-spin" />
-            ) : (
-              <Send size={11} />
-            )}{" "}
-            Send
+            {loading ? <Loader2 size={11} className="animate-spin" /> : <Send size={11} />} Send
           </Button>
         </div>
         {method !== "GET" && (
@@ -155,40 +146,34 @@ export function EndpointsTab({
             value={body}
             onChange={(e) => setBody(e.target.value)}
             placeholder={'{\n  "key": "value"\n}'}
-            className={`text-xs font-mono px-3 py-2 rounded-lg resize-none ${inputClass}`}
+            className={`resize-none rounded-lg px-3 py-2 font-mono text-xs ${inputClass}`}
           />
         )}
       </div>
 
       {/* Response */}
       {(response || error) && (
-        <div
-          className={`rounded-xl p-3 flex flex-col gap-2 flex-1 overflow-hidden ${panelBg}`}
-        >
+        <div className={`flex flex-1 flex-col gap-2 overflow-hidden rounded-xl p-3 ${panelBg}`}>
           <div className="flex items-center gap-2">
-            <p
-              className={`text-[10px] font-semibold uppercase tracking-wider ${subtextColor}`}
-            >
+            <p className={`text-[10px] font-semibold tracking-wider uppercase ${subtextColor}`}>
               Response
             </p>
             {response && (
               <>
                 <span
-                  className={`text-xs font-mono font-bold ${response.status < 300 ? "text-green-400" : response.status < 500 ? "text-amber-400" : "text-red-400"}`}
+                  className={`font-mono text-xs font-bold ${response.status < 300 ? "text-green-400" : response.status < 500 ? "text-amber-400" : "text-red-400"}`}
                 >
                   {response.status}
                 </span>
-                <span className={`text-[10px] ${subtextColor}`}>
-                  {response.ms}ms
-                </span>
+                <span className={`text-[10px] ${subtextColor}`}>{response.ms}ms</span>
               </>
             )}
           </div>
           {error ? (
-            <p className="text-xs text-red-400 font-mono">{error}</p>
+            <p className="font-mono text-xs text-red-400">{error}</p>
           ) : (
             <pre
-              className={`text-[10px] font-mono rounded-lg p-2 overflow-auto flex-1 ${subtextColor} bg-black/10`}
+              className={`flex-1 overflow-auto rounded-lg p-2 font-mono text-[10px] ${subtextColor} bg-black/10`}
             >
               {JSON.stringify(response?.data, null, 2)}
             </pre>

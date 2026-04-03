@@ -15,18 +15,12 @@ export function RadioGroupChoiceCard({
   onValueChange: (value: string) => void;
 }) {
   return (
-    <RadioGroup
-      value={value}
-      onValueChange={onValueChange}
-      className="max-w-sm"
-    >
+    <RadioGroup value={value} onValueChange={onValueChange} className="max-w-sm">
       <FieldLabel htmlFor="Top">
         <Field orientation="horizontal">
           <FieldContent>
             <FieldTitle>Top</FieldTitle>
-            <FieldDescription>
-              Place image as a banner above the content.
-            </FieldDescription>
+            <FieldDescription>Place image as a banner above the content.</FieldDescription>
           </FieldContent>
           <RadioGroupItem value="Top" id="Top" />
         </Field>
@@ -35,9 +29,7 @@ export function RadioGroupChoiceCard({
         <Field orientation="horizontal">
           <FieldContent>
             <FieldTitle>Right</FieldTitle>
-            <FieldDescription>
-              Place image to the right of the content.
-            </FieldDescription>
+            <FieldDescription>Place image to the right of the content.</FieldDescription>
           </FieldContent>
           <RadioGroupItem value="Right" id="Right" />
         </Field>

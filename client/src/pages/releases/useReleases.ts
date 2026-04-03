@@ -144,13 +144,9 @@ export function useReleases(selectedOs: string) {
       const res = await fetch(`${GITHUB_API_URL}?per_page=100`);
 
       if (!res.ok) {
-        const body = (await res.json().catch(() => ({}))) as Record<
-          string,
-          unknown
-        >;
+        const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
         throw new Error(
-          (body?.message as string) ??
-            `GitHub API error: ${res.status} ${res.statusText}`,
+          (body?.message as string) ?? `GitHub API error: ${res.status} ${res.statusText}`,
         );
       }
 

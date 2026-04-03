@@ -7,9 +7,7 @@ interface NavbarContextType {
   setIsDropdownOpen: (value: boolean) => void;
 }
 
-export const NavbarContext = createContext<NavbarContextType | undefined>(
-  undefined,
-);
+export const NavbarContext = createContext<NavbarContextType | undefined>(undefined);
 
 export function useNavbarContext() {
   const context = useContext(NavbarContext);

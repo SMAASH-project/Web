@@ -17,10 +17,10 @@ interface Ripple {
 }
 
 const RIPPLE_DURATION = 2800; // ms for one ring to fully expand and fade
-const RING_OFFSET = 220;      // ms delay between concentric rings
+const RING_OFFSET = 220; // ms delay between concentric rings
 const RING_COUNT = 3;
 const MAX_RIPPLES = 22;
-const SPAWN_INTERVAL = 280;   // ms between new ripple spawns
+const SPAWN_INTERVAL = 280; // ms between new ripple spawns
 
 // Parse a hex color string into [r, g, b]
 function hexToRgb(hex: string): [number, number, number] {
@@ -98,7 +98,8 @@ export function PuddleRipplesBackground({
           }
 
           // Prune fully expired ripples (last ring done)
-          const totalAge = (now - ripple.birthTime - (RING_COUNT - 1) * RING_OFFSET) / RIPPLE_DURATION;
+          const totalAge =
+            (now - ripple.birthTime - (RING_COUNT - 1) * RING_OFFSET) / RIPPLE_DURATION;
           if (totalAge > 1) {
             ripples.splice(i, 1);
           }
@@ -126,14 +127,14 @@ export function PuddleRipplesBackground({
       cancelAnimationFrame(rafRef.current);
       if (!preview) window.removeEventListener("resize", resize);
     };
-  // Re-initialize when color changes so new ripples use the updated color
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Re-initialize when color changes so new ripples use the updated color
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [colorRight, showRipples]);
 
   return (
     <canvas
       ref={canvasRef}
-      className={`${preview ? "absolute" : "fixed"} inset-0 z-0 opacity-90 pointer-events-none`}
+      className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 opacity-90`}
     />
   );
 }

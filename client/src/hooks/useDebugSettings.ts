@@ -64,8 +64,7 @@ export function useDebugSettings() {
   };
 
   useEffect(() => {
-    const h = (e: Event) =>
-      setSettings((e as CustomEvent<DebugSettings>).detail);
+    const h = (e: Event) => setSettings((e as CustomEvent<DebugSettings>).detail);
     window.addEventListener("debug-settings", h);
     return () => window.removeEventListener("debug-settings", h);
   }, []);

@@ -50,31 +50,19 @@ function StatCard({
   subtextColor: string;
 }) {
   return (
-    <div
-      className={cn(
-        "rounded-xl p-3 flex flex-col gap-1",
-        panelBg,
-        dimmed && "opacity-40",
-      )}
-    >
-      <p className={cn("text-xs flex items-center gap-1", subtextColor)}>
+    <div className={cn("flex flex-col gap-1 rounded-xl p-3", panelBg, dimmed && "opacity-40")}>
+      <p className={cn("flex items-center gap-1 text-xs", subtextColor)}>
         {icon}
         {label}
       </p>
-      <p className={cn("text-sm font-semibold", valueClass ?? textColor)}>
-        {value}
-      </p>
+      <p className={cn("text-sm font-semibold", valueClass ?? textColor)}>{value}</p>
     </div>
   );
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function ProfilePageContent({
-  animReady = true,
-}: {
-  animReady?: boolean;
-}) {
+export function ProfilePageContent({ animReady = true }: { animReady?: boolean }) {
   const pfpinputRef = useRef<HTMLInputElement>(null);
   const { selectedProfile } = useProfiles();
   const uploadProfilePictureMutation = useUploadProfilePictureMutation();
@@ -116,9 +104,7 @@ export function ProfilePageContent({
   const rawCardBg = useLiquidGlass
     ? getLiquidGlassClasses(useLiquidGlass, useDarkMode)
     : getBackgroundClasses(useLiquidGlass, useDarkMode);
-  const cardBg = animReady
-    ? rawCardBg
-    : rawCardBg.replace(/backdrop-blur-\S+/g, "");
+  const cardBg = animReady ? rawCardBg : rawCardBg.replace(/backdrop-blur-\S+/g, "");
 
   const panelBg = getBackgroundClasses(useLiquidGlass, useDarkMode, "light");
   const textColor = getTextColor(useLiquidGlass, useDarkMode);
@@ -133,8 +119,7 @@ export function ProfilePageContent({
       ? "bg-gray-700"
       : "bg-gray-200";
 
-  const avatarSrc =
-    localPreview ?? selectedProfile?.avatar ?? "./src/assets/SlimeArt.png";
+  const avatarSrc = localPreview ?? selectedProfile?.avatar ?? "./src/assets/SlimeArt.png";
 
   // ─── Derived stats ───────────────────────────────────────────────────────
   const coins = selectedProfile?.coins?.toLocaleString() ?? "—";
@@ -150,8 +135,8 @@ export function ProfilePageContent({
   return (
     <Card
       className={cn(
-        "z-0 flex flex-col lg:flex-row w-full max-w-6xl",
-        "p-6 sm:p-8 lg:p-10 gap-6 lg:gap-8",
+        "z-0 flex w-full max-w-6xl flex-col lg:flex-row",
+        "gap-6 p-6 sm:p-8 lg:gap-8 lg:p-10",
         cardBg,
       )}
     >
@@ -161,18 +146,12 @@ export function ProfilePageContent({
         style={sectionStyle(animReady, 0)}
       >
         <div>
-          <input
-            type="file"
-            ref={pfpinputRef}
-            hidden
-            accept="image/*"
-            onChange={onFileChange}
-          />
+          <input type="file" ref={pfpinputRef} hidden accept="image/*" onChange={onFileChange} />
           <div onClick={() => pfpinputRef.current?.click()}>
             <Avatar
               size="lg"
               className={cn(
-                "text-white cursor-pointer",
+                "cursor-pointer text-white",
                 getLiquidGlassClasses(useLiquidGlass, useDarkMode),
                 getLiquidGlassTextShadow(useLiquidGlass, useDarkMode),
               )}
@@ -180,34 +159,21 @@ export function ProfilePageContent({
               <AvatarImage src={avatarSrc} alt={username} />
               <span
                 aria-hidden
-                className="absolute inset-0 flex items-center justify-center rounded-full bg-gray-700/70 opacity-0 transition-opacity duration-150 pointer-events-none group-hover/avatar:opacity-100"
+                className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-gray-700/70 opacity-0 transition-opacity duration-150 group-hover/avatar:opacity-100"
               >
                 <ExternalLink className="size-4 text-white opacity-100" />
               </span>
-              <AvatarFallback>
-                {username.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
+              <AvatarFallback>{username.slice(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
           </div>
         </div>
 
         <div className="text-center">
-          <p
-            className={cn(
-              "font-semibold text-lg leading-tight",
-              textColor,
-              textShadow,
-            )}
-          >
+          <p className={cn("text-lg leading-tight font-semibold", textColor, textShadow)}>
             {username}
           </p>
           {selectedProfile?.coins !== undefined && (
-            <p
-              className={cn(
-                "text-xs mt-1 flex items-center justify-center gap-1",
-                subtextColor,
-              )}
-            >
+            <p className={cn("mt-1 flex items-center justify-center gap-1 text-xs", subtextColor)}>
               <Coins size={11} />
               {coins} coins
             </p>
@@ -220,26 +186,18 @@ export function ProfilePageContent({
       {/* Vertical divider (desktop) / horizontal (mobile) */}
       <Separator
         orientation="vertical"
-        className={cn("hidden lg:block self-stretch w-px", sepClass)}
+        className={cn("hidden w-px self-stretch lg:block", sepClass)}
       />
       <Separator className={cn("block lg:hidden", sepClass)} />
 
       {/* ═══ Center — stats ════════════════════════════════════════════════ */}
-      <div
-        className="flex-1 flex flex-col gap-4"
-        style={sectionStyle(animReady, 80)}
-      >
-        <p
-          className={cn(
-            "text-xs font-semibold uppercase tracking-wider",
-            subtextColor,
-          )}
-        >
+      <div className="flex flex-1 flex-col gap-4" style={sectionStyle(animReady, 80)}>
+        <p className={cn("text-xs font-semibold tracking-wider uppercase", subtextColor)}>
           {t("page.stats")}
         </p>
 
         {/* Live stats — data we already have */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <StatCard
             icon={<Coins size={11} />}
             label={t("stats.coins")}
@@ -281,7 +239,7 @@ export function ProfilePageContent({
          *   3. Replace the dimmed placeholder cards below with real values
          *   4. Populate the Match History section on the right
          */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <StatCard
             icon={<Trophy size={11} />}
             label={t("stats.wins")}
@@ -324,21 +282,13 @@ export function ProfilePageContent({
       {/* Vertical divider (desktop) */}
       <Separator
         orientation="vertical"
-        className={cn("hidden lg:block self-stretch w-px", sepClass)}
+        className={cn("hidden w-px self-stretch lg:block", sepClass)}
       />
       <Separator className={cn("block lg:hidden", sepClass)} />
 
       {/* ═══ Right — match history ══════════════════════════════════════════ */}
-      <div
-        className="flex-1 flex flex-col gap-4 min-w-0"
-        style={sectionStyle(animReady, 160)}
-      >
-        <p
-          className={cn(
-            "text-xs font-semibold uppercase tracking-wider",
-            subtextColor,
-          )}
-        >
+      <div className="flex min-w-0 flex-1 flex-col gap-4" style={sectionStyle(animReady, 160)}>
+        <p className={cn("text-xs font-semibold tracking-wider uppercase", subtextColor)}>
           {t("page.matchHistory")}
         </p>
 
@@ -349,7 +299,7 @@ export function ProfilePageContent({
          */}
         <div
           className={cn(
-            "flex-1 rounded-xl flex flex-col items-center justify-center gap-3 py-10",
+            "flex flex-1 flex-col items-center justify-center gap-3 rounded-xl py-10",
             panelBg,
           )}
         >
@@ -357,12 +307,7 @@ export function ProfilePageContent({
           <p className={cn("text-sm font-medium opacity-50", subtextColor)}>
             {t("page.noMatches")}
           </p>
-          <p
-            className={cn(
-              "text-xs text-center max-w-45 opacity-40",
-              subtextColor,
-            )}
-          >
+          <p className={cn("max-w-45 text-center text-xs opacity-40", subtextColor)}>
             {t("page.noMatchesSubtext")}
           </p>
         </div>

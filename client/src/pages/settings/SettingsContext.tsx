@@ -20,15 +20,10 @@ export interface SettingsState {
 
 interface SettingsContextType {
   settings: SettingsState;
-  updateSetting: <K extends keyof SettingsState>(
-    key: K,
-    value: SettingsState[K],
-  ) => void;
+  updateSetting: <K extends keyof SettingsState>(key: K, value: SettingsState[K]) => void;
 }
 
-const SettingsContext = createContext<SettingsContextType | undefined>(
-  undefined,
-);
+const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function useSettings() {
@@ -48,8 +43,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       useLiquidGlass: parsed?.useLiquidGlass ?? true,
       useDarkMode: parsed?.useDarkMode ?? false,
       language: parsed?.language ?? "en",
-      animationOverride: (parsed?.animationOverride ??
-        null) as AnimationOverride,
+      animationOverride: (parsed?.animationOverride ?? null) as AnimationOverride,
     };
   });
 
@@ -65,10 +59,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [settings.language]);
 
-  const updateSetting = <K extends keyof SettingsState>(
-    key: K,
-    value: SettingsState[K],
-  ) => {
+  const updateSetting = <K extends keyof SettingsState>(key: K, value: SettingsState[K]) => {
     setSettings((prev) => ({
       ...prev,
       [key]: value,

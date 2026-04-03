@@ -35,12 +35,7 @@ const icons: Record<FormAlertVariant, React.ElementType> = {
  * Inline alert for form-level error / success / info messages.
  * Styled to match shadcn's Alert component.
  */
-export function FormAlert({
-  variant = "error",
-  title,
-  message,
-  className,
-}: FormAlertProps) {
+export function FormAlert({ variant = "error", title, message, className }: FormAlertProps) {
   const Icon = icons[variant];
 
   return (
@@ -54,7 +49,7 @@ export function FormAlert({
     >
       <Icon className={cn("mt-0.5 h-4 w-4 shrink-0", iconStyles[variant])} />
       <div className="flex flex-col gap-0.5">
-        {title && <p className="font-medium leading-none">{title}</p>}
+        {title && <p className="leading-none font-medium">{title}</p>}
         <p className={cn(title ? "text-xs opacity-80" : "")}>{message}</p>
       </div>
     </div>

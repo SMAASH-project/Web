@@ -75,8 +75,7 @@ function AnimatedAccordionContent({
   children,
   ...props
 }: React.ComponentProps<typeof AccordionPrimitive.Content>) {
-  const { contentRef, innerRef, isOpen, contentHeight } =
-    useAnimatedAccordionContent(children);
+  const { contentRef, innerRef, isOpen, contentHeight } = useAnimatedAccordionContent(children);
 
   return (
     <AccordionPrimitive.Content
