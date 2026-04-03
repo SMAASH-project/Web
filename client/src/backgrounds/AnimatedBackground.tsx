@@ -1,18 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { type AnimationKey } from "@/lib/animationTypes";
-
-import { DeepSpaceBackground } from "./DeepSpaceBackground";
-import { AuroraBackground } from "./AuroraBackground";
-import { FishtankBackground } from "./FishtankBackground";
-import { LavaLampBackground } from "./LavaLampBackground";
-import { SynthwaveBackground } from "./SynthwaveBackground";
-import { SakuraBackground } from "./SakuraBackground";
-import { StormBackground } from "./StormBackground";
-import { ParticleWebBackground } from "./ParticleWebBackground";
-import { PuddleRipplesBackground } from "./PuddleRipplesBackground";
-import { BioluminescenceBackground } from "./BioluminescenceBackground";
-import { ConstellationBackground } from "./ConstellationBackground";
-import { VoidBackground } from "./VoidBackground";
 
 interface Props {
   animationKey: AnimationKey;
@@ -24,21 +11,57 @@ interface Props {
 
 const CROSSFADE_MS = 600; // duration of the swap transition
 
+type BackgroundProps = {
+  colorLeft: string;
+  colorMiddle: string;
+  colorRight: string;
+  paused: boolean;
+};
+
+const DeepSpaceBackground = lazy(() =>
+  import("./DeepSpaceBackground").then((m) => ({ default: m.DeepSpaceBackground })),
+);
+const AuroraBackground = lazy(() =>
+  import("./AuroraBackground").then((m) => ({ default: m.AuroraBackground })),
+);
+const FishtankBackground = lazy(() =>
+  import("./FishtankBackground").then((m) => ({ default: m.FishtankBackground })),
+);
+const LavaLampBackground = lazy(() =>
+  import("./LavaLampBackground").then((m) => ({ default: m.LavaLampBackground })),
+);
+const SynthwaveBackground = lazy(() =>
+  import("./SynthwaveBackground").then((m) => ({ default: m.SynthwaveBackground })),
+);
+const SakuraBackground = lazy(() =>
+  import("./SakuraBackground").then((m) => ({ default: m.SakuraBackground })),
+);
+const StormBackground = lazy(() =>
+  import("./StormBackground").then((m) => ({ default: m.StormBackground })),
+);
+const ParticleWebBackground = lazy(() =>
+  import("./ParticleWebBackground").then((m) => ({ default: m.ParticleWebBackground })),
+);
+const PuddleRipplesBackground = lazy(() =>
+  import("./PuddleRipplesBackground").then((m) => ({ default: m.PuddleRipplesBackground })),
+);
+const BioluminescenceBackground = lazy(() =>
+  import("./BioluminescenceBackground").then((m) => ({ default: m.BioluminescenceBackground })),
+);
+const ConstellationBackground = lazy(() =>
+  import("./ConstellationBackground").then((m) => ({ default: m.ConstellationBackground })),
+);
+const VoidBackground = lazy(() =>
+  import("./VoidBackground").then((m) => ({ default: m.VoidBackground })),
+);
+
 interface Layer {
   id: number;
   key: AnimationKey;
   visible: boolean; // drives opacity — CSS transition handles the fade
 }
 
-function makeBackground(
-  key: AnimationKey,
-  shared: {
-    colorLeft: string;
-    colorMiddle: string;
-    colorRight: string;
-    paused: boolean;
-  },
-): React.ReactNode {
+function makeBackground(key: AnimationKey, shared: BackgroundProps): React.ReactNode {
   switch (key) {
     case "fishtank":
       return <FishtankBackground {...shared} />;
@@ -111,8 +134,6 @@ export function AnimatedBackground({
       clearTimeout(fadeId);
       clearTimeout(cleanId);
     };
-    // Only re-run when the animation key actually changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [animationKey]);
 
   const shared = { colorLeft, colorMiddle, colorRight, paused };
@@ -129,7 +150,7 @@ export function AnimatedBackground({
             transition: `opacity ${CROSSFADE_MS}ms ease-in-out`,
           }}
         >
-          {makeBackground(layer.key, shared)}
+          <Suspense fallback={null}>{makeBackground(layer.key, shared)}</Suspense>
         </div>
       ))}
     </div>

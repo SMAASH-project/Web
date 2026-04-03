@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import {
   type AnimationKey,
   type EffectLayerConfig,
@@ -5,18 +6,42 @@ import {
   DEFAULT_SUB_EFFECTS,
 } from "@/lib/animationTypes";
 
-import { DeepSpaceBackground } from "./DeepSpaceBackground";
-import { AuroraBackground } from "./AuroraBackground";
-import { VoidBackground } from "./VoidBackground";
-import { BioluminescenceBackground } from "./BioluminescenceBackground";
-import { ConstellationBackground } from "./ConstellationBackground";
-import { LavaLampBackground } from "./LavaLampBackground";
-import { SynthwaveBackground } from "./SynthwaveBackground";
-import { PuddleRipplesBackground } from "./PuddleRipplesBackground";
-import { FishtankBackground } from "./FishtankBackground";
-import { ParticleWebBackground } from "./ParticleWebBackground";
-import { StormBackground } from "./StormBackground";
-import { SakuraBackground } from "./SakuraBackground";
+const DeepSpaceBackground = lazy(() =>
+  import("./DeepSpaceBackground").then((m) => ({ default: m.DeepSpaceBackground })),
+);
+const AuroraBackground = lazy(() =>
+  import("./AuroraBackground").then((m) => ({ default: m.AuroraBackground })),
+);
+const VoidBackground = lazy(() =>
+  import("./VoidBackground").then((m) => ({ default: m.VoidBackground })),
+);
+const BioluminescenceBackground = lazy(() =>
+  import("./BioluminescenceBackground").then((m) => ({ default: m.BioluminescenceBackground })),
+);
+const ConstellationBackground = lazy(() =>
+  import("./ConstellationBackground").then((m) => ({ default: m.ConstellationBackground })),
+);
+const LavaLampBackground = lazy(() =>
+  import("./LavaLampBackground").then((m) => ({ default: m.LavaLampBackground })),
+);
+const SynthwaveBackground = lazy(() =>
+  import("./SynthwaveBackground").then((m) => ({ default: m.SynthwaveBackground })),
+);
+const PuddleRipplesBackground = lazy(() =>
+  import("./PuddleRipplesBackground").then((m) => ({ default: m.PuddleRipplesBackground })),
+);
+const FishtankBackground = lazy(() =>
+  import("./FishtankBackground").then((m) => ({ default: m.FishtankBackground })),
+);
+const ParticleWebBackground = lazy(() =>
+  import("./ParticleWebBackground").then((m) => ({ default: m.ParticleWebBackground })),
+);
+const StormBackground = lazy(() =>
+  import("./StormBackground").then((m) => ({ default: m.StormBackground })),
+);
+const SakuraBackground = lazy(() =>
+  import("./SakuraBackground").then((m) => ({ default: m.SakuraBackground })),
+);
 
 interface Props {
   effectMix: EffectLayerConfig;
@@ -102,7 +127,7 @@ export function CompositeBackground({
     <div className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0`}>
       {enabledKeys.map((key) => (
         <div key={key} className="absolute inset-0" style={{ zIndex: LAYER_Z_INDEX[key] }}>
-          {renderEffect(key, shared, effectMix[key])}
+          <Suspense fallback={null}>{renderEffect(key, shared, effectMix[key])}</Suspense>
         </div>
       ))}
     </div>

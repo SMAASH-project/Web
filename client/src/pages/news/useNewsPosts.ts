@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useCallback, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DateTime } from "luxon";
 import apiClient from "@/lib/apiClient";
@@ -58,9 +58,7 @@ const POSTS_KEY = ["posts"] as const;
 
 export function useNewsPosts(selectedCategories: NewsPost["category"][] = []) {
   const queryClient = useQueryClient();
-  const [postsToShow, setPostsToShow] = useState(2);
   const [searchQuery, setSearchQuery] = useState("");
-  const containerRef = useRef<HTMLDivElement>(null);
 
   // ── Fetch all posts ──────────────────────────────────────────────────────
   const { data: allPosts = [], isLoading } = useQuery<NewsPost[]>({
@@ -141,33 +139,11 @@ export function useNewsPosts(selectedCategories: NewsPost["category"][] = []) {
     return allPosts.filter((post) => selectedCategories.includes(post.category));
   }, [allPosts, selectedCategories]);
 
-  useEffect(() => {
-    setPostsToShow(2);
-  }, [selectedCategories]);
-
   const visiblePosts = useMemo(() => {
-    if (searchQuery) {
-      return filteredPosts.filter((post) =>
-        post.title.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
-    }
-    return filteredPosts.slice(0, postsToShow);
-  }, [filteredPosts, postsToShow, searchQuery]);
-
-  // ── Infinite scroll ───────────────────────────────────────────────────────
-
-  const handleScroll = useCallback(() => {
-    if (!searchQuery) {
-      if (window.scrollY + window.innerHeight >= document.body.scrollHeight - 5) {
-        setPostsToShow((prev) => prev + 2);
-      }
-    }
-  }, [searchQuery]);
-
-  useEffect(() => {
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [handleScroll]);
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return filteredPosts;
+    return filteredPosts.filter((post) => post.title.toLowerCase().includes(q));
+  }, [filteredPosts, searchQuery]);
 
   // ── Handlers ─────────────────────────────────────────────────────────────
 
@@ -185,7 +161,6 @@ export function useNewsPosts(selectedCategories: NewsPost["category"][] = []) {
 
   function handleSearch(query: string) {
     setSearchQuery(query);
-    setPostsToShow(2);
   }
 
   return {
@@ -193,7 +168,6 @@ export function useNewsPosts(selectedCategories: NewsPost["category"][] = []) {
     totalCount: filteredPosts.length,
     isSearching: searchQuery.length > 0,
     isLoading,
-    containerRef,
     handleCreate,
     handleUpdate,
     handleRemove,

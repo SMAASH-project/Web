@@ -40,7 +40,6 @@ export function NewsPage() {
     totalCount,
     isSearching,
     isLoading: postsLoading,
-    containerRef,
     handleCreate,
     handleUpdate,
     handleRemove,
