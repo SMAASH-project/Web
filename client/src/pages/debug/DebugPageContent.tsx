@@ -25,7 +25,13 @@ import type { Transition } from "motion/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AuthContext } from "@/context/AuthContext";
 import { useTranslation } from "react-i18next";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { SystemTab } from "./tabs/SystemTab";
 import { CacheTab } from "./tabs/CacheTab";
 import { EndpointsTab } from "./tabs/EndpointsTab";
@@ -208,6 +214,10 @@ export function DebugPageContent({ animReady = true }: { animReady?: boolean }) 
             </button>
           </SheetTrigger>
           <SheetContent side="left" className={`w-52 p-0 ${cardBg}`}>
+            <SheetTitle className="sr-only">{t("title")}</SheetTitle>
+            <SheetDescription className="sr-only">
+              {isAdmin ? t("roles.admin") : t("roles.support")}
+            </SheetDescription>
             <div className="flex h-full flex-col gap-1 p-3">
               {/* Logo */}
               <div className="mb-2 flex items-center gap-2 px-2 py-2">

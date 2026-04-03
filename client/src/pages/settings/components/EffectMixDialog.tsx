@@ -12,6 +12,7 @@ import { CompositeBackground } from "@/backgrounds/CompositeBackground";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -122,6 +123,9 @@ export function EffectMixDialog() {
       <DialogContent className={`sm:max-w-3xl ${dialogClass} ${textColor}`}>
         <DialogHeader>
           <DialogTitle className={textColor}>Mix Effects</DialogTitle>
+          <DialogDescription className={textColor}>
+            Toggle animation layers and preview the combined result.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="flex min-h-0 flex-col gap-4 lg:flex-row">
@@ -137,16 +141,24 @@ export function EffectMixDialog() {
 
                 return (
                   <AccordionItem key={key} value={key} className="border-white/20">
-                    <AccordionTrigger className={`gap-2 hover:no-underline ${textColor}`}>
+                    <div className="flex items-center gap-2 rounded-lg py-2.5">
                       <Switch
                         size="sm"
                         checked={isEnabled}
                         onCheckedChange={() => toggleEffect(key)}
-                        onClick={(e) => e.stopPropagation()}
                         className="shrink-0"
                       />
-                      <span className="text-sm font-medium">{ANIMATION_LABELS[key]}</span>
-                    </AccordionTrigger>
+                      <AccordionTrigger
+                        asChild
+                        className={`min-w-0 flex-1 gap-2 rounded-none p-0 hover:no-underline ${textColor}`}
+                      >
+                        <button type="button" className="flex min-w-0 flex-1 items-center gap-2">
+                          <span className="truncate text-sm font-medium">
+                            {ANIMATION_LABELS[key]}
+                          </span>
+                        </button>
+                      </AccordionTrigger>
+                    </div>
                     <AccordionContent>
                       <div className="flex flex-col gap-2 pb-1 pl-8">
                         {Object.entries(subLabels).map(([subKey, label]) => (
