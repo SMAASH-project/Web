@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 
 interface Props {
   colorLeft: string;
@@ -41,7 +41,7 @@ const PALETTE: [number, number, number][] = [
 
 const ORB_COUNT = 38;
 
-export function BioluminescenceBackground({
+export const BioluminescenceBackground = memo(function BioluminescenceBackground({
   paused = false,
   preview = false,
   showOrbs = true,
@@ -170,4 +170,4 @@ export function BioluminescenceBackground({
       className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 opacity-90`}
     />
   );
-}
+});

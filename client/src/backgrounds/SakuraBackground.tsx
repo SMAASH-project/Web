@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 
 interface Props {
   colorLeft: string;
@@ -32,7 +32,7 @@ const PETAL_SHAPES = [
   "40% 60% 60% 40% / 50% 50% 60% 40%",
 ];
 
-export function SakuraBackground({
+export const SakuraBackground = memo(function SakuraBackground({
   colorLeft,
   colorMiddle,
   colorRight,
@@ -116,4 +116,4 @@ export function SakuraBackground({
       </div>
     </>
   );
-}
+});

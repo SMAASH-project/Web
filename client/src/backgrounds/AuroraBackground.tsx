@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { motion } from "motion/react";
 
 interface Props {
@@ -103,7 +104,7 @@ const FIBER_CONFIG = Array.from({ length: 22 }, (_, i) => ({
   baseOpacity: 0.22 + (i % 5) * 0.06,
 }));
 
-export function AuroraBackground({
+export const AuroraBackground = memo(function AuroraBackground({
   colorLeft,
   colorMiddle,
   colorRight,
@@ -220,4 +221,4 @@ export function AuroraBackground({
       </div>
     </>
   );
-}
+});

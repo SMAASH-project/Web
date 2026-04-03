@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 
 interface Props {
   colorLeft: string;
@@ -94,7 +94,7 @@ function makeTentacles(count: number): Tentacle[] {
   }));
 }
 
-export function VoidBackground({
+export const VoidBackground = memo(function VoidBackground({
   paused = false,
   preview = false,
   showDepthBlobs = true,
@@ -390,4 +390,4 @@ export function VoidBackground({
       className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 opacity-95`}
     />
   );
-}
+});

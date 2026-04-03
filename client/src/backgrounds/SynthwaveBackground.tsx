@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 
 interface Props {
   colorLeft: string;
@@ -32,7 +32,7 @@ function lighten([r, g, b]: [number, number, number], amt: number): [number, num
   return [Math.min(255, r + amt), Math.min(255, g + amt), Math.min(255, b + amt)];
 }
 
-export function SynthwaveBackground({
+export const SynthwaveBackground = memo(function SynthwaveBackground({
   colorLeft,
   colorMiddle,
   colorRight,
@@ -226,4 +226,4 @@ export function SynthwaveBackground({
       className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 opacity-[0.72]`}
     />
   );
-}
+});

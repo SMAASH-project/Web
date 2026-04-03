@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import type { DtosPlayerProfileReadDTO } from "@/lib/api.generated";
 import {
   useAdminUsersQuery,
   useBanUserMutation,

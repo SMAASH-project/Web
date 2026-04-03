@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, memo } from "react";
 import {
   type AnimationKey,
   type EffectLayerConfig,
@@ -112,7 +112,7 @@ function renderEffect(
   }
 }
 
-export function CompositeBackground({
+export const CompositeBackground = memo(function CompositeBackground({
   effectMix,
   colorLeft,
   colorMiddle,
@@ -132,4 +132,4 @@ export function CompositeBackground({
       ))}
     </div>
   );
-}
+});

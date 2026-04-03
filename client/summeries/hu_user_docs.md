@@ -1,6 +1,6 @@
 # SMAASH kliens — felhasználói útmutató
 
-**Frissítve:** 2026-04-02 (rev 2)
+**Frissítve:** 2026-04-03 (rev 3)
 
 > Ez az útmutató röviden, érthetően vezet végig az app fő részein, a beállításokon és a leggyakoribb teendőkön.
 
@@ -208,7 +208,24 @@ Ilyenkor ezeket próbáld:
 
 ---
 
+## Nemrégiben Bevezetett Javítások (2026. április)
+
+Az alkalmazás gyorsabbá és simábbá vált:
+
+- **Kisebb letöltési méret:** Optimalizált eszközök; gyorsabb betöltés lassú kapcsolaton
+- **Zökkenőmentesebb témavá ltás:** A háttéranimációk azonnal reagálnak a beállítások változására
+- **Jobb teljesítmény:** Kevesebb CPU-használat az animációk lejátszásakor
+- **Jobb típusbiztonság:** A háttérrendszer API-módosításai korábbi szakaszban kerülnek feltárásra
+
+Lehet, hogy közvetlenül nem figyeled meg ezeket a változásokat, de az app összességében gyorsabbnak, simábbnak fogja érezni magát.
+
+---
+
 ## Segítségre van szükséged?
+
+- **Valami nem működik?** Először frissítsd az oldalt — sokszor ez elég. Ha nem működik, keress egy adminisztrátor vagy support tag.
+- **Van visszajelzésed vagy hibát találtál?** Nagyon szeretnénk erről hallani! A Settings-ben van egy feedback forma, vagy elérhetsz egy admin-t.
+- **Teljesítményprobléma az eszközödön?** Próbáld ki az animációk kikapcsolását a Settings-ben — különösen mobil telefonokon segíthet.
 
 - **Valami nem működik?** Először frissítsd az oldalt — sokszor ez elég. Ha nem sírj máshol.
 

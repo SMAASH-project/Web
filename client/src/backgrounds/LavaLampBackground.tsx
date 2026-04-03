@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 interface Props {
   colorLeft: string;
   colorMiddle: string;
@@ -96,7 +98,7 @@ const BLOB_CONFIG = [
   },
 ] as const;
 
-export function LavaLampBackground({
+export const LavaLampBackground = memo(function LavaLampBackground({
   colorLeft,
   colorMiddle,
   colorRight,
@@ -171,4 +173,4 @@ export function LavaLampBackground({
       </div>
     </>
   );
-}
+});

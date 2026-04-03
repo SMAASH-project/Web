@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 
 interface Props {
   colorLeft: string;
@@ -73,7 +73,7 @@ function makeBolt(startX: number, endX: number, h: number): BoltSegment[] {
   return segments;
 }
 
-export function StormBackground({
+export const StormBackground = memo(function StormBackground({
   colorLeft,
   colorMiddle,
   colorRight,
@@ -322,4 +322,4 @@ export function StormBackground({
       </div>
     </>
   );
-}
+});

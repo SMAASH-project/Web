@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 
 interface Props {
   colorLeft: string;
@@ -28,7 +28,7 @@ function hexToRgb(hex: string): [number, number, number] {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
-export function PuddleRipplesBackground({
+export const PuddleRipplesBackground = memo(function PuddleRipplesBackground({
   colorRight,
   paused = false,
   preview = false,
@@ -137,4 +137,4 @@ export function PuddleRipplesBackground({
       className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 opacity-90`}
     />
   );
-}
+});

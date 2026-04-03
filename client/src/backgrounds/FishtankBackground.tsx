@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 
 interface Props {
   colorLeft: string;
@@ -263,7 +263,7 @@ interface School {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-export function FishtankBackground({
+export const FishtankBackground = memo(function FishtankBackground({
   colorLeft,
   colorMiddle,
   colorRight,
@@ -510,4 +510,4 @@ export function FishtankBackground({
       className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 opacity-60`}
     />
   );
-}
+});

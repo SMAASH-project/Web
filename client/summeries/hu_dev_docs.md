@@ -1,6 +1,6 @@
 # SMAASH kliens — fejlesztői dokumentáció
 
-**Frissítve:** 2026-04-02 (rev 2)
+**Frissítve:** 2026-04-03 (rev 3)
 
 > Ez az összefoglaló a kliens architektúráját, a közös mintákat és a legfontosabb fejlesztési szabályokat foglalja össze. Nem csak azt mondja meg, _mit_ használunk, hanem azt is, _miért_ így.
 
@@ -29,6 +29,26 @@
 - **Szerepkör-alapú oldalak:**
   - `/app/admin` — csak admin
   - `/app/debug` — admin + support
+
+### Génrált API Típusok (Április 2026)
+
+Az DTO-eltérések csökkentése érdekében az API-típusok **a backend Swagger specből vannak generálva**:
+
+**Generált fájl:** `src/lib/api.generated.ts` (1000+ sor típusdefinícióval)
+
+**Hogyan Kell Használni:**
+
+```typescript
+import type {
+  DtosUserLoginDTO,
+  DtosUserReadDTO,
+  DtosPlayerProfileReadDTO,
+} from "@/lib/api.generated";
+
+export type LoginPayload = DtosUserLoginDTO;
+```
+
+**Regenerálni:** `npm run api:types`
 
 ### Fontos megjegyzés
 

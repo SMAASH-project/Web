@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { AxiosError } from "axios";
+import type { DtosPlayerProfileReadDTO } from "@/lib/api.generated";
 
 export interface AddProfilePayload {
   display_name: string;
@@ -9,7 +10,7 @@ export interface AddProfilePayload {
   profile_picture?: File | null;
 }
 
-export interface AddProfileResponse {
+export interface AddProfileResponse extends DtosPlayerProfileReadDTO {
   id: number;
   display_name: string;
   coins: number;
@@ -22,7 +23,7 @@ export interface UpdateProfilePayload {
   coins: number;
 }
 
-export interface ProfileResponse {
+export interface ProfileResponse extends DtosPlayerProfileReadDTO {
   id: number;
   display_name: string;
   coins: number;

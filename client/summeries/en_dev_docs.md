@@ -1,6 +1,6 @@
 # SMAASH Client — Developer Documentation
 
-**Last updated:** 2026-04-02 (rev 3)
+**Last updated:** 2026-04-03 (rev 4)
 
 > This guide covers the architecture, conventions, and practical workflows for the SMAASH web client. It's meant to be helpful—not just a checklist.
 
@@ -196,6 +196,41 @@ const response = await axios.get("/api/users/me");
 - Base URL: `/api`
 - Credentials: included (for auth cookies if needed)
 - 401 errors: auto-redirect to login
+
+### Generated API Types (Apr 2026)
+
+To reduce DTO drift between frontend and backend, API types are **generated from the backend Swagger spec**:
+
+**Generated file:** `src/lib/api.generated.ts` (1000+ lines of type definitions)
+
+**How to use:**
+
+```typescript
+// Import generated types
+import type {
+  DtosUserLoginDTO,
+  DtosUserReadDTO,
+  DtosPlayerProfileReadDTO,
+  DtosLevelReadDTO,
+  DtosCategoryReadDTO,
+} from "@/lib/api.generated";
+
+// Use in hook signatures
+export type LoginPayload = DtosUserLoginDTO;
+export type UserInfo = DtosUserReadDTO;
+```
+
+**To regenerate after backend changes:**
+
+```bash
+npm run api:types
+```
+
+This runs: `swagger-typescript-api generate --path ../docs/swagger/swagger.json --output src/lib --name api.generated.ts`
+
+**Current coverage:** Auth, users, profiles, roles, categories, levels (partial). Items and purchases not yet in Swagger spec; keep hand-written DTOs for now.
+
+**Important:** Runtime validation via Zod (`src/lib/apiSchemas.ts`) is **still active**—generated types are a complement, not a replacement. Both layers protect the app.
 
 ### React Query Conventions
 
@@ -489,6 +524,63 @@ import { Skeleton } from "@/components/ui/skeleton";
 - **Virtualization:** Large data grids (admin user list) could use react-window
 - **Prefetching:** Route hover → prefetch leaderboard queries
 - **PWA:** If offline support becomes a requirement
+
+---
+
+## Performance & Optimizations (Apr 2026 Sprint)
+
+Recent work focused on bundle reduction and rendering efficiency:
+
+### Asset Optimization
+
+**Favicon (PNG → SVG):**
+
+- Changed from 1.4 MB PNG to ~1 KB SVG reference in `index.html`
+- Eliminates oversized asset from critical path
+
+**Android Logo (PNG → SVG):**
+
+- Updated `src/pages/releases/components/SelectOs.tsx` to use `.svg` instead of `.png`
+- Size reduction: 111 KB → 49.68 KB (bundle) / 22.75 KB (gzipped) — **55% reduction**
+
+### Component Memoization
+
+All background animation components now wrapped with `React.memo()`:
+
+- `AuroraBackground`, `BioluminescenceBackground`, `ConstellationBackground`
+- `DeepSpaceBackground`, `FishtankBackground`, `LavaLampBackground`
+- `ParticleWebBackground`, `PuddleRipplesBackground`, `SakuraBackground`
+- `StormBackground`, `SynthwaveBackground`, `VoidBackground`
+- `AnimatedBackground`, `CompositeBackground`
+
+**Why:** These are expensive (canvas, animation frames). Memoization prevents re-renders when parent props haven't changed, especially during theme/setting toggles.
+
+### Bundle Metrics
+
+After optimizations:
+
+```
+Build time: 10.12s
+HTML: 1.33 kB (gzip: 0.55 kB)
+CSS: 146.42 kB (gzip: 21.82 kB)
+Total JS: ~1.6 MB raw → ~400 KB gzipped
+
+Largest chunks:
+  ops-pages: 437.83 kB (121.80 gzip) — admin/gallery/settings
+  react-vendor: 279.78 kB (89.70 gzip)
+  markdown-vendor: 156.62 kB (47.41 gzip)
+  ui-vendor: 143.17 kB (47.74 gzip)
+```
+
+**No regressions:** All chunk sizes stable; memoization is transparent.
+
+### Future Optimization Opportunities
+
+- **Code-splitting:** NewsPage (80 kB) could split markdown editor into sub-chunk
+- **Virtualization:** Admin user list (15 rows) could benefit from react-window
+- **Image optimization:** Convert remaining PNGs to modern formats
+- **Lazy background loading:** Load background components only when needed in settings
+- **Service worker:** Cache static assets for faster repeat visits
 
 ---
 

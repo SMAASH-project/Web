@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 
 interface Props {
   colorLeft: string;
@@ -62,7 +62,7 @@ const STAR_COLORS: Array<[number, number, number]> = [
   [255, 140, 140], // red
 ];
 
-export function DeepSpaceBackground({
+export const DeepSpaceBackground = memo(function DeepSpaceBackground({
   colorLeft,
   colorMiddle,
   colorRight,
@@ -381,4 +381,4 @@ export function DeepSpaceBackground({
       className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 opacity-95`}
     />
   );
-}
+});

@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import type { DtosLevelReadDTO, DtosCategoryReadDTO } from "@/lib/api.generated";
 import Navbar from "@/components/nav/Navbar";
 import { useSettings } from "@/pages/settings/SettingsContext";
 import {

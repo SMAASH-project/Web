@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useRef, useState } from "react";
+import { Suspense, lazy, memo, useEffect, useRef, useState } from "react";
 import { type AnimationKey } from "@/lib/animationTypes";
 
 interface Props {
@@ -92,7 +92,7 @@ function makeBackground(key: AnimationKey, shared: BackgroundProps): React.React
   }
 }
 
-export function AnimatedBackground({
+export const AnimatedBackground = memo(function AnimatedBackground({
   animationKey,
   colorLeft,
   colorMiddle,
@@ -155,4 +155,4 @@ export function AnimatedBackground({
       ))}
     </div>
   );
-}
+});

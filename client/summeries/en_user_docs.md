@@ -1,6 +1,6 @@
 # SMAASH Client — User Guide
 
-**Last updated:** 2026-04-02 (rev 2)
+**Last updated:** 2026-04-03 (rev 3)
 
 > Welcome! This guide walks you through SMAASH's features, settings, and common tasks. Think of it as a companion while you explore.
 
@@ -208,8 +208,21 @@ Try:
 
 ---
 
+## Recent Improvements (April 2026)
+
+We've made the app faster and smoother:
+
+- **Smaller download size:** Optimized assets; app loads quicker on slower connections
+- **Smoother theme switching:** Background animations now respond instantly to your settings changes
+- **Better performance:** Less CPU usage when animations are playing, especially on mobile devices
+- **Improved type safety:** Backend API changes are caught earlier, reducing bugs
+
+You might not notice these changes directly, but they mean the app should feel snappier overall.
+
+---
+
 ## Need Help?
 
-- **Something isn't working?** Refresh the page first; 9 times out of 10 it helps. Or if all else fails, yap about it to claude code because you can't be fucked to do your research
-- **Have feedback?** Admins are not listening; bug reports and feature requests help us make the app better, but we dont really give a shit.
-- **Nosey Little Cunt ya are raight?** Fuck you dipstick.
+- **Something isn't working?** Try refreshing the page first. Most issues clear up this way. If you still have trouble, contact support.
+- **Have feedback or found a bug?** We'd love to hear about it! Use the feedback form in Settings or reach out to the admin team.
+- **Performance issues on your device?** Try turning off animations in Settings — it can help on older phones or slower connections.

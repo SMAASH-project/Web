@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 
 interface Props {
   colorLeft: string;
@@ -41,7 +41,7 @@ const MAX_CONNECT_DIST = 190;
 // Max lines to avoid clutter
 const MAX_LINES = 55;
 
-export function ConstellationBackground({
+export const ConstellationBackground = memo(function ConstellationBackground({
   colorLeft,
   colorMiddle,
   colorRight,
@@ -213,4 +213,4 @@ export function ConstellationBackground({
       className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 opacity-90`}
     />
   );
-}
+});

@@ -13,6 +13,9 @@ const PAGE_SIZE = 12;
 const LOAD_DELAY_MS = 400;
 
 // ─── Backend DTOs ─────────────────────────────────────────────────────────────
+// NOTE: ItemReadDTO and PurchaseReadDTO are not yet included in the backend Swagger spec.
+// Once backend updates swagger.json to include these endpoints, import from @/lib/api.generated
+// with types: DtosItemReadDTO, DtosPurchaseReadDTO
 
 interface ItemReadDTO {
   id: number;
