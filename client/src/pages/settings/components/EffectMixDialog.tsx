@@ -119,14 +119,14 @@ export function EffectMixDialog() {
       <DialogTrigger asChild>
         <Button className={`cursor-pointer ${buttonClass} ${textShadow}`}>Mix Effects</Button>
       </DialogTrigger>
-      <DialogContent className={`sm:max-w-2xl ${dialogClass} ${textColor}`}>
+      <DialogContent className={`sm:max-w-3xl ${dialogClass} ${textColor}`}>
         <DialogHeader>
           <DialogTitle className={textColor}>Mix Effects</DialogTitle>
         </DialogHeader>
 
-        <div className="flex min-h-100 gap-4">
+        <div className="flex min-h-0 flex-col gap-4 lg:flex-row">
           {/* Left — effect accordion list */}
-          <div className="max-h-[60vh] min-w-0 flex-1 overflow-y-auto pr-1">
+          <div className="min-h-0 flex-1 overflow-y-auto pr-1 lg:max-h-[60vh]">
             <Accordion type="multiple" value={openItems} onValueChange={setOpenItems}>
               {ALL_ANIMATION_KEYS.map((key) => {
                 const isEnabled = key in pendingMix;
@@ -174,7 +174,7 @@ export function EffectMixDialog() {
 
           {/* Right — live preview (paused) */}
           <div
-            className="relative w-80 shrink-0 self-stretch overflow-hidden rounded-lg"
+            className="relative min-h-56 w-full overflow-hidden rounded-lg lg:aspect-auto lg:w-80 lg:shrink-0 lg:self-stretch"
             style={{
               backgroundImage: `linear-gradient(to right, ${colorLeft}, ${colorMiddle}, ${colorRight})`,
             }}

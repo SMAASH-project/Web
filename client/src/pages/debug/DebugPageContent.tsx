@@ -10,7 +10,7 @@ import {
   Eye,
   Smartphone,
   Activity,
-  Menu,
+  Settings2,
   X,
 } from "lucide-react";
 import { useSettings } from "@/pages/settings/SettingsContext";
@@ -201,9 +201,10 @@ export function DebugPageContent({ animReady = true }: { animReady?: boolean }) 
         <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
           <SheetTrigger asChild>
             <button
+              aria-label="Open debug menu"
               className={`rounded-lg p-1.5 transition-colors ${subtextColor} hover:bg-current/8`}
             >
-              <Menu size={18} />
+              <Settings2 size={18} />
             </button>
           </SheetTrigger>
           <SheetContent side="left" className={`w-52 p-0 ${cardBg}`}>
