@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import path from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
@@ -31,10 +32,15 @@ export default defineConfig({
             "@tanstack/react-query",
             "@tanstack/react-query-persist-client",
           ],
-          "ui-vendor": ["framer-motion", "motion", "lucide-react"],
+          "ui-vendor": ["motion", "lucide-react"],
         },
       },
     },
+  },
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: ["./src/test-setup.ts"],
   },
   base: "/app/",
   server: {

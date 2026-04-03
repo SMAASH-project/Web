@@ -3,6 +3,8 @@ import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
+import pluginQuery from "@tanstack/eslint-plugin-query";
+import prettier from "eslint-config-prettier";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
@@ -28,4 +30,6 @@ export default defineConfig([
       "@typescript-eslint": tsPlugin,
     },
   },
+  ...pluginQuery.configs["flat/recommended"],
+  prettier,
 ]);

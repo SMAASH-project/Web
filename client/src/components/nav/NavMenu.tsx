@@ -1,4 +1,4 @@
-import { Label } from "@radix-ui/react-dropdown-menu";
+import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { navItems } from "./navLogic/navItems";
@@ -121,7 +121,7 @@ export function NavMenu({ useLiquidGlass, useDarkMode = false }: NavMenuProps) {
           onMouseEnter={handleMouseEnter}
         >
           <Link to={item.path}>
-            <Label className="px-1 lg:px-2">{t(item.labelKey)}</Label>
+            <DropdownMenuPrimitive.Label className="px-1 lg:px-2">{t(item.labelKey)}</DropdownMenuPrimitive.Label>
           </Link>
         </li>
       ))}
