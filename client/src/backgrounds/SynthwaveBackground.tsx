@@ -218,7 +218,17 @@ export const SynthwaveBackground = memo(function SynthwaveBackground({
       cancelAnimationFrame(animId);
       if (!preview) window.removeEventListener("resize", resize);
     };
-  }, [colorLeft, colorMiddle, colorRight, showSky, showSun, showGrid, showScanlines]);
+  }, [
+    preview,
+    paused,
+    colorLeft,
+    colorMiddle,
+    colorRight,
+    showSky,
+    showSun,
+    showGrid,
+    showScanlines,
+  ]);
 
   return (
     <canvas

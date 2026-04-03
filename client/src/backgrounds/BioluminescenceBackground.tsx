@@ -162,7 +162,7 @@ export const BioluminescenceBackground = memo(function BioluminescenceBackground
       cancelAnimationFrame(animId);
       if (!preview) window.removeEventListener("resize", resize);
     };
-  }, [showOrbs, showPulses, showVignette]);
+  }, [preview, showOrbs, showPulses, showVignette]);
 
   return (
     <canvas

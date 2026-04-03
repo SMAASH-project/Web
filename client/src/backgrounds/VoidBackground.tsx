@@ -382,7 +382,7 @@ export const VoidBackground = memo(function VoidBackground({
       cancelAnimationFrame(animId);
       if (!preview) window.removeEventListener("resize", resize);
     };
-  }, [showDepthBlobs, showJellyfish, showAmbientOrbs, showMarineSnow]);
+  }, [preview, showDepthBlobs, showJellyfish, showAmbientOrbs, showMarineSnow]);
 
   return (
     <canvas

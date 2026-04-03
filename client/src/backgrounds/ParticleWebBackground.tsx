@@ -268,7 +268,7 @@ export const ParticleWebBackground = memo(function ParticleWebBackground({
         window.removeEventListener("mouseleave", onLeave);
       }
     };
-  }, [colorLeft, colorMiddle, colorRight, showParticles, showConnections]);
+  }, [preview, paused, colorLeft, colorMiddle, colorRight, showParticles, showConnections]);
 
   return (
     <canvas

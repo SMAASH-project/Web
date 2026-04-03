@@ -494,6 +494,8 @@ export const FishtankBackground = memo(function FishtankBackground({
       if (!preview) window.removeEventListener("resize", resize);
     };
   }, [
+    preview,
+    paused,
     colorLeft,
     colorMiddle,
     colorRight,

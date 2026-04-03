@@ -37,7 +37,7 @@ export default function ProfilesPanel({ logic }: { logic: AdminPageLogic }) {
       setCoinDraft(String(selectedProfile.coins ?? 0));
       setSaved(false);
     }
-  }, [selectedProfile?.id, selectedProfile?.coins]);
+  }, [selectedProfile]);
 
   const parsedCoins = parseInt(coinDraft, 10);
   const isValid = !isNaN(parsedCoins) && parsedCoins >= 0;

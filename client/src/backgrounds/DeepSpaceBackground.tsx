@@ -373,7 +373,17 @@ export const DeepSpaceBackground = memo(function DeepSpaceBackground({
       cancelAnimationFrame(animId);
       if (!preview) window.removeEventListener("resize", resize);
     };
-  }, [colorLeft, colorMiddle, colorRight, showStars, showMilkyWay, showNebulae, showShootingStars]);
+  }, [
+    preview,
+    paused,
+    colorLeft,
+    colorMiddle,
+    colorRight,
+    showStars,
+    showMilkyWay,
+    showNebulae,
+    showShootingStars,
+  ]);
 
   return (
     <canvas

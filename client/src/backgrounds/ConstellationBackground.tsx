@@ -205,7 +205,7 @@ export const ConstellationBackground = memo(function ConstellationBackground({
       cancelAnimationFrame(animId);
       if (!preview) window.removeEventListener("resize", resize);
     };
-  }, [colorLeft, colorMiddle, colorRight, showStars, showConstellationLines]);
+  }, [preview, colorLeft, colorMiddle, colorRight, showStars, showConstellationLines]);
 
   return (
     <canvas

@@ -167,7 +167,7 @@ export const StormBackground = memo(function StormBackground({
       cancelAnimationFrame(animId);
       if (!preview) window.removeEventListener("resize", resize);
     };
-  }, [paused, showRain]);
+  }, [preview, paused, showRain]);
 
   // ── Lightning bolt canvas ────────────────────────────────────────────────────
   useEffect(() => {
@@ -229,7 +229,7 @@ export const StormBackground = memo(function StormBackground({
       cancelAnimationFrame(animId);
       if (!preview) window.removeEventListener("resize", resize);
     };
-  }, [paused, showLightning]);
+  }, [preview, paused, showLightning]);
 
   // ── Lightning timer ──────────────────────────────────────────────────────────
   useEffect(() => {
