@@ -8,6 +8,7 @@ alias r := run
 alias b := build
 alias bf := build-fullstack
 alias bc := build-client
+alias fc := format-client
 alias t := test
 alias w := watch
 alias c := clean
@@ -29,6 +30,11 @@ build-fullstack: build-client build
 @build-client:
     echo "Building client"
     cd ./client && npm install && npm run build
+
+# Auto-format frontend files checked by format:check
+@format-client:
+    echo "Formatting client"
+    cd ./client && npm run format
 
 # Test Frontend file formatting, linting and unit tests
 @test-client:
