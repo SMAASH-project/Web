@@ -70,7 +70,12 @@ interface GameDataTabProps {
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 
-export function GameDataTab({ textColor, subtextColor, panelBg, inputClass = "" }: GameDataTabProps) {
+export function GameDataTab({
+  textColor,
+  subtextColor,
+  panelBg,
+  inputClass = "",
+}: GameDataTabProps) {
   // ── Queries ──────────────────────────────────────────────────────────────
   const { data: characters = [], isLoading: charsLoading } = useDebugCharactersQuery();
   const { data: levels = [], isLoading: levelsLoading } = useDebugLevelsQuery();
@@ -125,9 +130,7 @@ export function GameDataTab({ textColor, subtextColor, panelBg, inputClass = "" 
     currentRole: string;
     isBanned: boolean;
   } | null>(null);
-  const [userAction, setUserAction] = useState<"ban" | "unban" | "promote" | "demote" | null>(
-    null,
-  );
+  const [userAction, setUserAction] = useState<"ban" | "unban" | "promote" | "demote" | null>(null);
   const [banMinutes, setBanMinutes] = useState("1440");
   const [isPermanentBan, setIsPermanentBan] = useState(false);
   const [promoteTarget, setPromoteTarget] = useState<"admin" | "support">("support");
@@ -249,9 +252,7 @@ export function GameDataTab({ textColor, subtextColor, panelBg, inputClass = "" 
               ? { ban_type: "permanent" }
               : {
                   ban_type: "temporary",
-                  ban_until: new Date(
-                    Date.now() + Number(banMinutes) * 60_000,
-                  ).toISOString(),
+                  ban_until: new Date(Date.now() + Number(banMinutes) * 60_000).toISOString(),
                 },
           });
           toast.success("User banned");
@@ -302,12 +303,7 @@ export function GameDataTab({ textColor, subtextColor, panelBg, inputClass = "" 
 
   // ── Sub-components helpers ────────────────────────────────────────────────
 
-  const cardHeader = (
-    title: string,
-    icon: React.ReactNode,
-    count?: number,
-    onAdd?: () => void,
-  ) => (
+  const cardHeader = (title: string, icon: React.ReactNode, count?: number, onAdd?: () => void) => (
     <div className={`mb-2 flex items-center gap-1.5 ${subtextColor}`}>
       {icon}
       <p className="flex-1 text-[10px] font-semibold tracking-widest uppercase">
@@ -352,7 +348,7 @@ export function GameDataTab({ textColor, subtextColor, panelBg, inputClass = "" 
               {characters.map((c) => (
                 <div
                   key={c.id}
-                  className="flex items-center gap-2 rounded-lg bg-current/5 p-1.5 group"
+                  className="group flex items-center gap-2 rounded-lg bg-current/5 p-1.5"
                 >
                   <div className="h-7 w-7 shrink-0 overflow-hidden rounded-full bg-current/10">
                     <img
@@ -411,7 +407,7 @@ export function GameDataTab({ textColor, subtextColor, panelBg, inputClass = "" 
               {levels.map((l) => (
                 <div
                   key={l.id}
-                  className="flex items-center gap-2 rounded-lg bg-current/5 p-1.5 group"
+                  className="group flex items-center gap-2 rounded-lg bg-current/5 p-1.5"
                 >
                   <div className="h-7 w-7 shrink-0 overflow-hidden rounded-lg bg-current/10">
                     <img
@@ -437,9 +433,7 @@ export function GameDataTab({ textColor, subtextColor, panelBg, inputClass = "" 
                     </button>
                     <button
                       type="button"
-                      onClick={() =>
-                        setDeleteTarget({ section: "level", id: l.id, label: l.name })
-                      }
+                      onClick={() => setDeleteTarget({ section: "level", id: l.id, label: l.name })}
                       className="rounded p-0.5 text-red-400 hover:text-red-300"
                     >
                       <Trash2 size={9} />
@@ -580,15 +574,11 @@ export function GameDataTab({ textColor, subtextColor, panelBg, inputClass = "" 
                 <tbody>
                   {filteredUsers.map((u) => (
                     <tr key={u.id} className="border-t border-current/5 hover:bg-current/3">
-                      <td className={`py-1 pr-2 font-mono text-[10px] ${subtextColor}`}>
-                        {u.id}
-                      </td>
-                      <td className={`py-1 pr-2 max-w-40 truncate text-xs ${textColor}`}>
+                      <td className={`py-1 pr-2 font-mono text-[10px] ${subtextColor}`}>{u.id}</td>
+                      <td className={`max-w-40 truncate py-1 pr-2 text-xs ${textColor}`}>
                         {u.email}
                       </td>
-                      <td className={`py-1 pr-2 text-xs capitalize ${subtextColor}`}>
-                        {u.role}
-                      </td>
+                      <td className={`py-1 pr-2 text-xs capitalize ${subtextColor}`}>{u.role}</td>
                       <td className="py-1 pr-2">
                         {u.is_banned ? (
                           <span className="text-[10px] font-medium text-red-400">Banned</span>
@@ -601,7 +591,6 @@ export function GameDataTab({ textColor, subtextColor, panelBg, inputClass = "" 
                           {!u.is_banned ? (
                             <button
                               type="button"
-                              title="Ban"
                               onClick={() => {
                                 setUserActionTarget({
                                   userId: u.id,
@@ -694,8 +683,7 @@ export function GameDataTab({ textColor, subtextColor, panelBg, inputClass = "" 
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>
-              {editId !== null ? "Edit" : "New"}{" "}
-              {editSection ? sectionTitle(editSection) : ""}
+              {editId !== null ? "Edit" : "New"} {editSection ? sectionTitle(editSection) : ""}
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-3 py-1">
@@ -845,12 +833,8 @@ export function GameDataTab({ textColor, subtextColor, panelBg, inputClass = "" 
             <DialogTitle className="flex items-center gap-2">
               {userAction === "ban" && <ShieldBan size={14} className="text-red-400" />}
               {userAction === "unban" && <ShieldCheck size={14} className="text-green-400" />}
-              {userAction === "promote" && (
-                <ArrowUpCircle size={14} className="text-violet-400" />
-              )}
-              {userAction === "demote" && (
-                <ArrowDownCircle size={14} className="text-amber-400" />
-              )}
+              {userAction === "promote" && <ArrowUpCircle size={14} className="text-violet-400" />}
+              {userAction === "demote" && <ArrowDownCircle size={14} className="text-amber-400" />}
               {userAction === "ban" && "Ban User"}
               {userAction === "unban" && "Unban User"}
               {userAction === "promote" && "Promote User"}
@@ -930,8 +914,7 @@ export function GameDataTab({ textColor, subtextColor, panelBg, inputClass = "" 
             <div className="flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/10 p-2.5">
               <AlertTriangle size={11} className="mt-0.5 shrink-0 text-amber-400" />
               <p className="text-[10px] text-amber-300">
-                This will demote{" "}
-                <strong>{userActionTarget?.email}</strong> from{" "}
+                This will demote <strong>{userActionTarget?.email}</strong> from{" "}
                 <strong>{userActionTarget?.currentRole}</strong> back to regular user.
               </p>
             </div>
