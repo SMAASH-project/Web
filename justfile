@@ -17,26 +17,24 @@ alias c := clean
 @default:
     just --list
 
-all: build-client build-auto test-client test seed
+all: build-client build test-client test seed
+build-fullstack: build-client build
 
-@build-auto:
-    just {{ if os_family() == "windows" { "build-windows" } else { "build" } }}
-
-@build-windows:
-        echo "Building backend for Windows"
-        @go build -v -o build/main.exe cmd/api/main.go
+#Build the backend and automatically determine the output file based on the operating system
 @build:
     echo "Building backend"
-    @go build -v -o build/main cmd/api/main.go
+    @go build -v -o {{ if os_family() == "windows" { "build/main.exe" } else { "build/main" } }} cmd/api/main.go
 
-build-fullstack: build-client build-auto
-
+# Build the frontend
 @build-client:
     echo "Building client"
     cd ./client && npm install && npm run build
+
+# Test Frontend file formatting, linting and unit tests
 @test-client:
     echo "Testing client"
     cd ./client && npm run format:check ; npm run lint ; npm run test:run
+
 # Run the application
 @run:
     go run -v cmd/api/main.go
