@@ -48,26 +48,24 @@ export function EffectMixDialog() {
     [context?.effectMix],
   );
 
-  const toggleEffect = useCallback(
-    (key: AnimationKey) => {
-      const isEnabled = key in pendingMix;
+  const toggleEffect = useCallback((key: AnimationKey) => {
+    setPendingMix((prev) => {
+      const isEnabled = key in prev;
       if (isEnabled) {
-        setPendingMix((prev) => {
-          const next = { ...prev };
-          delete next[key];
-          return next;
-        });
-        setOpenItems((items) => items.filter((i) => i !== key));
-      } else {
-        setPendingMix((prev) => ({
-          ...prev,
-          [key]: { ...DEFAULT_SUB_EFFECTS[key] },
-        }));
-        setOpenItems((items) => [...items, key]);
+        const next = { ...prev };
+        delete next[key];
+        return next;
       }
-    },
-    [pendingMix],
-  );
+      return {
+        ...prev,
+        [key]: { ...DEFAULT_SUB_EFFECTS[key] },
+      };
+    });
+
+    setOpenItems((items) =>
+      items.includes(key) ? items.filter((i) => i !== key) : [...items, key],
+    );
+  }, []);
 
   const toggleSubEffect = useCallback((effectKey: AnimationKey, subKey: string) => {
     setPendingMix((prev) => {
@@ -150,6 +148,11 @@ export function EffectMixDialog() {
                       />
                       <AccordionTrigger
                         className={`min-w-0 flex-1 gap-2 rounded-none p-0 hover:no-underline ${textColor}`}
+                        onClick={() => {
+                          if (!isEnabled) {
+                            toggleEffect(key);
+                          }
+                        }}
                       >
                         <span className="truncate text-sm font-medium">
                           {ANIMATION_LABELS[key]}
