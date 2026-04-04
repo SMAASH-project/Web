@@ -46,10 +46,7 @@ export function useWhoAmIQuery() {
 export function useLoginMutation() {
   return useMutation<LoginResponse, AxiosError, LoginPayload>({
     mutationFn: async (payload) => {
-      const { data } = await apiClient.post<LoginResponse>(
-        "/auth/login",
-        payload,
-      );
+      const { data } = await apiClient.post<LoginResponse>("/auth/login", payload);
       return data;
     },
   });

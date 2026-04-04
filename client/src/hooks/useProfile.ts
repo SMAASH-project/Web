@@ -52,10 +52,7 @@ function loadPfpVersions(): Map<number, number> {
 
 function savePfpVersions(map: Map<number, number>): void {
   try {
-    sessionStorage.setItem(
-      PFP_VERSION_KEY,
-      JSON.stringify(Object.fromEntries(map)),
-    );
+    sessionStorage.setItem(PFP_VERSION_KEY, JSON.stringify(Object.fromEntries(map)));
   } catch {
     // ignore — cache-busting degrades gracefully if storage is unavailable
   }
@@ -96,9 +93,7 @@ export function useProfilesQuery(userId: number | null) {
     queryKey: queryKeys.profiles.byUserId(userId ?? 0),
     queryFn: async () => {
       if (!userId) throw new Error("User ID is required");
-      const { data } = await apiClient.get<ProfileResponse[]>(
-        `/users/${userId}/profiles`,
-      );
+      const { data } = await apiClient.get<ProfileResponse[]>(`/users/${userId}/profiles`);
 
       return data.map((profile) => ({
         ...profile,
@@ -121,19 +116,15 @@ export function useAddProfileMutation() {
       const { user_id, profile_picture, ...body } = payload;
       const displayName = clampDisplayName(body.display_name);
 
-      const { data } = await apiClient.post<AddProfileResponse>(
-        `/users/${user_id}/profiles`,
-        { display_name: displayName },
-      );
+      const { data } = await apiClient.post<AddProfileResponse>(`/users/${user_id}/profiles`, {
+        display_name: displayName,
+      });
 
       if (profile_picture) {
         try {
           await uploadProfilePicture(data.id, profile_picture);
         } catch (uploadError) {
-          console.error(
-            "Profile created but picture upload failed:",
-            uploadError,
-          );
+          console.error("Profile created but picture upload failed:", uploadError);
         }
       }
 
@@ -222,17 +213,12 @@ export function useUpdateProfileMutation() {
         return;
       }
 
-      queryClient.setQueriesData<ProfileResponse[]>(
-        { queryKey: queryKeys.profiles.all },
-        (old) => {
-          if (!old) return old;
-          return old.map((p) =>
-            p.id === profileId
-              ? { ...p, display_name: payload.display_name }
-              : p,
-          );
-        },
-      );
+      queryClient.setQueriesData<ProfileResponse[]>({ queryKey: queryKeys.profiles.all }, (old) => {
+        if (!old) return old;
+        return old.map((p) =>
+          p.id === profileId ? { ...p, display_name: payload.display_name } : p,
+        );
+      });
     },
     onSuccess: (_data, variables) => {
       if (variables.invalidateAfterSuccess === false) {
@@ -270,13 +256,10 @@ export function useDeleteProfileMutation() {
       );
 
       // Optimistically remove from cache
-      queryClient.setQueryData<ProfileResponse[]>(
-        queryKeys.profiles.byUserId(userId),
-        (old) => {
-          if (!old) return old;
-          return old.filter((p) => p.id !== profileId);
-        },
-      );
+      queryClient.setQueryData<ProfileResponse[]>(queryKeys.profiles.byUserId(userId), (old) => {
+        if (!old) return old;
+        return old.filter((p) => p.id !== profileId);
+      });
 
       return { previousData, userId };
     },

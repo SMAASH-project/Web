@@ -77,10 +77,7 @@ export function useNewsPosts(selectedCategories: NewsPost["category"][] = []) {
   // ── Create ───────────────────────────────────────────────────────────────
   const createMutation = useMutation<PostReadDTO, Error, NewsPost>({
     mutationFn: async (post) => {
-      const { data } = await apiClient.post<PostReadDTO>(
-        "/posts",
-        newsPostToCreateBody(post),
-      );
+      const { data } = await apiClient.post<PostReadDTO>("/posts", newsPostToCreateBody(post));
       return data;
     },
     onSuccess: () => {
@@ -141,9 +138,7 @@ export function useNewsPosts(selectedCategories: NewsPost["category"][] = []) {
 
   const filteredPosts = useMemo(() => {
     if (selectedCategories.length === 0) return [];
-    return allPosts.filter((post) =>
-      selectedCategories.includes(post.category),
-    );
+    return allPosts.filter((post) => selectedCategories.includes(post.category));
   }, [allPosts, selectedCategories]);
 
   useEffect(() => {

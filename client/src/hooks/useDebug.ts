@@ -89,8 +89,7 @@ export function useTopPlayersQuery() {
   return useQuery<TopPlayerDTO[], AxiosError>({
     queryKey: debugQueryKeys.topPlayers,
     queryFn: async () => {
-      const { data } =
-        await apiClient.get<TopPlayerDTO[]>("/stats/top/players");
+      const { data } = await apiClient.get<TopPlayerDTO[]>("/stats/top/players");
       return data ?? [];
     },
     staleTime: 60 * 1000,
@@ -112,8 +111,7 @@ export function useLeaderboardQuery() {
   return useQuery<BestPlayerDTO[], AxiosError>({
     queryKey: debugQueryKeys.leaderboard,
     queryFn: async () => {
-      const { data } =
-        await apiClient.get<BestPlayerDTO[]>("/stats/leaderboard");
+      const { data } = await apiClient.get<BestPlayerDTO[]>("/stats/leaderboard");
       return data ?? [];
     },
     staleTime: 60 * 1000,

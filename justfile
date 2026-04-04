@@ -33,7 +33,7 @@ build-fullstack: build-client build
 # Test Frontend file formatting, linting and unit tests
 @test-client:
     echo "Testing client"
-    cd ./client && npm run format:check ; npm run lint ; npm run test:run
+    cd ./client && npm run format:check && npm run lint && npm run test:run
 
 # Run the application
 @run:
