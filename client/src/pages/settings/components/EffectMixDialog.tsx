@@ -149,14 +149,11 @@ export function EffectMixDialog() {
                         className="shrink-0"
                       />
                       <AccordionTrigger
-                        asChild
                         className={`min-w-0 flex-1 gap-2 rounded-none p-0 hover:no-underline ${textColor}`}
                       >
-                        <button type="button" className="flex min-w-0 flex-1 items-center gap-2">
-                          <span className="truncate text-sm font-medium">
-                            {ANIMATION_LABELS[key]}
-                          </span>
-                        </button>
+                        <span className="truncate text-sm font-medium">
+                          {ANIMATION_LABELS[key]}
+                        </span>
                       </AccordionTrigger>
                     </div>
                     <AccordionContent>
