@@ -1,6 +1,6 @@
 # SMAASH Client — User Guide
 
-**Last updated:** 2026-04-03 (rev 4)
+**Last updated:** 2026-04-04 (rev 5)
 
 > Welcome! This guide walks you through SMAASH's features, settings, and common tasks. Think of it as a companion while you explore.
 
@@ -35,7 +35,25 @@ The top navigation bar is your home base. Here's what each section does:
 | **Profile**         | Your account, stats, settings     | Managing your character info              |
 | **Settings**        | Theme, language, animations       | Making the app feel right for you         |
 
-**For Admins:** You'll also see **Admin Panel** and **Debug Tools** at the end.
+**For Admins:** You'll also see **Admin Panel** and an expanded **Debug Dashboard**.
+
+### Admin Debug Dashboard (New in April 2026)
+
+Admins now have an expanded debug workspace at `/app/debug` with interactive tools across system state, endpoints, cache, game data, diagnostics, and a new **Database** tab.
+
+Key capabilities:
+
+- Interactive data operations (create/edit/delete where API supports it)
+- User moderation actions (ban with duration, unban, promote, demote)
+- Session action history in the panel
+- Danger Zone controls for sensitive operations with warnings
+
+Database tab scope:
+
+- Resources: Users, Profiles, Items, Characters, Levels, Categories, Rarities, Purchases, Roles, Posts, Stats
+- Inline record browsing and editing workflows
+- Built-in schema/reference view for quick operator guidance
+- Some actions may be unavailable if no backend endpoint exists yet (for example seed/reset flows)
 
 ---
 

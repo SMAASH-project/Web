@@ -1,6 +1,6 @@
 # SMAASH kliens — felhasználói útmutató
 
-**Frissítve:** 2026-04-03 (rev 4)
+**Frissítve:** 2026-04-04 (rev 5)
 
 > Ez az útmutató röviden, érthetően vezet végig az app fő részein, a beállításokon és a leggyakoribb teendőkön.
 
@@ -35,7 +35,25 @@ A felső navigáció az app központi vezérlője. Innen eléred a fő felülete
 | **Profile**             | Fiók, statisztikák, személyes adatok | Ha a saját profilodat kezeled          |
 | **Settings**            | Téma, nyelv, animációk               | Ha kényelmesebbé akarod tenni az appot |
 
-**Adminoknak:** megjelenik még az **Admin** és a **Debug** is.
+**Adminoknak:** megjelenik még az **Admin** és a kibővített **Debug Dashboard** is.
+
+### Admin Debug Dashboard (Új: 2026. április)
+
+Az adminok a `/app/debug` oldalon egy jelentősen kibővített, interaktív debug felületet kapnak: rendszerállapot, endpoint tesztelés, cache műveletek, game data kezelés, diagnosztika és új **Database** tab.
+
+Főbb képességek:
+
+- interaktív adatkezelés (létrehozás/szerkesztés/törlés, ahol az API támogatja)
+- felhasználó moderáció (időtartamos tiltás, feloldás, előléptetés, lefokozás)
+- session szintű akciónapló a panelen belül
+- Danger Zone műveletek figyelmeztetésekkel a kockázatos műveletekhez
+
+Database tab tartalma:
+
+- erőforrások: Users, Profiles, Items, Characters, Levels, Categories, Rarities, Purchases, Roles, Posts, Stats
+- rekordok listázása és inline szerkesztési folyamatok
+- beépített séma/reference nézet gyors üzemeltetői tájékozódáshoz
+- egyes műveletek nem érhetők el, ha a backend oldalon nincs endpoint (például seed/reset)
 
 ---
 

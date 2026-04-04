@@ -11,7 +11,7 @@ import {
   Smartphone,
   Activity,
   Settings2,
-  X,
+  TableProperties,
 } from "lucide-react";
 import { useSettings } from "@/pages/settings/SettingsContext";
 import {
@@ -37,16 +37,26 @@ import { CacheTab } from "./tabs/CacheTab";
 import { EndpointsTab } from "./tabs/EndpointsTab";
 import { GameDataTab } from "./tabs/GameDataTab";
 import { SightTab } from "./tabs/SightTab";
+import { DatabaseTab } from "./tabs/DatabaseTab";
 
 // ─── Tab definition ───────────────────────────────────────────────────────────
 
-type Tab = "system" | "cache" | "endpoints" | "game" | "visual" | "emulation" | "diagnostics";
+type Tab =
+  | "system"
+  | "cache"
+  | "endpoints"
+  | "game"
+  | "database"
+  | "visual"
+  | "emulation"
+  | "diagnostics";
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "system", label: "System", icon: <Monitor size={14} /> },
   { id: "endpoints", label: "Endpoints", icon: <Terminal size={14} /> },
   { id: "cache", label: "Cache", icon: <Database size={14} /> },
   { id: "game", label: "Game Data", icon: <Gamepad2 size={14} /> },
+  { id: "database", label: "Database", icon: <TableProperties size={14} /> },
   { id: "visual", label: "Visual", icon: <Eye size={14} /> },
   { id: "emulation", label: "Emulation", icon: <Smartphone size={14} /> },
   { id: "diagnostics", label: "Diagnostics", icon: <Activity size={14} /> },
@@ -67,7 +77,7 @@ const colTransition = (delay: number): Transition => ({
 export function DebugPageContent({ animReady = true }: { animReady?: boolean }) {
   const { settings } = useSettings();
   const { useLiquidGlass, useDarkMode, useAnimations } = settings;
-  const { isAdmin, isSupport } = useContext(AuthContext);
+  const { isAdmin } = useContext(AuthContext);
   const queryClient = useQueryClient();
   const { t } = useTranslation("debug");
   const [activeTab, setActiveTab] = useState<Tab>("system");
@@ -80,7 +90,9 @@ export function DebugPageContent({ animReady = true }: { animReady?: boolean }) 
   const textShadow = getTextShadow(useLiquidGlass, useDarkMode);
   const inputClass = getInputClasses(useLiquidGlass, useDarkMode);
 
-  const visibleTabs = TABS.filter((t) => t.id !== "game" || isAdmin);
+  const visibleTabs = TABS.filter(
+    (t) => (t.id !== "game" && t.id !== "database") || isAdmin,
+  );
 
   const tabBtn = (tab: (typeof TABS)[0]) => {
     const active = tab.id === activeTab;
@@ -116,7 +128,7 @@ export function DebugPageContent({ animReady = true }: { animReady?: boolean }) 
         <div>
           <p className={`text-xs font-bold ${textColor} ${textShadow}`}>{t("title")}</p>
           <p className={`text-[10px] ${subtextColor} leading-none`}>
-            {isAdmin ? t("roles.admin") : t("roles.support")}
+            {t("roles.admin")}
           </p>
         </div>
       </div>
@@ -161,7 +173,21 @@ export function DebugPageContent({ animReady = true }: { animReady?: boolean }) 
         />
       )}
       {activeTab === "game" && isAdmin && (
-        <GameDataTab textColor={textColor} subtextColor={subtextColor} panelBg={panelBg} />
+        <GameDataTab
+          textColor={textColor}
+          subtextColor={subtextColor}
+          panelBg={panelBg}
+          inputClass={inputClass}
+        />
+      )}
+      {activeTab === "database" && isAdmin && (
+        <DatabaseTab
+          textColor={textColor}
+          subtextColor={subtextColor}
+          panelBg={panelBg}
+          inputClass={inputClass}
+          bgClass={cardBg}
+        />
       )}
       {activeTab === "visual" && (
         <SightTab
@@ -216,7 +242,7 @@ export function DebugPageContent({ animReady = true }: { animReady?: boolean }) 
           <SheetContent side="left" className={`w-52 p-0 ${cardBg}`}>
             <SheetTitle className="sr-only">{t("title")}</SheetTitle>
             <SheetDescription className="sr-only">
-              {isAdmin ? t("roles.admin") : t("roles.support")}
+              {t("roles.admin")}
             </SheetDescription>
             <div className="flex h-full flex-col gap-1 p-3">
               {/* Logo */}
@@ -225,7 +251,7 @@ export function DebugPageContent({ animReady = true }: { animReady?: boolean }) 
                 <div>
                   <p className={`text-xs font-bold ${textColor} ${textShadow}`}>{t("title")}</p>
                   <p className={`text-[10px] ${subtextColor} leading-none`}>
-                    {isAdmin ? t("roles.admin") : t("roles.support")}
+                    {t("roles.admin")}
                   </p>
                 </div>
               </div>

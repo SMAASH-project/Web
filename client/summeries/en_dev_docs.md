@@ -1,6 +1,6 @@
 # SMAASH Client — Developer Documentation
 
-**Last updated:** 2026-04-03 (rev 4)
+**Last updated:** 2026-04-04 (rev 5)
 
 > This guide covers the architecture, conventions, and practical workflows for the SMAASH web client. It's meant to be helpful—not just a checklist.
 
@@ -47,7 +47,7 @@ Everything under `/app/*` requires authentication via `RequireAuth` guard.
 Some pages are only available to specific roles:
 
 - `/app/admin` — admin moderation tools (user ban, profile management)
-- `/app/debug` — system diagnostics (admin + support staff)
+- `/app/debug` — admin-only diagnostics and operations dashboard
 
 Role checks happen at the route level, but also re-verified at component entry points as a safety measure.
 
@@ -257,19 +257,29 @@ Admins manage users, apply bans, and monitor platform health.
 
 ### Debug Panel (`/app/debug`)
 
-Available to admins and support staff for system diagnostics.
+Admin-only diagnostics and operations dashboard.
 
 **Core tabs:**
 
 1. **System** — runtime/system-level diagnostics
 2. **Endpoints** — manual endpoint testing
 3. **Cache** — React Query cache inspection/invalidation
-4. **Game Data** — admin-only game data tools
+4. **Game Data** — interactive CRUD + moderation workflows
 5. **Visual** — UI debugging
 6. **Emulation** — responsive testing & network simulation
 7. **Diagnostics** — performance & accessibility insights
+8. **Database** — generic REST-backed data browser + schema/reference view
 
 Detailed highlights:
+
+- **Database** — new generic admin data browser
+  - Resource selectors: Users, Profiles, Items, Characters, Levels, Categories, Rarities, Purchases, Roles, Posts, Stats
+  - Row-level CRUD via create/edit dialogs and delete confirmations (where backend endpoints exist)
+  - Hardcoded schema/reference view derived from Go/GORM models (client-side documentation layer)
+  - Inline user moderation actions: Ban (duration picker), Unban, Promote, Demote
+  - Session-only action history (in-memory ring, max 20 actions)
+  - Danger Zone area with cascade warnings (notably Users/Profiles)
+  - Current constraints: no seed/reset endpoints, posts delete unavailable, image upload flows intentionally excluded
 
 - **Visual** — UI debugging
   - Animation speed control
@@ -297,6 +307,15 @@ Detailed highlights:
   - Render diagnostics (component render count, React Query fetch/mutate operations)
   - Click target size inspector
   - z-index stack viewer
+
+- **Game Data** — expanded interaction scope
+  - Full CRUD flows for characters, levels, and items
+  - Item form selectors wired to rarity/category datasets
+  - User management table with moderation actions (ban/promote/demote)
+
+- **Hook surface (`useDebug.ts`)**
+  - Added multiple debug query hooks and broad mutation coverage for CRUD-capable endpoints
+  - New JSDoc coverage on added hooks to keep IntelliSense and usage guidance consistent
 
 **Viewport Override Technical Details:**
 

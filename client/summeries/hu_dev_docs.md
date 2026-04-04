@@ -1,6 +1,6 @@
 # SMAASH kliens — fejlesztői dokumentáció
 
-**Frissítve:** 2026-04-03 (rev 4)
+**Frissítve:** 2026-04-04 (rev 5)
 
 > Ez az összefoglaló a kliens architektúráját, a közös mintákat és a legfontosabb fejlesztési szabályokat foglalja össze. Nem csak azt mondja meg, _mit_ használunk, hanem azt is, _miért_ így.
 
@@ -28,7 +28,7 @@
 - **Védett oldalak:** minden `/app/*` route a `RequireAuth` alatt fut
 - **Szerepkör-alapú oldalak:**
   - `/app/admin` — csak admin
-  - `/app/debug` — admin + support
+  - `/app/debug` — csak admin (diagnosztika + műveleti dashboard)
 
 ### Fontos megjegyzés
 
@@ -135,12 +135,20 @@ A debug emulációs mód hálózati késleltetést is tud szimulálni. Ez fejles
 
 ### Debug panel
 
-- tabok: system, cache, endpoints, game data, visual, emulation, diagnostics
+- tabok: system, cache, endpoints, game data, visual, emulation, diagnostics, database
 - Sight részek: vizuális kapcsolók, viewport/network emuláció, diagnosztika
 - `useDebugSettings` lokálisan perzisztál, és `CustomEvent("debug-settings")` eseménnyel jelzi a változásokat
 - globális debug effektusok a `RootLayout.tsx`-ben futnak
 - JS viewport emuláció: `window.innerWidth/Height` és `window.matchMedia` patch-elésével segíti a JS-alapú responsive logikát
 - Tailwind breakpoints nem változnak ettől, mert azok build-time CSS médiaquery-k
+- **Database tab (új):** általános REST-alapú adatböngésző 11 erőforrással (Users, Profiles, Items, Characters, Levels, Categories, Rarities, Purchases, Roles, Posts, Stats)
+- sor-szintű CRUD (ahol van backend endpoint), létrehozás/szerkesztés dialógusokkal és törlési megerősítéssel
+- kliensoldali (hardcoded) sémanézet a Go/GORM modellek alapján
+- inline user moderáció: tiltás (időtartam-választóval), feloldás, előléptetés, lefokozás
+- session-only akciónapló (memóriában, max 20)
+- Danger Zone blokk kaszkád figyelmeztetésekkel (különösen Users/Profiles)
+- jelenlegi korlátok: seed/reset endpoint nincs; post törlés nincs; képfeltöltés CRUD űrlapokban nincs bekötve
+- **Game Data tab bővítés:** karakter/level/item CRUD + user management táblában moderációs műveletek
 
 ### Profil oldal
 

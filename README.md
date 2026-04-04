@@ -133,6 +133,27 @@ For wrintig code, refer to the style guides and idioms of the languages we're us
 - [Go standard](https://go.dev/doc/effective_go)
 - [React standard](https://react.dev/reference/rules)
 
+## Debug & Admin panel
+
+The app ships with a built-in debug/admin panel at `/app/debug`. Access is restricted to users with the **admin** role.
+
+### Tabs
+
+| Tab | Description |
+|-----|-------------|
+| System | Browser info, display metrics, session, environment flags |
+| Endpoints | Interactive REST API explorer with quick-route presets and response inspector |
+| Cache | React Query cache browser — view, filter, invalidate, and remove cached queries |
+| Game Data | CRUD for characters, levels, and store items; user management (ban, promote, demote) |
+| Database | Generic data browser for all 11 API-exposed resources with row-level CRUD, schema view, session history, and a clearly marked danger zone |
+| Visual | Animation speed, layout borders, element inspector, FPS counter, scroll position overlay, CSS variable inspector |
+| Emulation | Viewport emulation presets, forced reduced motion, compact density, network delay/jitter simulation |
+| Diagnostics | A11y contrast ratios, render counters, React Query status, click-target and z-index inspectors |
+
+The debug settings (animation speed, viewport overrides, network simulation, etc.) are persisted to `localStorage` under the key `debug-settings`.
+
+---
+
 ## Database seeding
 
 The project defines a database seeder, which can be used in the following way:

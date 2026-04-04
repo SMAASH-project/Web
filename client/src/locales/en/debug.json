@@ -12,7 +12,8 @@
     "sight": "Sight",
     "visual": "Visual",
     "emulation": "Emulation",
-    "diagnostics": "Diagnostics"
+    "diagnostics": "Diagnostics",
+    "database": "Database"
   },
   "refresh": "Refresh",
   "sight": {

@@ -8,7 +8,7 @@ import { DebugPageContent } from "./DebugPageContent";
 import { getTextColor } from "@/lib/utils";
 
 export function DebugPage() {
-  const { isAdmin, isSupport, isInitializing } = useContext(AuthContext);
+  const { isAdmin, isInitializing } = useContext(AuthContext);
   const { settings } = useSettings();
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
 
@@ -23,7 +23,7 @@ export function DebugPage() {
     );
   }
 
-  if (!isAdmin && !isSupport) {
+  if (!isAdmin) {
     return <NotFoundPage />;
   }
 
