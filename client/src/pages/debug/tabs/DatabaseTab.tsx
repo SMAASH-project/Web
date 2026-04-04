@@ -305,12 +305,7 @@ interface DatabaseTabProps {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function DatabaseTab({
-  textColor,
-  subtextColor,
-  panelBg,
-  inputClass,
-}: DatabaseTabProps) {
+export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: DatabaseTabProps) {
   // ── UI state ──────────────────────────────────────────────────────────────
   const [selected, setSelected] = useState<ResourceId>("users");
   const [filter, setFilter] = useState("");
@@ -466,7 +461,11 @@ export function DatabaseTab({
     const q = filter.trim().toLowerCase();
     if (!q) return currentData;
     return currentData.filter((row) =>
-      Object.values(row).some((v) => String(v ?? "").toLowerCase().includes(q)),
+      Object.values(row).some((v) =>
+        String(v ?? "")
+          .toLowerCase()
+          .includes(q),
+      ),
     );
   }, [currentData, filter]);
 
@@ -480,9 +479,7 @@ export function DatabaseTab({
     if (selected === "items") {
       const itemCats = (row.categories as string[]) ?? [];
       setFormCategoryIds(
-        itemCats
-          .map((n) => categories.find((c) => c.name === n)?.id)
-          .filter(Boolean) as number[],
+        itemCats.map((n) => categories.find((c) => c.name === n)?.id).filter(Boolean) as number[],
       );
       const rarityId = rarities.find((r) => r.name === row.rarity)?.id;
       if (rarityId) fd.rarity_id = String(rarityId);
@@ -504,8 +501,7 @@ export function DatabaseTab({
     setIsCreating(false);
   };
 
-  const setField = (key: string, value: string) =>
-    setForm((prev) => ({ ...prev, [key]: value }));
+  const setField = (key: string, value: string) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const toggleCategoryId = (id: number) =>
     setFormCategoryIds((prev) =>
@@ -670,10 +666,7 @@ export function DatabaseTab({
           await deleteRole.mutateAsync(id);
           break;
       }
-      addHistory(
-        `Deleted ${selected.replace(/s$/, "")} #${id} "${deleteTarget.label}"`,
-        true,
-      );
+      addHistory(`Deleted ${selected.replace(/s$/, "")} #${id} "${deleteTarget.label}"`, true);
       toast.success("Deleted");
       setDeleteTarget(null);
     } catch {
@@ -695,9 +688,7 @@ export function DatabaseTab({
               ? { ban_type: "permanent" }
               : {
                   ban_type: "temporary",
-                  ban_until: new Date(
-                    Date.now() + Number(banMinutes) * 60_000,
-                  ).toISOString(),
+                  ban_until: new Date(Date.now() + Number(banMinutes) * 60_000).toISOString(),
                 },
           });
           addHistory(
@@ -742,7 +733,7 @@ export function DatabaseTab({
     const value = row[col];
     if (col === "is_banned") {
       return value ? (
-        <span className="text-red-400 font-medium">Banned</span>
+        <span className="font-medium text-red-400">Banned</span>
       ) : (
         <span className="text-green-400">Active</span>
       );
@@ -760,9 +751,7 @@ export function DatabaseTab({
       }
     }
     return (
-      <span className={`truncate max-w-32 block text-xs ${textColor}`}>
-        {String(value ?? "—")}
-      </span>
+      <span className={`block max-w-32 truncate text-xs ${textColor}`}>{String(value ?? "—")}</span>
     );
   };
 
@@ -851,9 +840,7 @@ export function DatabaseTab({
           </>
         );
       default:
-        return (
-          <p className={`text-xs ${subtextColor}`}>No editable fields for this resource.</p>
-        );
+        return <p className={`text-xs ${subtextColor}`}>No editable fields for this resource.</p>;
     }
   };
 
@@ -865,12 +852,18 @@ export function DatabaseTab({
         {
           title: "Top Items",
           icon: <ShoppingBag size={11} />,
-          rows: topItems.map((x) => ({ label: x.name, value: `${x.count_of_purchases} purchases` })),
+          rows: topItems.map((x) => ({
+            label: x.name,
+            value: `${x.count_of_purchases} purchases`,
+          })),
         },
         {
           title: "Top Players",
           icon: <UserCircle size={11} />,
-          rows: topPlayers.map((x) => ({ label: x.display_name, value: `${x.count_of_matches} matches` })),
+          rows: topPlayers.map((x) => ({
+            label: x.display_name,
+            value: `${x.count_of_matches} matches`,
+          })),
         },
         {
           title: "Top Levels",
@@ -880,7 +873,10 @@ export function DatabaseTab({
         {
           title: "Leaderboard",
           icon: <Star size={11} />,
-          rows: leaderboard.map((x) => ({ label: x.display_name, value: `${x.count_of_wins} wins` })),
+          rows: leaderboard.map((x) => ({
+            label: x.display_name,
+            value: `${x.count_of_wins} wins`,
+          })),
         },
       ].map(({ title, icon, rows }) => (
         <div key={title} className={`flex flex-col gap-0.5 rounded-xl p-3 ${panelBg}`}>
@@ -973,9 +969,7 @@ export function DatabaseTab({
                 setShowSchema(false);
               }}
               className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-medium transition-all ${
-                active
-                  ? "bg-white/20 " + textColor
-                  : subtextColor + " hover:bg-white/10"
+                active ? "bg-white/20 " + textColor : subtextColor + " hover:bg-white/10"
               }`}
             >
               {r.icon}
@@ -1228,8 +1222,8 @@ export function DatabaseTab({
                 Delete Profile (cascade)
               </p>
               <p className={`text-[9px] leading-relaxed ${subtextColor}`}>
-                Removes the profile and all associated purchases. Select{" "}
-                <strong>Profiles</strong> table and use the trash icon on a row.
+                Removes the profile and all associated purchases. Select <strong>Profiles</strong>{" "}
+                table and use the trash icon on a row.
               </p>
             </div>
           </div>

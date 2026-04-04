@@ -90,9 +90,7 @@ export function DebugPageContent({ animReady = true }: { animReady?: boolean }) 
   const textShadow = getTextShadow(useLiquidGlass, useDarkMode);
   const inputClass = getInputClasses(useLiquidGlass, useDarkMode);
 
-  const visibleTabs = TABS.filter(
-    (t) => (t.id !== "game" && t.id !== "database") || isAdmin,
-  );
+  const visibleTabs = TABS.filter((t) => (t.id !== "game" && t.id !== "database") || isAdmin);
 
   const tabBtn = (tab: (typeof TABS)[0]) => {
     const active = tab.id === activeTab;
@@ -127,9 +125,7 @@ export function DebugPageContent({ animReady = true }: { animReady?: boolean }) 
         <Bug size={15} className={subtextColor} />
         <div>
           <p className={`text-xs font-bold ${textColor} ${textShadow}`}>{t("title")}</p>
-          <p className={`text-[10px] ${subtextColor} leading-none`}>
-            {t("roles.admin")}
-          </p>
+          <p className={`text-[10px] ${subtextColor} leading-none`}>{t("roles.admin")}</p>
         </div>
       </div>
 
@@ -241,18 +237,14 @@ export function DebugPageContent({ animReady = true }: { animReady?: boolean }) 
           </SheetTrigger>
           <SheetContent side="left" className={`w-52 p-0 ${cardBg}`}>
             <SheetTitle className="sr-only">{t("title")}</SheetTitle>
-            <SheetDescription className="sr-only">
-              {t("roles.admin")}
-            </SheetDescription>
+            <SheetDescription className="sr-only">{t("roles.admin")}</SheetDescription>
             <div className="flex h-full flex-col gap-1 p-3">
               {/* Logo */}
               <div className="mb-2 flex items-center gap-2 px-2 py-2">
                 <Bug size={15} className={subtextColor} />
                 <div>
                   <p className={`text-xs font-bold ${textColor} ${textShadow}`}>{t("title")}</p>
-                  <p className={`text-[10px] ${subtextColor} leading-none`}>
-                    {t("roles.admin")}
-                  </p>
+                  <p className={`text-[10px] ${subtextColor} leading-none`}>{t("roles.admin")}</p>
                 </div>
               </div>
 
