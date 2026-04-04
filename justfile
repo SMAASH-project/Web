@@ -3,7 +3,6 @@
 set windows-shell := ["cmd.exe", "/C"]
 # Run this on Windows only
 
-windows-all: build-client build-windows test-client test seed
 
 alias r := run
 alias b := build
@@ -18,7 +17,10 @@ alias c := clean
 @default:
     just --list
 
-all: build-fullstack test-client test seed
+all: build-client build-auto test-client test seed
+
+@build-auto:
+    just {{ if os_family() == "windows" { "build-windows" } else { "build" } }}
 
 @build-windows:
         echo "Building backend for Windows"
@@ -27,14 +29,14 @@ all: build-fullstack test-client test seed
     echo "Building backend"
     @go build -v -o build/main cmd/api/main.go
 
-build-fullstack: build-client build
+build-fullstack: build-client build-auto
 
 @build-client:
     echo "Building client"
     cd ./client && npm install && npm run build
 @test-client:
     echo "Testing client"
-    cd ./client && npm run format:check && npm run lint && npm run test:run
+    cd ./client && npm run format:check ; npm run lint ; npm run test:run
 # Run the application
 @run:
     go run -v cmd/api/main.go
