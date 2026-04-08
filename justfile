@@ -1,8 +1,8 @@
 # By default just runs the first recipe (aliases are not considered recipes)
 
 set windows-shell := ["cmd.exe", "/C"]
-# Run this on Windows only
 
+# Run this on Windows only
 
 alias r := run
 alias b := build
@@ -19,9 +19,10 @@ alias c := clean
     just --list
 
 all: build-client build test-client test seed
+
 build-fullstack: build-client build
 
-#Build the backend and automatically determine the output file based on the operating system
+# Build the backend and automatically determine the output file based on the operating system
 @build:
     echo "Building backend"
     @go build -v -o {{ if os_family() == "windows" { "build/main.exe" } else { "build/main" } }} cmd/api/main.go
@@ -39,7 +40,7 @@ build-fullstack: build-client build
 # Test Frontend file formatting, linting and unit tests
 @test-client:
     echo "Testing client"
-    cd ./client && npm run format:check && npm run lint && npm run test:run
+    cd ./client && npm install && npm run format:check && npm run lint && npm run test:run
 
 # Run the application
 @run:
