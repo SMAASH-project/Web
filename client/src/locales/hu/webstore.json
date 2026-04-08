@@ -1,6 +1,6 @@
 {
   "title": "Webáruház",
-  "subtitle": "Karakterek és kinézetek feloldása",
+  "subtitle": "Karakterek feloldása",
   "searchPlaceholder": "Keresés tárgy neve alapján…",
   "noResults": "Nem található tárgy.",
   "filters": {
@@ -13,8 +13,7 @@
     "unowned": "Nem saját",
     "melee": "Közelharci",
     "ranged": "Távolsági",
-    "character": "Karakter",
-    "skin": "Kinézet"
+    "character": "Karakter"
   },
   "rarity": {
     "common": "Közönséges",

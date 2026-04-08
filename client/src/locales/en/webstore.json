@@ -1,6 +1,6 @@
 {
   "title": "Webstore",
-  "subtitle": "Unlock characters and skins",
+  "subtitle": "Unlock characters",
   "searchPlaceholder": "Search by item name…",
   "noResults": "No items found.",
   "filters": {
@@ -13,8 +13,7 @@
     "unowned": "Unowned",
     "melee": "Melee",
     "ranged": "Ranged",
-    "character": "Character",
-    "skin": "Skin"
+    "character": "Character"
   },
   "rarity": {
     "common": "Common",

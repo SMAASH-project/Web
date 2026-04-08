@@ -28,7 +28,6 @@ import {
 } from "@/lib/utils";
 
 const RARITIES = ["Common", "Uncommon", "Rare", "Epic", "Legendary"] as const;
-const KINDS = ["Character", "Skin"] as const;
 const COMBAT_TYPES = ["Melee", "Ranged"] as const;
 
 const RARITY_COLORS: Record<string, string> = {
@@ -42,8 +41,7 @@ const RARITY_COLORS: Record<string, string> = {
 interface CreateItemDialogProps {
   onCreate: (data: {
     name: string;
-    kind: (typeof KINDS)[number];
-    combatType?: (typeof COMBAT_TYPES)[number];
+    combatType: (typeof COMBAT_TYPES)[number];
     rarity: (typeof RARITIES)[number];
     description: string;
     price: number;
@@ -57,7 +55,6 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
   const { settings } = useSettings();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
-  const [kind, setKind] = useState<(typeof KINDS)[number]>("Character");
   const [combatType, setCombatType] = useState<(typeof COMBAT_TYPES)[number]>("Melee");
   const [rarity, setRarity] = useState<(typeof RARITIES)[number]>("Common");
   const [description, setDescription] = useState("");
@@ -76,14 +73,12 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
     if (!name.trim() || !description.trim() || !price) return;
     onCreate({
       name: name.trim(),
-      kind,
-      ...(kind === "Character" ? { combatType } : {}),
+      combatType,
       rarity,
       description: description.trim(),
       price: Number(price),
     });
     setName("");
-    setKind("Character");
     setCombatType("Melee");
     setRarity("Common");
     setDescription("");
@@ -128,19 +123,8 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
             />
           </Field>
 
-          {/* Kind + Rarity row */}
+          {/* Rarity + Combat Type row */}
           <div className="grid grid-cols-2 gap-3">
-            <Field>
-              <Label className={textColor}>Kind</Label>
-              <StyledSelect
-                value={kind}
-                options={KINDS}
-                onChange={setKind}
-                inputClass={inputClass}
-                textColor={textColor}
-                bgClass={bgClass}
-              />
-            </Field>
             <Field>
               <Label className={textColor}>Rarity</Label>
               <StyledSelect
@@ -161,11 +145,6 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
                 )}
               />
             </Field>
-          </div>
-
-          {/* Combat type — only for Characters */}
-          {/* Combat type — only for Characters */}
-          {kind === "Character" && (
             <Field>
               <Label className={textColor}>Combat Type</Label>
               <StyledSelect
@@ -177,7 +156,7 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
                 bgClass={bgClass}
               />
             </Field>
-          )}
+          </div>
 
           {/* Description */}
           <Field>

@@ -30,18 +30,13 @@ export function WebstorePage() {
     sentinelRef,
     hasMore,
     isLoading,
-    kinds,
     rarities,
     combatTypes,
     ownershipOptions,
-    selectedKind,
     selectedRarity,
     selectedCombatType,
     selectedOwnership,
-    showOwnershipFilter,
-    showCombatTypeFilter,
     handleSearch,
-    handleKindChange,
     handleRarityChange,
     handleCombatTypeChange,
     handleOwnershipChange,
@@ -73,7 +68,7 @@ export function WebstorePage() {
               <h1 className={`text-2xl font-bold ${textColor} tracking-tight ${textShadow}`}>
                 Webstore
               </h1>
-              <p className={`text-sm ${subtextColor}`}>Unlock characters and skins</p>
+              <p className={`text-sm ${subtextColor}`}>Unlock characters</p>
             </div>
 
             {/* Right side: coins display, admin create */}
@@ -104,33 +99,23 @@ export function WebstorePage() {
           {/* Filters */}
           <div className="flex flex-wrap justify-center gap-4">
             <ItemFilters
-              label={t("filters.type")}
-              options={kinds}
-              selected={selectedKind}
-              onSelect={handleKindChange}
-            />
-            <ItemFilters
               label={t("filters.rarity")}
               options={rarities}
               selected={selectedRarity}
               onSelect={handleRarityChange}
             />
-            {showCombatTypeFilter && (
-              <ItemFilters
-                label={t("filters.combat")}
-                options={combatTypes}
-                selected={selectedCombatType}
-                onSelect={handleCombatTypeChange}
-              />
-            )}
-            {showOwnershipFilter && (
-              <ItemFilters
-                label={t("filters.ownership")}
-                options={ownershipOptions}
-                selected={selectedOwnership}
-                onSelect={handleOwnershipChange}
-              />
-            )}
+            <ItemFilters
+              label={t("filters.combat")}
+              options={combatTypes}
+              selected={selectedCombatType}
+              onSelect={handleCombatTypeChange}
+            />
+            <ItemFilters
+              label={t("filters.ownership")}
+              options={ownershipOptions}
+              selected={selectedOwnership}
+              onSelect={handleOwnershipChange}
+            />
           </div>
         </div>
 

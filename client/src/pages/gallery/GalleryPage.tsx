@@ -3,12 +3,8 @@ import Navbar from "@/components/nav/Navbar";
 import { useSettings } from "@/pages/settings/SettingsContext";
 import { getBackgroundClasses, getTextColor, getSubtextColor, getTextShadow } from "@/lib/utils";
 import { useDebugCharactersQuery } from "@/hooks/useDebug";
-import { useQuery } from "@tanstack/react-query";
-import apiClient from "@/lib/apiClient";
 import {
-  Images,
   Swords,
-  Paintbrush,
   Loader2,
   Music2,
   Play,
@@ -39,26 +35,7 @@ const OST_TRACKS: OstTrack[] = [
   // { id: 2, title: "Battle Arena", artist: "SMAASH OST", src: "/assets/music/battle-arena.mp3" },
 ];
 
-// ─── DTOs ─────────────────────────────────────────────────────────────────────
-
-interface ItemReadDTO {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  rarity: string;
-  categories: string[];
-}
-
-const RARITY_COLORS: Record<string, string> = {
-  Common: "#9ca3af",
-  Uncommon: "#10b981",
-  Rare: "#3b82f6",
-  Epic: "#8b5cf6",
-  Legendary: "#f59e0b",
-};
-
-type Tab = "characters" | "skins" | "ost";
+type Tab = "characters" | "ost";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -399,53 +376,6 @@ function CharacterCard({
   return animate ? <LoadPost index={index}>{card}</LoadPost> : <div>{card}</div>;
 }
 
-// ─── Skin card ────────────────────────────────────────────────────────────────
-
-function SkinCard({
-  item,
-  panelBg,
-  textColor,
-  subtextColor,
-  animate,
-  index,
-}: {
-  item: ItemReadDTO;
-  panelBg: string;
-  textColor: string;
-  subtextColor: string;
-  animate: boolean;
-  index: number;
-}) {
-  const rarityColor = RARITY_COLORS[item.rarity] ?? "#9ca3af";
-  const card = (
-    <div
-      className={`flex flex-col overflow-hidden rounded-xl ${panelBg} transition-all duration-200 hover:scale-[1.02] hover:shadow-xl`}
-      style={{ boxShadow: `inset 0 0 0 1px ${rarityColor}30` }}
-    >
-      <div className="h-1" style={{ backgroundColor: rarityColor }} />
-      <div className="flex flex-col gap-2 p-3">
-        <div className="flex items-start justify-between gap-2">
-          <p className={`text-sm leading-tight font-semibold ${textColor}`}>{item.name}</p>
-          <span
-            className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase"
-            style={{
-              backgroundColor: `${rarityColor}20`,
-              color: rarityColor,
-              border: `1px solid ${rarityColor}40`,
-            }}
-          >
-            {item.rarity}
-          </span>
-        </div>
-        <p className={`line-clamp-2 text-xs leading-relaxed opacity-60 ${subtextColor}`}>
-          {item.description}
-        </p>
-      </div>
-    </div>
-  );
-  return animate ? <LoadPost index={index}>{card}</LoadPost> : <div>{card}</div>;
-}
-
 // ─── Tab button ───────────────────────────────────────────────────────────────
 
 function TabButton({
@@ -513,19 +443,7 @@ export function GalleryPage() {
 
   const { data: characters = [], isLoading: charsLoading } = useDebugCharactersQuery();
 
-  const { data: skins = [], isLoading: skinsLoading } = useQuery<ItemReadDTO[]>({
-    queryKey: ["gallery", "skins"],
-    queryFn: async () => {
-      const { data } = await apiClient.get<ItemReadDTO[]>("/items", {
-        params: { page: 1, page_size: 100 },
-      });
-      return (data ?? []).filter((item) => item.categories.includes("Skin"));
-    },
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const isLoading =
-    activeTab === "characters" ? charsLoading : activeTab === "skins" ? skinsLoading : false;
+  const isLoading = activeTab === "characters" ? charsLoading : false;
 
   return (
     <div className="flex min-h-screen w-full flex-col self-start p-4">
@@ -535,7 +453,7 @@ export function GalleryPage() {
           <h1 className={`text-2xl font-bold ${textColor} tracking-tight ${textShadow}`}>
             Gallery
           </h1>
-          <p className={`text-sm ${subtextColor}`}>Characters, skins, and original soundtrack</p>
+          <p className={`text-sm ${subtextColor}`}>Characters and original soundtrack</p>
         </div>
 
         <div className={`flex items-center gap-1 self-start rounded-2xl p-1 ${panelBg}`}>
@@ -545,17 +463,6 @@ export function GalleryPage() {
             icon={<Swords size={14} />}
             label="Characters"
             count={characters.length}
-            useLiquidGlass={useLiquidGlass}
-            useDarkMode={useDarkMode}
-            textColor={textColor}
-            subtextColor={subtextColor}
-          />
-          <TabButton
-            active={activeTab === "skins"}
-            onClick={() => setActiveTab("skins")}
-            icon={<Paintbrush size={14} />}
-            label="Skins"
-            count={skins.length}
             useLiquidGlass={useLiquidGlass}
             useDarkMode={useDarkMode}
             textColor={textColor}
@@ -608,25 +515,6 @@ export function GalleryPage() {
               ))}
             </div>
           )
-        ) : skins.length === 0 ? (
-          <div className="mt-16 flex flex-col items-center justify-center gap-3 opacity-50">
-            <Paintbrush className={`h-12 w-12 ${subtextColor}`} />
-            <p className={`text-sm ${subtextColor}`}>No skins yet</p>
-          </div>
-        ) : (
-          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {skins.map((item, i) => (
-              <SkinCard
-                key={item.id}
-                item={item}
-                panelBg={panelBg}
-                textColor={textColor}
-                subtextColor={subtextColor}
-                animate={useAnimations}
-                index={i}
-              />
-            ))}
-          </div>
         )}
       </div>
     </div>
