@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,6 +39,7 @@ import { CheckCircle2, AlertCircle, Loader2, Lock } from "lucide-react";
 export function UpdateSheet() {
   const { settings } = useSettings();
   const { t } = useTranslation("profile");
+  const navigate = useNavigate();
   const { userId } = useContext(AuthContext);
   const numUserId = userId !== null ? Number(userId) : null;
 
@@ -234,9 +236,19 @@ export function UpdateSheet() {
               />
               <p className={cn("text-xs", subtextColor)}>
                 {t("sheet.passwordHint")}{" "}
-                <span className={cn("cursor-default underline underline-offset-2", subtextColor)}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpen(false);
+                    navigate("/app/reset-password");
+                  }}
+                  className={cn(
+                    "cursor-pointer underline underline-offset-2 transition-opacity hover:opacity-100",
+                    subtextColor,
+                  )}
+                >
                   {t("sheet.passwordReset")}
-                </span>
+                </button>
               </p>
             </div>
 
