@@ -53,9 +53,7 @@ export function PasswordResetPage({ className, ...props }: React.ComponentProps<
                 />
               </Field>
 
-              {submitted && (
-                <FormAlert variant="info" message={t("reset.notAvailable")} />
-              )}
+              {submitted && <FormAlert variant="info" message={t("reset.notAvailable")} />}
 
               <Field>
                 <Button type="submit" className="text-white" disabled={submitted}>

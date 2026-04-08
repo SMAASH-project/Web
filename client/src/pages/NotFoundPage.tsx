@@ -40,7 +40,7 @@ export function NotFoundPage() {
         style={sectionStyle(ready, 0)}
       >
         <span
-          className={`select-none text-[10rem] font-black leading-none tracking-tighter opacity-15 ${textColor}`}
+          className={`text-[10rem] leading-none font-black tracking-tighter opacity-15 select-none ${textColor}`}
         >
           404
         </span>

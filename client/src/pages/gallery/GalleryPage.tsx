@@ -515,7 +515,7 @@ export function GalleryPage() {
               ))}
             </div>
           )
-        )}
+        ) : null}
       </div>
     </div>
   );
