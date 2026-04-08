@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 
 interface Props {
   colorLeft: string;
@@ -62,7 +62,7 @@ const STAR_COLORS: Array<[number, number, number]> = [
   [255, 140, 140], // red
 ];
 
-export function DeepSpaceBackground({
+export const DeepSpaceBackground = memo(function DeepSpaceBackground({
   colorLeft,
   colorMiddle,
   colorRight,
@@ -98,9 +98,7 @@ export function DeepSpaceBackground({
     const [rr, rg, rb] = hexToRgb(colorRight);
 
     // Stars — 85% white, 8% blue, 5% orange, 2% red
-    const TYPE_WEIGHTS = [
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 3,
-    ]; // index into STAR_COLORS
+    const TYPE_WEIGHTS = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 3]; // index into STAR_COLORS
     const stars: Star[] = Array.from({ length: 300 }, () => {
       const layer = Math.floor(Math.random() * 3);
       return {
@@ -122,8 +120,7 @@ export function DeepSpaceBackground({
         twinkleSpeed: 0.3 + Math.random() * 1.8,
         twinklePhase: Math.random() * Math.PI * 2,
         layer,
-        colorType:
-          TYPE_WEIGHTS[Math.floor(Math.random() * TYPE_WEIGHTS.length)],
+        colorType: TYPE_WEIGHTS[Math.floor(Math.random() * TYPE_WEIGHTS.length)],
       };
     });
     for (const s of stars) s.alpha = s.baseAlpha;
@@ -217,14 +214,7 @@ export function DeepSpaceBackground({
         const alpha = (0.22 + Math.sin(t * 0.22 + n.phase) * 0.08) * n.depth;
         ctx!.save();
         ctx!.globalAlpha = Math.max(0, alpha);
-        const grad = ctx!.createRadialGradient(
-          cx,
-          cy,
-          0,
-          cx,
-          cy,
-          Math.max(n.rx, n.ry),
-        );
+        const grad = ctx!.createRadialGradient(cx, cy, 0, cx, cy, Math.max(n.rx, n.ry));
         grad.addColorStop(0, `rgba(${n.r},${n.g},${n.b},1)`);
         grad.addColorStop(0.3, `rgba(${n.r},${n.g},${n.b},0.75)`);
         grad.addColorStop(0.65, `rgba(${n.r},${n.g},${n.b},0.35)`);
@@ -317,52 +307,45 @@ export function DeepSpaceBackground({
       if (showNebulae) drawNebulae(w, h);
 
       // Stars
-      if (showStars) for (const s of stars) {
-        s.alpha =
-          s.baseAlpha +
-          Math.sin(t * s.twinkleSpeed + s.twinklePhase) * s.baseAlpha * 0.45;
-        const [sr, sg, sb] = STAR_COLORS[s.colorType];
-        ctx!.save();
-        ctx!.globalAlpha = Math.max(0, s.alpha);
+      if (showStars)
+        for (const s of stars) {
+          s.alpha =
+            s.baseAlpha + Math.sin(t * s.twinkleSpeed + s.twinklePhase) * s.baseAlpha * 0.45;
+          const [sr, sg, sb] = STAR_COLORS[s.colorType];
+          ctx!.save();
+          ctx!.globalAlpha = Math.max(0, s.alpha);
 
-        if (s.layer === 2) {
-          // Glow halo
-          const glow = ctx!.createRadialGradient(
-            s.x,
-            s.y,
-            0,
-            s.x,
-            s.y,
-            s.radius * 5.5,
-          );
-          glow.addColorStop(0, `rgba(${sr},${sg},${sb},0.80)`);
-          glow.addColorStop(1, `rgba(${sr},${sg},${sb},0)`);
-          ctx!.fillStyle = glow;
-          ctx!.beginPath();
-          ctx!.arc(s.x, s.y, s.radius * 4, 0, Math.PI * 2);
-          ctx!.fill();
-          // 4-point diffraction spike on brightest stars
-          if (s.baseAlpha > 0.85) {
-            ctx!.globalAlpha = Math.max(0, s.alpha * 0.4);
-            ctx!.strokeStyle = `rgba(${sr},${sg},${sb},1)`;
-            ctx!.lineWidth = 0.5;
-            const sp = s.radius * 5;
+          if (s.layer === 2) {
+            // Glow halo
+            const glow = ctx!.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.radius * 5.5);
+            glow.addColorStop(0, `rgba(${sr},${sg},${sb},0.80)`);
+            glow.addColorStop(1, `rgba(${sr},${sg},${sb},0)`);
+            ctx!.fillStyle = glow;
             ctx!.beginPath();
-            ctx!.moveTo(s.x - sp, s.y);
-            ctx!.lineTo(s.x + sp, s.y);
-            ctx!.moveTo(s.x, s.y - sp);
-            ctx!.lineTo(s.x, s.y + sp);
-            ctx!.stroke();
+            ctx!.arc(s.x, s.y, s.radius * 4, 0, Math.PI * 2);
+            ctx!.fill();
+            // 4-point diffraction spike on brightest stars
+            if (s.baseAlpha > 0.85) {
+              ctx!.globalAlpha = Math.max(0, s.alpha * 0.4);
+              ctx!.strokeStyle = `rgba(${sr},${sg},${sb},1)`;
+              ctx!.lineWidth = 0.5;
+              const sp = s.radius * 5;
+              ctx!.beginPath();
+              ctx!.moveTo(s.x - sp, s.y);
+              ctx!.lineTo(s.x + sp, s.y);
+              ctx!.moveTo(s.x, s.y - sp);
+              ctx!.lineTo(s.x, s.y + sp);
+              ctx!.stroke();
+            }
           }
-        }
 
-        ctx!.globalAlpha = Math.max(0, s.alpha);
-        ctx!.beginPath();
-        ctx!.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
-        ctx!.fillStyle = `rgba(${sr},${sg},${sb},1)`;
-        ctx!.fill();
-        ctx!.restore();
-      }
+          ctx!.globalAlpha = Math.max(0, s.alpha);
+          ctx!.beginPath();
+          ctx!.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+          ctx!.fillStyle = `rgba(${sr},${sg},${sb},1)`;
+          ctx!.fill();
+          ctx!.restore();
+        }
 
       // Shooting stars
       if (showShootingStars) {
@@ -390,12 +373,22 @@ export function DeepSpaceBackground({
       cancelAnimationFrame(animId);
       if (!preview) window.removeEventListener("resize", resize);
     };
-  }, [colorLeft, colorMiddle, colorRight, showStars, showMilkyWay, showNebulae, showShootingStars]);
+  }, [
+    preview,
+    paused,
+    colorLeft,
+    colorMiddle,
+    colorRight,
+    showStars,
+    showMilkyWay,
+    showNebulae,
+    showShootingStars,
+  ]);
 
   return (
     <canvas
       ref={canvasRef}
-      className={`${preview ? "absolute" : "fixed"} inset-0 z-0 opacity-95 pointer-events-none`}
+      className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 opacity-95`}
     />
   );
-}
+});

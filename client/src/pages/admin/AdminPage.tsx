@@ -33,8 +33,8 @@ export function AdminPage() {
 
   if (isInitializing) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white" />
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-white" />
       </div>
     );
   }
@@ -44,21 +44,19 @@ export function AdminPage() {
   }
 
   return (
-    <div
-      className={`min-h-screen w-full self-start flex flex-col items-center ${textColor}`}
-    >
+    <div className={`flex min-h-screen w-full flex-col items-center self-start ${textColor}`}>
       <div className="w-full">
         <Navbar />
       </div>
       {settings.useAnimations ? (
         <CardAnimation
-          className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 pt-20 xl:pt-0 flex items-start xl:items-center justify-center"
+          className="z-0 flex w-full flex-1 items-start justify-center px-4 pt-20 sm:px-6 lg:px-10 xl:items-center xl:pt-0"
           onAnimationComplete={handleAnimationComplete}
         >
           <AdminPageContent animReady={animDone} />
         </CardAnimation>
       ) : (
-        <div className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-10 pt-20 xl:pt-0 flex items-start xl:items-center justify-center">
+        <div className="z-0 flex w-full flex-1 items-start justify-center px-4 pt-20 sm:px-6 lg:px-10 xl:items-center xl:pt-0">
           <AdminPageContent animReady={true} />
         </div>
       )}

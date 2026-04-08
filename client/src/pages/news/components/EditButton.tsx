@@ -54,36 +54,13 @@ export function EditButton({
 }) {
   const { settings } = useSettings();
   const { t } = useTranslation("news");
-  const buttonClass = getButtonClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-    "primary",
-  );
-  const inputClass = getInputClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const dialogClass = getDialogClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const footerClass = getDialogFooterClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const textShadow = getTextShadow(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const subtextColor = getSubtextColor(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const bgClass = getBackgroundClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-    "light",
-  );
+  const buttonClass = getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "primary");
+  const inputClass = getInputClasses(settings.useLiquidGlass, settings.useDarkMode);
+  const dialogClass = getDialogClasses(settings.useLiquidGlass, settings.useDarkMode);
+  const footerClass = getDialogFooterClasses(settings.useLiquidGlass, settings.useDarkMode);
+  const textShadow = getTextShadow(settings.useLiquidGlass, settings.useDarkMode);
+  const subtextColor = getSubtextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const bgClass = getBackgroundClasses(settings.useLiquidGlass, settings.useDarkMode, "light");
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
 
   const {
@@ -124,14 +101,12 @@ export function EditButton({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button
-          className={`${buttonClass} ${textShadow} rounded-lg cursor-pointer`}
-        >
+        <Button className={`${buttonClass} ${textShadow} cursor-pointer rounded-lg`}>
           <SquarePen />
         </Button>
       </DialogTrigger>
       <DialogContent
-        className={`w-full max-w-4xl! sm:max-w-4xl! overflow-visible ${dialogClass} ${textShadow}`}
+        className={`w-full max-w-4xl! overflow-visible sm:max-w-4xl! ${dialogClass} ${textShadow}`}
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
@@ -153,11 +128,7 @@ export function EditButton({
           </Field>
         </FieldGroup>
         {settings.useAnimations ? (
-          <AnimatedAccordion
-            type="multiple"
-            defaultValue={["content"]}
-            className="w-full"
-          >
+          <AnimatedAccordion type="multiple" defaultValue={["content"]} className="w-full">
             <AnimatedAccordionItem value="image">
               <AnimatedAccordionTrigger className={textColor}>
                 Image Settings
@@ -165,16 +136,12 @@ export function EditButton({
               <AnimatedAccordionContent>
                 <FieldGroup>
                   <Field>
-                    <Label className={`text-sm ${subtextColor}`}>
-                      Image Position
-                    </Label>
-                    <div className="flex flex-row gap-4 items-start">
-                      <div className="flex flex-col gap-2 max-w-sm">
+                    <Label className={`text-sm ${subtextColor}`}>Image Position</Label>
+                    <div className="flex flex-row items-start gap-4">
+                      <div className="flex max-w-sm flex-col gap-2">
                         <RadioGroupChoiceCard
                           value={imagePosition}
-                          onValueChange={(v) =>
-                            setImagePosition(v as "Top" | "Right")
-                          }
+                          onValueChange={(v) => setImagePosition(v as "Top" | "Right")}
                         />
                         <Input
                           type="file"
@@ -186,12 +153,12 @@ export function EditButton({
                         />
                         {imageAlt && (
                           <div className="flex items-center gap-1">
-                            <span className="text-xs text-muted-foreground truncate">
+                            <span className="text-muted-foreground truncate text-xs">
                               Current: {imageAlt}
                             </span>
                             <button
                               type="button"
-                              className="shrink-0 cursor-pointer rounded-md p-0.5 hover:bg-muted hover:text-red-500"
+                              className="hover:bg-muted shrink-0 cursor-pointer rounded-md p-0.5 hover:text-red-500"
                               onClick={clearImage}
                             >
                               <X className="h-3.5 w-3.5" />
@@ -218,30 +185,22 @@ export function EditButton({
               </AnimatedAccordionContent>
             </AnimatedAccordionItem>
             <AnimatedAccordionItem value="content">
-              <AnimatedAccordionTrigger className={textColor}>
-                Content
-              </AnimatedAccordionTrigger>
+              <AnimatedAccordionTrigger className={textColor}>Content</AnimatedAccordionTrigger>
               <AnimatedAccordionContent>
                 <FieldGroup>
                   <Field>
-                    <Label className={`text-sm ${subtextColor}`}>
-                      Markdown supported
-                    </Label>
+                    <Label className={`text-sm ${subtextColor}`}>Markdown supported</Label>
                     <textarea
                       value={content}
-                      onChange={(e) =>
-                        setContent((e.target as HTMLTextAreaElement).value)
-                      }
-                      className={`w-full min-h-32 rounded-md px-3 py-2 text-sm ${inputClass}`}
+                      onChange={(e) => setContent((e.target as HTMLTextAreaElement).value)}
+                      className={`min-h-32 w-full rounded-md px-3 py-2 text-sm ${inputClass}`}
                     />
                     {content && (
                       <div
-                        className={`mt-2 rounded-md border ${bgClass} p-3 max-h-64 overflow-y-auto prose prose-sm prose-invert max-w-none`}
+                        className={`mt-2 rounded-md border ${bgClass} prose prose-sm prose-invert max-h-64 max-w-none overflow-y-auto p-3`}
                       >
-                        <Label className="text-xs mb-1">Preview Text</Label>
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {content}
-                        </ReactMarkdown>
+                        <Label className="mb-1 text-xs">Preview Text</Label>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
                       </div>
                     )}
                   </Field>
@@ -250,28 +209,18 @@ export function EditButton({
             </AnimatedAccordionItem>
           </AnimatedAccordion>
         ) : (
-          <Accordion
-            type="multiple"
-            defaultValue={["content"]}
-            className="w-full"
-          >
+          <Accordion type="multiple" defaultValue={["content"]} className="w-full">
             <AccordionItem value="image">
-              <AccordionTrigger className={textColor}>
-                Image Settings
-              </AccordionTrigger>
+              <AccordionTrigger className={textColor}>Image Settings</AccordionTrigger>
               <AccordionContent>
                 <FieldGroup>
                   <Field>
-                    <Label className={`text-sm ${subtextColor}`}>
-                      Image Position
-                    </Label>
-                    <div className="flex flex-row gap-4 items-start">
-                      <div className="flex flex-col gap-2 max-w-sm">
+                    <Label className={`text-sm ${subtextColor}`}>Image Position</Label>
+                    <div className="flex flex-row items-start gap-4">
+                      <div className="flex max-w-sm flex-col gap-2">
                         <RadioGroupChoiceCard
                           value={imagePosition}
-                          onValueChange={(v) =>
-                            setImagePosition(v as "Top" | "Right")
-                          }
+                          onValueChange={(v) => setImagePosition(v as "Top" | "Right")}
                         />
                         <Input
                           type="file"
@@ -283,14 +232,12 @@ export function EditButton({
                         />
                         {imageAlt && (
                           <div className="flex items-center gap-1">
-                            <span
-                              className={`text-xs ${subtextColor} truncate`}
-                            >
+                            <span className={`text-xs ${subtextColor} truncate`}>
                               Current: {imageAlt}
                             </span>
                             <button
                               type="button"
-                              className="shrink-0 cursor-pointer rounded-md p-0.5 hover:bg-muted hover:text-red-500"
+                              className="hover:bg-muted shrink-0 cursor-pointer rounded-md p-0.5 hover:text-red-500"
                               onClick={clearImage}
                             >
                               <X className="h-3.5 w-3.5" />
@@ -321,24 +268,18 @@ export function EditButton({
               <AccordionContent>
                 <FieldGroup>
                   <Field>
-                    <Label className={`text-sm ${subtextColor}`}>
-                      Markdown supported
-                    </Label>
+                    <Label className={`text-sm ${subtextColor}`}>Markdown supported</Label>
                     <textarea
                       value={content}
-                      onChange={(e) =>
-                        setContent((e.target as HTMLTextAreaElement).value)
-                      }
-                      className={`w-full min-h-32 rounded-md px-3 py-2 text-sm ${inputClass}`}
+                      onChange={(e) => setContent((e.target as HTMLTextAreaElement).value)}
+                      className={`min-h-32 w-full rounded-md px-3 py-2 text-sm ${inputClass}`}
                     />
                     {content && (
                       <div
-                        className={`mt-2 rounded-md border ${bgClass} p-3 max-h-64 overflow-y-auto prose prose-sm prose-invert max-w-none`}
+                        className={`mt-2 rounded-md border ${bgClass} prose prose-sm prose-invert max-h-64 max-w-none overflow-y-auto p-3`}
                       >
-                        <Label className="text-xs mb-1">Preview Text</Label>
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {content}
-                        </ReactMarkdown>
+                        <Label className="mb-1 text-xs">Preview Text</Label>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
                       </div>
                     )}
                   </Field>
@@ -356,10 +297,7 @@ export function EditButton({
               Cancel
             </Button>
           </DialogClose>
-          <Button
-            onClick={handleSave}
-            className={`cursor-pointer ${buttonClass} ${textShadow}`}
-          >
+          <Button onClick={handleSave} className={`cursor-pointer ${buttonClass} ${textShadow}`}>
             Save changes
           </Button>
         </DialogFooter>

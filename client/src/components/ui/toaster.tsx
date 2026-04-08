@@ -13,8 +13,8 @@ const ICON: Record<ToastItem["type"], React.ReactNode> = {
 
 const STYLE: Record<ToastItem["type"], string> = {
   success: "bg-green-500/15 border-green-500/30 text-green-200",
-  error:   "bg-red-500/15 border-red-500/30 text-red-200",
-  info:    "bg-blue-500/15 border-blue-500/30 text-blue-200",
+  error: "bg-red-500/15 border-red-500/30 text-red-200",
+  info: "bg-blue-500/15 border-blue-500/30 text-blue-200",
 };
 
 export function Toaster() {
@@ -33,7 +33,7 @@ export function Toaster() {
 
   return (
     <div
-      className="fixed bottom-4 right-4 z-9999 flex flex-col gap-2 pointer-events-none"
+      className="pointer-events-none fixed right-4 bottom-4 z-9999 flex flex-col gap-2"
       aria-live="polite"
       aria-atomic="false"
     >
@@ -52,7 +52,7 @@ export function Toaster() {
               <span className="flex-1 leading-snug">{item.message}</span>
               <button
                 onClick={() => setItems((prev) => prev.filter((t) => t.id !== item.id))}
-                className="ml-1 opacity-60 hover:opacity-100 transition-opacity"
+                className="ml-1 opacity-60 transition-opacity hover:opacity-100"
                 aria-label="Dismiss"
               >
                 <X size={13} />
@@ -68,7 +68,7 @@ export function Toaster() {
               <span className="flex-1 leading-snug">{item.message}</span>
               <button
                 onClick={() => setItems((prev) => prev.filter((t) => t.id !== item.id))}
-                className="ml-1 opacity-60 hover:opacity-100 transition-opacity"
+                className="ml-1 opacity-60 transition-opacity hover:opacity-100"
                 aria-label="Dismiss"
               >
                 <X size={13} />

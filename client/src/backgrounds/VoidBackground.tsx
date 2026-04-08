@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 
 interface Props {
   colorLeft: string;
@@ -14,21 +14,26 @@ interface Props {
 
 // Deep-sea bioluminescent palette
 const PALETTE: [number, number, number][] = [
-  [0, 220, 180],   // teal
-  [0, 180, 255],   // electric blue
-  [0, 255, 140],   // sea green
-  [80, 140, 255],  // indigo blue
-  [0, 200, 220],   // cyan
-  [40, 255, 180],  // mint
-  [120, 80, 255],  // violet
+  [0, 220, 180], // teal
+  [0, 180, 255], // electric blue
+  [0, 255, 140], // sea green
+  [80, 140, 255], // indigo blue
+  [0, 200, 220], // cyan
+  [40, 255, 180], // mint
+  [120, 80, 255], // violet
 ];
 
 interface Blob {
-  x: number; y: number;
-  vx: number; vy: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
   radius: number;
-  phase: number; pulseSpeed: number;
-  r: number; g: number; b: number;
+  phase: number;
+  pulseSpeed: number;
+  r: number;
+  g: number;
+  b: number;
 }
 
 interface Tentacle {
@@ -40,28 +45,39 @@ interface Tentacle {
 }
 
 interface Jellyfish {
-  x: number; y: number;
-  vx: number; vy: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
   bellR: number;
   squash: number; // vertical scale of bell dome
-  phase: number; pulseSpeed: number;
+  phase: number;
+  pulseSpeed: number;
   tentacles: Tentacle[];
-  r: number; g: number; b: number;
+  r: number;
+  g: number;
+  b: number;
   baseAlpha: number;
-  flashAge: number;   // -1 = idle; >=0 = seconds elapsed since flash started
+  flashAge: number; // -1 = idle; >=0 = seconds elapsed since flash started
   flashTimer: number; // seconds until next flash triggers
 }
 
 interface Orb {
-  x: number; y: number;
-  vx: number; vy: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
   radius: number;
-  phase: number; pulseSpeed: number;
-  r: number; g: number; b: number;
+  phase: number;
+  pulseSpeed: number;
+  r: number;
+  g: number;
+  b: number;
 }
 
 interface Snowflake {
-  x: number; y: number;
+  x: number;
+  y: number;
   vy: number;
   alpha: number;
   radius: number;
@@ -78,7 +94,14 @@ function makeTentacles(count: number): Tentacle[] {
   }));
 }
 
-export function VoidBackground({ paused = false, preview = false, showDepthBlobs = true, showJellyfish = true, showAmbientOrbs = true, showMarineSnow = true }: Props) {
+export const VoidBackground = memo(function VoidBackground({
+  paused = false,
+  preview = false,
+  showDepthBlobs = true,
+  showJellyfish = true,
+  showAmbientOrbs = true,
+  showMarineSnow = true,
+}: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pausedRef = useRef(paused);
   const timeRef = useRef(0);
@@ -115,7 +138,9 @@ export function VoidBackground({ paused = false, preview = false, showDepthBlobs
         radius: 120 + Math.random() * 100,
         phase: Math.random() * Math.PI * 2,
         pulseSpeed: 0.15 + Math.random() * 0.2,
-        r, g, b,
+        r,
+        g,
+        b,
       };
     });
 
@@ -132,7 +157,9 @@ export function VoidBackground({ paused = false, preview = false, showDepthBlobs
         phase: Math.random() * Math.PI * 2,
         pulseSpeed: 0.5 + Math.random() * 0.6,
         tentacles: makeTentacles(5 + (i % 3)),
-        r, g, b,
+        r,
+        g,
+        b,
         baseAlpha: 0.55 + Math.random() * 0.3,
         flashAge: -1,
         flashTimer: 8 + Math.random() * 10 + i * 3, // stagger initial flashes
@@ -150,7 +177,9 @@ export function VoidBackground({ paused = false, preview = false, showDepthBlobs
         radius: 6 + Math.random() * 18,
         phase: Math.random() * Math.PI * 2,
         pulseSpeed: 0.4 + Math.random() * 0.7,
-        r, g, b,
+        r,
+        g,
+        b,
       };
     });
 
@@ -235,87 +264,97 @@ export function VoidBackground({ paused = false, preview = false, showDepthBlobs
       }
 
       // --- Jellyfish ---
-      if (showJellyfish) for (const jelly of jellies) {
-        jelly.phase += jelly.pulseSpeed * dt;
-        const bellPulse = 0.92 + 0.08 * Math.sin(jelly.phase); // subtle bell pulse
-        const alpha = jelly.baseAlpha;
-        const br = jelly.bellR * bellPulse;
+      if (showJellyfish)
+        for (const jelly of jellies) {
+          jelly.phase += jelly.pulseSpeed * dt;
+          const bellPulse = 0.92 + 0.08 * Math.sin(jelly.phase); // subtle bell pulse
+          const alpha = jelly.baseAlpha;
+          const br = jelly.bellR * bellPulse;
 
-        // Glow halo (in screen space, before squash transform)
-        const glowR = br * 2.2;
-        const glowCY = jelly.y - br * jelly.squash * 0.4;
-        const glow = ctx.createRadialGradient(jelly.x, glowCY, 0, jelly.x, jelly.y, glowR);
-        glow.addColorStop(0, `rgba(${jelly.r},${jelly.g},${jelly.b},${(alpha * 0.25).toFixed(3)})`);
-        glow.addColorStop(0.5, `rgba(${jelly.r},${jelly.g},${jelly.b},${(alpha * 0.08).toFixed(3)})`);
-        glow.addColorStop(1, `rgba(${jelly.r},${jelly.g},${jelly.b},0)`);
-        ctx.fillStyle = glow;
-        ctx.beginPath();
-        ctx.arc(jelly.x, jelly.y, glowR, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Bell dome (squashed semicircle, opening downward)
-        ctx.save();
-        ctx.translate(jelly.x, jelly.y);
-        ctx.scale(1, jelly.squash);
-        ctx.beginPath();
-        // arc(x,y,r,0,PI,true) = top half of circle (anticlockwise) = dome shape
-        ctx.arc(0, 0, br, 0, Math.PI, true);
-        ctx.closePath();
-        ctx.fillStyle = `rgba(${jelly.r},${jelly.g},${jelly.b},${(alpha * 0.12).toFixed(3)})`;
-        ctx.fill();
-        ctx.strokeStyle = `rgba(${jelly.r},${jelly.g},${jelly.b},${(alpha * 0.55).toFixed(3)})`;
-        ctx.lineWidth = 1.0;
-        ctx.stroke();
-        ctx.restore();
-
-        // Tentacles hanging from bottom of bell (y = jelly.y in screen space)
-        for (const ten of jelly.tentacles) {
-          const startX = jelly.x + ten.offsetX * br;
-          const startY = jelly.y;
-          const sway = Math.sin(t * ten.swaySpeed + ten.phaseOffset) * ten.swayAmp;
-          ctx.beginPath();
-          ctx.moveTo(startX, startY);
-          ctx.bezierCurveTo(
-            startX + sway * 0.3, startY + ten.length * 0.35,
-            startX + sway * 0.8, startY + ten.length * 0.65,
-            startX + sway * 0.7, startY + ten.length,
+          // Glow halo (in screen space, before squash transform)
+          const glowR = br * 2.2;
+          const glowCY = jelly.y - br * jelly.squash * 0.4;
+          const glow = ctx.createRadialGradient(jelly.x, glowCY, 0, jelly.x, jelly.y, glowR);
+          glow.addColorStop(
+            0,
+            `rgba(${jelly.r},${jelly.g},${jelly.b},${(alpha * 0.25).toFixed(3)})`,
           );
-          ctx.strokeStyle = `rgba(${jelly.r},${jelly.g},${jelly.b},${(alpha * 0.45).toFixed(3)})`;
-          ctx.lineWidth = 0.8;
-          ctx.stroke();
-        }
-
-        // Pulse flash ring
-        if (jelly.flashAge >= 0) {
-          const ringR = jelly.flashAge * 100;
-          const ringAlpha = Math.max(0, 0.35 * (1 - jelly.flashAge));
+          glow.addColorStop(
+            0.5,
+            `rgba(${jelly.r},${jelly.g},${jelly.b},${(alpha * 0.08).toFixed(3)})`,
+          );
+          glow.addColorStop(1, `rgba(${jelly.r},${jelly.g},${jelly.b},0)`);
+          ctx.fillStyle = glow;
           ctx.beginPath();
-          ctx.arc(jelly.x, jelly.y, ringR, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(${jelly.r},${jelly.g},${jelly.b},${ringAlpha.toFixed(3)})`;
-          ctx.lineWidth = 1.5;
+          ctx.arc(jelly.x, jelly.y, glowR, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Bell dome (squashed semicircle, opening downward)
+          ctx.save();
+          ctx.translate(jelly.x, jelly.y);
+          ctx.scale(1, jelly.squash);
+          ctx.beginPath();
+          // arc(x,y,r,0,PI,true) = top half of circle (anticlockwise) = dome shape
+          ctx.arc(0, 0, br, 0, Math.PI, true);
+          ctx.closePath();
+          ctx.fillStyle = `rgba(${jelly.r},${jelly.g},${jelly.b},${(alpha * 0.12).toFixed(3)})`;
+          ctx.fill();
+          ctx.strokeStyle = `rgba(${jelly.r},${jelly.g},${jelly.b},${(alpha * 0.55).toFixed(3)})`;
+          ctx.lineWidth = 1.0;
           ctx.stroke();
-          jelly.flashAge += dt;
-          if (jelly.flashAge > 1.0) jelly.flashAge = -1;
-        }
+          ctx.restore();
 
-        // Flash timer countdown
-        jelly.flashTimer -= dt;
-        if (jelly.flashTimer <= 0 && jelly.flashAge < 0) {
-          jelly.flashAge = 0;
-          jelly.flashTimer = 10 + Math.random() * 12;
-        }
+          // Tentacles hanging from bottom of bell (y = jelly.y in screen space)
+          for (const ten of jelly.tentacles) {
+            const startX = jelly.x + ten.offsetX * br;
+            const startY = jelly.y;
+            const sway = Math.sin(t * ten.swaySpeed + ten.phaseOffset) * ten.swayAmp;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.bezierCurveTo(
+              startX + sway * 0.3,
+              startY + ten.length * 0.35,
+              startX + sway * 0.8,
+              startY + ten.length * 0.65,
+              startX + sway * 0.7,
+              startY + ten.length,
+            );
+            ctx.strokeStyle = `rgba(${jelly.r},${jelly.g},${jelly.b},${(alpha * 0.45).toFixed(3)})`;
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+          }
 
-        // Drift — wrap at top, sides
-        jelly.x += jelly.vx;
-        jelly.y += jelly.vy;
-        const pad = jelly.bellR * 2 + 80;
-        if (jelly.y < -pad) {
-          jelly.y = h + pad;
-          jelly.x = Math.random() * w;
+          // Pulse flash ring
+          if (jelly.flashAge >= 0) {
+            const ringR = jelly.flashAge * 100;
+            const ringAlpha = Math.max(0, 0.35 * (1 - jelly.flashAge));
+            ctx.beginPath();
+            ctx.arc(jelly.x, jelly.y, ringR, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(${jelly.r},${jelly.g},${jelly.b},${ringAlpha.toFixed(3)})`;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            jelly.flashAge += dt;
+            if (jelly.flashAge > 1.0) jelly.flashAge = -1;
+          }
+
+          // Flash timer countdown
+          jelly.flashTimer -= dt;
+          if (jelly.flashTimer <= 0 && jelly.flashAge < 0) {
+            jelly.flashAge = 0;
+            jelly.flashTimer = 10 + Math.random() * 12;
+          }
+
+          // Drift — wrap at top, sides
+          jelly.x += jelly.vx;
+          jelly.y += jelly.vy;
+          const pad = jelly.bellR * 2 + 80;
+          if (jelly.y < -pad) {
+            jelly.y = h + pad;
+            jelly.x = Math.random() * w;
+          }
+          if (jelly.x < -jelly.bellR * 2) jelly.x = w + jelly.bellR * 2;
+          else if (jelly.x > w + jelly.bellR * 2) jelly.x = -jelly.bellR * 2;
         }
-        if (jelly.x < -jelly.bellR * 2) jelly.x = w + jelly.bellR * 2;
-        else if (jelly.x > w + jelly.bellR * 2) jelly.x = -jelly.bellR * 2;
-      }
 
       // Heavy vignette
       const vg = ctx.createRadialGradient(w / 2, h / 2, h * 0.1, w / 2, h / 2, h * 0.88);
@@ -343,12 +382,12 @@ export function VoidBackground({ paused = false, preview = false, showDepthBlobs
       cancelAnimationFrame(animId);
       if (!preview) window.removeEventListener("resize", resize);
     };
-  }, [showDepthBlobs, showJellyfish, showAmbientOrbs, showMarineSnow]);
+  }, [preview, showDepthBlobs, showJellyfish, showAmbientOrbs, showMarineSnow]);
 
   return (
     <canvas
       ref={canvasRef}
-      className={`${preview ? "absolute" : "fixed"} inset-0 z-0 opacity-95 pointer-events-none`}
+      className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 opacity-95`}
     />
   );
-}
+});

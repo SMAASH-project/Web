@@ -26,21 +26,13 @@ const Navbar = () => {
   const scrollHidden = useScrollDirection();
   const { settings: dbg } = useDebugSettings();
   const hidden =
-    dbg.navbarOverride === "show" ? false
-    : dbg.navbarOverride === "hide" ? true
-    : scrollHidden;
+    dbg.navbarOverride === "show" ? false : dbg.navbarOverride === "hide" ? true : scrollHidden;
   const { selectedProfile } = useProfiles();
   const username = selectedProfile?.name ?? "PlaceholderUserName";
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const navigate = useNavigate();
-  const {
-    setIsLoggedIn,
-    setUserId,
-    setIsAdmin,
-    setIsSupport,
-    isAdmin,
-    isSupport,
-  } = useContext(AuthContext);
+  const { setIsLoggedIn, setUserId, setIsAdmin, setIsSupport, isAdmin, isSupport } =
+    useContext(AuthContext);
   const logoutMutation = useLogoutMutation();
   const { t } = useTranslation("nav");
   const navBackground = getBackgroundClasses(
@@ -49,14 +41,8 @@ const Navbar = () => {
     "light",
   );
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
-  const subtextColor = getSubtextColor(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const textShadow = getTextShadow(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
+  const subtextColor = getSubtextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const textShadow = getTextShadow(settings.useLiquidGlass, settings.useDarkMode);
 
   const handleLogout = async () => {
     try {
@@ -73,7 +59,7 @@ const Navbar = () => {
 
   const navContent = (
     <nav
-      className={`flex justify-between items-center p-4 max-w-full w-full border-b border-transparent ${navBackground}`}
+      className={`flex w-full max-w-full items-center justify-between border-b border-transparent p-4 ${navBackground}`}
       style={{
         borderBottomColor: "var(--theme-nav-border)",
         boxShadow: "0 8px 18px -14px var(--theme-nav-shadow)",
@@ -82,45 +68,34 @@ const Navbar = () => {
       {isDesktop ? (
         <>
           {/* Desktop layout — left/right have equal min-width so center stays centered */}
-          <div className="flex-1 min-w-0 flex items-center gap-2">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
             {isAdmin && (
               <Link
                 to="/app/admin"
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 no-underline ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "secondary")} ${textColor}`}
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium no-underline transition-all duration-200 ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "secondary")} ${textColor}`}
                 title={t("account.adminPanel")}
               >
                 <ShieldAlert size={14} />
-                <span className="hidden lg:inline">
-                  {t("account.adminPanel")}
-                </span>
+                <span className="hidden lg:inline">{t("account.adminPanel")}</span>
               </Link>
             )}
             {(isAdmin || isSupport) && (
               <Link
                 to="/app/debug"
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 no-underline ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "secondary")} ${textColor}`}
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium no-underline transition-all duration-200 ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "secondary")} ${textColor}`}
                 title={t("account.debugPanel")}
               >
                 <Bug size={14} />
-                <span className="hidden lg:inline">
-                  {t("account.debugPanel")}
-                </span>
+                <span className="hidden lg:inline">{t("account.debugPanel")}</span>
               </Link>
             )}
           </div>
           <div className="shrink-0">
-            <NavMenu
-              useLiquidGlass={settings.useLiquidGlass}
-              useDarkMode={settings.useDarkMode}
-            />
+            <NavMenu useLiquidGlass={settings.useLiquidGlass} useDarkMode={settings.useDarkMode} />
           </div>
-          <div className="flex-1 min-w-0 flex justify-end items-center gap-2 lg:gap-4 overflow-hidden">
-            <span
-              className={`whitespace-nowrap truncate ${textColor} ${textShadow}`}
-            >
-              <span className={`hidden xl:inline ${subtextColor}`}>
-                {t("loggedInAs")}{" "}
-              </span>
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-2 overflow-hidden lg:gap-4">
+            <span className={`truncate whitespace-nowrap ${textColor} ${textShadow}`}>
+              <span className={`hidden xl:inline ${subtextColor}`}>{t("loggedInAs")} </span>
               <Link to="/app/profile/" className="hidden lg:inline">
                 {username}
               </Link>
@@ -141,9 +116,7 @@ const Navbar = () => {
             isAdmin={isAdmin}
             isSupport={isSupport}
           />
-          <span
-            className={`text-sm truncate max-w-[50vw] ${textColor} ${textShadow}`}
-          >
+          <span className={`max-w-[50vw] truncate text-sm ${textColor} ${textShadow}`}>
             <Link to="/app/profile/">{username}</Link>
           </span>
           {/* Account options are in the mobile drawer */}
@@ -155,16 +128,14 @@ const Navbar = () => {
 
   return settings.useAnimations ? (
     <motion.div
-      className="fixed top-0 left-0 right-0 z-50"
+      className="fixed top-0 right-0 left-0 z-50"
       animate={{ y: hidden ? -80 : 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
     >
       {navContent}
     </motion.div>
   ) : (
-    <div className="fixed top-0 left-0 right-0 z-50">
-      {navContent}
-    </div>
+    <div className="fixed top-0 right-0 left-0 z-50">{navContent}</div>
   );
 };
 

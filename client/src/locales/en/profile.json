@@ -51,6 +51,7 @@
     "errorUsernameRequired": "Username is required.",
     "errorUsernameTooLong": "Username must be 20 characters or less.",
     "errorUsernameTaken": "That username is already taken. Please choose a different one.",
+    "errorMaxProfiles": "You already have the maximum number of profiles.",
     "errorSaveFailed": "Failed to save profile. Please try again."
   }
 }

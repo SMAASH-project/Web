@@ -6,11 +6,7 @@ type Props = React.PropsWithChildren<{
   onAnimationComplete?: () => void;
 }>;
 
-export function CardAnimation({
-  children,
-  className,
-  onAnimationComplete,
-}: Props) {
+export function CardAnimation({ children, className, onAnimationComplete }: Props) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0 }}

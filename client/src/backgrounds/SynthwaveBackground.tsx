@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 
 interface Props {
   colorLeft: string;
@@ -28,18 +28,11 @@ function hexToRgb(hex: string): [number, number, number] {
   ];
 }
 
-function lighten(
-  [r, g, b]: [number, number, number],
-  amt: number,
-): [number, number, number] {
-  return [
-    Math.min(255, r + amt),
-    Math.min(255, g + amt),
-    Math.min(255, b + amt),
-  ];
+function lighten([r, g, b]: [number, number, number], amt: number): [number, number, number] {
+  return [Math.min(255, r + amt), Math.min(255, g + amt), Math.min(255, b + amt)];
 }
 
-export function SynthwaveBackground({
+export const SynthwaveBackground = memo(function SynthwaveBackground({
   colorLeft,
   colorMiddle,
   colorRight,
@@ -100,14 +93,7 @@ export function SynthwaveBackground({
         const sunCY = horizon - sunR * 0.05;
 
         // Sun gradient
-        const sunGrad = ctx!.createRadialGradient(
-          sunCX,
-          sunCY,
-          0,
-          sunCX,
-          sunCY,
-          sunR,
-        );
+        const sunGrad = ctx!.createRadialGradient(sunCX, sunCY, 0, sunCX, sunCY, sunR);
         sunGrad.addColorStop(
           0,
           `rgb(${Math.min(255, bright[0] + 40)},${Math.min(255, bright[1] + 20)},${Math.min(255, bright[2] + 80)})`,
@@ -232,12 +218,22 @@ export function SynthwaveBackground({
       cancelAnimationFrame(animId);
       if (!preview) window.removeEventListener("resize", resize);
     };
-  }, [colorLeft, colorMiddle, colorRight, showSky, showSun, showGrid, showScanlines]);
+  }, [
+    preview,
+    paused,
+    colorLeft,
+    colorMiddle,
+    colorRight,
+    showSky,
+    showSun,
+    showGrid,
+    showScanlines,
+  ]);
 
   return (
     <canvas
       ref={canvasRef}
-      className={`${preview ? "absolute" : "fixed"} inset-0 z-0 opacity-[0.72] pointer-events-none`}
+      className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 opacity-[0.72]`}
     />
   );
-}
+});

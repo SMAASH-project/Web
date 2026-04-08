@@ -45,9 +45,7 @@ export default function BanPresetCard({
     >
       {icon && <span className={descClass}>{icon}</span>}
       <div className={cn("text-sm font-medium", labelClass)}>{label}</div>
-      {description && (
-        <div className={cn("text-[10px]", descClass)}>{description}</div>
-      )}
+      {description && <div className={cn("text-[10px]", descClass)}>{description}</div>}
     </div>
   );
 }

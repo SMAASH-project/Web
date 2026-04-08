@@ -3,12 +3,7 @@ import React, { useCallback, useState } from "react";
 import { Calendar, type DateRange } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { useSettings } from "@/pages/settings/SettingsContext";
-import {
-  getTextColor,
-  getSubtextColor,
-  getBackgroundClasses,
-  getInputClasses,
-} from "@/lib/utils";
+import { getTextColor, getSubtextColor, getBackgroundClasses, getInputClasses } from "@/lib/utils";
 import { CalendarIcon, Clock, ChevronUp, ChevronDown } from "lucide-react";
 
 interface Props {
@@ -95,12 +90,7 @@ function TimeSpinner({
 
   return (
     <div className="flex flex-col items-center gap-0.5">
-      <button
-        type="button"
-        onClick={stepUp}
-        className={btnBase}
-        aria-label="Increase"
-      >
+      <button type="button" onClick={stepUp} className={btnBase} aria-label="Increase">
         <ChevronUp size={12} />
       </button>
       <input
@@ -123,16 +113,11 @@ function TimeSpinner({
         }}
         className={cn(
           inputClass,
-          "w-10 text-center text-sm font-mono font-semibold py-1 px-0 rounded-xl",
+          "w-10 rounded-xl px-0 py-1 text-center font-mono text-sm font-semibold",
           textColor,
         )}
       />
-      <button
-        type="button"
-        onClick={stepDown}
-        className={btnBase}
-        aria-label="Decrease"
-      >
+      <button type="button" onClick={stepDown} className={btnBase} aria-label="Decrease">
         <ChevronDown size={12} />
       </button>
     </div>
@@ -161,12 +146,7 @@ function TimePicker({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <span
-        className={cn(
-          "text-xs font-medium flex items-center gap-1",
-          subtextColor,
-        )}
-      >
+      <span className={cn("flex items-center gap-1 text-xs font-medium", subtextColor)}>
         <Clock size={11} />
         {label}
       </span>
@@ -180,9 +160,7 @@ function TimePicker({
           textColor={textColor}
           subtextColor={subtextColor}
         />
-        <span className={cn("text-xl font-bold leading-none", textColor)}>
-          :
-        </span>
+        <span className={cn("text-xl leading-none font-bold", textColor)}>:</span>
         <TimeSpinner
           value={m}
           min={0}
@@ -192,7 +170,7 @@ function TimePicker({
           textColor={textColor}
           subtextColor={subtextColor}
         />
-        <span className={cn("text-xs ml-1", subtextColor)}>
+        <span className={cn("ml-1 text-xs", subtextColor)}>
           {pad(h)}:{pad(m)}
         </span>
       </div>
@@ -245,13 +223,11 @@ function DateTextInput({
         onKeyDown={(e) => e.key === "Enter" && tryCommit()}
         className={cn(
           inputClass,
-          "w-full text-xs py-1.5 px-2 font-mono",
-          error && "ring-1 ring-red-500 border-red-500",
+          "w-full px-2 py-1.5 font-mono text-xs",
+          error && "border-red-500 ring-1 ring-red-500",
         )}
       />
-      {error && (
-        <span className="text-[10px] text-red-400 px-1">Use dd/mm/yyyy</span>
-      )}
+      {error && <span className="px-1 text-[10px] text-red-400">Use dd/mm/yyyy</span>}
     </div>
   );
 }
@@ -313,22 +289,15 @@ export default function BanCustomRange({
         />
       )}
 
-      <div className={cn("rounded-xl p-3 flex flex-row gap-0", datePillBg)}>
+      <div className={cn("flex flex-row gap-0 rounded-xl p-3", datePillBg)}>
         {/* Start */}
-        <div className="flex-1 flex flex-col gap-2 pr-3">
-          <div
-            className={cn("flex items-center gap-1.5 text-xs", subtextColor)}
-          >
+        <div className="flex flex-1 flex-col gap-2 pr-3">
+          <div className={cn("flex items-center gap-1.5 text-xs", subtextColor)}>
             <CalendarIcon size={11} />
             <span>{t("ban.starts")}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span
-              className={cn(
-                "text-xs font-medium flex-1 min-w-0 truncate",
-                textColor,
-              )}
-            >
+            <span className={cn("min-w-0 flex-1 truncate text-xs font-medium", textColor)}>
               {formatDateDisplay(from)}
             </span>
           </div>
@@ -352,22 +321,15 @@ export default function BanCustomRange({
         <div className={cn("w-px self-stretch", dividerClass)} />
 
         {/* End */}
-        <div className="flex-1 flex flex-col gap-2 pl-3">
-          <div
-            className={cn("flex items-center gap-1.5 text-xs", subtextColor)}
-          >
+        <div className="flex flex-1 flex-col gap-2 pl-3">
+          <div className={cn("flex items-center gap-1.5 text-xs", subtextColor)}>
             <CalendarIcon size={11} />
             <span>{t("ban.ends")}</span>
           </div>
           {to ? (
             <>
               <div className="flex items-center gap-2">
-                <span
-                  className={cn(
-                    "text-xs font-medium flex-1 min-w-0 truncate",
-                    textColor,
-                  )}
-                >
+                <span className={cn("min-w-0 flex-1 truncate text-xs font-medium", textColor)}>
                   {formatDateDisplay(to)}
                 </span>
               </div>
@@ -387,9 +349,7 @@ export default function BanCustomRange({
               />
             </>
           ) : (
-            <p className={cn("text-xs italic mt-1", subtextColor)}>
-              {t("ban.endPlaceholder")}
-            </p>
+            <p className={cn("mt-1 text-xs italic", subtextColor)}>{t("ban.endPlaceholder")}</p>
           )}
         </div>
       </div>
@@ -397,15 +357,13 @@ export default function BanCustomRange({
       {to && (
         <div
           className={cn(
-            "rounded-xl px-3 py-2 flex items-center gap-2",
+            "flex items-center gap-2 rounded-xl px-3 py-2",
             getBackgroundClasses(useLiquidGlass, useDarkMode, "base"),
           )}
         >
           <Clock size={12} className={subtextColor} />
-          <span className={cn("text-xs", subtextColor)}>
-            {t("ban.banActiveUntil")}
-          </span>
-          <span className={cn("text-xs font-semibold ml-auto", textColor)}>
+          <span className={cn("text-xs", subtextColor)}>{t("ban.banActiveUntil")}</span>
+          <span className={cn("ml-auto text-xs font-semibold", textColor)}>
             {to.toLocaleString(undefined, {
               month: "short",
               day: "numeric",

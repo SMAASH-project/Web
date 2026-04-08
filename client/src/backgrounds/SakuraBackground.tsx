@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 
 interface Props {
   colorLeft: string;
@@ -32,7 +32,7 @@ const PETAL_SHAPES = [
   "40% 60% 60% 40% / 50% 50% 60% 40%",
 ];
 
-export function SakuraBackground({
+export const SakuraBackground = memo(function SakuraBackground({
   colorLeft,
   colorMiddle,
   colorRight,
@@ -41,15 +41,7 @@ export function SakuraBackground({
   showPetals = true,
   showBokeh = true,
 }: Props) {
-  const colors = [
-    colorLeft,
-    colorMiddle,
-    colorRight,
-    "#ffb7c5",
-    "#ffc0cb",
-    "#ffe4e8",
-    "#ffd1dc",
-  ];
+  const colors = [colorLeft, colorMiddle, colorRight, "#ffb7c5", "#ffc0cb", "#ffe4e8", "#ffd1dc"];
 
   const petals = useMemo(
     () =>
@@ -78,46 +70,50 @@ export function SakuraBackground({
     <>
       <style>{KEYFRAMES}</style>
 
-      <div className={`${preview ? "absolute" : "fixed"} inset-0 z-0 pointer-events-none overflow-hidden`}>
-        {showPetals && petals.map((p, i) => (
-          <div
-            key={i}
-            className="absolute -top-15 blur-[0.4px] will-change-[transform,opacity]"
-            style={{
-              left: `${p.left}vw`,
-              width: `${p.size}px`,
-              height: `${p.size * 0.85}px`,
-              background: p.color,
-              borderRadius: p.borderRadius,
-              opacity: p.opacity,
-              transform: `rotate(${p.rotate}deg)`,
-              ["--drift" as string]: `${p.drift}px`,
-              ["--rot-end" as string]: `${p.rotEnd}deg`,
-              ["--sway" as string]: `${p.sway}px`,
-              animation:
-                `sakura-fall ${p.duration}s ${p.delay}s linear infinite, ` +
-                `sakura-sway ${p.duration * 0.6}s ${p.delay}s ease-in-out infinite`,
-              animationPlayState: paused ? "paused" : "running",
-            }}
-          />
-        ))}
+      <div
+        className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 overflow-hidden`}
+      >
+        {showPetals &&
+          petals.map((p, i) => (
+            <div
+              key={i}
+              className="absolute -top-15 blur-[0.4px] will-change-[transform,opacity]"
+              style={{
+                left: `${p.left}vw`,
+                width: `${p.size}px`,
+                height: `${p.size * 0.85}px`,
+                background: p.color,
+                borderRadius: p.borderRadius,
+                opacity: p.opacity,
+                transform: `rotate(${p.rotate}deg)`,
+                ["--drift" as string]: `${p.drift}px`,
+                ["--rot-end" as string]: `${p.rotEnd}deg`,
+                ["--sway" as string]: `${p.sway}px`,
+                animation:
+                  `sakura-fall ${p.duration}s ${p.delay}s linear infinite, ` +
+                  `sakura-sway ${p.duration * 0.6}s ${p.delay}s ease-in-out infinite`,
+                animationPlayState: paused ? "paused" : "running",
+              }}
+            />
+          ))}
 
         {/* Bokeh circles */}
-        {showBokeh && Array.from({ length: 12 }, (_, i) => (
-          <div
-            key={`bokeh-${i}`}
-            className="absolute rounded-full blur-[18px]"
-            style={{
-              top: `${(i * 43 + 15) % 90}%`,
-              left: `${(i * 67 + 8) % 95}%`,
-              width: `${20 + (i % 5) * 15}px`,
-              height: `${20 + (i % 5) * 15}px`,
-              background: colors[i % colors.length],
-              opacity: 0.08 + (i % 4) * 0.03,
-            }}
-          />
-        ))}
+        {showBokeh &&
+          Array.from({ length: 12 }, (_, i) => (
+            <div
+              key={`bokeh-${i}`}
+              className="absolute rounded-full blur-[18px]"
+              style={{
+                top: `${(i * 43 + 15) % 90}%`,
+                left: `${(i * 67 + 8) % 95}%`,
+                width: `${20 + (i % 5) * 15}px`,
+                height: `${20 + (i % 5) * 15}px`,
+                background: colors[i % colors.length],
+                opacity: 0.08 + (i % 4) * 0.03,
+              }}
+            />
+          ))}
       </div>
     </>
   );
-}
+});

@@ -40,7 +40,7 @@ export default function UserListItem({
     <button
       type="button"
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all duration-150 text-left ${activeClass}`}
+      className={`flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-all duration-150 ${activeClass}`}
     >
       <Avatar size="sm" className="shrink-0">
         <AvatarFallback
@@ -49,18 +49,12 @@ export default function UserListItem({
           {(user.username || user.email).slice(0, 2).toUpperCase()}
         </AvatarFallback>
       </Avatar>
-      <div className="flex-1 min-w-0">
-        <p className={`text-sm font-medium truncate ${textColor}`}>
-          {user.username || "—"}
-        </p>
-        <p className={`text-xs truncate ${subtextColor}`}>{user.email}</p>
+      <div className="min-w-0 flex-1">
+        <p className={`truncate text-sm font-medium ${textColor}`}>{user.username || "—"}</p>
+        <p className={`truncate text-xs ${subtextColor}`}>{user.email}</p>
       </div>
-      {user.is_banned && (
-        <Ban size={12} className="text-red-400 shrink-0" aria-label="Banned" />
-      )}
-      {isSelected && (
-        <ChevronRight size={14} className={`shrink-0 ${subtextColor}`} />
-      )}
+      {user.is_banned && <Ban size={12} className="shrink-0 text-red-400" aria-label="Banned" />}
+      {isSelected && <ChevronRight size={14} className={`shrink-0 ${subtextColor}`} />}
     </button>
   );
 }

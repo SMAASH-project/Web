@@ -24,7 +24,7 @@ export function SystemTab({
   const role = isAdmin ? "admin" : isSupport ? "support" : "user";
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 auto-rows-min">
+    <div className="grid auto-rows-min grid-cols-1 gap-3 sm:grid-cols-2">
       <Section
         title="Browser"
         icon={<Monitor size={11} />}
@@ -34,7 +34,7 @@ export function SystemTab({
         <InfoRow
           label="User Agent"
           value={
-            <span className="max-w-48 truncate block">
+            <span className="block max-w-48 truncate">
               {navigator.userAgent.split(")")[0] + ")"}
             </span>
           }
@@ -135,13 +135,7 @@ export function SystemTab({
         panelBg={panelBg}
         subtextColor={subtextColor}
       >
-        <InfoRow
-          label="Role"
-          value={role}
-          mono
-          textColor={textColor}
-          subtextColor={subtextColor}
-        />
+        <InfoRow label="Role" value={role} mono textColor={textColor} subtextColor={subtextColor} />
         <InfoRow
           label="User ID"
           value={userId !== null ? `#${userId}` : "—"}

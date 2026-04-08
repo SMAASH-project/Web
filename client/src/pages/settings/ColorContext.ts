@@ -22,6 +22,4 @@ export interface ColorContextType {
   setCustomTheme: (theme: CustomTheme | null) => void;
 }
 
-export const ColorContext = createContext<ColorContextType | undefined>(
-  undefined,
-);
+export const ColorContext = createContext<ColorContextType | undefined>(undefined);

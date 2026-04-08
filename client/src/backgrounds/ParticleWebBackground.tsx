@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 
 interface Props {
   colorLeft: string;
@@ -12,11 +12,23 @@ interface Props {
 
 function hexToRgb(hex: string): [number, number, number] {
   const c = hex.replace("#", "");
-  const full = c.length === 3 ? c.split("").map((x) => x + x).join("") : c;
-  return [parseInt(full.slice(0, 2), 16), parseInt(full.slice(2, 4), 16), parseInt(full.slice(4, 6), 16)];
+  const full =
+    c.length === 3
+      ? c
+          .split("")
+          .map((x) => x + x)
+          .join("")
+      : c;
+  return [
+    parseInt(full.slice(0, 2), 16),
+    parseInt(full.slice(2, 4), 16),
+    parseInt(full.slice(4, 6), 16),
+  ];
 }
 
-function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
+function lerp(a: number, b: number, t: number) {
+  return a + (b - a) * t;
+}
 
 interface Particle {
   x: number;
@@ -32,7 +44,15 @@ interface Particle {
   baseY: number;
 }
 
-export function ParticleWebBackground({ colorLeft, colorMiddle, colorRight, paused = false, preview = false, showParticles = true, showConnections = true }: Props) {
+export const ParticleWebBackground = memo(function ParticleWebBackground({
+  colorLeft,
+  colorMiddle,
+  colorRight,
+  paused = false,
+  preview = false,
+  showParticles = true,
+  showConnections = true,
+}: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef({ x: -9999, y: -9999 });
 
@@ -51,10 +71,18 @@ export function ParticleWebBackground({ colorLeft, colorMiddle, colorRight, paus
       const t = i / total;
       if (t < 0.5) {
         const u = t * 2;
-        return [Math.round(lerp(lr, mr, u)), Math.round(lerp(lg, mg, u)), Math.round(lerp(lb, mb, u))];
+        return [
+          Math.round(lerp(lr, mr, u)),
+          Math.round(lerp(lg, mg, u)),
+          Math.round(lerp(lb, mb, u)),
+        ];
       } else {
         const u = (t - 0.5) * 2;
-        return [Math.round(lerp(mr, rr, u)), Math.round(lerp(mg, rg, u)), Math.round(lerp(mb, rb, u))];
+        return [
+          Math.round(lerp(mr, rr, u)),
+          Math.round(lerp(mg, rg, u)),
+          Math.round(lerp(mb, rb, u)),
+        ];
       }
     }
 
@@ -69,8 +97,12 @@ export function ParticleWebBackground({ colorLeft, colorMiddle, colorRight, paus
     resize();
     if (!preview) window.addEventListener("resize", resize);
 
-    const onMouse = (e: MouseEvent) => { mouseRef.current = { x: e.clientX, y: e.clientY }; };
-    const onLeave = () => { mouseRef.current = { x: -9999, y: -9999 }; };
+    const onMouse = (e: MouseEvent) => {
+      mouseRef.current = { x: e.clientX, y: e.clientY };
+    };
+    const onLeave = () => {
+      mouseRef.current = { x: -9999, y: -9999 };
+    };
     if (!preview) {
       window.addEventListener("mousemove", onMouse);
       window.addEventListener("mouseleave", onLeave);
@@ -86,10 +118,13 @@ export function ParticleWebBackground({ colorLeft, colorMiddle, colorRight, paus
       const x = Math.random() * window.innerWidth;
       const y = Math.random() * window.innerHeight;
       return {
-        x, y,
+        x,
+        y,
         vx: (Math.random() - 0.5) * 0.6,
         vy: (Math.random() - 0.5) * 0.6,
-        r, g, b,
+        r,
+        g,
+        b,
         size: 1.5 + Math.random() * 2,
         baseX: x,
         baseY: y,
@@ -114,7 +149,10 @@ export function ParticleWebBackground({ colorLeft, colorMiddle, colorRight, paus
 
         // Speed cap
         const speed = Math.hypot(p.vx, p.vy);
-        if (speed > 1.2) { p.vx *= 0.98; p.vy *= 0.98; }
+        if (speed > 1.2) {
+          p.vx *= 0.98;
+          p.vy *= 0.98;
+        }
 
         // Mouse repulsion
         const mdx = p.x - mx;
@@ -130,8 +168,14 @@ export function ParticleWebBackground({ colorLeft, colorMiddle, colorRight, paus
         p.y += p.vy;
 
         // Bounce off edges
-        if (p.x < 0 || p.x > w) { p.vx *= -1; p.x = Math.max(0, Math.min(w, p.x)); }
-        if (p.y < 0 || p.y > h) { p.vy *= -1; p.y = Math.max(0, Math.min(h, p.y)); }
+        if (p.x < 0 || p.x > w) {
+          p.vx *= -1;
+          p.x = Math.max(0, Math.min(w, p.x));
+        }
+        if (p.y < 0 || p.y > h) {
+          p.vy *= -1;
+          p.y = Math.max(0, Math.min(h, p.y));
+        }
       }
 
       // ── Draw connections ─────────────────────────────────────────────────
@@ -176,25 +220,26 @@ export function ParticleWebBackground({ colorLeft, colorMiddle, colorRight, paus
       }
 
       // ── Draw particles ───────────────────────────────────────────────────
-      if (showParticles) for (const p of particles) {
-        // Pulse size
-        const pulse = p.size + Math.sin(t * 1.5 + p.baseX * 0.01) * 0.4;
+      if (showParticles)
+        for (const p of particles) {
+          // Pulse size
+          const pulse = p.size + Math.sin(t * 1.5 + p.baseX * 0.01) * 0.4;
 
-        // Glow
-        const glow = ctx!.createRadialGradient(p.x, p.y, 0, p.x, p.y, pulse * 4);
-        glow.addColorStop(0, `rgba(${p.r},${p.g},${p.b},0.35)`);
-        glow.addColorStop(1, `rgba(${p.r},${p.g},${p.b},0)`);
-        ctx!.fillStyle = glow;
-        ctx!.beginPath();
-        ctx!.arc(p.x, p.y, pulse * 4, 0, Math.PI * 2);
-        ctx!.fill();
+          // Glow
+          const glow = ctx!.createRadialGradient(p.x, p.y, 0, p.x, p.y, pulse * 4);
+          glow.addColorStop(0, `rgba(${p.r},${p.g},${p.b},0.35)`);
+          glow.addColorStop(1, `rgba(${p.r},${p.g},${p.b},0)`);
+          ctx!.fillStyle = glow;
+          ctx!.beginPath();
+          ctx!.arc(p.x, p.y, pulse * 4, 0, Math.PI * 2);
+          ctx!.fill();
 
-        // Core dot
-        ctx!.beginPath();
-        ctx!.arc(p.x, p.y, pulse, 0, Math.PI * 2);
-        ctx!.fillStyle = `rgba(${p.r},${p.g},${p.b},0.9)`;
-        ctx!.fill();
-      }
+          // Core dot
+          ctx!.beginPath();
+          ctx!.arc(p.x, p.y, pulse, 0, Math.PI * 2);
+          ctx!.fillStyle = `rgba(${p.r},${p.g},${p.b},0.9)`;
+          ctx!.fill();
+        }
 
       // Mouse cursor node
       if (mx > 0 && mx < w) {
@@ -223,7 +268,12 @@ export function ParticleWebBackground({ colorLeft, colorMiddle, colorRight, paus
         window.removeEventListener("mouseleave", onLeave);
       }
     };
-  }, [colorLeft, colorMiddle, colorRight, showParticles, showConnections]);
+  }, [preview, paused, colorLeft, colorMiddle, colorRight, showParticles, showConnections]);
 
-  return <canvas ref={canvasRef} className={`${preview ? "absolute" : "fixed"} inset-0 z-0 opacity-70 pointer-events-none`} />;
-}
+  return (
+    <canvas
+      ref={canvasRef}
+      className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 opacity-70`}
+    />
+  );
+});

@@ -12,13 +12,9 @@ export function InfoRow({
   subtextColor: string;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 py-1.5 border-b border-current/5 last:border-0">
-      <span className={`text-xs shrink-0 ${subtextColor}`}>{label}</span>
-      <span
-        className={`text-xs text-right ${mono ? "font-mono" : ""} ${textColor}`}
-      >
-        {value}
-      </span>
+    <div className="flex items-center justify-between gap-4 border-b border-current/5 py-1.5 last:border-0">
+      <span className={`shrink-0 text-xs ${subtextColor}`}>{label}</span>
+      <span className={`text-right text-xs ${mono ? "font-mono" : ""} ${textColor}`}>{value}</span>
     </div>
   );
 }
@@ -37,12 +33,10 @@ export function Section({
   subtextColor: string;
 }) {
   return (
-    <div className={`rounded-xl p-3 flex flex-col gap-0.5 ${panelBg}`}>
-      <div className={`flex items-center gap-1.5 mb-2 ${subtextColor}`}>
+    <div className={`flex flex-col gap-0.5 rounded-xl p-3 ${panelBg}`}>
+      <div className={`mb-2 flex items-center gap-1.5 ${subtextColor}`}>
         {icon}
-        <p className="text-[10px] font-semibold uppercase tracking-widest">
-          {title}
-        </p>
+        <p className="text-[10px] font-semibold tracking-widest uppercase">{title}</p>
       </div>
       {children}
     </div>

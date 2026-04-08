@@ -51,6 +51,7 @@
     "errorUsernameRequired": "A felhasználónév megadása kötelező.",
     "errorUsernameTooLong": "A felhasználónév legfeljebb 20 karakter lehet.",
     "errorUsernameTaken": "Ez a felhasználónév már foglalt. Kérjük, válassz másikat.",
+    "errorMaxProfiles": "Már elérted a profilok maximális számát.",
     "errorSaveFailed": "A profil mentése sikertelen. Kérjük, próbáld újra."
   }
 }

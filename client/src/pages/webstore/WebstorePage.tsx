@@ -7,12 +7,7 @@ import { CreateItemDialog } from "./components/CreateItemDialog";
 import { useSettings } from "@/pages/settings/SettingsContext";
 import { LoadPost } from "@/animations/LoadPost";
 import { ShoppingBag, Loader2, Coins } from "lucide-react";
-import {
-  getTextColor,
-  getTextShadow,
-  getSubtextColor,
-  getBackgroundClasses,
-} from "@/lib/utils";
+import { getTextColor, getTextShadow, getSubtextColor, getBackgroundClasses } from "@/lib/utils";
 import { useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "@/context/AuthContext";
@@ -62,60 +57,37 @@ export function WebstorePage() {
   } = useItems();
 
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
-  const textShadow = getTextShadow(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const subtextColor = getSubtextColor(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const bgClass = getBackgroundClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-    "light",
-  );
+  const textShadow = getTextShadow(settings.useLiquidGlass, settings.useDarkMode);
+  const subtextColor = getSubtextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const bgClass = getBackgroundClasses(settings.useLiquidGlass, settings.useDarkMode, "light");
 
   return (
-    <div className="p-4 min-h-screen w-full self-start flex flex-col">
+    <div className="flex min-h-screen w-full flex-col self-start p-4">
       <Navbar />
-      <div className="mt-20 z-0 flex flex-col items-center justify-start gap-6 w-full max-w-6xl mx-auto pb-8">
+      <div className="z-0 mx-auto mt-20 flex w-full max-w-6xl flex-col items-center justify-start gap-6 pb-8">
         {/* Header section */}
-        <div className="flex flex-col gap-5 w-full">
+        <div className="flex w-full flex-col gap-5">
           {/* Title row */}
-          <div className="flex items-center justify-between w-full">
+          <div className="flex w-full items-center justify-between">
             <div className="flex flex-col gap-1">
-              <h1
-                className={`text-2xl font-bold ${textColor} tracking-tight ${textShadow}`}
-              >
+              <h1 className={`text-2xl font-bold ${textColor} tracking-tight ${textShadow}`}>
                 Webstore
               </h1>
-              <p className={`text-sm ${subtextColor}`}>
-                Unlock characters and skins
-              </p>
+              <p className={`text-sm ${subtextColor}`}>Unlock characters and skins</p>
             </div>
 
             {/* Right side: coins display, admin create */}
             <div className="flex items-center gap-3">
               {/* Coins display */}
-              <div
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${bgClass}`}
-              >
-                <Coins className="w-4 h-4 text-amber-400" />
-                <span
-                  className={`text-sm font-bold text-amber-400 ${textShadow}`}
-                >
+              <div className={`flex items-center gap-2 rounded-lg px-3 py-1.5 ${bgClass}`}>
+                <Coins className="h-4 w-4 text-amber-400" />
+                <span className={`text-sm font-bold text-amber-400 ${textShadow}`}>
                   {userCoins.toLocaleString()}
                 </span>
               </div>
 
               {/* Admin: Create Item */}
-              {isAdmin && (
-                <CreateItemDialog
-                  onCreate={handleCreateItem}
-                  isLoading={isCreating}
-                />
-              )}
+              {isAdmin && <CreateItemDialog onCreate={handleCreateItem} isLoading={isCreating} />}
             </div>
           </div>
 
@@ -130,7 +102,7 @@ export function WebstorePage() {
           <SearchItem onSearch={handleSearch} />
 
           {/* Filters */}
-          <div className="flex flex-wrap gap-4 justify-center">
+          <div className="flex flex-wrap justify-center gap-4">
             <ItemFilters
               label={t("filters.type")}
               options={kinds}
@@ -165,23 +137,26 @@ export function WebstorePage() {
         {/* Item grid */}
         <div ref={containerRef} className="w-full">
           {isLoading && visibleItems.length === 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className={`relative rounded-xl overflow-hidden flex flex-col gap-3 p-5 pt-4 ${bgClass}`}>
+                <div
+                  key={i}
+                  className={`relative flex flex-col gap-3 overflow-hidden rounded-xl p-5 pt-4 ${bgClass}`}
+                >
                   {/* accent bar */}
-                  <Skeleton className="absolute top-0 left-0 right-0 h-1 rounded-none" />
+                  <Skeleton className="absolute top-0 right-0 left-0 h-1 rounded-none" />
                   {/* name + rarity badge */}
                   <div className="flex items-start justify-between gap-2 pt-1">
                     <Skeleton className="h-4 w-1/2" />
                     <Skeleton className="h-4 w-14 rounded-full" />
                   </div>
                   {/* description lines */}
-                  <div className="flex flex-col gap-1.5 min-h-10">
+                  <div className="flex min-h-10 flex-col gap-1.5">
                     <Skeleton className="h-3 w-full" />
                     <Skeleton className="h-3 w-4/5" />
                   </div>
                   {/* footer */}
-                  <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                  <div className="flex items-center justify-between border-t border-white/10 pt-2">
                     <Skeleton className="h-3 w-14" />
                     <Skeleton className="h-4 w-12" />
                   </div>
@@ -191,12 +166,12 @@ export function WebstorePage() {
               ))}
             </div>
           ) : visibleItems.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-3 mt-16 opacity-60">
-              <ShoppingBag className={`w-12 h-12 ${subtextColor}`} />
+            <div className="mt-16 flex flex-col items-center justify-center gap-3 opacity-60">
+              <ShoppingBag className={`h-12 w-12 ${subtextColor}`} />
               <p className={`text-base ${subtextColor}`}>{t("noResults")}</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {visibleItems.map((item, index) =>
                 settings.useAnimations ? (
                   <LoadPost key={item.id} index={index}>
@@ -227,11 +202,9 @@ export function WebstorePage() {
           {hasMore && (
             <div
               ref={sentinelRef}
-              className="flex items-center justify-center py-4 w-full shrink-0"
+              className="flex w-full shrink-0 items-center justify-center py-4"
             >
-              {isLoading && (
-                <Loader2 className={`w-5 h-5 ${subtextColor} animate-spin`} />
-              )}
+              {isLoading && <Loader2 className={`h-5 w-5 ${subtextColor} animate-spin`} />}
             </div>
           )}
         </div>

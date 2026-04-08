@@ -19,8 +19,14 @@ export function useMediaQuery(query: string): boolean {
       setMatches(e.matches);
     };
 
+    const onOverride = () => setMatches(window.matchMedia(query).matches);
+
     mql.addEventListener("change", handler);
-    return () => mql.removeEventListener("change", handler);
+    window.addEventListener("viewport-override", onOverride);
+    return () => {
+      mql.removeEventListener("change", handler);
+      window.removeEventListener("viewport-override", onOverride);
+    };
   }, [query]);
 
   return matches;

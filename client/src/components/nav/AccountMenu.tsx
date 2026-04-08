@@ -17,30 +17,18 @@ import { useTranslation } from "react-i18next";
 import { AuthContext } from "@/context/AuthContext";
 import { useLogoutMutation } from "@/hooks/useQueryHooks";
 import { m } from "motion/react";
-import {
-  getBackgroundClasses,
-  getSubtextColor,
-  getTextColor,
-  getTextShadow,
-} from "@/lib/utils";
+import { getBackgroundClasses, getSubtextColor, getTextColor, getTextShadow } from "@/lib/utils";
 
 export default function AccountMenu() {
   const { setIsDropdownHovering, setIsDropdownOpen } = useNavbarContext();
   const { settings } = useSettings();
   const { t } = useTranslation("nav");
-  const { setIsLoggedIn, setUserId, setIsAdmin, setIsSupport } =
-    useContext(AuthContext);
+  const { setIsLoggedIn, setUserId, setIsAdmin, setIsSupport } = useContext(AuthContext);
   const navigate = useNavigate();
   const logoutMutation = useLogoutMutation();
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
-  const subtextColor = getSubtextColor(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const textShadow = getTextShadow(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
+  const subtextColor = getSubtextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const textShadow = getTextShadow(settings.useLiquidGlass, settings.useDarkMode);
   const dropdownBackground = getBackgroundClasses(
     settings.useLiquidGlass,
     settings.useDarkMode,
@@ -63,7 +51,7 @@ export default function AccountMenu() {
   const triggerBtn = (
     <Button
       size="icon"
-      className={`transition-colors duration-150 rounded-full cursor-pointer shadow-sm p-2 ${textColor} ${textShadow} ${
+      className={`cursor-pointer rounded-full p-2 shadow-sm transition-colors duration-150 ${textColor} ${textShadow} ${
         settings.useLiquidGlass
           ? settings.useDarkMode
             ? "bg-black/20 hover:bg-black/30"
@@ -82,13 +70,13 @@ export default function AccountMenu() {
     <>
       <DropdownMenuGroup>
         <DropdownMenuLabel
-          className={`px-3 py-2 text-xs font-semibold uppercase tracking-wider ${subtextColor}`}
+          className={`px-3 py-2 text-xs font-semibold tracking-wider uppercase ${subtextColor}`}
         >
           {t("account.title")}
         </DropdownMenuLabel>
         <DropdownMenuItem
           asChild
-          className={`px-3 py-2.5 rounded-md text-sm transition-all duration-150 ${
+          className={`rounded-md px-3 py-2.5 text-sm transition-all duration-150 ${
             settings.useDarkMode
               ? "hover:bg-white/10 hover:text-gray-100"
               : "hover:bg-gray-100 hover:text-gray-900"
@@ -98,7 +86,7 @@ export default function AccountMenu() {
         </DropdownMenuItem>
         <DropdownMenuItem
           asChild
-          className={`px-3 py-2.5 rounded-md text-sm transition-all duration-150 ${
+          className={`rounded-md px-3 py-2.5 text-sm transition-all duration-150 ${
             settings.useDarkMode
               ? "hover:bg-white/10 hover:text-gray-100"
               : "hover:bg-gray-100 hover:text-gray-900"
@@ -112,7 +100,7 @@ export default function AccountMenu() {
       />
       <DropdownMenuItem
         asChild
-        className={`px-3 py-2.5 rounded-md text-sm transition-all duration-150 ${
+        className={`rounded-md px-3 py-2.5 text-sm transition-all duration-150 ${
           settings.useDarkMode
             ? "hover:bg-white/10 hover:text-gray-100"
             : "hover:bg-gray-100 hover:text-gray-900"
@@ -125,7 +113,7 @@ export default function AccountMenu() {
       />
       <DropdownMenuGroup>
         <DropdownMenuItem
-          className={`px-3 py-2.5 rounded-md text-sm transition-all duration-150 ${
+          className={`rounded-md px-3 py-2.5 text-sm transition-all duration-150 ${
             settings.useDarkMode
               ? "hover:bg-red-600/80 hover:text-white"
               : "hover:bg-red-50 hover:text-red-700"
@@ -140,7 +128,7 @@ export default function AccountMenu() {
 
   const dropdownContent = (
     <DropdownMenuContent
-      className={`w-48 z-9999 rounded-xl p-2 shadow-xl backdrop-blur-md border ${dropdownBackground} ${textColor}`}
+      className={`z-9999 w-48 rounded-xl border p-2 shadow-xl backdrop-blur-md ${dropdownBackground} ${textColor}`}
       align="end"
       onMouseEnter={() => setIsDropdownHovering(true)}
       onMouseLeave={() => setIsDropdownHovering(false)}
@@ -150,10 +138,7 @@ export default function AccountMenu() {
   );
 
   return (
-    <DropdownMenu
-      modal={false}
-      onOpenChange={(open: boolean) => setIsDropdownOpen(open)}
-    >
+    <DropdownMenu modal={false} onOpenChange={(open: boolean) => setIsDropdownOpen(open)}>
       <DropdownMenuTrigger asChild>
         {settings.useAnimations ? (
           <m.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>

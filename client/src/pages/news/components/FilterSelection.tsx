@@ -1,11 +1,5 @@
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-  FieldSet,
-} from "@/components/ui/field";
+import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import type { NewsPost } from "@/types/PageTypes";
 import { NEWS_FILTER_OPTIONS } from "../useNewsCategoryFilter";
 import { useSettings } from "@/pages/settings/SettingsContext";
@@ -16,15 +10,9 @@ interface FilterSelectionProps {
   onCategoryChange: (category: NewsPost["category"], checked: boolean) => void;
 }
 
-export function FilterSelection({
-  selectedByCategory,
-  onCategoryChange,
-}: FilterSelectionProps) {
+export function FilterSelection({ selectedByCategory, onCategoryChange }: FilterSelectionProps) {
   const { settings } = useSettings();
-  const subtextColor = getSubtextColor(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
+  const subtextColor = getSubtextColor(settings.useLiquidGlass, settings.useDarkMode);
 
   return (
     <FieldSet>
@@ -41,19 +29,12 @@ export function FilterSelection({
                 id={id}
                 name={id}
                 checked={selectedByCategory[option.category]}
-                onCheckedChange={(checked) =>
-                  onCategoryChange(option.category, checked === true)
-                }
+                onCheckedChange={(checked) => onCategoryChange(option.category, checked === true)}
               />
-              <FieldLabel
-                htmlFor={id}
-                className="font-normal flex flex-wrap items-center gap-1"
-              >
+              <FieldLabel htmlFor={id} className="flex flex-wrap items-center gap-1 font-normal">
                 {option.label}
                 {option.description ? (
-                  <span className={`text-xs ${subtextColor}`}>
-                    ({option.description})
-                  </span>
+                  <span className={`text-xs ${subtextColor}`}>({option.description})</span>
                 ) : null}
               </FieldLabel>
             </Field>

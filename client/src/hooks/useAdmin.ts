@@ -104,9 +104,7 @@ export const adminQueryKeys = {
  */
 export function useAdminUsersQuery(searchQuery?: string) {
   return useQuery<AdminUserDTO[], AxiosError>({
-    queryKey: searchQuery
-      ? adminQueryKeys.users.search(searchQuery)
-      : adminQueryKeys.users.all,
+    queryKey: searchQuery ? adminQueryKeys.users.search(searchQuery) : adminQueryKeys.users.all,
     queryFn: async () => {
       // TODO: BACKEND — add ?search= query param support on the server.
       // When available, change to: `/users?search=${encodeURIComponent(searchQuery ?? "")}`
@@ -130,22 +128,20 @@ export function useAdminUsersQuery(searchQuery?: string) {
 export function useBanUserMutation() {
   const queryClient = useQueryClient();
 
-  return useMutation<void, AxiosError, { userId: number; payload: BanPayload }>(
-    {
-      mutationFn: async ({ userId, payload }) => {
-        const period = banPayloadToMinutes(payload);
-        await apiClient.post(`/users/${userId}/ban`, { id: userId, period });
-      },
-      onSuccess: (_data, variables) => {
-        queryClient.invalidateQueries({ queryKey: adminQueryKeys.users.all });
-        // Re-fetch the full user list so ban status updates immediately
-        queryClient.invalidateQueries({
-          queryKey: adminQueryKeys.users.search(""),
-        });
-        void variables;
-      },
+  return useMutation<void, AxiosError, { userId: number; payload: BanPayload }>({
+    mutationFn: async ({ userId, payload }) => {
+      const period = banPayloadToMinutes(payload);
+      await apiClient.post(`/users/${userId}/ban`, { id: userId, period });
     },
-  );
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: adminQueryKeys.users.all });
+      // Re-fetch the full user list so ban status updates immediately
+      queryClient.invalidateQueries({
+        queryKey: adminQueryKeys.users.search(""),
+      });
+      void variables;
+    },
+  });
 }
 
 /**
@@ -180,11 +176,7 @@ export function useUnbanUserMutation() {
 export function usePromoteUserMutation() {
   const queryClient = useQueryClient();
 
-  return useMutation<
-    void,
-    AxiosError,
-    { userId: number; targetRole: "admin" | "support" }
-  >({
+  return useMutation<void, AxiosError, { userId: number; targetRole: "admin" | "support" }>({
     mutationFn: async ({ userId, targetRole }) => {
       await apiClient.post(`/users/${userId}/promote`, {
         id: userId,

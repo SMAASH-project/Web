@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 
 interface Props {
   colorLeft: string;
@@ -17,7 +17,7 @@ interface Orb {
   vx: number;
   vy: number;
   radius: number;
-  phase: number;       // pulse phase offset (radians)
+  phase: number; // pulse phase offset (radians)
   pulseSpeed: number;
   r: number;
   g: number;
@@ -31,17 +31,23 @@ function hexToRgb(hex: string): [number, number, number] {
 
 // Palette of deep-sea bioluminescent colors
 const PALETTE: [number, number, number][] = [
-  [0, 220, 180],   // teal
-  [0, 180, 255],   // electric blue
-  [0, 255, 140],   // sea green
-  [80, 140, 255],  // indigo blue
-  [0, 200, 220],   // cyan
-  [40, 255, 180],  // mint
+  [0, 220, 180], // teal
+  [0, 180, 255], // electric blue
+  [0, 255, 140], // sea green
+  [80, 140, 255], // indigo blue
+  [0, 200, 220], // cyan
+  [40, 255, 180], // mint
 ];
 
 const ORB_COUNT = 38;
 
-export function BioluminescenceBackground({ paused = false, preview = false, showOrbs = true, showPulses = true, showVignette = true }: Props) {
+export const BioluminescenceBackground = memo(function BioluminescenceBackground({
+  paused = false,
+  preview = false,
+  showOrbs = true,
+  showPulses = true,
+  showVignette = true,
+}: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pausedRef = useRef(paused);
 
@@ -76,7 +82,9 @@ export function BioluminescenceBackground({ paused = false, preview = false, sho
         radius: 18 + Math.random() * 55,
         phase: Math.random() * Math.PI * 2,
         pulseSpeed: 0.4 + Math.random() * 0.6,
-        r, g, b,
+        r,
+        g,
+        b,
       };
     });
 
@@ -99,9 +107,9 @@ export function BioluminescenceBackground({ paused = false, preview = false, sho
         if (showOrbs) {
           // Glow: large soft outer halo
           const halo = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius * 2.8);
-          halo.addColorStop(0,   `rgba(${orb.r},${orb.g},${orb.b},${(alpha * 0.9).toFixed(3)})`);
-          halo.addColorStop(0.35,`rgba(${orb.r},${orb.g},${orb.b},${(alpha * 0.4).toFixed(3)})`);
-          halo.addColorStop(1,   `rgba(${orb.r},${orb.g},${orb.b},0)`);
+          halo.addColorStop(0, `rgba(${orb.r},${orb.g},${orb.b},${(alpha * 0.9).toFixed(3)})`);
+          halo.addColorStop(0.35, `rgba(${orb.r},${orb.g},${orb.b},${(alpha * 0.4).toFixed(3)})`);
+          halo.addColorStop(1, `rgba(${orb.r},${orb.g},${orb.b},0)`);
           ctx.fillStyle = halo;
           ctx.beginPath();
           ctx.arc(orb.x, orb.y, orb.radius * 2.8, 0, Math.PI * 2);
@@ -154,12 +162,12 @@ export function BioluminescenceBackground({ paused = false, preview = false, sho
       cancelAnimationFrame(animId);
       if (!preview) window.removeEventListener("resize", resize);
     };
-  }, [showOrbs, showPulses, showVignette]);
+  }, [preview, showOrbs, showPulses, showVignette]);
 
   return (
     <canvas
       ref={canvasRef}
-      className={`${preview ? "absolute" : "fixed"} inset-0 z-0 opacity-90 pointer-events-none`}
+      className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 opacity-90`}
     />
   );
-}
+});

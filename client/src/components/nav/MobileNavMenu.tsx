@@ -1,14 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import {
-  Menu,
-  User,
-  Settings,
-  ArrowLeftRight,
-  LogOut,
-  ShieldAlert,
-  Bug,
-} from "lucide-react";
+import { Menu, User, Settings, ArrowLeftRight, LogOut, ShieldAlert, Bug } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -56,9 +48,7 @@ export function MobileNavMenu({
 
   const activeClass =
     getLiquidGlassNavHighlight(useLiquidGlass, useDarkMode) ||
-    (useLiquidGlass
-      ? "bg-white/20 rounded-sm"
-      : "text-(--theme-accent) font-bold");
+    (useLiquidGlass ? "bg-white/20 rounded-sm" : "text-(--theme-accent) font-bold");
 
   const hoverClass = useLiquidGlass
     ? useDarkMode
@@ -93,9 +83,7 @@ export function MobileNavMenu({
         className={`${sheetClass} ${textColor} ${textShadow} p-0`}
       >
         <SheetHeader className="p-4 pb-2">
-          <SheetTitle className={`${textColor} ${textShadow}`}>
-            {t("menu")}
-          </SheetTitle>
+          <SheetTitle className={`${textColor} ${textShadow}`}>{t("menu")}</SheetTitle>
         </SheetHeader>
 
         <nav className="flex flex-col gap-1 px-3">
@@ -105,7 +93,7 @@ export function MobileNavMenu({
               <SheetClose asChild key={item.path}>
                 <Link
                   to={item.path}
-                  className={`px-3 py-2.5 text-sm font-medium transition-colors duration-200 no-underline ${textColor} ${
+                  className={`px-3 py-2.5 text-sm font-medium no-underline transition-colors duration-200 ${textColor} ${
                     isActive ? activeClass : hoverClass
                   }`}
                 >
@@ -122,16 +110,14 @@ export function MobileNavMenu({
 
         {/* Account section */}
         <div className="flex flex-col gap-1 px-3">
-          <p
-            className={`px-3 py-1 text-xs font-semibold uppercase tracking-wider ${subtextColor}`}
-          >
+          <p className={`px-3 py-1 text-xs font-semibold tracking-wider uppercase ${subtextColor}`}>
             {t("account.title")}
           </p>
 
           <SheetClose asChild>
             <Link
               to="/app/profile"
-              className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors duration-200 no-underline ${textColor} ${hoverClass}`}
+              className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium no-underline transition-colors duration-200 ${textColor} ${hoverClass}`}
             >
               <User size={16} />
               <span>{t("account.profile")}</span>
@@ -141,7 +127,7 @@ export function MobileNavMenu({
           <SheetClose asChild>
             <Link
               to="/app/settings"
-              className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors duration-200 no-underline ${textColor} ${hoverClass}`}
+              className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium no-underline transition-colors duration-200 ${textColor} ${hoverClass}`}
             >
               <Settings size={16} />
               <span>{t("account.settings")}</span>
@@ -151,7 +137,7 @@ export function MobileNavMenu({
           <SheetClose asChild>
             <Link
               to="/app/profile-selector"
-              className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors duration-200 no-underline ${textColor} ${hoverClass}`}
+              className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium no-underline transition-colors duration-200 ${textColor} ${hoverClass}`}
             >
               <ArrowLeftRight size={16} />
               <span>{t("account.changeProfile")}</span>
@@ -162,7 +148,7 @@ export function MobileNavMenu({
             <SheetClose asChild>
               <Link
                 to="/app/admin"
-                className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors duration-200 no-underline ${textColor} ${hoverClass}`}
+                className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium no-underline transition-colors duration-200 ${textColor} ${hoverClass}`}
               >
                 <ShieldAlert size={16} />
                 <span>{t("account.adminPanel")}</span>
@@ -173,7 +159,7 @@ export function MobileNavMenu({
             <SheetClose asChild>
               <Link
                 to="/app/debug"
-                className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors duration-200 no-underline ${textColor} ${hoverClass}`}
+                className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium no-underline transition-colors duration-200 ${textColor} ${hoverClass}`}
               >
                 <Bug size={16} />
                 <span>{t("account.debugPanel")}</span>
@@ -203,7 +189,7 @@ export function MobileNavMenu({
               setOpen(false);
               await onLogout();
             }}
-            className={`flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors duration-200 ${textColor} cursor-pointer bg-transparent border-none ${hoverClass}`}
+            className={`flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors duration-200 ${textColor} cursor-pointer border-none bg-transparent ${hoverClass}`}
           >
             <LogOut size={16} />
             <span>{t("account.logout")}</span>

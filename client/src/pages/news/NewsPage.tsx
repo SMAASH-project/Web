@@ -27,20 +27,19 @@ import { CategoryBadge } from "./components/CategoryBadge";
 import { useContext } from "react";
 import { AuthContext } from "@/context/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 export function NewsPage() {
   const { settings } = useSettings();
   const { t } = useTranslation("news");
   const { isAdmin } = useContext(AuthContext);
-  const { selectedByCategory, selectedCategories, setCategorySelected } =
-    useNewsCategoryFilter();
+  const { selectedByCategory, selectedCategories, setCategorySelected } = useNewsCategoryFilter();
 
   const {
     visiblePosts,
     totalCount,
     isSearching,
     isLoading: postsLoading,
-    containerRef,
     handleCreate,
     handleUpdate,
     handleRemove,
@@ -49,29 +48,24 @@ export function NewsPage() {
 
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
   const subtextColor = getSubtextColor(settings.useLiquidGlass, settings.useDarkMode);
-  const textShadow = getTextShadow(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const bgClass = getBackgroundClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const buttonClass = getButtonClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
+  const textShadow = getTextShadow(settings.useLiquidGlass, settings.useDarkMode);
+  const bgClass = getBackgroundClasses(settings.useLiquidGlass, settings.useDarkMode);
+  const buttonClass = getButtonClasses(settings.useLiquidGlass, settings.useDarkMode);
+  const postsVirtualizer = useVirtualizer({
+    count: visiblePosts.length,
+    getScrollElement: () => document.documentElement,
+    estimateSize: () => 360,
+    overscan: 6,
+    measureElement: (el) => el?.getBoundingClientRect().height ?? 360,
+  });
 
   return (
-    <div className="p-3 sm:p-4 min-h-screen">
+    <div className="min-h-screen p-3 sm:p-4">
       <Navbar />
-      <div className="mt-20 z-0 flex flex-col items-center justify-start gap-4">
+      <div className="z-0 mt-20 flex flex-col items-center justify-start gap-4">
         {/* ── Toolbar ── */}
-        <div className="flex flex-row w-full items-center justify-between gap-2">
-          <ButtonGroup
-            orientation="horizontal"
-            className={`${buttonClass} rounded-lg shrink-0`}
-          >
+        <div className="flex w-full flex-row items-center justify-between gap-2">
+          <ButtonGroup orientation="horizontal" className={`${buttonClass} shrink-0 rounded-lg`}>
             {isAdmin ? (
               <>
                 <AddNews onCreate={handleCreate} />
@@ -84,7 +78,9 @@ export function NewsPage() {
 
           <span className="flex flex-row items-center gap-2">
             {!postsLoading && (
-              <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${bgClass} ${subtextColor}`}>
+              <span
+                className={`rounded-full px-2.5 py-1 text-xs font-medium ${bgClass} ${subtextColor}`}
+              >
                 {isSearching ? `${visiblePosts.length} results` : `${totalCount} posts`}
               </span>
             )}
@@ -97,45 +93,48 @@ export function NewsPage() {
 
         {/* ── Post list ── */}
         {postsLoading && (
-          <ul className="list-none w-full flex flex-col gap-4">
+          <ul className="flex w-full list-none flex-col gap-4">
             {Array.from({ length: 3 }).map((_, i) => (
               <li key={i}>
-                <div className={`z-0 flex flex-col p-4 sm:p-6 md:p-8 w-full rounded-xl ${bgClass}`}>
-                  <div className="flex flex-row w-full items-start justify-between gap-3 mb-3">
-                    <div className="flex flex-col gap-2 flex-1">
+                <div className={`z-0 flex w-full flex-col rounded-xl p-4 sm:p-6 md:p-8 ${bgClass}`}>
+                  <div className="mb-3 flex w-full flex-row items-start justify-between gap-3">
+                    <div className="flex flex-1 flex-col gap-2">
                       <Skeleton className="h-5 w-2/3" />
                       <Skeleton className="h-4 w-24 rounded-full" />
                     </div>
                     <Skeleton className="h-4 w-24 shrink-0" />
                   </div>
-                  <Skeleton className="h-3 w-full mt-1" />
-                  <Skeleton className="h-3 w-5/6 mt-2" />
-                  <Skeleton className="h-3 w-4/6 mt-2" />
+                  <Skeleton className="mt-1 h-3 w-full" />
+                  <Skeleton className="mt-2 h-3 w-5/6" />
+                  <Skeleton className="mt-2 h-3 w-4/6" />
                 </div>
               </li>
             ))}
           </ul>
         )}
-        <ul className="list-none w-full flex flex-col gap-4">
-          {visiblePosts.map((post: NewsPost, index: number) => {
+        <ul
+          className="relative w-full list-none"
+          style={{ height: `${postsVirtualizer.getTotalSize()}px` }}
+        >
+          {postsVirtualizer.getVirtualItems().map((virtualRow) => {
+            const post = visiblePosts[virtualRow.index] as NewsPost;
+            const index = virtualRow.index;
             const cardContent = (
-              <Card
-                className={`z-0 flex flex-col p-4 sm:p-6 md:p-8 w-full ${bgClass}`}
-              >
+              <Card className={`z-0 flex w-full flex-col p-4 sm:p-6 md:p-8 ${bgClass}`}>
                 {/* Header: title+badge left, date+actions right */}
-                <div className="flex flex-row w-full items-start justify-between gap-3 mb-3">
-                  <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                <div className="mb-3 flex w-full flex-row items-start justify-between gap-3">
+                  <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                     <Label
-                      className={`text-base sm:text-lg font-semibold ${textColor} ${textShadow} wrap-break-word`}
+                      className={`text-base font-semibold sm:text-lg ${textColor} ${textShadow} wrap-break-word`}
                     >
                       {post.title}
                     </Label>
                     <CategoryBadge category={post.category} />
                   </div>
 
-                  <div className="flex flex-col items-end gap-2 shrink-0">
+                  <div className="flex shrink-0 flex-col items-end gap-2">
                     <Label
-                      className={`text-xs sm:text-sm ${textColor} ${textShadow} italic text-right whitespace-nowrap`}
+                      className={`text-xs sm:text-sm ${textColor} ${textShadow} text-right whitespace-nowrap italic`}
                     >
                       {formatDateTime(post.createdAt)}
                     </Label>
@@ -150,7 +149,7 @@ export function NewsPage() {
 
                 {/* Body: image + content */}
                 {post.imagePosition === "Top" ? (
-                  <div className="flex flex-col gap-3 w-full">
+                  <div className="flex w-full flex-col gap-3">
                     {post.image && (
                       <img
                         src={post.image}
@@ -160,28 +159,24 @@ export function NewsPage() {
                       />
                     )}
                     <div
-                      className={`text-sm ${textColor} ${textShadow} text-justify prose prose-sm prose-invert max-w-none`}
+                      className={`text-sm ${textColor} ${textShadow} prose prose-sm prose-invert max-w-none text-justify`}
                     >
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {post.content}
-                      </ReactMarkdown>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
                     </div>
                   </div>
                 ) : (
                   /* Side image — stacks on mobile, side-by-side on sm+ */
-                  <div className="flex flex-col sm:flex-row gap-3 w-full">
+                  <div className="flex w-full flex-col gap-3 sm:flex-row">
                     <div
-                      className={`text-sm ${textColor} ${textShadow} text-justify prose prose-sm prose-invert max-w-none w-full sm:flex-1`}
+                      className={`text-sm ${textColor} ${textShadow} prose prose-sm prose-invert w-full max-w-none text-justify sm:flex-1`}
                     >
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {post.content}
-                      </ReactMarkdown>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
                     </div>
                     {post.image && (
                       <img
                         src={post.image}
                         alt={post.imageAlt}
-                        className="rounded-md object-cover w-full sm:w-(--img-size)"
+                        className="w-full rounded-md object-cover sm:w-(--img-size)"
                         style={
                           {
                             "--img-size": `${post.imageSize}%`,
@@ -194,12 +189,22 @@ export function NewsPage() {
               </Card>
             );
 
-            return settings.useAnimations ? (
-              <LoadPost key={post.id} index={index}>
-                {cardContent}
-              </LoadPost>
-            ) : (
-              <div key={post.id}>{cardContent}</div>
+            return (
+              <li
+                key={post.id}
+                data-index={virtualRow.index}
+                ref={postsVirtualizer.measureElement}
+                className="absolute top-0 left-0 w-full"
+                style={{ transform: `translateY(${virtualRow.start}px)` }}
+              >
+                <div className="pb-4">
+                  {settings.useAnimations ? (
+                    <LoadPost index={index}>{cardContent}</LoadPost>
+                  ) : (
+                    cardContent
+                  )}
+                </div>
+              </li>
             );
           })}
         </ul>

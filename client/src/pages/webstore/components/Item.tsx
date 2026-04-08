@@ -4,22 +4,9 @@ import { useSettings } from "@/pages/settings/SettingsContext";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Coins,
-  Unlock,
-  CheckCircle,
-  Swords,
-  Crosshair,
-  Paintbrush,
-  Loader2,
-} from "lucide-react";
+import { Coins, Unlock, CheckCircle, Swords, Crosshair, Paintbrush, Loader2 } from "lucide-react";
 import { RemoveItemButton } from "./RemoveItemButton";
-import {
-  getBackgroundClasses,
-  getTextColor,
-  getTextShadow,
-  getSubtextColor,
-} from "@/lib/utils";
+import { getBackgroundClasses, getTextColor, getTextShadow, getSubtextColor } from "@/lib/utils";
 import { useContext } from "react";
 import { AuthContext } from "@/context/AuthContext";
 
@@ -51,20 +38,10 @@ export function Item({
   const { isAdmin } = useContext(AuthContext);
   const rarityColor = RARITY_COLORS[item.rarity] ?? "#9ca3af";
 
-  const bgClass = getBackgroundClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-    "light",
-  );
+  const bgClass = getBackgroundClasses(settings.useLiquidGlass, settings.useDarkMode, "light");
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
-  const textShadow = getTextShadow(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const subtextColor = getSubtextColor(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
+  const textShadow = getTextShadow(settings.useLiquidGlass, settings.useDarkMode);
+  const subtextColor = getSubtextColor(settings.useLiquidGlass, settings.useDarkMode);
 
   const handleUnlock = () => {
     onUnlock?.(item.id);
@@ -72,7 +49,7 @@ export function Item({
 
   return (
     <Card
-      className={`group relative overflow-hidden p-0 transition-all duration-200 h-full ${bgClass} hover:shadow-xl`}
+      className={`group relative h-full overflow-hidden p-0 transition-all duration-200 ${bgClass} hover:shadow-xl`}
       style={
         item.owned
           ? {
@@ -84,33 +61,26 @@ export function Item({
       {/* Admin delete button */}
       {isAdmin && onDelete && (
         <div className="absolute top-2 right-2 z-10">
-          <RemoveItemButton
-            onConfirm={() => onDelete(item.id)}
-            isDeleting={isDeleting}
-          />
+          <RemoveItemButton onConfirm={() => onDelete(item.id)} isDeleting={isDeleting} />
         </div>
       )}
 
       {/* Accent bar on top */}
       <div
-        className="absolute top-0 left-0 right-0 h-1 rounded-t-lg"
+        className="absolute top-0 right-0 left-0 h-1 rounded-t-lg"
         style={{ backgroundColor: rarityColor }}
       />
 
-      <div className="flex flex-col gap-3 p-5 pt-4 h-full">
+      <div className="flex h-full flex-col gap-3 p-5 pt-4">
         {/* Header: name + rarity badge */}
         <div
-          className={`flex items-start justify-between gap-2 ${
-            isAdmin && onDelete ? "pr-8" : ""
-          }`}
+          className={`flex items-start justify-between gap-2 ${isAdmin && onDelete ? "pr-8" : ""}`}
         >
-          <h3
-            className={`text-sm font-semibold ${textColor} leading-tight ${textShadow}`}
-          >
+          <h3 className={`text-sm font-semibold ${textColor} leading-tight ${textShadow}`}>
             {item.name}
           </h3>
           <Badge
-            className="text-[10px] uppercase font-semibold tracking-wider px-2 py-0 shrink-0"
+            className="shrink-0 px-2 py-0 text-[10px] font-semibold tracking-wider uppercase"
             style={{
               backgroundColor: `${rarityColor}20`,
               color: rarityColor,
@@ -122,15 +92,13 @@ export function Item({
         </div>
 
         {/* Description */}
-        <p
-          className={`text-xs ${subtextColor} leading-relaxed line-clamp-2 min-h-10`}
-        >
+        <p className={`text-xs ${subtextColor} line-clamp-2 min-h-10 leading-relaxed`}>
           {item.description}
         </p>
 
         {/* Footer: kind / combat type + price */}
         <div
-          className={`flex items-center justify-between mt-auto pt-2 border-t ${
+          className={`mt-auto flex items-center justify-between border-t pt-2 ${
             settings.useLiquidGlass
               ? settings.useDarkMode
                 ? "border-black/10"
@@ -143,21 +111,19 @@ export function Item({
           <div className="flex items-center gap-1.5">
             {item.kind === "Character" ? (
               item.combatType === "Melee" ? (
-                <Swords className="w-3 h-3 text-orange-400/70" />
+                <Swords className="h-3 w-3 text-orange-400/70" />
               ) : (
-                <Crosshair className="w-3 h-3 text-sky-400/70" />
+                <Crosshair className="h-3 w-3 text-sky-400/70" />
               )
             ) : (
-              <Paintbrush className="w-3 h-3 text-pink-400/70" />
+              <Paintbrush className="h-3 w-3 text-pink-400/70" />
             )}
-            <span
-              className={`text-[10px] uppercase tracking-wider font-medium ${subtextColor}`}
-            >
+            <span className={`text-[10px] font-medium tracking-wider uppercase ${subtextColor}`}>
               {item.kind === "Character" ? item.combatType : "Skin"}
             </span>
           </div>
           <div className="flex items-center gap-1">
-            <Coins className="w-3.5 h-3.5 text-amber-400/80" />
+            <Coins className="h-3.5 w-3.5 text-amber-400/80" />
             <span className={`text-sm font-bold text-amber-400 ${textShadow}`}>
               {item.price.toLocaleString()}
             </span>
@@ -168,27 +134,27 @@ export function Item({
         <div className="pt-1">
           {item.owned ? (
             <div
-              className="flex items-center justify-center gap-1.5 h-7 rounded-md text-xs font-medium border"
+              className="flex h-7 items-center justify-center gap-1.5 rounded-md border text-xs font-medium"
               style={{
                 backgroundColor: "var(--theme-accent-soft)",
                 borderColor: "var(--theme-accent)",
                 color: settings.useDarkMode ? "#ffffff" : "var(--theme-accent)",
               }}
             >
-              <CheckCircle className="w-3 h-3" />
+              <CheckCircle className="h-3 w-3" />
               Owned
             </div>
           ) : (
             <Button
               size="sm"
-              className="w-full h-7 text-xs gap-1.5 bg-amber-500/90 text-black font-semibold hover:bg-amber-400 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              className="h-7 w-full cursor-pointer gap-1.5 bg-amber-500/90 text-xs font-semibold text-black transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
               onClick={handleUnlock}
               disabled={isPurchasing}
             >
               {isPurchasing ? (
-                <Loader2 className="w-3 h-3 animate-spin" />
+                <Loader2 className="h-3 w-3 animate-spin" />
               ) : (
-                <Unlock className="w-3 h-3" />
+                <Unlock className="h-3 w-3" />
               )}
               {isPurchasing ? "Unlocking…" : "Unlock"}
             </Button>

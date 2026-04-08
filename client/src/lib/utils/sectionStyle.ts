@@ -11,10 +11,7 @@ import type { CSSProperties } from "react";
  * Once the card spring completes, `animReady` flips true and each section
  * fades in with a 200 ms CSS transition, staggered by `delayMs`.
  */
-export function sectionStyle(
-  animReady: boolean,
-  delayMs: number,
-): CSSProperties {
+export function sectionStyle(animReady: boolean, delayMs: number): CSSProperties {
   return {
     opacity: animReady ? 1 : 0,
     transform: animReady ? "translateY(0px)" : "translateY(10px)",

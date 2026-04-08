@@ -24,35 +24,17 @@ import {
 export function RemoveButton({ onConfirm }: { onConfirm?: () => void }) {
   const { settings } = useSettings();
   const { t } = useTranslation("news");
-  const buttonClass = getButtonClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-    "primary",
-  );
-  const dialogClass = getDialogClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const footerClass = getDialogFooterClasses(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const textShadow = getTextShadow(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
-  const subtextColor = getSubtextColor(
-    settings.useLiquidGlass,
-    settings.useDarkMode,
-  );
+  const buttonClass = getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "primary");
+  const dialogClass = getDialogClasses(settings.useLiquidGlass, settings.useDarkMode);
+  const footerClass = getDialogFooterClasses(settings.useLiquidGlass, settings.useDarkMode);
+  const textShadow = getTextShadow(settings.useLiquidGlass, settings.useDarkMode);
+  const subtextColor = getSubtextColor(settings.useLiquidGlass, settings.useDarkMode);
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button
-          className={`${buttonClass} ${textShadow} rounded-lg cursor-pointer`}
-        >
+        <Button className={`${buttonClass} ${textShadow} cursor-pointer rounded-lg`}>
           <Trash2 />
         </Button>
       </DialogTrigger>
@@ -60,12 +42,8 @@ export function RemoveButton({ onConfirm }: { onConfirm?: () => void }) {
         className={`${dialogClass} ${textShadow} **:data-[slot='dialog-close']:hover:bg-red-500/20 **:data-[slot='dialog-close']:hover:text-red-300`}
       >
         <DialogHeader>
-          <DialogTitle className={`${textColor} ${textShadow}`}>
-            {t("delete.confirm")}
-          </DialogTitle>
-          <DialogDescription className={subtextColor}>
-            {t("delete.description")}
-          </DialogDescription>
+          <DialogTitle className={`${textColor} ${textShadow}`}>{t("delete.confirm")}</DialogTitle>
+          <DialogDescription className={subtextColor}>{t("delete.description")}</DialogDescription>
         </DialogHeader>
         <DialogFooter className={footerClass}>
           <DialogClose asChild>
@@ -78,7 +56,7 @@ export function RemoveButton({ onConfirm }: { onConfirm?: () => void }) {
           </DialogClose>
           <DialogClose asChild>
             <Button
-              className={`cursor-pointer ${textShadow} disabled:opacity-60 disabled:cursor-not-allowed border border-red-500/60 bg-red-600/80 hover:bg-red-500 hover:border-red-400 text-white shadow-md shadow-red-900/40`}
+              className={`cursor-pointer ${textShadow} border border-red-500/60 bg-red-600/80 text-white shadow-md shadow-red-900/40 hover:border-red-400 hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60`}
               variant="destructive"
               onClick={() => {
                 onConfirm?.();

@@ -1,11 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { createContext, useContext, useCallback, useEffect, useMemo, useState } from "react";
 import type { Profile, ProfileContextType } from "./ProfilesTypes";
 import { AuthContext } from "@/context/AuthContext";
 import {
@@ -32,9 +25,7 @@ function profileStorageKey(userId: number) {
 }
 
 export function ProfileProvider({ children }: { children: React.ReactNode }) {
-  const [selectedProfileId, setSelectedProfileId] = useState<number | null>(
-    null,
-  );
+  const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
 
   const { userId } = useContext(AuthContext);
   const numUserId = userId !== null ? Number(userId) : null;
@@ -51,9 +42,7 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     const stored = localStorage.getItem(profileStorageKey(numUserId));
     if (!stored) return;
     const storedId = parseInt(stored, 10);
-    const stillExists = fetchedProfiles.some(
-      (p: ProfileResponse) => p.id === storedId,
-    );
+    const stillExists = fetchedProfiles.some((p: ProfileResponse) => p.id === storedId);
     if (stillExists) setSelectedProfileId(storedId);
   }, [numUserId, fetchedProfiles]);
 

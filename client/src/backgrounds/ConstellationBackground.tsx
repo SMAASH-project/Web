@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 
 interface Props {
   colorLeft: string;
@@ -41,7 +41,15 @@ const MAX_CONNECT_DIST = 190;
 // Max lines to avoid clutter
 const MAX_LINES = 55;
 
-export function ConstellationBackground({ colorLeft, colorMiddle, colorRight, paused = false, preview = false, showStars = true, showConstellationLines = true }: Props) {
+export const ConstellationBackground = memo(function ConstellationBackground({
+  colorLeft,
+  colorMiddle,
+  colorRight,
+  paused = false,
+  preview = false,
+  showStars = true,
+  showConstellationLines = true,
+}: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pausedRef = useRef(paused);
 
@@ -109,9 +117,9 @@ export function ConstellationBackground({ colorLeft, colorMiddle, colorRight, pa
 
       // Subtle background gradient tint
       const bg = ctx.createLinearGradient(0, 0, w, h);
-      bg.addColorStop(0,   `rgba(${lr},${lg},${lb},0.12)`);
+      bg.addColorStop(0, `rgba(${lr},${lg},${lb},0.12)`);
       bg.addColorStop(0.5, `rgba(${mr},${mg},${mb},0.08)`);
-      bg.addColorStop(1,   `rgba(${rr},${rg},${rb},0.12)`);
+      bg.addColorStop(1, `rgba(${rr},${rg},${rb},0.12)`);
       ctx.fillStyle = bg;
       ctx.fillRect(0, 0, w, h);
 
@@ -151,27 +159,28 @@ export function ConstellationBackground({ colorLeft, colorMiddle, colorRight, pa
       }
 
       // Draw stars
-      if (showStars) for (const s of stars) {
-        const twinkle = 0.6 + 0.4 * Math.sin(s.twinklePhase);
-        const alpha = s.brightness * twinkle;
+      if (showStars)
+        for (const s of stars) {
+          const twinkle = 0.6 + 0.4 * Math.sin(s.twinklePhase);
+          const alpha = s.brightness * twinkle;
 
-        // Soft glow for larger stars
-        if (s.size > 1.4) {
-          const glow = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.size * 4);
-          glow.addColorStop(0, `rgba(${mr},${mg},${mb},${(alpha * 0.3).toFixed(3)})`);
-          glow.addColorStop(1, "rgba(0,0,0,0)");
-          ctx.fillStyle = glow;
+          // Soft glow for larger stars
+          if (s.size > 1.4) {
+            const glow = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.size * 4);
+            glow.addColorStop(0, `rgba(${mr},${mg},${mb},${(alpha * 0.3).toFixed(3)})`);
+            glow.addColorStop(1, "rgba(0,0,0,0)");
+            ctx.fillStyle = glow;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.size * 4, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Star point
           ctx.beginPath();
-          ctx.arc(s.x, s.y, s.size * 4, 0, Math.PI * 2);
+          ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(220,230,255,${alpha.toFixed(3)})`;
           ctx.fill();
         }
-
-        // Star point
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(220,230,255,${alpha.toFixed(3)})`;
-        ctx.fill();
-      }
 
       // Vignette
       const vg = ctx.createRadialGradient(w / 2, h / 2, h * 0.2, w / 2, h / 2, h * 0.85);
@@ -196,12 +205,12 @@ export function ConstellationBackground({ colorLeft, colorMiddle, colorRight, pa
       cancelAnimationFrame(animId);
       if (!preview) window.removeEventListener("resize", resize);
     };
-  }, [colorLeft, colorMiddle, colorRight, showStars, showConstellationLines]);
+  }, [preview, colorLeft, colorMiddle, colorRight, showStars, showConstellationLines]);
 
   return (
     <canvas
       ref={canvasRef}
-      className={`${preview ? "absolute" : "fixed"} inset-0 z-0 opacity-90 pointer-events-none`}
+      className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 opacity-90`}
     />
   );
-}
+});

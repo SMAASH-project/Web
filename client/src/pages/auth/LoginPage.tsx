@@ -1,12 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { FormAlert } from "@/components/ui/form-alert";
@@ -23,14 +17,10 @@ import type { AxiosError } from "axios";
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_SECONDS = 30;
 
-export function LoginPage({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+export function LoginPage({ className, ...props }: React.ComponentProps<"div">) {
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
-  const { isLoggedIn, setIsLoggedIn, setUserId, setIsAdmin } =
-    React.useContext(AuthContext);
+  const { isLoggedIn, setIsLoggedIn, setUserId, setIsAdmin } = React.useContext(AuthContext);
 
   // ── Brute-force friction ────────────────────────────────────────────────
   const [attempts, setAttempts] = useState(0);
@@ -130,8 +120,7 @@ export function LoginPage({
             ? `Your account is banned until ${until}.`
             : "Your account has been permanently banned.";
         }
-        if (err?.response?.status === 401)
-          return t("login.errorInvalidCredentials");
+        if (err?.response?.status === 401) return t("login.errorInvalidCredentials");
         return extractErrorMessage(err, t("login.failed"));
       })()
     : null;
@@ -141,7 +130,7 @@ export function LoginPage({
 
   return (
     <div className={cn("relative z-10 w-full max-w-md px-4 sm:px-0", className)} {...props}>
-      <div className="flex justify-end mb-2">
+      <div className="mb-2 flex justify-end">
         <LanguageToggle
           language={settings.language}
           onChange={(lang) => updateSetting("language", lang)}
@@ -198,9 +187,7 @@ export function LoginPage({
                 />
               ) : (
                 <>
-                  {loginError && (
-                    <FormAlert variant="error" message={loginError} />
-                  )}
+                  {loginError && <FormAlert variant="error" message={loginError} />}
                   {attempts > 0 && attempts < MAX_ATTEMPTS && (
                     <FormAlert
                       variant="info"
@@ -224,8 +211,7 @@ export function LoginPage({
                       : t("login.submit")}
                 </Button>
                 <FieldDescription className="text-center">
-                  {t("login.noAccount")}{" "}
-                  <Link to="/app/signup">{t("login.signUp")}</Link>
+                  {t("login.noAccount")} <Link to="/app/signup">{t("login.signUp")}</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

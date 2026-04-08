@@ -1,18 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { Suspense, lazy, memo, useEffect, useRef, useState } from "react";
 import { type AnimationKey } from "@/lib/animationTypes";
-
-import { DeepSpaceBackground } from "./DeepSpaceBackground";
-import { AuroraBackground } from "./AuroraBackground";
-import { FishtankBackground } from "./FishtankBackground";
-import { LavaLampBackground } from "./LavaLampBackground";
-import { SynthwaveBackground } from "./SynthwaveBackground";
-import { SakuraBackground } from "./SakuraBackground";
-import { StormBackground } from "./StormBackground";
-import { ParticleWebBackground } from "./ParticleWebBackground";
-import { PuddleRipplesBackground } from "./PuddleRipplesBackground";
-import { BioluminescenceBackground } from "./BioluminescenceBackground";
-import { ConstellationBackground } from "./ConstellationBackground";
-import { VoidBackground } from "./VoidBackground";
 
 interface Props {
   animationKey: AnimationKey;
@@ -24,21 +11,57 @@ interface Props {
 
 const CROSSFADE_MS = 600; // duration of the swap transition
 
+type BackgroundProps = {
+  colorLeft: string;
+  colorMiddle: string;
+  colorRight: string;
+  paused: boolean;
+};
+
+const DeepSpaceBackground = lazy(() =>
+  import("./DeepSpaceBackground").then((m) => ({ default: m.DeepSpaceBackground })),
+);
+const AuroraBackground = lazy(() =>
+  import("./AuroraBackground").then((m) => ({ default: m.AuroraBackground })),
+);
+const FishtankBackground = lazy(() =>
+  import("./FishtankBackground").then((m) => ({ default: m.FishtankBackground })),
+);
+const LavaLampBackground = lazy(() =>
+  import("./LavaLampBackground").then((m) => ({ default: m.LavaLampBackground })),
+);
+const SynthwaveBackground = lazy(() =>
+  import("./SynthwaveBackground").then((m) => ({ default: m.SynthwaveBackground })),
+);
+const SakuraBackground = lazy(() =>
+  import("./SakuraBackground").then((m) => ({ default: m.SakuraBackground })),
+);
+const StormBackground = lazy(() =>
+  import("./StormBackground").then((m) => ({ default: m.StormBackground })),
+);
+const ParticleWebBackground = lazy(() =>
+  import("./ParticleWebBackground").then((m) => ({ default: m.ParticleWebBackground })),
+);
+const PuddleRipplesBackground = lazy(() =>
+  import("./PuddleRipplesBackground").then((m) => ({ default: m.PuddleRipplesBackground })),
+);
+const BioluminescenceBackground = lazy(() =>
+  import("./BioluminescenceBackground").then((m) => ({ default: m.BioluminescenceBackground })),
+);
+const ConstellationBackground = lazy(() =>
+  import("./ConstellationBackground").then((m) => ({ default: m.ConstellationBackground })),
+);
+const VoidBackground = lazy(() =>
+  import("./VoidBackground").then((m) => ({ default: m.VoidBackground })),
+);
+
 interface Layer {
   id: number;
   key: AnimationKey;
   visible: boolean; // drives opacity — CSS transition handles the fade
 }
 
-function makeBackground(
-  key: AnimationKey,
-  shared: {
-    colorLeft: string;
-    colorMiddle: string;
-    colorRight: string;
-    paused: boolean;
-  },
-): React.ReactNode {
+function makeBackground(key: AnimationKey, shared: BackgroundProps): React.ReactNode {
   switch (key) {
     case "fishtank":
       return <FishtankBackground {...shared} />;
@@ -69,7 +92,7 @@ function makeBackground(
   }
 }
 
-export function AnimatedBackground({
+export const AnimatedBackground = memo(function AnimatedBackground({
   animationKey,
   colorLeft,
   colorMiddle,
@@ -93,17 +116,12 @@ export function AnimatedBackground({
     const newId = ++layerIdRef.current;
 
     // Add new layer (invisible) alongside the current one
-    setLayers((prev) => [
-      ...prev,
-      { id: newId, key: animationKey, visible: false },
-    ]);
+    setLayers((prev) => [...prev, { id: newId, key: animationKey, visible: false }]);
 
     // On the next paint: fade in new, fade out old
     const fadeId = setTimeout(() => {
       setLayers((prev) =>
-        prev.map((l) =>
-          l.id === newId ? { ...l, visible: true } : { ...l, visible: false },
-        ),
+        prev.map((l) => (l.id === newId ? { ...l, visible: true } : { ...l, visible: false })),
       );
     }, 20); // one rAF tick is enough
 
@@ -116,14 +134,12 @@ export function AnimatedBackground({
       clearTimeout(fadeId);
       clearTimeout(cleanId);
     };
-    // Only re-run when the animation key actually changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [animationKey]);
 
   const shared = { colorLeft, colorMiddle, colorRight, paused };
 
   return (
-    <div className="fixed inset-0 z-0 pointer-events-none">
+    <div className="pointer-events-none fixed inset-0 z-0">
       {layers.map((layer) => (
         // Inner layer: crossfade wrapper per animation
         <div
@@ -134,9 +150,9 @@ export function AnimatedBackground({
             transition: `opacity ${CROSSFADE_MS}ms ease-in-out`,
           }}
         >
-          {makeBackground(layer.key, shared)}
+          <Suspense fallback={null}>{makeBackground(layer.key, shared)}</Suspense>
         </div>
       ))}
     </div>
   );
-}
+});

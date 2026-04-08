@@ -36,20 +36,13 @@ export function useNewsCategoryFilter() {
 
   const selectedCategories = useMemo(
     () =>
-      (
-        Object.entries(selectedByCategory) as Array<
-          [NewsPost["category"], boolean]
-        >
-      )
+      (Object.entries(selectedByCategory) as Array<[NewsPost["category"], boolean]>)
         .filter(([, isSelected]) => isSelected)
         .map(([category]) => category),
     [selectedByCategory],
   );
 
-  function setCategorySelected(
-    category: NewsPost["category"],
-    checked: boolean,
-  ) {
+  function setCategorySelected(category: NewsPost["category"], checked: boolean) {
     setSelectedByCategory((prev) => ({ ...prev, [category]: checked }));
   }
 

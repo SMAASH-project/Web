@@ -15,15 +15,8 @@ import {
   sectionStyle,
 } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-import {
-  ALL_ANIMATION_KEYS,
-  ANIMATION_LABELS,
-  type AnimationKey,
-} from "@/lib/animationTypes";
-import {
-  type AnimationOverride,
-  type SettingsState,
-} from "@/pages/settings/SettingsContext";
+import { ALL_ANIMATION_KEYS, ANIMATION_LABELS, type AnimationKey } from "@/lib/animationTypes";
+import { type AnimationOverride, type SettingsState } from "@/pages/settings/SettingsContext";
 import type { ColorContextType } from "@/pages/settings/ColorContext";
 
 // ─── Memoised sub-components ──────────────────────────────────────────────────
@@ -84,13 +77,11 @@ const ThemeSection = memo(function ThemeSection({
   const hasEffectMix = effectMix !== null && Object.keys(effectMix).length > 0;
 
   return (
-    <div className="flex-1 flex items-center justify-center flex-col gap-4">
-      <Label className={`${classes.text} ${classes.shadow}`}>
-        {t("themes.title")}
-      </Label>
+    <div className="flex flex-1 flex-col items-center justify-center gap-4">
+      <Label className={`${classes.text} ${classes.shadow}`}>{t("themes.title")}</Label>
 
       {/* Theme preset grid */}
-      <div className="flex items-center justify-center gap-2 flex-wrap">
+      <div className="flex flex-wrap items-center justify-center gap-2">
         {THEMES.map((theme: Theme) => (
           <Button
             key={theme.name}
@@ -122,22 +113,18 @@ const ThemeSection = memo(function ThemeSection({
 
       {/* Effect picker */}
       <div className="w-full">
-        <Label
-          className={`block text-center mb-2 ${classes.text} ${classes.shadow}`}
-        >
-          Effect
-        </Label>
+        <Label className={`mb-2 block text-center ${classes.text} ${classes.shadow}`}>Effect</Label>
         <div className="flex flex-wrap justify-center gap-1.5">
           {/* Theme Default */}
           <Button
-            className={`cursor-pointer text-xs px-2.5 py-1 h-auto ${classes.btnSm} ${classes.shadow} ${currentOverride === null ? classes.ring : ""}`}
+            className={`h-auto cursor-pointer px-2.5 py-1 text-xs ${classes.btnSm} ${classes.shadow} ${currentOverride === null ? classes.ring : ""}`}
             onClick={() => setAnimOverride(null)}
           >
             Default
           </Button>
           {/* None */}
           <Button
-            className={`cursor-pointer text-xs px-2.5 py-1 h-auto ${classes.btnSm} ${classes.shadow} ${currentOverride === "none" ? classes.ring : ""}`}
+            className={`h-auto cursor-pointer px-2.5 py-1 text-xs ${classes.btnSm} ${classes.shadow} ${currentOverride === "none" ? classes.ring : ""}`}
             onClick={() => setAnimOverride("none")}
           >
             None
@@ -145,7 +132,7 @@ const ThemeSection = memo(function ThemeSection({
           {/* Custom mix — only shown when an effectMix is saved */}
           {hasEffectMix && (
             <Button
-              className={`cursor-pointer text-xs px-2.5 py-1 h-auto ${classes.btnSm} ${classes.shadow} ${currentOverride === "custom" ? classes.ring : ""}`}
+              className={`h-auto cursor-pointer px-2.5 py-1 text-xs ${classes.btnSm} ${classes.shadow} ${currentOverride === "custom" ? classes.ring : ""}`}
               onClick={() => setAnimOverride("custom")}
             >
               Custom
@@ -155,7 +142,7 @@ const ThemeSection = memo(function ThemeSection({
           {ALL_ANIMATION_KEYS.map((key: AnimationKey) => (
             <Button
               key={key}
-              className={`cursor-pointer text-xs px-2.5 py-1 h-auto ${classes.btnSm} ${classes.shadow} ${currentOverride === key ? classes.ring : ""}`}
+              className={`h-auto cursor-pointer px-2.5 py-1 text-xs ${classes.btnSm} ${classes.shadow} ${currentOverride === key ? classes.ring : ""}`}
               onClick={() => setAnimOverride(key)}
             >
               {ANIMATION_LABELS[key]}
@@ -172,10 +159,7 @@ const ThemeSection = memo(function ThemeSection({
 interface LanguageSectionProps {
   classes: ClassBag;
   language: SettingsState["language"];
-  updateSetting: <K extends keyof SettingsState>(
-    key: K,
-    value: SettingsState[K],
-  ) => void;
+  updateSetting: <K extends keyof SettingsState>(key: K, value: SettingsState[K]) => void;
   t: (k: string) => string;
 }
 
@@ -185,21 +169,13 @@ const LanguageSection = memo(function LanguageSection({
   updateSetting,
   t,
 }: LanguageSectionProps) {
-  const setEn = useCallback(
-    () => updateSetting("language", "en"),
-    [updateSetting],
-  );
-  const setHu = useCallback(
-    () => updateSetting("language", "hu"),
-    [updateSetting],
-  );
+  const setEn = useCallback(() => updateSetting("language", "en"), [updateSetting]);
+  const setHu = useCallback(() => updateSetting("language", "hu"), [updateSetting]);
 
   return (
-    <div className="flex-1 flex items-center justify-center flex-col gap-6">
-      <Label className={`${classes.text} ${classes.shadow}`}>
-        {t("language.title")}
-      </Label>
-      <div className="flex items-center justify-center gap-3 flex-wrap">
+    <div className="flex flex-1 flex-col items-center justify-center gap-6">
+      <Label className={`${classes.text} ${classes.shadow}`}>{t("language.title")}</Label>
+      <div className="flex flex-wrap items-center justify-center gap-3">
         <Button
           className={`cursor-pointer ${classes.btn} ${classes.shadow} ${language === "en" ? classes.ring : ""}`}
           onClick={setEn}
@@ -229,10 +205,7 @@ export const SettingsPageContent = memo(function SettingsPageContent({
   const { t } = useTranslation("settings");
 
   const classes = useMemo<ClassBag>(() => {
-    const rawBg = getBackgroundClasses(
-      settings.useLiquidGlass,
-      settings.useDarkMode,
-    );
+    const rawBg = getBackgroundClasses(settings.useLiquidGlass, settings.useDarkMode);
     const bg = animReady ? rawBg : rawBg.replace(/backdrop-blur-\S+/g, "");
     const btn = getButtonClasses(settings.useLiquidGlass, settings.useDarkMode);
     const btnSm = btn;
@@ -259,19 +232,15 @@ export const SettingsPageContent = memo(function SettingsPageContent({
   );
 
   return (
-    <Card
-      className={`z-0 flex flex-col w-full max-w-6xl p-6 sm:p-8 lg:p-10 gap-8 ${classes.bg}`}
-    >
-      <div className="flex flex-col lg:flex-row gap-8 lg:gap-10">
+    <Card className={`z-0 flex w-full max-w-6xl flex-col gap-8 p-6 sm:p-8 lg:p-10 ${classes.bg}`}>
+      <div className="flex flex-col gap-8 lg:flex-row lg:gap-10">
         {/* Visual — first in, no delay */}
         <div
-          className="flex-1 flex items-center justify-center flex-col gap-6"
+          className="flex flex-1 flex-col items-center justify-center gap-6"
           style={sectionStyle(animReady, 0)}
         >
-          <Label className={`${classes.text} ${classes.shadow}`}>
-            {t("visual.title")}
-          </Label>
-          <div className="w-full flex justify-center">
+          <Label className={`${classes.text} ${classes.shadow}`}>{t("visual.title")}</Label>
+          <div className="flex w-full justify-center">
             <SettingToggle />
           </div>
         </div>
@@ -279,7 +248,7 @@ export const SettingsPageContent = memo(function SettingsPageContent({
         {/* Themes + Animation inline — 80 ms */}
         <div
           style={sectionStyle(animReady, 80)}
-          className="flex-1 flex items-center justify-center flex-col gap-6"
+          className="flex flex-1 flex-col items-center justify-center gap-6"
         >
           <ThemeSection
             classes={classes}
@@ -293,7 +262,7 @@ export const SettingsPageContent = memo(function SettingsPageContent({
         {/* Language — 160 ms */}
         <div
           style={sectionStyle(animReady, 160)}
-          className="flex-1 flex items-center justify-center flex-col gap-6"
+          className="flex flex-1 flex-col items-center justify-center gap-6"
         >
           <LanguageSection
             classes={classes}

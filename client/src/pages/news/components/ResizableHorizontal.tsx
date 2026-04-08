@@ -1,8 +1,4 @@
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -60,9 +56,9 @@ export function ResizableHorizontal({
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>
-      <div className="flex gap-2 items-end">
+      <div className="flex items-end gap-2">
         <div className="flex-1">
-          <Label className="text-xs text-muted-foreground">Content %</Label>
+          <Label className="text-muted-foreground text-xs">Content %</Label>
           <Input
             type="number"
             min="0"
@@ -74,7 +70,7 @@ export function ResizableHorizontal({
           />
         </div>
         <div className="flex-1">
-          <Label className="text-xs text-muted-foreground">Image %</Label>
+          <Label className="text-muted-foreground text-xs">Image %</Label>
           <Input
             type="number"
             min="0"

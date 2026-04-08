@@ -27,9 +27,7 @@ export const ANIMATION_LABELS: Record<AnimationKey, string> = {
   void: "Void",
 };
 
-export const ALL_ANIMATION_KEYS = Object.keys(
-  ANIMATION_LABELS,
-) as AnimationKey[];
+export const ALL_ANIMATION_KEYS = Object.keys(ANIMATION_LABELS) as AnimationKey[];
 
 // ── Sub-effect interfaces ────────────────────────────────────────────────────
 
@@ -114,33 +112,65 @@ export type SubEffectMap = {
 export type EffectLayerConfig = Partial<SubEffectMap>;
 
 export const DEFAULT_SUB_EFFECTS: SubEffectMap = {
-  storm:           { showRain: true, showLightning: true, showClouds: true, showGroundShimmer: true },
-  fishtank:        { showFish: true, showBubbles: true, showSeaweed: true, showCaustics: true, showLightShafts: true },
-  deepspace:       { showStars: true, showMilkyWay: true, showNebulae: true, showShootingStars: true },
-  aurora:          { showColorBands: true, showFibers: true, showStars: true, showMoon: true },
-  lavalamp:        { showBlobs: true, showHighlight: true },
-  synthwave:       { showSky: true, showSun: true, showGrid: true, showScanlines: true },
-  sakura:          { showPetals: true, showBokeh: true },
-  particleweb:     { showParticles: true, showConnections: true },
-  puddleripples:   { showRipples: true },
+  storm: { showRain: true, showLightning: true, showClouds: true, showGroundShimmer: true },
+  fishtank: {
+    showFish: true,
+    showBubbles: true,
+    showSeaweed: true,
+    showCaustics: true,
+    showLightShafts: true,
+  },
+  deepspace: { showStars: true, showMilkyWay: true, showNebulae: true, showShootingStars: true },
+  aurora: { showColorBands: true, showFibers: true, showStars: true, showMoon: true },
+  lavalamp: { showBlobs: true, showHighlight: true },
+  synthwave: { showSky: true, showSun: true, showGrid: true, showScanlines: true },
+  sakura: { showPetals: true, showBokeh: true },
+  particleweb: { showParticles: true, showConnections: true },
+  puddleripples: { showRipples: true },
   bioluminescence: { showOrbs: true, showPulses: true, showVignette: true },
-  constellation:   { showStars: true, showConstellationLines: true },
-  void:            { showDepthBlobs: true, showJellyfish: true, showAmbientOrbs: true, showMarineSnow: true },
+  constellation: { showStars: true, showConstellationLines: true },
+  void: { showDepthBlobs: true, showJellyfish: true, showAmbientOrbs: true, showMarineSnow: true },
 };
 
 export const SUB_EFFECT_LABELS: { [K in AnimationKey]: Record<keyof SubEffectMap[K], string> } = {
-  storm:           { showRain: "Rain", showLightning: "Lightning", showClouds: "Clouds", showGroundShimmer: "Ground Shimmer" },
-  fishtank:        { showFish: "Fish", showBubbles: "Bubbles", showSeaweed: "Seaweed", showCaustics: "Caustics", showLightShafts: "Light Shafts" },
-  deepspace:       { showStars: "Stars", showMilkyWay: "Milky Way", showNebulae: "Nebulae", showShootingStars: "Shooting Stars" },
-  aurora:          { showColorBands: "Color Bands", showFibers: "Fibers", showStars: "Stars", showMoon: "Moon" },
-  lavalamp:        { showBlobs: "Blobs", showHighlight: "Highlight" },
-  synthwave:       { showSky: "Sky", showSun: "Sun", showGrid: "Grid", showScanlines: "Scanlines" },
-  sakura:          { showPetals: "Petals", showBokeh: "Bokeh" },
-  particleweb:     { showParticles: "Particles", showConnections: "Connections" },
-  puddleripples:   { showRipples: "Ripples" },
+  storm: {
+    showRain: "Rain",
+    showLightning: "Lightning",
+    showClouds: "Clouds",
+    showGroundShimmer: "Ground Shimmer",
+  },
+  fishtank: {
+    showFish: "Fish",
+    showBubbles: "Bubbles",
+    showSeaweed: "Seaweed",
+    showCaustics: "Caustics",
+    showLightShafts: "Light Shafts",
+  },
+  deepspace: {
+    showStars: "Stars",
+    showMilkyWay: "Milky Way",
+    showNebulae: "Nebulae",
+    showShootingStars: "Shooting Stars",
+  },
+  aurora: {
+    showColorBands: "Color Bands",
+    showFibers: "Fibers",
+    showStars: "Stars",
+    showMoon: "Moon",
+  },
+  lavalamp: { showBlobs: "Blobs", showHighlight: "Highlight" },
+  synthwave: { showSky: "Sky", showSun: "Sun", showGrid: "Grid", showScanlines: "Scanlines" },
+  sakura: { showPetals: "Petals", showBokeh: "Bokeh" },
+  particleweb: { showParticles: "Particles", showConnections: "Connections" },
+  puddleripples: { showRipples: "Ripples" },
   bioluminescence: { showOrbs: "Orbs", showPulses: "Pulses", showVignette: "Vignette" },
-  constellation:   { showStars: "Stars", showConstellationLines: "Constellation Lines" },
-  void:            { showDepthBlobs: "Depth Blobs", showJellyfish: "Jellyfish", showAmbientOrbs: "Ambient Orbs", showMarineSnow: "Marine Snow" },
+  constellation: { showStars: "Stars", showConstellationLines: "Constellation Lines" },
+  void: {
+    showDepthBlobs: "Depth Blobs",
+    showJellyfish: "Jellyfish",
+    showAmbientOrbs: "Ambient Orbs",
+    showMarineSnow: "Marine Snow",
+  },
 };
 
 export function hasEnabledEffects(config: EffectLayerConfig): boolean {

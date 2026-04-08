@@ -7,8 +7,7 @@ export function WithOnloadAnimation(WrappedComponent: ComponentType) {
   return function OnloadAnimation() {
     const [hidden, setHidden] = useState(false);
     const [isHovering, setIsHovering] = useState(false);
-    const { isDropdownHovering, setIsDropdownHovering, isDropdownOpen } =
-      useNavbarContext();
+    const { isDropdownHovering, setIsDropdownHovering, isDropdownOpen } = useNavbarContext();
     const isFreshMountRef = useRef(true);
     const isMobile = !useMediaQuery("(min-width: 768px)");
 
@@ -33,8 +32,7 @@ export function WithOnloadAnimation(WrappedComponent: ComponentType) {
 
     // Lock navbar open if the dropdown menu is open OR content is being hovered,
     // but only after the initial mount animation has completed
-    const shouldLockNavbar =
-      !isFreshMountRef.current && (isDropdownOpen || isDropdownHovering);
+    const shouldLockNavbar = !isFreshMountRef.current && (isDropdownOpen || isDropdownHovering);
 
     const isVisible = !hidden || shouldLockNavbar || isHovering;
 
@@ -56,7 +54,7 @@ export function WithOnloadAnimation(WrappedComponent: ComponentType) {
         }}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
-        className="z-99 relative max-w-full w-full"
+        className="relative z-99 w-full max-w-full"
       >
         <WrappedComponent />
       </m.div>

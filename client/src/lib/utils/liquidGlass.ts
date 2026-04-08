@@ -26,10 +26,7 @@ export function getLiquidGlassClasses(
 /**
  * Get text shadow classes for liquid glass elements with dark mode support
  */
-export function getLiquidGlassTextShadow(
-  useLiquidGlass: boolean,
-  useDarkMode: boolean,
-): string {
+export function getLiquidGlassTextShadow(useLiquidGlass: boolean, useDarkMode: boolean): string {
   if (!useLiquidGlass) return "";
   return useDarkMode
     ? "[text-shadow:0_2px_4px_rgba(32,32,32,0.8)]"
@@ -39,10 +36,7 @@ export function getLiquidGlassTextShadow(
 /**
  * Get highlight classes for liquid glass elements with dark mode support
  */
-export function getLiquidGlassHighlight(
-  useLiquidGlass: boolean,
-  useDarkMode: boolean,
-): string {
+export function getLiquidGlassHighlight(useLiquidGlass: boolean, useDarkMode: boolean): string {
   if (!useLiquidGlass) return "";
   return useDarkMode ? "bg-black/20 rounded-sm" : "bg-white/20 rounded-sm";
 }
@@ -50,10 +44,7 @@ export function getLiquidGlassHighlight(
 /**
  * Get nav highlight classes for liquid glass navigation with dark mode support
  */
-export function getLiquidGlassNavHighlight(
-  useLiquidGlass: boolean,
-  useDarkMode: boolean,
-): string {
+export function getLiquidGlassNavHighlight(useLiquidGlass: boolean, useDarkMode: boolean): string {
   if (!useLiquidGlass) return "";
   return useDarkMode ? "bg-black/20" : "bg-white/20";
 }
@@ -61,10 +52,7 @@ export function getLiquidGlassNavHighlight(
 /**
  * Glass dialog surface classes tuned for readability in dark mode.
  */
-export function getLiquidGlassDialogClasses(
-  useLiquidGlass: boolean,
-  useDarkMode: boolean,
-): string {
+export function getLiquidGlassDialogClasses(useLiquidGlass: boolean, useDarkMode: boolean): string {
   if (!useLiquidGlass) return "";
   return useDarkMode
     ? "bg-black/45 backdrop-blur-2xl border-black/45 shadow-2xl shadow-black/55 text-white"
@@ -79,9 +67,7 @@ export function getLiquidGlassDialogFooterClasses(
   useDarkMode: boolean,
 ): string {
   if (!useLiquidGlass) return "";
-  return useDarkMode
-    ? "mt-4 pt-4 border-t border-black/35"
-    : "mt-4 pt-4 border-t border-white/30";
+  return useDarkMode ? "mt-4 pt-4 border-t border-black/35" : "mt-4 pt-4 border-t border-white/30";
 }
 
 /**

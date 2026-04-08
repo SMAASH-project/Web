@@ -8,7 +8,7 @@ import { DebugPageContent } from "./DebugPageContent";
 import { getTextColor } from "@/lib/utils";
 
 export function DebugPage() {
-  const { isAdmin, isSupport, isInitializing } = useContext(AuthContext);
+  const { isAdmin, isInitializing } = useContext(AuthContext);
   const { settings } = useSettings();
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
 
@@ -17,30 +17,28 @@ export function DebugPage() {
 
   if (isInitializing) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white" />
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-white" />
       </div>
     );
   }
 
-  if (!isAdmin && !isSupport) {
+  if (!isAdmin) {
     return <NotFoundPage />;
   }
 
   return (
-    <div
-      className={`h-screen w-full flex flex-col overflow-hidden ${textColor}`}
-    >
+    <div className={`flex h-screen w-full flex-col overflow-hidden ${textColor}`}>
       <Navbar />
       {settings.useAnimations ? (
         <CardAnimation
-          className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-8 pt-26 pb-8 flex items-stretch justify-center overflow-hidden"
+          className="z-0 flex w-full flex-1 items-stretch justify-center overflow-hidden px-4 pt-26 pb-8 sm:px-6 lg:px-8"
           onAnimationComplete={handleAnimationComplete}
         >
           <DebugPageContent animReady={animDone} />
         </CardAnimation>
       ) : (
-        <div className="z-0 flex-1 w-full px-4 sm:px-6 lg:px-8 pt-26 pb-8 flex items-stretch justify-center overflow-hidden">
+        <div className="z-0 flex w-full flex-1 items-stretch justify-center overflow-hidden px-4 pt-26 pb-8 sm:px-6 lg:px-8">
           <DebugPageContent animReady={true} />
         </div>
       )}

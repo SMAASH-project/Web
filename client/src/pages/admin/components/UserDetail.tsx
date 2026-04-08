@@ -51,8 +51,7 @@ function getRoleConfig(role: string, t: (k: string) => string): RoleConfig {
       return {
         label: t("roles.admin"),
         icon: <Shield size={10} />,
-        badgeClass:
-          "bg-purple-500/20 text-purple-300 border border-purple-500/30",
+        badgeClass: "bg-purple-500/20 text-purple-300 border border-purple-500/30",
         statClass: "text-purple-400",
       };
     case "support":
@@ -95,11 +94,9 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
 
   if (!selectedUser) {
     return (
-      <div className="flex-1 flex items-center justify-center min-h-75">
-        <div className="text-center flex flex-col items-center gap-3 opacity-50">
-          <div className={`text-lg ${subtextColor}`}>
-            {t("users.noSelected")}
-          </div>
+      <div className="flex min-h-75 flex-1 items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-center opacity-50">
+          <div className={`text-lg ${subtextColor}`}>{t("users.noSelected")}</div>
         </div>
       </div>
     );
@@ -127,47 +124,35 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, delay: 0, ease: "easeOut" }}
-          className={`rounded-xl p-4 flex items-center gap-4 ${panelBg}`}
+          className={`flex items-center gap-4 rounded-xl p-4 ${panelBg}`}
         >
           <Avatar size="lg">
             <AvatarImage
-              src={
-                selectedProfile
-                  ? `/api/profiles/${selectedProfile.id}/pfp`
-                  : undefined
-              }
+              src={selectedProfile ? `/api/profiles/${selectedProfile.id}/pfp` : undefined}
               alt={selectedUser.username || selectedUser.email}
             />
-            <AvatarFallback
-              className={`text-lg font-bold ${avatarFallbackClass}`}
-            >
-              {(selectedUser.username || selectedUser.email)
-                .slice(0, 2)
-                .toUpperCase()}
+            <AvatarFallback className={`text-lg font-bold ${avatarFallbackClass}`}>
+              {(selectedUser.username || selectedUser.email).slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
 
-          <div className="flex-1 min-w-0">
-            <h2
-              className={`text-lg font-bold truncate ${textColor} ${textShadow}`}
-            >
+          <div className="min-w-0 flex-1">
+            <h2 className={`truncate text-lg font-bold ${textColor} ${textShadow}`}>
               {selectedUser.username || "—"}
             </h2>
-            <p
-              className={`text-sm truncate flex items-center gap-1.5 ${subtextColor}`}
-            >
+            <p className={`flex items-center gap-1.5 truncate text-sm ${subtextColor}`}>
               <Mail size={12} />
               {selectedUser.email}
             </p>
-            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            <div className="mt-1.5 flex flex-wrap items-center gap-2">
               <span
-                className={`text-xs px-2 py-0.5 rounded-full font-medium flex items-center gap-1 ${roleConfig.badgeClass}`}
+                className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${roleConfig.badgeClass}`}
               >
                 {roleConfig.icon}
                 {roleConfig.label}
               </span>
               {selectedUser.is_banned && (
-                <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-red-500/20 text-red-400 border border-red-500/30 flex items-center gap-1">
+                <span className="flex items-center gap-1 rounded-full border border-red-500/30 bg-red-500/20 px-2 py-0.5 text-xs font-medium text-red-400">
                   <Ban size={10} />
                   {selectedUser.banned_until
                     ? t("detail.bannedUntil", {
@@ -179,24 +164,22 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
             </div>
           </div>
 
-          <div className="flex flex-col gap-2 shrink-0">
+          <div className="flex shrink-0 flex-col gap-2">
             {selectedUser.is_banned ? (
               <Button
                 size="sm"
                 onClick={handleUnban}
                 disabled={unbanMutation.isPending}
-                className="text-xs flex items-center justify-center gap-1.5 w-full bg-green-600 hover:bg-green-700 text-white border-green-700"
+                className="flex w-full items-center justify-center gap-1.5 border-green-700 bg-green-600 text-xs text-white hover:bg-green-700"
               >
                 <ShieldCheck size={13} />
-                {unbanMutation.isPending
-                  ? t("detail.unbanning")
-                  : t("detail.unban")}
+                {unbanMutation.isPending ? t("detail.unbanning") : t("detail.unban")}
               </Button>
             ) : (
               <Button
                 size="sm"
                 onClick={() => setBanDialogOpen(true)}
-                className="text-xs flex items-center justify-center gap-1.5 w-full bg-red-600 hover:bg-red-700 text-white border-red-700"
+                className="flex w-full items-center justify-center gap-1.5 border-red-700 bg-red-600 text-xs text-white hover:bg-red-700"
               >
                 <Ban size={13} />
                 Ban User
@@ -207,19 +190,18 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
                 size="sm"
                 onClick={() => handlePromote("support")}
                 disabled={promoteMutation.isPending}
-                className="text-xs flex items-center justify-center gap-1.5 w-full bg-sky-600 hover:bg-sky-700 text-white border-sky-700"
+                className="flex w-full items-center justify-center gap-1.5 border-sky-700 bg-sky-600 text-xs text-white hover:bg-sky-700"
               >
                 <ArrowBigUp size={13} />
                 {promoteMutation.isPending ? "..." : "Support"}
               </Button>
             )}
-            {(selectedUser.role === "user" ||
-              selectedUser.role === "support") && (
+            {(selectedUser.role === "user" || selectedUser.role === "support") && (
               <Button
                 size="sm"
                 onClick={() => handlePromote("admin")}
                 disabled={promoteMutation.isPending}
-                className="text-xs flex items-center justify-center gap-1.5 w-full bg-purple-600 hover:bg-purple-700 text-white border-purple-700"
+                className="flex w-full items-center justify-center gap-1.5 border-purple-700 bg-purple-600 text-xs text-white hover:bg-purple-700"
               >
                 <ArrowBigUpDash size={13} />
                 {promoteMutation.isPending ? "..." : "Admin"}
@@ -230,19 +212,18 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
                 size="sm"
                 onClick={() => handlePromote("support")}
                 disabled={promoteMutation.isPending}
-                className="text-xs flex items-center justify-center gap-1.5 w-full bg-sky-600 hover:bg-sky-700 text-white border-sky-700"
+                className="flex w-full items-center justify-center gap-1.5 border-sky-700 bg-sky-600 text-xs text-white hover:bg-sky-700"
               >
                 <ArrowBigDown size={13} />
                 {promoteMutation.isPending ? "..." : "Support"}
               </Button>
             )}
-            {(selectedUser.role === "admin" ||
-              selectedUser.role === "support") && (
+            {(selectedUser.role === "admin" || selectedUser.role === "support") && (
               <Button
                 size="sm"
                 onClick={handleDemote}
                 disabled={demoteMutation.isPending}
-                className="text-xs flex items-center justify-center gap-1.5 w-full bg-amber-600 hover:bg-amber-700 text-white border-amber-700"
+                className="flex w-full items-center justify-center gap-1.5 border-amber-700 bg-amber-600 text-xs text-white hover:bg-amber-700"
               >
                 <ArrowBigDownDash size={13} />
                 {demoteMutation.isPending ? "..." : "User"}
@@ -256,27 +237,19 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, delay: 0.08, ease: "easeOut" }}
-          className={`rounded-xl p-4 flex flex-col gap-3 ${panelBg}`}
+          className={`flex flex-col gap-3 rounded-xl p-4 ${panelBg}`}
         >
-          <p
-            className={`text-xs font-semibold uppercase tracking-wider ${subtextColor}`}
-          >
+          <p className={`text-xs font-semibold tracking-wider uppercase ${subtextColor}`}>
             Account Details
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className={logic.statCard}>
               <p className={`text-xs ${subtextColor}`}>{t("detail.userId")}</p>
-              <p className={`text-sm font-semibold font-mono ${textColor}`}>
-                #{selectedUser.id}
-              </p>
+              <p className={`font-mono text-sm font-semibold ${textColor}`}>#{selectedUser.id}</p>
             </div>
             <div className={logic.statCard}>
-              <p className={`text-xs ${subtextColor}`}>
-                {t("detail.lastLogin")}
-              </p>
-              <p
-                className={`text-sm font-semibold flex items-center gap-1 ${textColor}`}
-              >
+              <p className={`text-xs ${subtextColor}`}>{t("detail.lastLogin")}</p>
+              <p className={`flex items-center gap-1 text-sm font-semibold ${textColor}`}>
                 <Clock size={12} />
                 {selectedUser.last_login || t("detail.never")}
               </p>
@@ -284,7 +257,7 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
             <div className={logic.statCard}>
               <p className={`text-xs ${subtextColor}`}>{t("detail.role")}</p>
               <span
-                className={`text-xs px-2 py-0.5 rounded-full font-medium flex items-center gap-1 w-fit mt-0.5 ${roleConfig.badgeClass}`}
+                className={`mt-0.5 flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${roleConfig.badgeClass}`}
               >
                 {roleConfig.icon}
                 {roleConfig.label}
@@ -295,9 +268,7 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
               <p
                 className={`text-sm font-semibold ${selectedUser.is_banned ? "text-red-400" : "text-green-400"}`}
               >
-                {selectedUser.is_banned
-                  ? t("detail.banned")
-                  : t("detail.active")}
+                {selectedUser.is_banned ? t("detail.banned") : t("detail.active")}
               </p>
             </div>
           </div>

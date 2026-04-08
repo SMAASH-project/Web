@@ -11,10 +11,8 @@ export function LanguageToggle({ language, onChange }: LanguageToggleProps) {
       <button
         type="button"
         onClick={() => onChange("en")}
-        className={`px-2 py-0.5 rounded transition-colors ${
-          language === "en"
-            ? "font-semibold text-gray-900"
-            : "hover:text-gray-700"
+        className={`rounded px-2 py-0.5 transition-colors ${
+          language === "en" ? "font-semibold text-gray-900" : "hover:text-gray-700"
         }`}
       >
         🇬🇧 EN
@@ -23,10 +21,8 @@ export function LanguageToggle({ language, onChange }: LanguageToggleProps) {
       <button
         type="button"
         onClick={() => onChange("hu")}
-        className={`px-2 py-0.5 rounded transition-colors ${
-          language === "hu"
-            ? "font-semibold text-gray-900"
-            : "hover:text-gray-700"
+        className={`rounded px-2 py-0.5 transition-colors ${
+          language === "hu" ? "font-semibold text-gray-900" : "hover:text-gray-700"
         }`}
       >
         🇭🇺 HU

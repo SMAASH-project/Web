@@ -8,25 +8,14 @@ interface CategorySelectorProps {
   onValueChange: (value: NewsPost["category"]) => void;
 }
 
-const CATEGORIES = [
-  "Major update",
-  "Minor update",
-  "Patch",
-  "Unrelated news",
-] as const;
+const CATEGORIES = ["Major update", "Minor update", "Patch", "Unrelated news"] as const;
 
-export function CategorySelector({
-  value,
-  onValueChange,
-}: CategorySelectorProps) {
+export function CategorySelector({ value, onValueChange }: CategorySelectorProps) {
   const { settings } = useSettings();
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
 
   return (
-    <RadioGroup
-      value={value}
-      onValueChange={(v) => onValueChange(v as NewsPost["category"])}
-    >
+    <RadioGroup value={value} onValueChange={(v) => onValueChange(v as NewsPost["category"])}>
       <div className="grid grid-cols-2 gap-3">
         {CATEGORIES.map((category) => {
           const isSelected = value === category;
@@ -34,11 +23,11 @@ export function CategorySelector({
           return (
             <label
               key={category}
-              className={`flex items-center gap-2.5 p-3 rounded-lg border cursor-pointer transition-all duration-150 ${
+              className={`flex cursor-pointer items-center gap-2.5 rounded-lg border p-3 transition-all duration-150 ${
                 isSelected
                   ? settings.useDarkMode
-                    ? "bg-black/35 border-black/35"
-                    : "bg-white/35 border-white/35"
+                    ? "border-black/35 bg-black/35"
+                    : "border-white/35 bg-white/35"
                   : settings.useDarkMode
                     ? "border-black/35 hover:bg-black/20"
                     : "border-white/35 hover:bg-white/20"
@@ -52,22 +41,17 @@ export function CategorySelector({
                 type="radio"
                 value={category}
                 checked={isSelected}
-                onChange={(e) =>
-                  onValueChange(e.target.value as NewsPost["category"])
-                }
+                onChange={(e) => onValueChange(e.target.value as NewsPost["category"])}
                 className="sr-only"
               />
               <span
-                className="size-4 shrink-0 rounded-full border-2 flex items-center justify-center"
+                className="flex size-4 shrink-0 items-center justify-center rounded-full border-2"
                 style={{
                   borderColor: isSelected ? color : "var(--color-border)",
                 }}
               >
                 {isSelected && (
-                  <span
-                    className="size-2 rounded-full"
-                    style={{ backgroundColor: color }}
-                  />
+                  <span className="size-2 rounded-full" style={{ backgroundColor: color }} />
                 )}
               </span>
               <span

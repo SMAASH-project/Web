@@ -45,9 +45,7 @@ const NotFoundPage = lazy(() =>
   })),
 );
 const ProfilePage = lazy(() =>
-  import("./pages/profile/ProfilePage.tsx").then(
-    (m) => ({ default: m.ProfilePage }),
-  ),
+  import("./pages/profile/ProfilePage.tsx").then((m) => ({ default: m.ProfilePage })),
 );
 const ProfileSelectorPage = lazy(() =>
   import("./pages/profile-selector/ProfileSelectorPage.tsx").then((m) => ({
@@ -55,24 +53,18 @@ const ProfileSelectorPage = lazy(() =>
   })),
 );
 const SettingsPage = lazy(() =>
-  import("./pages/settings/SettingsPage.tsx").then(
-    (m) => ({ default: m.SettingsPage }),
-  ),
+  import("./pages/settings/SettingsPage.tsx").then((m) => ({ default: m.SettingsPage })),
 );
 const AdminPage = lazy(() =>
-  import("./pages/admin/AdminPage.tsx").then(
-    (m) => ({
-      default: m.AdminPage,
-    }),
-  ),
+  import("./pages/admin/AdminPage.tsx").then((m) => ({
+    default: m.AdminPage,
+  })),
 );
 
 const DebugPage = lazy(() =>
-  import("./pages/debug/DebugPage.tsx").then(
-    (m) => ({
-      default: m.DebugPage,
-    }),
-  ),
+  import("./pages/debug/DebugPage.tsx").then((m) => ({
+    default: m.DebugPage,
+  })),
 );
 
 function withBoundary(element: React.ReactNode) {

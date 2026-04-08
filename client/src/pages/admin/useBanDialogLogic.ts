@@ -2,15 +2,7 @@ import { useCallback, useState, useMemo } from "react";
 import type * as React from "react";
 import type { DateRange } from "@/components/ui/calendar";
 
-export type BanPreset =
-  | "permanent"
-  | "1h"
-  | "12h"
-  | "24h"
-  | "7d"
-  | "31d"
-  | "365d"
-  | "custom";
+export type BanPreset = "permanent" | "1h" | "12h" | "24h" | "7d" | "31d" | "365d" | "custom";
 
 export interface PresetConfig {
   id: BanPreset;
@@ -153,12 +145,8 @@ export function useBanDialogLogic(initialOpen = false) {
    */
   const handleCalendarSelect = useCallback(
     (range: DateRange) => {
-      const newFrom = range.from
-        ? mergeDateWithTime(range.from, customStart)
-        : range.from;
-      const newTo = range.to
-        ? mergeDateWithTime(range.to, customEnd ?? range.to)
-        : range.to;
+      const newFrom = range.from ? mergeDateWithTime(range.from, customStart) : range.from;
+      const newTo = range.to ? mergeDateWithTime(range.to, customEnd ?? range.to) : range.to;
 
       const merged: DateRange = { from: newFrom, to: newTo };
       setCalendarRange(merged);
@@ -170,9 +158,7 @@ export function useBanDialogLogic(initialOpen = false) {
   );
 
   const canConfirm = useMemo(
-    () =>
-      selectedPreset !== null &&
-      (selectedPreset === "permanent" || !!customEnd),
+    () => selectedPreset !== null && (selectedPreset === "permanent" || !!customEnd),
     [selectedPreset, customEnd],
   );
 
