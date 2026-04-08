@@ -84,6 +84,7 @@ export function useItems() {
     queryFn: async () => {
       const { data } = await apiClient.get<ItemReadDTO[]>("/items", {
         params: { page: 1, page_size: 100 },
+        data: { profile_id: 0 },
       });
       return data.map(itemDTOToWebstoreItem);
     },

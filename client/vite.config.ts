@@ -72,6 +72,9 @@ export default defineConfig({
     setupFiles: ["./src/test-setup.ts"],
   },
   base: "/app/",
+  optimizeDeps: {
+    include: ["@tanstack/react-virtual"],
+  },
   server: {
     proxy: {
       "/api": {
