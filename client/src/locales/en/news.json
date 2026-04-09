@@ -31,6 +31,16 @@
     "imageRight": "Right",
     "imageRightDesc": "Place image to the right of the content."
   },
+  "filterTitle": "Select Filters",
+  "filterDescription": "Select which types of news posts you want to see.",
+  "results": "{{count}} results",
+  "posts": "{{count}} posts",
+  "filterOptions": {
+    "majorUpdate": { "label": "Major updates" },
+    "minorUpdate": { "label": "Minor updates", "description": "QOL improvements, bug fixes, etc." },
+    "patch": { "label": "Patches", "description": "Security updates, hotfixes, etc." },
+    "unrelatedNews": { "label": "Unrelated news", "description": "Events, community highlights, etc." }
+  },
   "noResults": "No posts found.",
   "edit": "Edit",
   "delete": {

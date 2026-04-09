@@ -3,6 +3,7 @@
   "subtitle": "Download the latest builds from GitHub",
   "searchPlaceholder": "Search by version…",
   "noResults": "No releases found.",
+  "noResultsForOs": "No releases found for {{os}}.",
   "fetchError": "Could not load releases from GitHub",
   "download": "Download",
   "os": {

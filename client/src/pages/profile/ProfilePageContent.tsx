@@ -175,7 +175,7 @@ export function ProfilePageContent({ animReady = true }: { animReady?: boolean }
           {selectedProfile?.coins !== undefined && (
             <p className={cn("mt-1 flex items-center justify-center gap-1 text-xs", subtextColor)}>
               <Coins size={11} />
-              {coins} coins
+              {coins} {t("common:common.coins")}
             </p>
           )}
         </div>

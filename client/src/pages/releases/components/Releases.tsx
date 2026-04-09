@@ -1,4 +1,5 @@
 import { useSettings } from "@/pages/settings/SettingsContext";
+import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -47,6 +48,7 @@ export function Releases({
   fetchError,
 }: ReleasesProps) {
   const { settings } = useSettings();
+  const { t } = useTranslation("releases");
   const glass = settings.useLiquidGlass;
   const bgClass = getBackgroundClasses(settings.useLiquidGlass, settings.useDarkMode, "light");
   const textShadow = getTextShadow(settings.useLiquidGlass, settings.useDarkMode);
@@ -59,7 +61,7 @@ export function Releases({
         <div className="mt-16 flex flex-col items-center justify-center gap-3 opacity-60">
           <Package className={`h-12 w-12 ${subtextColor}`} />
           <p className={`${subtextColor} text-base ${textShadow}`}>
-            No releases found for {selectedOs}.
+            {t("noResultsForOs", { os: selectedOs })}
           </p>
         </div>
       ) : (

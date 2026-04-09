@@ -182,7 +182,7 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
                 className="flex w-full items-center justify-center gap-1.5 border-red-700 bg-red-600 text-xs text-white hover:bg-red-700"
               >
                 <Ban size={13} />
-                Ban User
+                {t("detail.banUser")}
               </Button>
             )}
             {selectedUser.role === "user" && (
@@ -193,7 +193,7 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
                 className="flex w-full items-center justify-center gap-1.5 border-sky-700 bg-sky-600 text-xs text-white hover:bg-sky-700"
               >
                 <ArrowBigUp size={13} />
-                {promoteMutation.isPending ? "..." : "Support"}
+                {promoteMutation.isPending ? "..." : t("roles.support")}
               </Button>
             )}
             {(selectedUser.role === "user" || selectedUser.role === "support") && (
@@ -204,7 +204,7 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
                 className="flex w-full items-center justify-center gap-1.5 border-purple-700 bg-purple-600 text-xs text-white hover:bg-purple-700"
               >
                 <ArrowBigUpDash size={13} />
-                {promoteMutation.isPending ? "..." : "Admin"}
+                {promoteMutation.isPending ? "..." : t("roles.admin")}
               </Button>
             )}
             {selectedUser.role === "admin" && (
@@ -215,7 +215,7 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
                 className="flex w-full items-center justify-center gap-1.5 border-sky-700 bg-sky-600 text-xs text-white hover:bg-sky-700"
               >
                 <ArrowBigDown size={13} />
-                {promoteMutation.isPending ? "..." : "Support"}
+                {promoteMutation.isPending ? "..." : t("roles.support")}
               </Button>
             )}
             {(selectedUser.role === "admin" || selectedUser.role === "support") && (
@@ -226,7 +226,7 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
                 className="flex w-full items-center justify-center gap-1.5 border-amber-700 bg-amber-600 text-xs text-white hover:bg-amber-700"
               >
                 <ArrowBigDownDash size={13} />
-                {demoteMutation.isPending ? "..." : "User"}
+                {demoteMutation.isPending ? "..." : t("roles.user")}
               </Button>
             )}
           </div>
@@ -240,7 +240,7 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
           className={`flex flex-col gap-3 rounded-xl p-4 ${panelBg}`}
         >
           <p className={`text-xs font-semibold tracking-wider uppercase ${subtextColor}`}>
-            Account Details
+            {t("detail.accountDetails")}
           </p>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className={logic.statCard}>

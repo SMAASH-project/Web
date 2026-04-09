@@ -178,7 +178,9 @@
       "msgInfo": "Test info toast"
     },
     "cssVars": {
-      "title": "CSS Variables"
+      "title": "CSS Variables",
+      "copied": "Copied token value",
+      "copyFailed": "Failed to copy token value"
     },
     "emulation": {
       "viewportTitle": "Viewport Emulation",

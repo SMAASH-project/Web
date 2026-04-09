@@ -199,9 +199,9 @@ export function SightTab({
   const copyToClipboard = async (value: string) => {
     try {
       await navigator.clipboard.writeText(value);
-      toast.success("Copied token value");
+      toast.success(t("sight.cssVars.copied"));
     } catch {
-      toast.error("Failed to copy token value");
+      toast.error(t("sight.cssVars.copyFailed"));
     }
   };
 

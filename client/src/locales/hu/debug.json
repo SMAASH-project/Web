@@ -178,7 +178,9 @@
       "msgInfo": "Teszt infó értesítés"
     },
     "cssVars": {
-      "title": "CSS változók"
+      "title": "CSS változók",
+      "copied": "Token érték másolva",
+      "copyFailed": "Token érték másolása sikertelen"
     },
     "emulation": {
       "viewportTitle": "Nézőablak emuláció",

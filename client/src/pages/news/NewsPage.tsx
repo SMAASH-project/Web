@@ -81,7 +81,9 @@ export function NewsPage() {
               <span
                 className={`rounded-full px-2.5 py-1 text-xs font-medium ${bgClass} ${subtextColor}`}
               >
-                {isSearching ? `${visiblePosts.length} results` : `${totalCount} posts`}
+                {isSearching
+                  ? t("results", { count: visiblePosts.length })
+                  : t("posts", { count: totalCount })}
               </span>
             )}
             <FilterSelect

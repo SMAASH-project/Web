@@ -21,15 +21,25 @@
     "cancel": "Mégse",
     "submit": "Cikk létrehozása",
     "categories": {
-      "Major update": "Nagy frissítés",
-      "Minor update": "Kis frissítés",
-      "Patch": "Javítás",
-      "Unrelated news": "Egyéb hír"
+      "Major update": "Major update",
+      "Minor update": "Minor update",
+      "Patch": "Patch",
+      "Unrelated news": "Unrelated news"
     },
     "imageTop": "Fent",
     "imageTopDesc": "Kép elhelyezése bannerként a tartalom fölé.",
     "imageRight": "Jobbra",
     "imageRightDesc": "Kép elhelyezése a tartalom jobb oldalára."
+  },
+  "filterTitle": "Szűrők kiválasztása",
+  "filterDescription": "Válaszd ki, hogy mely típusú híreket szeretnéd látni.",
+  "results": "{{count}} találat",
+  "posts": "{{count}} bejegyzés",
+  "filterOptions": {
+    "majorUpdate": { "label": "Nagy frissítések" },
+    "minorUpdate": { "label": "Kis frissítések", "description": "QOL fejlesztések, hibajavítások, stb." },
+    "patch": { "label": "Javítások", "description": "Biztonsági frissítések, hotfixek, stb." },
+    "unrelatedNews": { "label": "Egyéb hírek", "description": "Események, közösségi kiemelések, stb." }
   },
   "noResults": "Nem található bejegyzés.",
   "edit": "Szerkesztés",
