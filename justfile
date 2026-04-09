@@ -33,6 +33,7 @@ build-fullstack: build-client build
     cd ./client && npm install && npm run build
 
 @dev:
+    echo "Starting development environment"
     wt new-tab -d . cmd /k go run -v cmd/api/main.go
     cd client && npm install && npm run dev
 
