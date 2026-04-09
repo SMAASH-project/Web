@@ -32,7 +32,7 @@ export default function UserList({ logic }: { logic: AdminPageLogic }) {
       <div className="flex items-center gap-2 px-1">
         <Shield size={14} className={subtextColor} />
         <span className={`text-xs font-semibold tracking-wider uppercase ${subtextColor}`}>
-          Users
+          {t("users.title")}
         </span>
         {!usersLoading && <span className={countBadge}>{filteredUsers.length}</span>}
       </div>
@@ -63,7 +63,7 @@ export default function UserList({ logic }: { logic: AdminPageLogic }) {
             </div>
           ))
         ) : filteredUsers.length === 0 ? (
-          <p className={`py-6 text-center text-xs ${subtextColor}`}>No users found</p>
+          <p className={`py-6 text-center text-xs ${subtextColor}`}>{t("users.noResults")}</p>
         ) : (
           paginatedUsers.map((user, index) => (
             <LoadPost key={user.id} index={index}>

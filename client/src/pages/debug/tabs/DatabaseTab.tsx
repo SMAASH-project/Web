@@ -519,12 +519,12 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
           case "characters":
             await createChar.mutateAsync({ name: form.name });
             addHistory(`Created character "${form.name}"`, true);
-            toast.success("Character created");
+            toast.success(t("toast.charCreated"));
             break;
           case "levels":
             await createLevel.mutateAsync({ name: form.name });
             addHistory(`Created level "${form.name}"`, true);
-            toast.success("Level created");
+            toast.success(t("toast.levelCreated"));
             break;
           case "items":
             await createItem.mutateAsync({
@@ -535,22 +535,22 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
               category_ids: formCategoryIds,
             });
             addHistory(`Created item "${form.name}"`, true);
-            toast.success("Item created");
+            toast.success(t("toast.itemCreated"));
             break;
           case "categories":
             await createCat.mutateAsync({ name: form.name });
             addHistory(`Created category "${form.name}"`, true);
-            toast.success("Category created");
+            toast.success(t("toast.catCreated"));
             break;
           case "rarities":
             await createRarity.mutateAsync({ name: form.name });
             addHistory(`Created rarity "${form.name}"`, true);
-            toast.success("Rarity created");
+            toast.success(t("toast.rarCreated"));
             break;
           case "roles":
             await createRole.mutateAsync({ name: form.name });
             addHistory(`Created role "${form.name}"`, true);
-            toast.success("Role created");
+            toast.success(t("toast.roleCreated"));
             break;
           case "purchases":
             await createPurchase.mutateAsync({
@@ -559,7 +559,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
               count: Number(form.count) || 1,
             });
             addHistory(`Created purchase for profile #${form.player_profile_id}`, true);
-            toast.success("Purchase created");
+            toast.success(t("toast.purchaseCreated"));
             break;
         }
       } else if (editTarget) {
@@ -568,7 +568,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
           case "users":
             await updateUser.mutateAsync({ id, email: form.email });
             addHistory(`Updated user #${id} email → ${form.email}`, true);
-            toast.success("User updated");
+            toast.success(t("toast.userUpdated"));
             break;
           case "profiles":
             await updateProfile.mutateAsync({
@@ -577,17 +577,17 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
               coins: Number(form.coins) || 0,
             });
             addHistory(`Updated profile #${id}`, true);
-            toast.success("Profile updated");
+            toast.success(t("toast.profileUpdated"));
             break;
           case "characters":
             await updateChar.mutateAsync({ id, name: form.name });
             addHistory(`Updated character #${id} → "${form.name}"`, true);
-            toast.success("Character updated");
+            toast.success(t("toast.charUpdated"));
             break;
           case "levels":
             await updateLevel.mutateAsync({ id, name: form.name });
             addHistory(`Updated level #${id} → "${form.name}"`, true);
-            toast.success("Level updated");
+            toast.success(t("toast.levelUpdated"));
             break;
           case "items":
             await updateItem.mutateAsync({
@@ -599,22 +599,22 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
               category_ids: formCategoryIds,
             });
             addHistory(`Updated item #${id}`, true);
-            toast.success("Item updated");
+            toast.success(t("toast.itemUpdated"));
             break;
           case "categories":
             await updateCat.mutateAsync({ id, name: form.name });
             addHistory(`Updated category #${id}`, true);
-            toast.success("Category updated");
+            toast.success(t("toast.catUpdated"));
             break;
           case "rarities":
             await updateRarity.mutateAsync({ id, name: form.name });
             addHistory(`Updated rarity #${id}`, true);
-            toast.success("Rarity updated");
+            toast.success(t("toast.rarUpdated"));
             break;
           case "roles":
             await updateRole.mutateAsync({ id, name: form.name });
             addHistory(`Updated role #${id}`, true);
-            toast.success("Role updated");
+            toast.success(t("toast.roleUpdated"));
             break;
           case "purchases":
             await updatePurchase.mutateAsync({
@@ -624,14 +624,14 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
               count: Number(form.count) || 1,
             });
             addHistory(`Updated purchase #${id}`, true);
-            toast.success("Purchase updated");
+            toast.success(t("toast.purchaseUpdated"));
             break;
         }
       }
       closeFormDialog();
     } catch {
       addHistory(`Failed to ${isCreating ? "create" : "update"} ${selected}`, false);
-      toast.error("Operation failed");
+      toast.error(t("toast.opFailed"));
     }
   };
 
@@ -669,11 +669,11 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
           break;
       }
       addHistory(`Deleted ${selected.replace(/s$/, "")} #${id} "${deleteTarget.label}"`, true);
-      toast.success("Deleted");
+      toast.success(t("toast.deleted"));
       setDeleteTarget(null);
     } catch {
       addHistory(`Failed to delete ${selected.replace(/s$/, "")} #${id}`, false);
-      toast.error("Delete failed");
+      toast.error(t("toast.deleteFailed"));
       setDeleteTarget(null);
     }
   };
@@ -697,28 +697,28 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
             `Banned user #${userId} (${email}) ${isPermanentBan ? "permanently" : `for ${banMinutes}m`}`,
             true,
           );
-          toast.success("User banned");
+          toast.success(t("toast.userBanned"));
           break;
         case "unban":
           await unbanUser.mutateAsync({ userId });
           addHistory(`Unbanned user #${userId} (${email})`, true);
-          toast.success("User unbanned");
+          toast.success(t("toast.userUnbanned"));
           break;
         case "promote":
           await promoteUser.mutateAsync({ userId, targetRole: promoteTarget });
           addHistory(`Promoted #${userId} (${email}) → ${promoteTarget}`, true);
-          toast.success(`Promoted to ${promoteTarget}`);
+          toast.success(t("toast.promotedTo", { role: promoteTarget }));
           break;
         case "demote":
           await demoteUser.mutateAsync({ userId });
           addHistory(`Demoted #${userId} (${email}) → user`, true);
-          toast.success("User demoted");
+          toast.success(t("toast.userDemoted"));
           break;
       }
       setUserActionTarget(null);
       setUserAction(null);
     } catch {
-      toast.error("Action failed");
+      toast.error(t("toast.actionFailed"));
       setUserActionTarget(null);
       setUserAction(null);
     }

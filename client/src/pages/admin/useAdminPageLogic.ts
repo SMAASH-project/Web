@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   useAdminUsersQuery,
   useBanUserMutation,
@@ -21,6 +22,7 @@ import { toast } from "@/lib/toast";
 export function useAdminPageLogic() {
   const { settings } = useSettings();
   const { useLiquidGlass, useDarkMode } = settings;
+  const { t } = useTranslation("admin");
 
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -79,9 +81,9 @@ export function useAdminPageLogic() {
         payload: { ban_type: banType, ban_until: banUntil, reason },
       });
       setBanDialogOpen(false);
-      toast.success("User banned successfully.");
+      toast.success(t("toast.bannedSuccess"));
     } catch {
-      toast.error("Failed to ban user. Please try again.");
+      toast.error(t("toast.banFailed"));
     }
   };
 
@@ -89,9 +91,9 @@ export function useAdminPageLogic() {
     if (!selectedUserId) return;
     try {
       await unbanMutation.mutateAsync({ userId: selectedUserId });
-      toast.success("User unbanned.");
+      toast.success(t("toast.unbannedSuccess"));
     } catch {
-      toast.error("Failed to unban user.");
+      toast.error(t("toast.unbanFailed"));
     }
   };
 
@@ -99,9 +101,9 @@ export function useAdminPageLogic() {
     if (!selectedUserId) return;
     try {
       await promoteMutation.mutateAsync({ userId: selectedUserId, targetRole });
-      toast.success(`User promoted to ${targetRole}.`);
+      toast.success(t("toast.promotedTo", { role: targetRole }));
     } catch {
-      toast.error("Failed to promote user.");
+      toast.error(t("toast.promoteFailed"));
     }
   };
 
@@ -109,9 +111,9 @@ export function useAdminPageLogic() {
     if (!selectedUserId) return;
     try {
       await demoteMutation.mutateAsync({ userId: selectedUserId });
-      toast.success("User demoted to user.");
+      toast.success(t("toast.demotedSuccess"));
     } catch {
-      toast.error("Failed to demote user.");
+      toast.error(t("toast.demoteFailed"));
     }
   };
 
@@ -123,9 +125,9 @@ export function useAdminPageLogic() {
         optimistic: false,
         invalidateAfterSuccess: true,
       });
-      toast.success("Coins updated.");
+      toast.success(t("toast.coinsUpdated"));
     } catch {
-      toast.error("Failed to update coins.");
+      toast.error(t("toast.coinsFailed"));
     }
   };
 

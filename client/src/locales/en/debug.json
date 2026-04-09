@@ -182,6 +182,32 @@
       "copied": "Copied token value",
       "copyFailed": "Failed to copy token value"
     },
+    "toast": {
+      "charCreated": "Character created",
+      "levelCreated": "Level created",
+      "itemCreated": "Item created",
+      "catCreated": "Category created",
+      "rarCreated": "Rarity created",
+      "roleCreated": "Role created",
+      "purchaseCreated": "Purchase created",
+      "userUpdated": "User updated",
+      "profileUpdated": "Profile updated",
+      "charUpdated": "Character updated",
+      "levelUpdated": "Level updated",
+      "itemUpdated": "Item updated",
+      "catUpdated": "Category updated",
+      "rarUpdated": "Rarity updated",
+      "roleUpdated": "Role updated",
+      "purchaseUpdated": "Purchase updated",
+      "opFailed": "Operation failed",
+      "deleted": "Deleted",
+      "deleteFailed": "Delete failed",
+      "userBanned": "User banned",
+      "userUnbanned": "User unbanned",
+      "promotedTo": "Promoted to {{role}}",
+      "userDemoted": "User demoted",
+      "actionFailed": "Action failed"
+    },
     "emulation": {
       "viewportTitle": "Viewport Emulation",
       "forceReducedMotion": "Force reduced motion",
@@ -200,7 +226,9 @@
       "baseDelay": "Base delay (ms)",
       "jitter": "Jitter ± (ms)",
       "jitterDesc": "Jitter adds random variance (±) to each request delay.",
-      "apply": "Apply"
+      "apply": "Apply",
+      "networkUpdated": "Network simulation updated",
+      "viewportApplied": "Custom viewport applied"
     },
     "diagnostics": {
       "a11yTitle": "A11y",

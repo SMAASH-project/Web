@@ -41,6 +41,12 @@
     "submit": "Tárgy létrehozása",
     "creating": "Létrehozás…"
   },
+  "toast": {
+    "unlocked": "Tárgy feloldva!",
+    "created": "Tárgy létrehozva.",
+    "deleted": "Tárgy törölve.",
+    "deleteFailed": "Nem sikerült törölni a tárgyat."
+  },
   "delete": {
     "confirm": "Törlés megerősítése",
     "description": "Biztosan törölni szeretnéd ezt a tárgyat? Ez a művelet nem vonható vissza.",

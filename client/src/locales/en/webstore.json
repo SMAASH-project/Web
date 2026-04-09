@@ -41,6 +41,12 @@
     "submit": "Create Item",
     "creating": "Creating…"
   },
+  "toast": {
+    "unlocked": "Item unlocked!",
+    "created": "Item created.",
+    "deleted": "Item deleted.",
+    "deleteFailed": "Failed to delete item."
+  },
   "delete": {
     "confirm": "Confirm Deletion",
     "description": "Are you sure you want to delete this item? This action cannot be undone.",

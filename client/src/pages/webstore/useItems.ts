@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback, useContext } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DateTime } from "luxon";
 import apiClient from "@/lib/apiClient";
@@ -70,6 +71,7 @@ function nowDateString(): string {
 
 export function useItems() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation("webstore");
   const { selectedProfile } = useProfiles();
   const { userId } = useContext(AuthContext);
   const profileId = selectedProfile?.id ?? null;
@@ -136,7 +138,7 @@ export function useItems() {
           queryKey: queryKeys.profiles.byUserId(Number(userId)),
         });
       }
-      toast.success("Item unlocked!");
+      toast.success(t("toast.unlocked"));
     },
     onError: (err) => {
       const msg = (err as any)?.response?.data?.error ?? err?.message ?? "Purchase failed.";
@@ -171,7 +173,7 @@ export function useItems() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items.all });
-      toast.success("Item created.");
+      toast.success(t("toast.created"));
     },
     onError: (err) => {
       const msg = (err as any)?.response?.data?.error ?? err?.message ?? "Failed to create item.";
@@ -197,11 +199,11 @@ export function useItems() {
       if (ctx?.previousItems !== undefined) {
         queryClient.setQueryData(queryKeys.items.all, ctx.previousItems);
       }
-      toast.error("Failed to delete item.");
+      toast.error(t("toast.deleteFailed"));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items.all });
-      toast.success("Item deleted.");
+      toast.success(t("toast.deleted"));
     },
   });
 

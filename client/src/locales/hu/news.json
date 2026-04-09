@@ -41,6 +41,14 @@
     "patch": { "label": "Javítások", "description": "Biztonsági frissítések, hotfixek, stb." },
     "unrelatedNews": { "label": "Egyéb hírek", "description": "Események, közösségi kiemelések, stb." }
   },
+  "toast": {
+    "created": "Bejegyzés létrehozva.",
+    "createFailed": "Nem sikerült létrehozni a bejegyzést.",
+    "updated": "Bejegyzés frissítve.",
+    "updateFailed": "Nem sikerült frissíteni a bejegyzést.",
+    "deleted": "Bejegyzés törölve.",
+    "deleteFailed": "Nem sikerült törölni a bejegyzést."
+  },
   "noResults": "Nem található bejegyzés.",
   "edit": "Szerkesztés",
   "delete": {

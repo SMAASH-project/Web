@@ -182,6 +182,32 @@
       "copied": "Token érték másolva",
       "copyFailed": "Token érték másolása sikertelen"
     },
+    "toast": {
+      "charCreated": "Karakter létrehozva",
+      "levelCreated": "Pálya létrehozva",
+      "itemCreated": "Tárgy létrehozva",
+      "catCreated": "Kategória létrehozva",
+      "rarCreated": "Ritkaság létrehozva",
+      "roleCreated": "Szerep létrehozva",
+      "purchaseCreated": "Vásárlás létrehozva",
+      "userUpdated": "Felhasználó frissítve",
+      "profileUpdated": "Profil frissítve",
+      "charUpdated": "Karakter frissítve",
+      "levelUpdated": "Pálya frissítve",
+      "itemUpdated": "Tárgy frissítve",
+      "catUpdated": "Kategória frissítve",
+      "rarUpdated": "Ritkaság frissítve",
+      "roleUpdated": "Szerep frissítve",
+      "purchaseUpdated": "Vásárlás frissítve",
+      "opFailed": "Művelet sikertelen",
+      "deleted": "Törölve",
+      "deleteFailed": "Törlés sikertelen",
+      "userBanned": "Felhasználó tiltva",
+      "userUnbanned": "Tiltás feloldva",
+      "promotedTo": "Előléptetve: {{role}}",
+      "userDemoted": "Felhasználó lefokozva",
+      "actionFailed": "Művelet sikertelen"
+    },
     "emulation": {
       "viewportTitle": "Nézőablak emuláció",
       "forceReducedMotion": "Csökkentett mozgás kényszerítése",
@@ -200,7 +226,9 @@
       "baseDelay": "Alap késleltetés (ms)",
       "jitter": "Jitter ± (ms)",
       "jitterDesc": "A jitter véletlenszerű szórást (±) ad az egyes kérések késleltetéséhez.",
-      "apply": "Alkalmazás"
+      "apply": "Alkalmazás",
+      "networkUpdated": "Hálózatszimuláció frissítve",
+      "viewportApplied": "Egyéni nézőablak alkalmazva"
     },
     "diagnostics": {
       "a11yTitle": "Akadálymentesség",

@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo, useCallback, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DateTime } from "luxon";
 import apiClient from "@/lib/apiClient";
@@ -58,6 +59,7 @@ const POSTS_KEY = ["posts"] as const;
 
 export function useNewsPosts(selectedCategories: NewsPost["category"][] = []) {
   const queryClient = useQueryClient();
+  const { t } = useTranslation("news");
   const [postsToShow, setPostsToShow] = useState(2);
   const [searchQuery, setSearchQuery] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
@@ -82,10 +84,10 @@ export function useNewsPosts(selectedCategories: NewsPost["category"][] = []) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: POSTS_KEY });
-      toast.success("Post created.");
+      toast.success(t("toast.created"));
     },
     onError: () => {
-      toast.error("Failed to create post.");
+      toast.error(t("toast.createFailed"));
     },
   });
 
@@ -96,10 +98,10 @@ export function useNewsPosts(selectedCategories: NewsPost["category"][] = []) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: POSTS_KEY });
-      toast.success("Post updated.");
+      toast.success(t("toast.updated"));
     },
     onError: () => {
-      toast.error("Failed to update post.");
+      toast.error(t("toast.updateFailed"));
     },
   });
 
@@ -124,10 +126,10 @@ export function useNewsPosts(selectedCategories: NewsPost["category"][] = []) {
       if (ctx?.previous) {
         queryClient.setQueryData(POSTS_KEY, ctx.previous);
       }
-      toast.error("Failed to delete post.");
+      toast.error(t("toast.deleteFailed"));
     },
     onSuccess: () => {
-      toast.success("Post deleted.");
+      toast.success(t("toast.deleted"));
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: POSTS_KEY });

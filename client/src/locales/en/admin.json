@@ -9,7 +9,10 @@
   "profiles": {
     "title": "Profiles",
     "noSelected": "No user selected",
-    "noProfiles": "No profiles"
+    "noProfiles": "No profiles",
+    "coinsTitle": "Coins",
+    "saved": "Saved",
+    "setCoins": "Set Coins"
   },
   "detail": {
     "accountDetails": "Account Details",
@@ -30,6 +33,18 @@
     "admin": "Admin",
     "support": "Support",
     "user": "User"
+  },
+  "toast": {
+    "bannedSuccess": "User banned successfully.",
+    "banFailed": "Failed to ban user. Please try again.",
+    "unbannedSuccess": "User unbanned.",
+    "unbanFailed": "Failed to unban user.",
+    "promotedTo": "User promoted to {{role}}.",
+    "promoteFailed": "Failed to promote user.",
+    "demotedSuccess": "User demoted.",
+    "demoteFailed": "Failed to demote user.",
+    "coinsUpdated": "Coins updated.",
+    "coinsFailed": "Failed to update coins."
   },
   "ban": {
     "title": "Ban User — {{name}}",

@@ -168,7 +168,7 @@ export function SightTab({
       networkDelayMs: Number.isFinite(delay) ? Math.max(0, Math.round(delay)) : 0,
       networkJitterMs: Number.isFinite(jitter) ? Math.max(0, Math.round(jitter)) : 0,
     });
-    toast.success("Network simulation updated");
+    toast.success(t("sight.emulation.networkUpdated"));
   };
 
   const applyViewportCustomSize = () => {
@@ -179,7 +179,7 @@ export function SightTab({
       forceViewportWidth: Number.isFinite(width) ? Math.max(320, Math.round(width)) : 1280,
       forceViewportHeight: Number.isFinite(height) ? Math.max(320, Math.round(height)) : 720,
     });
-    toast.success("Custom viewport applied");
+    toast.success(t("sight.emulation.viewportApplied"));
   };
 
   const applyViewportPreset = (presetId: string) => {

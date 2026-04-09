@@ -41,6 +41,14 @@
     "patch": { "label": "Patches", "description": "Security updates, hotfixes, etc." },
     "unrelatedNews": { "label": "Unrelated news", "description": "Events, community highlights, etc." }
   },
+  "toast": {
+    "created": "Post created.",
+    "createFailed": "Failed to create post.",
+    "updated": "Post updated.",
+    "updateFailed": "Failed to update post.",
+    "deleted": "Post deleted.",
+    "deleteFailed": "Failed to delete post."
+  },
   "noResults": "No posts found.",
   "edit": "Edit",
   "delete": {

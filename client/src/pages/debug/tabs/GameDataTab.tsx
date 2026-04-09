@@ -189,18 +189,18 @@ export function GameDataTab({
       if (editSection === "character") {
         if (editId !== null) {
           await updateChar.mutateAsync({ id: editId, name: formName });
-          toast.success("Character updated");
+          toast.success(t("toast.charUpdated"));
         } else {
           await createChar.mutateAsync({ name: formName });
-          toast.success("Character created");
+          toast.success(t("toast.charCreated"));
         }
       } else if (editSection === "level") {
         if (editId !== null) {
           await updateLevel.mutateAsync({ id: editId, name: formName });
-          toast.success("Level updated");
+          toast.success(t("toast.levelUpdated"));
         } else {
           await createLevel.mutateAsync({ name: formName });
-          toast.success("Level created");
+          toast.success(t("toast.levelCreated"));
         }
       } else if (editSection === "item") {
         const payload = {
@@ -212,15 +212,15 @@ export function GameDataTab({
         };
         if (editId !== null) {
           await updateItem.mutateAsync({ id: editId, ...payload });
-          toast.success("Item updated");
+          toast.success(t("toast.itemUpdated"));
         } else {
           await createItem.mutateAsync(payload);
-          toast.success("Item created");
+          toast.success(t("toast.itemCreated"));
         }
       }
       closeDialog();
     } catch {
-      toast.error("Operation failed");
+      toast.error(t("toast.opFailed"));
     }
   };
 
@@ -232,10 +232,10 @@ export function GameDataTab({
       if (deleteTarget.section === "character") await deleteChar.mutateAsync(deleteTarget.id);
       else if (deleteTarget.section === "level") await deleteLevel.mutateAsync(deleteTarget.id);
       else if (deleteTarget.section === "item") await deleteItem.mutateAsync(deleteTarget.id);
-      toast.success("Deleted");
+      toast.success(t("toast.deleted"));
       setDeleteTarget(null);
     } catch {
-      toast.error("Delete failed");
+      toast.error(t("toast.deleteFailed"));
       setDeleteTarget(null);
     }
   };
@@ -257,25 +257,25 @@ export function GameDataTab({
                   ban_until: new Date(Date.now() + Number(banMinutes) * 60_000).toISOString(),
                 },
           });
-          toast.success("User banned");
+          toast.success(t("toast.userBanned"));
           break;
         case "unban":
           await unbanUser.mutateAsync({ userId });
-          toast.success("User unbanned");
+          toast.success(t("toast.userUnbanned"));
           break;
         case "promote":
           await promoteUser.mutateAsync({ userId, targetRole: promoteTarget });
-          toast.success(`Promoted to ${promoteTarget}`);
+          toast.success(t("toast.promotedTo", { role: promoteTarget }));
           break;
         case "demote":
           await demoteUser.mutateAsync({ userId });
-          toast.success("User demoted");
+          toast.success(t("toast.userDemoted"));
           break;
       }
       setUserActionTarget(null);
       setUserAction(null);
     } catch {
-      toast.error("Action failed");
+      toast.error(t("toast.actionFailed"));
     }
   };
 
