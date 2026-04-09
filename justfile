@@ -32,6 +32,10 @@ build-fullstack: build-client build
     echo "Building client"
     cd ./client && npm install && npm run build
 
+@dev:
+    wt new-tab -d . cmd /k go run -v cmd/api/main.go
+    cd client && npm install && npm run dev
+
 # Auto-format frontend files checked by format:check
 @format-client:
     echo "Formatting client"
