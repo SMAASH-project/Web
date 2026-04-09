@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { Monitor, Database, Wifi, WifiOff, Bug } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { AuthContext } from "@/context/AuthContext";
 import { InfoRow, Section } from "./shared";
 
@@ -15,6 +16,7 @@ export function SystemTab({
 }) {
   const { isAdmin, isSupport, userId } = useContext(AuthContext);
   const queryClient = useQueryClient();
+  const { t } = useTranslation("debug");
   const cacheSize = queryClient.getQueryCache().getAll().length;
   const nav = navigator as Navigator & {
     connection?: { effectiveType?: string };
@@ -26,13 +28,13 @@ export function SystemTab({
   return (
     <div className="grid auto-rows-min grid-cols-1 gap-3 sm:grid-cols-2">
       <Section
-        title="Browser"
+        title={t("system.browser")}
         icon={<Monitor size={11} />}
         panelBg={panelBg}
         subtextColor={subtextColor}
       >
         <InfoRow
-          label="User Agent"
+          label={t("system.userAgent")}
           value={
             <span className="block max-w-48 truncate">
               {navigator.userAgent.split(")")[0] + ")"}
@@ -43,21 +45,21 @@ export function SystemTab({
           subtextColor={subtextColor}
         />
         <InfoRow
-          label="Language"
+          label={t("system.language")}
           value={navigator.language}
           textColor={textColor}
           subtextColor={subtextColor}
         />
         <InfoRow
-          label="Online"
+          label={t("system.online")}
           value={
             navigator.onLine ? (
               <span className="flex items-center gap-1 text-green-400">
-                <Wifi size={10} /> Online
+                <Wifi size={10} /> {t("system.online")}
               </span>
             ) : (
               <span className="flex items-center gap-1 text-red-400">
-                <WifiOff size={10} /> Offline
+                <WifiOff size={10} /> {t("system.offline")}
               </span>
             )
           }
@@ -66,7 +68,7 @@ export function SystemTab({
         />
         {nav.connection?.effectiveType && (
           <InfoRow
-            label="Connection"
+            label={t("system.connection")}
             value={nav.connection.effectiveType}
             mono
             textColor={textColor}
@@ -75,7 +77,7 @@ export function SystemTab({
         )}
         {nav.deviceMemory !== undefined && (
           <InfoRow
-            label="Device Memory"
+            label={t("system.deviceMemory")}
             value={`${nav.deviceMemory} GB`}
             mono
             textColor={textColor}
@@ -84,7 +86,7 @@ export function SystemTab({
         )}
         {nav.hardwareConcurrency !== undefined && (
           <InfoRow
-            label="CPU Threads"
+            label={t("system.cpuThreads")}
             value={String(nav.hardwareConcurrency)}
             mono
             textColor={textColor}
@@ -94,34 +96,34 @@ export function SystemTab({
       </Section>
 
       <Section
-        title="Display"
+        title={t("system.display")}
         icon={<Monitor size={11} />}
         panelBg={panelBg}
         subtextColor={subtextColor}
       >
         <InfoRow
-          label="Viewport"
+          label={t("system.viewport")}
           value={`${window.innerWidth} × ${window.innerHeight}`}
           mono
           textColor={textColor}
           subtextColor={subtextColor}
         />
         <InfoRow
-          label="Screen"
+          label={t("system.screen")}
           value={`${window.screen.width} × ${window.screen.height}`}
           mono
           textColor={textColor}
           subtextColor={subtextColor}
         />
         <InfoRow
-          label="Pixel Ratio"
+          label={t("system.pixelRatio")}
           value={`${window.devicePixelRatio}x`}
           mono
           textColor={textColor}
           subtextColor={subtextColor}
         />
         <InfoRow
-          label="Color Depth"
+          label={t("system.colorDepth")}
           value={`${window.screen.colorDepth}-bit`}
           mono
           textColor={textColor}
@@ -130,35 +132,35 @@ export function SystemTab({
       </Section>
 
       <Section
-        title="Session"
+        title={t("system.session")}
         icon={<Database size={11} />}
         panelBg={panelBg}
         subtextColor={subtextColor}
       >
-        <InfoRow label="Role" value={role} mono textColor={textColor} subtextColor={subtextColor} />
+        <InfoRow label={t("system.role")} value={role} mono textColor={textColor} subtextColor={subtextColor} />
         <InfoRow
-          label="User ID"
+          label={t("system.userId")}
           value={userId !== null ? `#${userId}` : "—"}
           mono
           textColor={textColor}
           subtextColor={subtextColor}
         />
         <InfoRow
-          label="Query Cache"
-          value={`${cacheSize} entries`}
+          label={t("system.queryCache")}
+          value={t("system.queryCacheCount", { count: cacheSize })}
           mono
           textColor={textColor}
           subtextColor={subtextColor}
         />
         <InfoRow
-          label="Timezone"
+          label={t("system.timezone")}
           value={Intl.DateTimeFormat().resolvedOptions().timeZone}
           mono
           textColor={textColor}
           subtextColor={subtextColor}
         />
         <InfoRow
-          label="Local Time"
+          label={t("system.localTime")}
           value={new Date().toLocaleTimeString()}
           textColor={textColor}
           subtextColor={subtextColor}
@@ -166,35 +168,35 @@ export function SystemTab({
       </Section>
 
       <Section
-        title="Environment"
+        title={t("system.environment")}
         icon={<Bug size={11} />}
         panelBg={panelBg}
         subtextColor={subtextColor}
       >
         <InfoRow
-          label="Base URL"
+          label={t("system.baseUrl")}
           value={window.location.origin}
           mono
           textColor={textColor}
           subtextColor={subtextColor}
         />
         <InfoRow
-          label="Path"
+          label={t("system.path")}
           value={window.location.pathname}
           mono
           textColor={textColor}
           subtextColor={subtextColor}
         />
         <InfoRow
-          label="Build Mode"
+          label={t("system.buildMode")}
           value={import.meta.env.MODE}
           mono
           textColor={textColor}
           subtextColor={subtextColor}
         />
         <InfoRow
-          label="Dev Server"
-          value={import.meta.env.DEV ? "Yes" : "No"}
+          label={t("system.devServer")}
+          value={import.meta.env.DEV ? t("system.yes") : t("system.no")}
           mono
           textColor={textColor}
           subtextColor={subtextColor}

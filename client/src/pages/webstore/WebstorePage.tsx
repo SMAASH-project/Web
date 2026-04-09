@@ -66,9 +66,9 @@ export function WebstorePage() {
           <div className="flex w-full items-center justify-between">
             <div className="flex flex-col gap-1">
               <h1 className={`text-2xl font-bold ${textColor} tracking-tight ${textShadow}`}>
-                Webstore
+                {t("title")}
               </h1>
-              <p className={`text-sm ${subtextColor}`}>Unlock characters</p>
+              <p className={`text-sm ${subtextColor}`}>{t("subtitle")}</p>
             </div>
 
             {/* Right side: coins display, admin create */}
@@ -101,18 +101,27 @@ export function WebstorePage() {
             <ItemFilters
               label={t("filters.rarity")}
               options={rarities}
+              displayOptions={rarities.map((r) =>
+                r === "All" ? t("filters.all") : t(`rarity.${r.toLowerCase()}`)
+              )}
               selected={selectedRarity}
               onSelect={handleRarityChange}
             />
             <ItemFilters
               label={t("filters.combat")}
               options={combatTypes}
+              displayOptions={combatTypes.map((c) =>
+                c === "All" ? t("filters.all") : t(`filters.${c.toLowerCase()}`)
+              )}
               selected={selectedCombatType}
               onSelect={handleCombatTypeChange}
             />
             <ItemFilters
               label={t("filters.ownership")}
               options={ownershipOptions}
+              displayOptions={ownershipOptions.map((o) =>
+                o === "All" ? t("filters.all") : t(`filters.${o.toLowerCase()}`)
+              )}
               selected={selectedOwnership}
               onSelect={handleOwnershipChange}
             />

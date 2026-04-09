@@ -1,4 +1,5 @@
 import { useCallback, useContext, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ColorContext } from "@/pages/settings/ColorContext";
 import {
   ALL_ANIMATION_KEYS,
@@ -99,6 +100,7 @@ export function EffectMixDialog() {
     setOpen(false);
   }, [context, settings.animationOverride, updateSetting]);
 
+  const { t } = useTranslation("settings");
   const { textColor, textShadow, buttonClass, dialogClass } = useMemo(
     () => ({
       textColor: getTextColor(settings.useLiquidGlass, settings.useDarkMode),
@@ -116,13 +118,13 @@ export function EffectMixDialog() {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button className={`cursor-pointer ${buttonClass} ${textShadow}`}>Mix Effects</Button>
+        <Button className={`cursor-pointer ${buttonClass} ${textShadow}`}>{t("mixEffects.triggerButton")}</Button>
       </DialogTrigger>
       <DialogContent className={`sm:max-w-3xl ${dialogClass} ${textColor}`}>
         <DialogHeader>
-          <DialogTitle className={textColor}>Mix Effects</DialogTitle>
+          <DialogTitle className={textColor}>{t("mixEffects.title")}</DialogTitle>
           <DialogDescription className={textColor}>
-            Toggle animation layers and preview the combined result.
+            {t("mixEffects.description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -208,10 +210,10 @@ export function EffectMixDialog() {
             className={`cursor-pointer ${buttonClass}`}
             onClick={handleClear}
           >
-            Clear
+            {t("mixEffects.clear")}
           </Button>
           <Button className={`cursor-pointer ${buttonClass}`} onClick={handleApply}>
-            Apply
+            {t("mixEffects.apply")}
           </Button>
         </DialogFooter>
       </DialogContent>

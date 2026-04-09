@@ -1,4 +1,6 @@
 import { Card } from "@/components/ui/card";
+import gbFlag from "@/assets/flags/gb-f.svg?url";
+import huFlag from "@/assets/flags/hu-f.svg?url";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { memo, useCallback, useContext, useMemo } from "react";
@@ -106,28 +108,28 @@ const ThemeSection = memo(function ThemeSection({
               context?.setAnimationKey(null);
             }}
           >
-            Custom
+            {t("effect.custom")}
           </Button>
         )}
       </div>
 
       {/* Effect picker */}
       <div className="w-full">
-        <Label className={`mb-2 block text-center ${classes.text} ${classes.shadow}`}>Effect</Label>
+        <Label className={`mb-2 block text-center ${classes.text} ${classes.shadow}`}>{t("effect.title")}</Label>
         <div className="flex flex-wrap justify-center gap-1.5">
           {/* Theme Default */}
           <Button
             className={`h-auto cursor-pointer px-2.5 py-1 text-xs ${classes.btnSm} ${classes.shadow} ${currentOverride === null ? classes.ring : ""}`}
             onClick={() => setAnimOverride(null)}
           >
-            Default
+            {t("effect.default")}
           </Button>
           {/* None */}
           <Button
             className={`h-auto cursor-pointer px-2.5 py-1 text-xs ${classes.btnSm} ${classes.shadow} ${currentOverride === "none" ? classes.ring : ""}`}
             onClick={() => setAnimOverride("none")}
           >
-            None
+            {t("effect.none")}
           </Button>
           {/* Custom mix — only shown when an effectMix is saved */}
           {hasEffectMix && (
@@ -135,7 +137,7 @@ const ThemeSection = memo(function ThemeSection({
               className={`h-auto cursor-pointer px-2.5 py-1 text-xs ${classes.btnSm} ${classes.shadow} ${currentOverride === "custom" ? classes.ring : ""}`}
               onClick={() => setAnimOverride("custom")}
             >
-              Custom
+              {t("effect.custom")}
             </Button>
           )}
           {/* Each animation key */}
@@ -180,13 +182,15 @@ const LanguageSection = memo(function LanguageSection({
           className={`cursor-pointer ${classes.btn} ${classes.shadow} ${language === "en" ? classes.ring : ""}`}
           onClick={setEn}
         >
-          🇬🇧 {t("language.en")}
+          <img src={gbFlag} alt="GB" className="h-3.5 w-auto" />
+          {t("language.en")}
         </Button>
         <Button
           className={`cursor-pointer ${classes.btn} ${classes.shadow} ${language === "hu" ? classes.ring : ""}`}
           onClick={setHu}
         >
-          🇭🇺 {t("language.hu")}
+          <img src={huFlag} alt="HU" className="h-3.5 w-auto" />
+          {t("language.hu")}
         </Button>
       </div>
     </div>

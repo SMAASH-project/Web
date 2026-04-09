@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Users,
   UserCircle,
@@ -306,6 +307,7 @@ interface DatabaseTabProps {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: DatabaseTabProps) {
+  const { t } = useTranslation("debug");
   // ── UI state ──────────────────────────────────────────────────────────────
   const [selected, setSelected] = useState<ResourceId>("users");
   const [filter, setFilter] = useState("");
@@ -733,9 +735,9 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
     const value = row[col];
     if (col === "is_banned") {
       return value ? (
-        <span className="font-medium text-red-400">Banned</span>
+        <span className="font-medium text-red-400">{t("db.bannedStatus")}</span>
       ) : (
-        <span className="text-green-400">Active</span>
+        <span className="text-green-400">{t("db.activeStatus")}</span>
       );
     }
     if (col === "last_login" || col === "created_at" || col === "updated_at") {
@@ -840,7 +842,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
           </>
         );
       default:
-        return <p className={`text-xs ${subtextColor}`}>No editable fields for this resource.</p>;
+        return <p className={`text-xs ${subtextColor}`}>{t("db.noEditableFields")}</p>;
     }
   };
 
@@ -850,32 +852,32 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       {[
         {
-          title: "Top Items",
+          title: t("db.topItems"),
           icon: <ShoppingBag size={11} />,
           rows: topItems.map((x) => ({
             label: x.name,
-            value: `${x.count_of_purchases} purchases`,
+            value: `${x.count_of_purchases} ${t("db.purchases")}`,
           })),
         },
         {
-          title: "Top Players",
+          title: t("db.topPlayers"),
           icon: <UserCircle size={11} />,
           rows: topPlayers.map((x) => ({
             label: x.display_name,
-            value: `${x.count_of_matches} matches`,
+            value: `${x.count_of_matches} ${t("db.matches")}`,
           })),
         },
         {
-          title: "Top Levels",
+          title: t("db.topLevels"),
           icon: <Layers size={11} />,
-          rows: topLevels.map((x) => ({ label: x.name, value: `${x.count_of_plays} plays` })),
+          rows: topLevels.map((x) => ({ label: x.name, value: `${x.count_of_plays} ${t("db.plays")}` })),
         },
         {
-          title: "Leaderboard",
+          title: t("db.leaderboard"),
           icon: <Star size={11} />,
           rows: leaderboard.map((x) => ({
             label: x.display_name,
-            value: `${x.count_of_wins} wins`,
+            value: `${x.count_of_wins} ${t("db.wins")}`,
           })),
         },
       ].map(({ title, icon, rows }) => (
@@ -885,7 +887,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
             <p className="text-[10px] font-semibold tracking-widest uppercase">{title}</p>
           </div>
           {rows.length === 0 ? (
-            <p className={`py-2 text-center text-[10px] opacity-40 ${subtextColor}`}>No data</p>
+            <p className={`py-2 text-center text-[10px] opacity-40 ${subtextColor}`}>{t("db.statsNoData")}</p>
           ) : (
             rows.slice(0, 8).map((row, i) => (
               <div
@@ -948,10 +950,19 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
   // Render
   // ─────────────────────────────────────────────────────────────────────────
 
+  const noActionsNotes: Partial<Record<ResourceId, string>> = {
+    posts: t("db.postsNoActionsNote"),
+    stats: t("db.statsNoActionsNote"),
+  };
+  const dangerNotes: Partial<Record<ResourceId, string>> = {
+    users: t("db.usersDangerNote"),
+    profiles: t("db.profilesDangerNote"),
+  };
+
   const formDialogOpen = isCreating || editTarget !== null;
   const formDialogTitle = isCreating
-    ? `New ${currentMeta.label.replace(/s$/, "")}`
-    : `Edit ${currentMeta.label.replace(/s$/, "")} #${editTarget?.id ?? ""}`;
+    ? `${t("db.dialogNew")} ${currentMeta.label.replace(/s$/, "")}`
+    : `${t("db.edit")} ${currentMeta.label.replace(/s$/, "")} #${editTarget?.id ?? ""}`;
 
   return (
     <div className="flex flex-col gap-3">
@@ -997,7 +1008,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
             <>
               <input
                 type="text"
-                placeholder="Filter…"
+                placeholder={t("db.filter")}
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
                 className={`w-32 rounded-lg px-2 py-1 text-[10px] ${inputClass}`}
@@ -1008,7 +1019,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
                   className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] transition-colors ${subtextColor} hover:bg-current/10`}
                 >
                   {showSchema ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
-                  Schema
+                  {t("db.schema")}
                 </button>
               )}
               {currentMeta.canCreate && (
@@ -1016,7 +1027,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
                   onClick={openCreate}
                   className="flex items-center gap-1 rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] font-medium text-violet-300 transition-colors hover:bg-violet-500/30"
                 >
-                  <Plus size={10} /> Add
+                  <Plus size={10} /> {t("db.add")}
                 </button>
               )}
             </>
@@ -1029,9 +1040,9 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
             <table className="w-full text-[10px]">
               <thead>
                 <tr className={subtextColor}>
-                  <th className="pb-1 text-left font-semibold">Field</th>
-                  <th className="pb-1 text-left font-semibold">Type</th>
-                  <th className="pb-1 text-left font-semibold">Notes</th>
+                  <th className="pb-1 text-left font-semibold">{t("db.schemaField")}</th>
+                  <th className="pb-1 text-left font-semibold">{t("db.schemaType")}</th>
+                  <th className="pb-1 text-left font-semibold">{t("db.schemaLabelNotes")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1049,7 +1060,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
 
         {/* No-actions note */}
         {currentMeta.noActionsNote && (
-          <p className={`text-[10px] ${subtextColor} opacity-60`}>{currentMeta.noActionsNote}</p>
+          <p className={`text-[10px] ${subtextColor} opacity-60`}>{noActionsNotes[selected] ?? currentMeta.noActionsNote}</p>
         )}
 
         {/* Stats special view */}
@@ -1064,7 +1075,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
               </div>
             ) : filteredRows.length === 0 ? (
               <p className={`py-4 text-center text-xs opacity-40 ${subtextColor}`}>
-                {filter ? "No matches" : "No data"}
+                {filter ? t("db.noMatches") : t("db.noData")}
               </p>
             ) : (
               <div className="max-h-80 overflow-y-auto">
@@ -1081,7 +1092,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
                       ))}
                       {(currentMeta.canUpdate || currentMeta.canDelete || selected === "users") && (
                         <th className={`pb-1 text-right text-[10px] font-semibold ${subtextColor}`}>
-                          Actions
+                          {t("db.actions")}
                         </th>
                       )}
                     </tr>
@@ -1149,7 +1160,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
         >
           <div className="flex items-center gap-1.5">
             <Clock size={11} />
-            Session History
+            {t("db.sessionHistory")}
             {history.length > 0 && (
               <span className="rounded-full bg-current/10 px-1.5 py-0.5 text-[9px]">
                 {history.length}
@@ -1163,7 +1174,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
           <div className="border-t border-current/10 px-3 pb-3">
             {history.length === 0 ? (
               <p className={`py-3 text-center text-xs opacity-40 ${subtextColor}`}>
-                No actions yet this session
+                {t("db.noActionsYet")}
               </p>
             ) : (
               <div className="flex flex-col gap-0.5 pt-2">
@@ -1185,7 +1196,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
                   onClick={() => setHistory([])}
                   className={`mt-1 flex items-center gap-1 self-end text-[10px] ${subtextColor} hover:opacity-80`}
                 >
-                  <RefreshCw size={9} /> Clear
+                  <RefreshCw size={9} /> {t("db.clearHistory")}
                 </button>
               </div>
             )}
@@ -1198,32 +1209,28 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
         <div className="flex items-center gap-2 border-b border-red-500/15 px-3 py-2">
           <AlertTriangle size={11} className="shrink-0 text-red-400" />
           <p className="text-[10px] font-semibold tracking-widest text-red-400 uppercase">
-            Danger Zone
+            {t("db.dangerZone")}
           </p>
         </div>
         <div className="px-3 py-2.5">
           <p className={`mb-2 text-[10px] leading-relaxed ${subtextColor}`}>
-            Row-level deletes for <strong className={textColor}>Users</strong> and{" "}
-            <strong className={textColor}>Profiles</strong> cascade to related records and are
-            irreversible. Use the row actions above after selecting those tables.
+            {t("db.dangerDesc")}
           </p>
           <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
             <div className="rounded-lg border border-red-500/15 p-2">
               <p className={`mb-0.5 text-[10px] font-semibold ${textColor}`}>
-                Delete User (cascade)
+                {t("db.deleteUserCascade")}
               </p>
               <p className={`text-[9px] leading-relaxed ${subtextColor}`}>
-                Removes the user, all their profiles, purchases, and match participations. Select
-                the <strong>Users</strong> table and use the trash icon on a row.
+                {t("db.deleteUserCascadeDesc")}
               </p>
             </div>
             <div className="rounded-lg border border-red-500/15 p-2">
               <p className={`mb-0.5 text-[10px] font-semibold ${textColor}`}>
-                Delete Profile (cascade)
+                {t("db.deleteProfileCascade")}
               </p>
               <p className={`text-[9px] leading-relaxed ${subtextColor}`}>
-                Removes the profile and all associated purchases. Select <strong>Profiles</strong>{" "}
-                table and use the trash icon on a row.
+                {t("db.deleteProfileCascadeDesc")}
               </p>
             </div>
           </div>
@@ -1237,7 +1244,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
             <DialogTitle>{formDialogTitle}</DialogTitle>
             {isCreating && (
               <DialogDescription className={`text-xs ${subtextColor}`}>
-                Fill in the required fields and click Save.
+                {t("db.fillRequired")}
               </DialogDescription>
             )}
           </DialogHeader>
@@ -1248,14 +1255,14 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
               onClick={closeFormDialog}
               className={`rounded-lg border border-current/20 px-3 py-1.5 text-xs ${subtextColor} hover:border-current/40`}
             >
-              Cancel
+              {t("db.cancel")}
             </button>
             <button
               type="button"
               onClick={handleFormSubmit}
               className="rounded-lg bg-violet-500/20 px-3 py-1.5 text-xs font-medium text-violet-300 transition-colors hover:bg-violet-500/30"
             >
-              Save
+              {t("db.save")}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -1267,20 +1274,16 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Trash2 size={14} className="text-red-400" />
-              Delete {currentMeta.label.replace(/s$/, "")}
+              {t("db.delete")} {currentMeta.label.replace(/s$/, "")}
             </DialogTitle>
             <DialogDescription className={`text-xs ${subtextColor}`}>
-              Delete{" "}
-              <strong className={textColor}>
-                #{deleteTarget?.id} {deleteTarget?.label}
-              </strong>
-              ? This cannot be undone.
+              {t("db.deleteDesc", { id: deleteTarget?.id ?? "", label: deleteTarget?.label ?? "" })}
             </DialogDescription>
           </DialogHeader>
           {deleteTarget?.isDanger && deleteTarget.dangerNote && (
             <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-2.5">
               <AlertTriangle size={11} className="mt-0.5 shrink-0 text-red-400" />
-              <p className="text-[10px] text-red-300">{deleteTarget.dangerNote}</p>
+              <p className="text-[10px] text-red-300">{dangerNotes[selected] ?? deleteTarget.dangerNote}</p>
             </div>
           )}
           <DialogFooter>
@@ -1289,14 +1292,14 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
               onClick={() => setDeleteTarget(null)}
               className={`rounded-lg border border-current/20 px-3 py-1.5 text-xs ${subtextColor} hover:border-current/40`}
             >
-              Cancel
+              {t("db.cancel")}
             </button>
             <button
               type="button"
               onClick={handleDelete}
               className="rounded-lg bg-red-500/20 px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/30"
             >
-              Delete
+              {t("db.delete")}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -1319,10 +1322,10 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
               {userAction === "unban" && <ShieldCheck size={14} className="text-green-400" />}
               {userAction === "promote" && <ArrowUpCircle size={14} className="text-violet-400" />}
               {userAction === "demote" && <ArrowDownCircle size={14} className="text-amber-400" />}
-              {userAction === "ban" && "Ban User"}
-              {userAction === "unban" && "Unban User"}
-              {userAction === "promote" && "Promote User"}
-              {userAction === "demote" && "Demote User"}
+              {userAction === "ban" && t("db.banUser")}
+              {userAction === "unban" && t("db.unbanUser")}
+              {userAction === "promote" && t("db.promoteUser")}
+              {userAction === "demote" && t("db.demoteUser")}
             </DialogTitle>
             <DialogDescription className={`text-xs ${subtextColor}`}>
               {userActionTarget?.email} #{userActionTarget?.userId}
@@ -1332,7 +1335,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
           {userAction === "ban" && (
             <div className="flex flex-col gap-3 py-1">
               <label className="flex items-center justify-between">
-                <span className={`text-xs ${subtextColor}`}>Permanent</span>
+                <span className={`text-xs ${subtextColor}`}>{t("db.permanent")}</span>
                 <button
                   type="button"
                   onClick={() => setIsPermanentBan((v) => !v)}
@@ -1345,7 +1348,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
               </label>
               {!isPermanentBan && (
                 <div className="flex flex-col gap-1">
-                  <label className={`text-[10px] ${subtextColor}`}>Duration (minutes)</label>
+                  <label className={`text-[10px] ${subtextColor}`}>{t("db.durationMinutes")}</label>
                   <input
                     type="number"
                     min={1}
@@ -1403,7 +1406,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
               }}
               className={`rounded-lg border border-current/20 px-3 py-1.5 text-xs ${subtextColor} hover:border-current/40`}
             >
-              Cancel
+              {t("db.cancel")}
             </button>
             <button
               type="button"
@@ -1418,7 +1421,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
                       : "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
               }`}
             >
-              Confirm
+              {t("db.confirm")}
             </button>
           </DialogFooter>
         </DialogContent>

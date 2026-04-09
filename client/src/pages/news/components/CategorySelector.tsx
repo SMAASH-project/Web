@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { RadioGroup } from "@/components/ui/radio-group";
 import { CATEGORY_COLORS, type NewsPost } from "@/types/PageTypes";
 import { useSettings } from "@/pages/settings/SettingsContext";
@@ -12,6 +13,7 @@ const CATEGORIES = ["Major update", "Minor update", "Patch", "Unrelated news"] a
 
 export function CategorySelector({ value, onValueChange }: CategorySelectorProps) {
   const { settings } = useSettings();
+  const { t } = useTranslation("news");
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
 
   return (
@@ -60,7 +62,7 @@ export function CategorySelector({ value, onValueChange }: CategorySelectorProps
                   settings.useDarkMode,
                 )}`}
               >
-                {category}
+                {t(`add.categories.${category}`)}
               </span>
             </label>
           );

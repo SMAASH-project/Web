@@ -1,0 +1,11 @@
+{
+  "title": "Gallery",
+  "subtitle": "Characters and original soundtrack",
+  "tabs": {
+    "characters": "Characters",
+    "ost": "OST"
+  },
+  "noCharacters": "No characters yet",
+  "noTracks": "No tracks yet",
+  "tracklist": "Tracklist"
+}

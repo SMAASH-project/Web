@@ -38,7 +38,9 @@
     "addNew": "Add New",
     "manage": "Manage Profiles",
     "done": "Done",
-    "logout": "Logout"
+    "logout": "Logout",
+    "profilesAvailable_one": "{{count}} profile available",
+    "profilesAvailable_other": "{{count}} profiles available"
   },
   "addProfile": {
     "title": "Create New Profile",

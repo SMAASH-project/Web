@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import Navbar from "@/components/nav/Navbar";
 import { useSettings } from "@/pages/settings/SettingsContext";
 import { getBackgroundClasses, getTextColor, getSubtextColor, getTextShadow } from "@/lib/utils";
@@ -63,6 +64,7 @@ function OstPlayer({
   useLiquidGlass: boolean;
   useDarkMode: boolean;
 }) {
+  const { t } = useTranslation("gallery");
   const audioRef = useRef<HTMLAudioElement>(null);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -173,7 +175,7 @@ function OstPlayer({
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-24 opacity-50">
         <Music2 className={`h-12 w-12 ${subtextColor}`} />
-        <p className={`text-sm ${subtextColor}`}>No tracks yet</p>
+        <p className={`text-sm ${subtextColor}`}>{t("noTracks")}</p>
         <p className={`max-w-64 text-center text-xs ${subtextColor} opacity-70`}>
           Add .mp3 files to <code className="font-mono">build/client/assets/music/</code> and
           register them in the OST_TRACKS list in GalleryPage.tsx
@@ -289,7 +291,7 @@ function OstPlayer({
         <div
           className={`px-4 py-2.5 text-[10px] font-semibold tracking-wider uppercase ${subtextColor} border-b border-current/10`}
         >
-          Tracklist
+          {t("tracklist")}
         </div>
         <div className="flex flex-col">
           {OST_TRACKS.map((t, i) => (
@@ -441,6 +443,7 @@ export function GalleryPage() {
   const textShadow = getTextShadow(useLiquidGlass, useDarkMode);
   const panelBg = getBackgroundClasses(useLiquidGlass, useDarkMode, "light");
 
+  const { t } = useTranslation("gallery");
   const { data: characters = [], isLoading: charsLoading } = useDebugCharactersQuery();
 
   const isLoading = activeTab === "characters" ? charsLoading : false;
@@ -451,9 +454,9 @@ export function GalleryPage() {
       <div className="z-0 mx-auto mt-20 flex w-full max-w-6xl flex-col items-center justify-start gap-6 pb-8">
         <div className="flex w-full flex-col gap-1">
           <h1 className={`text-2xl font-bold ${textColor} tracking-tight ${textShadow}`}>
-            Gallery
+            {t("title")}
           </h1>
-          <p className={`text-sm ${subtextColor}`}>Characters and original soundtrack</p>
+          <p className={`text-sm ${subtextColor}`}>{t("subtitle")}</p>
         </div>
 
         <div className={`flex items-center gap-1 self-start rounded-2xl p-1 ${panelBg}`}>
@@ -461,7 +464,7 @@ export function GalleryPage() {
             active={activeTab === "characters"}
             onClick={() => setActiveTab("characters")}
             icon={<Swords size={14} />}
-            label="Characters"
+            label={t("tabs.characters")}
             count={characters.length}
             useLiquidGlass={useLiquidGlass}
             useDarkMode={useDarkMode}
@@ -472,7 +475,7 @@ export function GalleryPage() {
             active={activeTab === "ost"}
             onClick={() => setActiveTab("ost")}
             icon={<Music2 size={14} />}
-            label="OST"
+            label={t("tabs.ost")}
             count={OST_TRACKS.length || undefined}
             useLiquidGlass={useLiquidGlass}
             useDarkMode={useDarkMode}
@@ -498,7 +501,7 @@ export function GalleryPage() {
           characters.length === 0 ? (
             <div className="mt-16 flex flex-col items-center justify-center gap-3 opacity-50">
               <Swords className={`h-12 w-12 ${subtextColor}`} />
-              <p className={`text-sm ${subtextColor}`}>No characters yet</p>
+              <p className={`text-sm ${subtextColor}`}>{t("noCharacters")}</p>
             </div>
           ) : (
             <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">

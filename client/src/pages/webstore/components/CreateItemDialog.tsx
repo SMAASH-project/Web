@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogTrigger,
@@ -60,6 +61,7 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
 
+  const { t } = useTranslation("webstore");
   const buttonClass = getButtonClasses(settings.useLiquidGlass, settings.useDarkMode);
   const inputClass = getInputClasses(settings.useLiquidGlass, settings.useDarkMode);
   const dialogClass = getDialogClasses(settings.useLiquidGlass, settings.useDarkMode);
@@ -94,7 +96,7 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
       <DialogTrigger asChild>
         <Button size="sm" className={`cursor-pointer gap-2 ${buttonClass} ${textShadow}`}>
           <Plus className="h-4 w-4" />
-          <span className="text-sm font-medium">Create Item</span>
+          <span className="text-sm font-medium">{t("create.triggerButton")}</span>
         </Button>
       </DialogTrigger>
 
@@ -104,20 +106,20 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle className={textColor}>Create New Item</DialogTitle>
+          <DialogTitle className={textColor}>{t("create.title")}</DialogTitle>
           <DialogDescription className={subtextColor}>
-            Add a new item to the webstore.
+            {t("create.description")}
           </DialogDescription>
         </DialogHeader>
 
         <FieldGroup>
           {/* Name */}
           <Field>
-            <Label className={textColor}>Name</Label>
+            <Label className={textColor}>{t("create.name")}</Label>
             <Input
               value={name}
               onChange={(e) => setName((e.target as HTMLInputElement).value)}
-              placeholder="Item name"
+              placeholder={t("create.namePlaceholder")}
               maxLength={20}
               className={inputClass}
             />
@@ -126,7 +128,7 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
           {/* Rarity + Combat Type row */}
           <div className="grid grid-cols-2 gap-3">
             <Field>
-              <Label className={textColor}>Rarity</Label>
+              <Label className={textColor}>{t("create.rarity")}</Label>
               <StyledSelect
                 value={rarity}
                 options={RARITIES}
@@ -146,7 +148,7 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
               />
             </Field>
             <Field>
-              <Label className={textColor}>Combat Type</Label>
+              <Label className={textColor}>{t("create.combatType")}</Label>
               <StyledSelect
                 value={combatType}
                 options={COMBAT_TYPES}
@@ -160,11 +162,11 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
 
           {/* Description */}
           <Field>
-            <Label className={textColor}>Description</Label>
+            <Label className={textColor}>{t("create.descriptionLabel")}</Label>
             <Input
               value={description}
               onChange={(e) => setDescription((e.target as HTMLInputElement).value)}
-              placeholder="Item description"
+              placeholder={t("create.descriptionPlaceholder")}
               maxLength={50}
               className={inputClass}
             />
@@ -172,7 +174,7 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
 
           {/* Price */}
           <Field>
-            <Label className={textColor}>Price</Label>
+            <Label className={textColor}>{t("create.price")}</Label>
             <Input
               type="number"
               min={1}
@@ -187,7 +189,7 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
         <DialogFooter className={footerClass}>
           <DialogClose asChild>
             <Button variant="outline" className={`cursor-pointer ${buttonClass} ${textShadow}`}>
-              Cancel
+              {t("create.cancel")}
             </Button>
           </DialogClose>
           <Button
@@ -198,10 +200,10 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
             {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Creating…
+                {t("create.creating")}
               </>
             ) : (
-              "Create Item"
+              t("create.submit")
             )}
           </Button>
         </DialogFooter>

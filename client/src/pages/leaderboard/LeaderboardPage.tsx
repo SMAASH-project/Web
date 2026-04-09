@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import Navbar from "@/components/nav/Navbar";
 import { useSettings } from "@/pages/settings/SettingsContext";
 import {
@@ -80,6 +81,7 @@ function rankColor(i: number) {
 export function LeaderboardPage() {
   const { settings } = useSettings();
   const { useLiquidGlass, useDarkMode, useAnimations } = settings;
+  const { t } = useTranslation("leaderboard");
 
   const [animDone, setAnimDone] = useState(false);
   const handleAnimationComplete = useCallback(() => setAnimDone(true), []);
@@ -109,7 +111,7 @@ export function LeaderboardPage() {
   } transition-colors duration-150`;
 
   const emptyMsg = (
-    <p className={`py-6 text-center text-xs opacity-50 ${subtextColor}`}>No data yet</p>
+    <p className={`py-6 text-center text-xs opacity-50 ${subtextColor}`}>{t("noData")}</p>
   );
 
   // Wrap a row list in LoadPost stagger — only when animations are on
@@ -132,16 +134,16 @@ export function LeaderboardPage() {
       {/* Header */}
       <div className="flex w-full flex-col gap-1" style={sectionStyle(ready, 0)}>
         <h1 className={`text-2xl font-bold ${textColor} tracking-tight ${textShadow}`}>
-          Leaderboard
+          {t("title")}
         </h1>
-        <p className={`text-sm ${subtextColor}`}>Community stats and top performers</p>
+        <p className={`text-sm ${subtextColor}`}>{t("subtitle")}</p>
       </div>
 
       {/* 2×2 panel grid */}
       <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
         {/* Win leaderboard */}
         <StatPanel
-          title="Win Leaderboard"
+          title={t("panels.winLeaderboard")}
           icon={<Trophy size={13} />}
           isLoading={leaderboardLoading}
           panelBg={panelBg}
@@ -161,7 +163,7 @@ export function LeaderboardPage() {
                   </span>
                   <span className={`flex items-center gap-1 text-xs font-semibold ${subtextColor}`}>
                     <Trophy size={10} className="text-amber-400" />
-                    {p.count_of_wins.toLocaleString()} W
+                    {p.count_of_wins.toLocaleString()} {t("stats.wins")}
                   </span>
                   <span className={`flex items-center gap-1 text-xs ${subtextColor}`}>
                     <Coins size={10} className="text-amber-400" />
@@ -175,7 +177,7 @@ export function LeaderboardPage() {
 
         {/* Most active players */}
         <StatPanel
-          title="Most Active Players"
+          title={t("panels.mostActivePlayers")}
           icon={<Users size={13} />}
           isLoading={playersLoading}
           panelBg={panelBg}
@@ -194,7 +196,7 @@ export function LeaderboardPage() {
                     {p.display_name}
                   </span>
                   <span className={`text-xs font-semibold ${subtextColor}`}>
-                    {p.count_of_matches.toLocaleString()} matches
+                    {p.count_of_matches.toLocaleString()} {t("stats.matches")}
                   </span>
                 </div>
               ))}
@@ -204,7 +206,7 @@ export function LeaderboardPage() {
 
         {/* Most played levels */}
         <StatPanel
-          title="Most Played Levels"
+          title={t("panels.mostPlayedLevels")}
           icon={<BarChart3 size={13} />}
           isLoading={levelsLoading}
           panelBg={panelBg}
@@ -223,7 +225,7 @@ export function LeaderboardPage() {
                     {l.name}
                   </span>
                   <span className={`text-xs font-semibold ${subtextColor}`}>
-                    {l.count_of_plays.toLocaleString()} plays
+                    {l.count_of_plays.toLocaleString()} {t("stats.plays")}
                   </span>
                 </div>
               ))}
@@ -233,7 +235,7 @@ export function LeaderboardPage() {
 
         {/* Most purchased items */}
         <StatPanel
-          title="Most Purchased Items"
+          title={t("panels.mostPurchasedItems")}
           icon={<ShoppingBag size={13} />}
           isLoading={itemsLoading}
           panelBg={panelBg}
@@ -252,7 +254,7 @@ export function LeaderboardPage() {
                     {item.name}
                   </span>
                   <span className={`text-xs font-semibold ${subtextColor}`}>
-                    {item.count_of_purchases.toLocaleString()} sales
+                    {item.count_of_purchases.toLocaleString()} {t("stats.sales")}
                   </span>
                 </div>
               ))}

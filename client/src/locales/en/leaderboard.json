@@ -1,0 +1,17 @@
+{
+  "title": "Leaderboard",
+  "subtitle": "Community stats and top performers",
+  "panels": {
+    "winLeaderboard": "Win Leaderboard",
+    "mostActivePlayers": "Most Active Players",
+    "mostPlayedLevels": "Most Played Levels",
+    "mostPurchasedItems": "Most Purchased Items"
+  },
+  "noData": "No data yet",
+  "stats": {
+    "wins": "W",
+    "matches": "matches",
+    "plays": "plays",
+    "sales": "sales"
+  }
+}

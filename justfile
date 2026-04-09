@@ -45,7 +45,7 @@ build-fullstack: build-client build
 # Test Frontend file formatting, linting and unit tests
 @test-client:
     echo "Testing client"
-    cd ./client && npm install && npm run format:check && npm run lint && npm run test:run
+    cd ./client && npm install && npm run lint && npm run test:run && npm run format:check
 
 # Run the application
 @run:

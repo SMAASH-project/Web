@@ -38,7 +38,9 @@
     "addNew": "Új hozzáadása",
     "manage": "Profilok kezelése",
     "done": "Kész",
-    "logout": "Kijelentkezés"
+    "logout": "Kijelentkezés",
+    "profilesAvailable_one": "{{count}} profil elérhető",
+    "profilesAvailable_other": "{{count}} profil elérhető"
   },
   "addProfile": {
     "title": "Új profil létrehozása",

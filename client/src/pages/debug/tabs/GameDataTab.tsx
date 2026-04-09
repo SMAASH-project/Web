@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Loader2,
   Sword,
@@ -76,6 +77,7 @@ export function GameDataTab({
   panelBg,
   inputClass = "",
 }: GameDataTabProps) {
+  const { t } = useTranslation("debug");
   // ── Queries ──────────────────────────────────────────────────────────────
   const { data: characters = [], isLoading: charsLoading } = useDebugCharactersQuery();
   const { data: levels = [], isLoading: levelsLoading } = useDebugLevelsQuery();
@@ -316,7 +318,7 @@ export function GameDataTab({
           onClick={onAdd}
           className="flex items-center gap-1 rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] font-medium text-violet-300 transition-colors hover:bg-violet-500/30"
         >
-          <Plus size={9} /> Add
+          <Plus size={9} /> {t("gameData.add")}
         </button>
       )}
     </div>
@@ -332,7 +334,7 @@ export function GameDataTab({
         {/* ── Characters ───────────────────────────────────────────────── */}
         <div className={`flex flex-col gap-2 rounded-xl p-3 ${panelBg}`}>
           {cardHeader(
-            "Characters",
+            t("gameData.characters"),
             <Sword size={11} />,
             charsLoading ? undefined : characters.length,
             () => openCreate("character"),
@@ -342,7 +344,7 @@ export function GameDataTab({
               <Loader2 size={14} className={`animate-spin ${subtextColor}`} />
             </div>
           ) : characters.length === 0 ? (
-            <p className={`py-3 text-center text-xs opacity-40 ${subtextColor}`}>None</p>
+            <p className={`py-3 text-center text-xs opacity-40 ${subtextColor}`}>{t("gameData.none")}</p>
           ) : (
             <div className="grid grid-cols-2 gap-1.5">
               {characters.map((c) => (
@@ -391,7 +393,7 @@ export function GameDataTab({
         {/* ── Levels ───────────────────────────────────────────────────── */}
         <div className={`flex flex-col gap-2 rounded-xl p-3 ${panelBg}`}>
           {cardHeader(
-            "Levels",
+            t("gameData.levels"),
             <Layers size={11} />,
             levelsLoading ? undefined : levels.length,
             () => openCreate("level"),
@@ -401,7 +403,7 @@ export function GameDataTab({
               <Loader2 size={14} className={`animate-spin ${subtextColor}`} />
             </div>
           ) : levels.length === 0 ? (
-            <p className={`py-3 text-center text-xs opacity-40 ${subtextColor}`}>None</p>
+            <p className={`py-3 text-center text-xs opacity-40 ${subtextColor}`}>{t("gameData.none")}</p>
           ) : (
             <div className="grid grid-cols-2 gap-1.5">
               {levels.map((l) => (
@@ -448,7 +450,7 @@ export function GameDataTab({
         {/* ── Store Items ───────────────────────────────────────────────── */}
         <div className={`flex flex-col gap-2 rounded-xl p-3 sm:col-span-2 ${panelBg}`}>
           {cardHeader(
-            "Store Items",
+            t("gameData.storeItems"),
             <ShoppingBag size={11} />,
             itemsLoading ? undefined : items.length,
             () => openCreate("item"),
@@ -461,7 +463,7 @@ export function GameDataTab({
               />
               <input
                 type="text"
-                placeholder="Search items…"
+                placeholder={t("gameData.searchItems")}
                 value={itemSearch}
                 onChange={(e) => setItemSearch(e.target.value)}
                 className={`w-full rounded-lg py-1.5 pr-2 pl-6 text-[10px] ${inputClass}`}
@@ -474,7 +476,7 @@ export function GameDataTab({
             </div>
           ) : filteredItems.length === 0 ? (
             <p className={`py-3 text-center text-xs opacity-40 ${subtextColor}`}>
-              {itemSearch ? "No matches" : "None"}
+              {itemSearch ? t("gameData.noMatches") : t("gameData.none")}
             </p>
           ) : (
             <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
@@ -527,7 +529,7 @@ export function GameDataTab({
           <div className={`flex items-center gap-1.5 ${subtextColor}`}>
             <Users size={11} />
             <p className="flex-1 text-[10px] font-semibold tracking-widest uppercase">
-              User Management
+              {t("gameData.userManagement")}
               {!usersLoading && <span className="ml-1 opacity-50">({users.length})</span>}
             </p>
           </div>
@@ -540,7 +542,7 @@ export function GameDataTab({
               />
               <input
                 type="text"
-                placeholder="Search by email or role…"
+                placeholder={t("gameData.searchByEmailOrRole")}
                 value={userSearch}
                 onChange={(e) => setUserSearch(e.target.value)}
                 className={`w-full rounded-lg py-1.5 pr-2 pl-6 text-[10px] ${inputClass}`}
@@ -554,14 +556,14 @@ export function GameDataTab({
             </div>
           ) : filteredUsers.length === 0 ? (
             <p className={`py-3 text-center text-xs opacity-40 ${subtextColor}`}>
-              {userSearch ? "No matches" : "No users"}
+              {userSearch ? t("gameData.noMatches") : t("gameData.noUsers")}
             </p>
           ) : (
             <div className="max-h-64 overflow-y-auto">
               <table className="w-full border-collapse text-xs">
                 <thead>
                   <tr>
-                    {["#", "Email", "Role", "Status", "Actions"].map((h) => (
+                    {["#", "Email", "Role", t("gameData.tableStatus"), t("gameData.tableActions")].map((h) => (
                       <th
                         key={h}
                         className={`pb-1 text-left text-[10px] font-semibold ${subtextColor}`}
@@ -581,9 +583,9 @@ export function GameDataTab({
                       <td className={`py-1 pr-2 text-xs capitalize ${subtextColor}`}>{u.role}</td>
                       <td className="py-1 pr-2">
                         {u.is_banned ? (
-                          <span className="text-[10px] font-medium text-red-400">Banned</span>
+                          <span className="text-[10px] font-medium text-red-400">{t("gameData.statusBanned")}</span>
                         ) : (
-                          <span className="text-[10px] text-green-400">Active</span>
+                          <span className="text-[10px] text-green-400">{t("gameData.statusActive")}</span>
                         )}
                       </td>
                       <td className="py-1">
@@ -683,12 +685,12 @@ export function GameDataTab({
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>
-              {editId !== null ? "Edit" : "New"} {editSection ? sectionTitle(editSection) : ""}
+              {editId !== null ? t("gameData.dialogEdit") : t("gameData.dialogNew")} {editSection ? sectionTitle(editSection) : ""}
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-3 py-1">
             <div className="flex flex-col gap-1">
-              <label className={`text-[10px] ${subtextColor}`}>Name</label>
+              <label className={`text-[10px] ${subtextColor}`}>{t("gameData.dialogName")}</label>
               <input
                 type="text"
                 value={formName}
@@ -701,7 +703,7 @@ export function GameDataTab({
             {isEditingItem && (
               <>
                 <div className="flex flex-col gap-1">
-                  <label className={`text-[10px] ${subtextColor}`}>Description</label>
+                  <label className={`text-[10px] ${subtextColor}`}>{t("gameData.dialogDescription")}</label>
                   <input
                     type="text"
                     value={formDesc}
@@ -710,7 +712,7 @@ export function GameDataTab({
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className={`text-[10px] ${subtextColor}`}>Price</label>
+                  <label className={`text-[10px] ${subtextColor}`}>{t("gameData.dialogPrice")}</label>
                   <input
                     type="number"
                     min={0}
@@ -720,13 +722,13 @@ export function GameDataTab({
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className={`text-[10px] ${subtextColor}`}>Rarity</label>
+                  <label className={`text-[10px] ${subtextColor}`}>{t("gameData.dialogRarity")}</label>
                   <select
                     value={formRarityId}
                     onChange={(e) => setFormRarityId(e.target.value)}
                     className={`rounded-lg px-2.5 py-1.5 text-xs ${inputClass}`}
                   >
-                    <option value="">— select —</option>
+                    <option value="">{t("gameData.dialogSelectRarity")}</option>
                     {rarities.map((r) => (
                       <option key={r.id} value={r.id}>
                         {r.name}
@@ -735,7 +737,7 @@ export function GameDataTab({
                   </select>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className={`text-[10px] ${subtextColor}`}>Categories</label>
+                  <label className={`text-[10px] ${subtextColor}`}>{t("gameData.dialogCategories")}</label>
                   <div className="flex flex-wrap gap-1">
                     {categories.map((c) => {
                       const active = formCategoryIds.includes(c.id);
@@ -765,14 +767,14 @@ export function GameDataTab({
               onClick={closeDialog}
               className={`rounded-lg border border-current/20 px-3 py-1.5 text-xs ${subtextColor} hover:border-current/40`}
             >
-              Cancel
+              {t("gameData.dialogCancel")}
             </button>
             <button
               type="button"
               onClick={handleSubmit}
               className="rounded-lg bg-violet-500/20 px-3 py-1.5 text-xs font-medium text-violet-300 transition-colors hover:bg-violet-500/30"
             >
-              Save
+              {t("gameData.dialogSave")}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -789,14 +791,10 @@ export function GameDataTab({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Trash2 size={14} className="text-red-400" />
-              Delete {deleteTarget ? sectionTitle(deleteTarget.section) : ""}
+              {t("gameData.dialogDelete")} {deleteTarget ? sectionTitle(deleteTarget.section) : ""}
             </DialogTitle>
             <DialogDescription className={`text-xs ${subtextColor}`}>
-              Delete{" "}
-              <strong className={textColor}>
-                #{deleteTarget?.id} {deleteTarget?.label}
-              </strong>
-              ? This cannot be undone.
+              {t("gameData.dialogDeleteDesc", { id: deleteTarget?.id ?? "", label: deleteTarget?.label ?? "" })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -805,14 +803,14 @@ export function GameDataTab({
               onClick={() => setDeleteTarget(null)}
               className={`rounded-lg border border-current/20 px-3 py-1.5 text-xs ${subtextColor} hover:border-current/40`}
             >
-              Cancel
+              {t("gameData.dialogCancel")}
             </button>
             <button
               type="button"
               onClick={handleDelete}
               className="rounded-lg bg-red-500/20 px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/30"
             >
-              Delete
+              {t("gameData.dialogDelete")}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -835,10 +833,10 @@ export function GameDataTab({
               {userAction === "unban" && <ShieldCheck size={14} className="text-green-400" />}
               {userAction === "promote" && <ArrowUpCircle size={14} className="text-violet-400" />}
               {userAction === "demote" && <ArrowDownCircle size={14} className="text-amber-400" />}
-              {userAction === "ban" && "Ban User"}
-              {userAction === "unban" && "Unban User"}
-              {userAction === "promote" && "Promote User"}
-              {userAction === "demote" && "Demote User"}
+              {userAction === "ban" && t("gameData.banUser")}
+              {userAction === "unban" && t("gameData.unbanUser")}
+              {userAction === "promote" && t("gameData.promoteUser")}
+              {userAction === "demote" && t("gameData.demoteUser")}
             </DialogTitle>
             <DialogDescription className={`text-xs ${subtextColor}`}>
               {userActionTarget?.email}
@@ -848,7 +846,7 @@ export function GameDataTab({
           {userAction === "ban" && (
             <div className="flex flex-col gap-3 py-1">
               <label className="flex items-center justify-between">
-                <span className={`text-xs ${subtextColor}`}>Permanent ban</span>
+                <span className={`text-xs ${subtextColor}`}>{t("gameData.permanentBan")}</span>
                 <button
                   type="button"
                   onClick={() => setIsPermanentBan((v) => !v)}
@@ -861,7 +859,7 @@ export function GameDataTab({
               </label>
               {!isPermanentBan && (
                 <div className="flex flex-col gap-1">
-                  <label className={`text-[10px] ${subtextColor}`}>Duration (minutes)</label>
+                  <label className={`text-[10px] ${subtextColor}`}>{t("gameData.durationMinutes")}</label>
                   <input
                     type="number"
                     min={1}
@@ -914,8 +912,7 @@ export function GameDataTab({
             <div className="flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/10 p-2.5">
               <AlertTriangle size={11} className="mt-0.5 shrink-0 text-amber-400" />
               <p className="text-[10px] text-amber-300">
-                This will demote <strong>{userActionTarget?.email}</strong> from{" "}
-                <strong>{userActionTarget?.currentRole}</strong> back to regular user.
+                {t("gameData.demoteWarning", { email: userActionTarget?.email ?? "", role: userActionTarget?.currentRole ?? "" })}
               </p>
             </div>
           )}
@@ -929,7 +926,7 @@ export function GameDataTab({
               }}
               className={`rounded-lg border border-current/20 px-3 py-1.5 text-xs ${subtextColor} hover:border-current/40`}
             >
-              Cancel
+              {t("gameData.dialogCancel")}
             </button>
             <button
               type="button"
@@ -944,7 +941,7 @@ export function GameDataTab({
                       : "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
               }`}
             >
-              Confirm
+              {t("gameData.confirm")}
             </button>
           </DialogFooter>
         </DialogContent>

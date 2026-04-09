@@ -17,6 +17,21 @@
   "themes": {
     "title": "Témák"
   },
+  "effect": {
+    "title": "Effekt",
+    "default": "Alapértelmezett",
+    "none": "Nincs",
+    "custom": "Egyéni"
+  },
+  "customTheme": "Egyéni téma",
+  "applyChanges": "Módosítások alkalmazása",
+  "mixEffects": {
+    "triggerButton": "Effektek keverése",
+    "title": "Effektek keverése",
+    "description": "Kapcsold be az animációs rétegeket és nézd meg az eredményt.",
+    "clear": "Törlés",
+    "apply": "Alkalmazás"
+  },
   "language": {
     "title": "Nyelv",
     "en": "English",

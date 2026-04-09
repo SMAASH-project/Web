@@ -10,8 +10,26 @@
   },
   "add": {
     "title": "Új híroldal cikk létrehozása",
+    "titleLabel": "Cím",
+    "categoryLabel": "Kategória",
+    "imageSettings": "Képbeállítások",
+    "imagePosition": "Kép pozíciója",
+    "content": "Tartalom",
+    "markdownSupported": "Markdown támogatott",
+    "previewText": "Előnézet",
+    "current": "Jelenlegi: {{name}}",
     "cancel": "Mégse",
-    "submit": "Cikk létrehozása"
+    "submit": "Cikk létrehozása",
+    "categories": {
+      "Major update": "Nagy frissítés",
+      "Minor update": "Kis frissítés",
+      "Patch": "Javítás",
+      "Unrelated news": "Egyéb hír"
+    },
+    "imageTop": "Fent",
+    "imageTopDesc": "Kép elhelyezése bannerként a tartalom fölé.",
+    "imageRight": "Jobbra",
+    "imageRightDesc": "Kép elhelyezése a tartalom jobb oldalára."
   },
   "noResults": "Nem található bejegyzés.",
   "edit": "Szerkesztés",

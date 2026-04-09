@@ -1,4 +1,5 @@
 import { memo, useCallback, useContext, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ColorContext } from "@/pages/settings/ColorContext";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -56,6 +57,7 @@ export const ThemePicker = memo(function ThemePicker() {
     setCustomTheme,
   ]);
 
+  const { t } = useTranslation("settings");
   const { textColor, textShadow, buttonClass } = useMemo(
     () => ({
       textColor: getTextColor(settings.useLiquidGlass, settings.useDarkMode),
@@ -67,7 +69,7 @@ export const ThemePicker = memo(function ThemePicker() {
 
   return (
     <div className="flex w-full flex-wrap items-center justify-center gap-2">
-      <Label className={`${textColor} p-1.5 ${textShadow}`}>Custom Theme</Label>
+      <Label className={`${textColor} p-1.5 ${textShadow}`}>{t("customTheme")}</Label>
       <ColorPicker
         className="w-10 cursor-pointer"
         onChange={setPendingColorLeft}
@@ -87,7 +89,7 @@ export const ThemePicker = memo(function ThemePicker() {
         className={`cursor-pointer ${buttonClass} ${textShadow}`}
         onClick={handleApplyChanges}
       >
-        Apply changes
+        {t("applyChanges")}
       </Button>
       <EffectMixDialog />
     </div>

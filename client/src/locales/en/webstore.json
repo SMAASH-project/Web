@@ -26,6 +26,21 @@
     "unlock": "Unlock",
     "owned": "Owned"
   },
+  "create": {
+    "triggerButton": "Create Item",
+    "title": "Create New Item",
+    "description": "Add a new item to the webstore.",
+    "name": "Name",
+    "namePlaceholder": "Item name",
+    "rarity": "Rarity",
+    "combatType": "Combat Type",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Item description",
+    "price": "Price",
+    "cancel": "Cancel",
+    "submit": "Create Item",
+    "creating": "Creating…"
+  },
   "delete": {
     "confirm": "Confirm Deletion",
     "description": "Are you sure you want to delete this item? This action cannot be undone.",

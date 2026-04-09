@@ -273,8 +273,7 @@ export function SightTab({
             {row(t("sight.visual.layoutBorders"), settings.layoutBorders, "layoutBorders")}
             {row(t("sight.visual.elementInspector"), settings.elementInspector, "elementInspector")}
             <p className={`pt-1 text-[10px] leading-tight ${subtextColor}`}>
-              Element inspector: hover any element to inspect its tag, classes, and computed CSS
-              properties.
+              {t("sight.visual.elementInspectorDesc")}
             </p>
           </Section>
 
@@ -287,10 +286,9 @@ export function SightTab({
           >
             {row(t("sight.overlays.fps"), settings.showFps, "showFps")}
             {row(t("sight.overlays.scroll"), settings.showScrollPos, "showScrollPos")}
-            {row("Breakpoint badge", settings.showBreakpointBadge, "showBreakpointBadge")}
+            {row(t("sight.visual.breakpointBadge"), settings.showBreakpointBadge, "showBreakpointBadge")}
             <p className={`pt-1 text-[10px] leading-tight ${subtextColor}`}>
-              Breakpoint badge shows the active Tailwind screen size and window width in the
-              bottom-right corner.
+              {t("sight.visual.breakpointBadgeDesc")}
             </p>
           </Section>
 
@@ -363,24 +361,24 @@ export function SightTab({
         <>
           {/* Viewport Emulation */}
           <Section
-            title="Viewport Emulation"
+            title={t("sight.emulation.viewportTitle")}
             icon={<Eye size={11} />}
             panelBg={panelBg}
             subtextColor={subtextColor}
           >
-            {row("Force reduced motion", settings.forceReducedMotion, "forceReducedMotion")}
-            {row("Compact density", settings.compactDensity, "compactDensity")}
+            {row(t("sight.emulation.forceReducedMotion"), settings.forceReducedMotion, "forceReducedMotion")}
+            {row(t("sight.emulation.compactDensity"), settings.compactDensity, "compactDensity")}
             <p className={`-mt-0.5 mb-1 text-[10px] leading-tight ${subtextColor}`}>
-              Reduces font size and spacing for a denser information display.
+              {t("sight.emulation.compactDensityDesc")}
             </p>
-            {row("Safe-area outlines", settings.safeAreaOutlines, "safeAreaOutlines")}
+            {row(t("sight.emulation.safeAreaOutlines"), settings.safeAreaOutlines, "safeAreaOutlines")}
             <p className={`-mt-0.5 text-[10px] leading-tight ${subtextColor}`}>
-              Draws colored borders representing device safe-area insets (notch, home bar).
+              {t("sight.emulation.safeAreaOutlinesDesc")}
             </p>
 
             <div className="mt-1 flex flex-col gap-2 border-t border-current/5 pt-2">
               <div className="flex items-center justify-between">
-                <span className={`text-xs ${subtextColor}`}>Force JS viewport</span>
+                <span className={`text-xs ${subtextColor}`}>{t("sight.emulation.forceJsViewport")}</span>
                 <Switch
                   checked={settings.forceViewportEnabled}
                   onCheckedChange={(v) => update({ forceViewportEnabled: v })}
@@ -388,13 +386,11 @@ export function SightTab({
               </div>
 
               <p className={`text-[10px] leading-tight ${subtextColor}`}>
-                Overrides <code>window.innerWidth/Height</code> and <code>matchMedia</code> so
-                JS-driven responsive logic (e.g. Navbar breakpoints) reacts to the emulated size.
-                Tailwind CSS classes are compile-time and are not affected.
+                {t("sight.emulation.forceJsViewportDesc")}
               </p>
 
               <div className="flex flex-col gap-1">
-                <span className={`text-[10px] ${subtextColor}`}>Preset</span>
+                <span className={`text-[10px] ${subtextColor}`}>{t("sight.emulation.preset")}</span>
                 <StyledSelect
                   value={settings.forceViewportPreset}
                   options={VIEWPORT_PRESETS.map((p) => p.id)}
@@ -408,7 +404,7 @@ export function SightTab({
 
               <div className="grid grid-cols-2 gap-2">
                 <div className="flex flex-col gap-1">
-                  <span className={`text-[10px] ${subtextColor}`}>Width</span>
+                  <span className={`text-[10px] ${subtextColor}`}>{t("sight.emulation.width")}</span>
                   <input
                     type="number"
                     min={320}
@@ -419,7 +415,7 @@ export function SightTab({
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <span className={`text-[10px] ${subtextColor}`}>Height</span>
+                  <span className={`text-[10px] ${subtextColor}`}>{t("sight.emulation.height")}</span>
                   <input
                     type="number"
                     min={320}
@@ -436,7 +432,7 @@ export function SightTab({
                   onClick={applyViewportCustomSize}
                   className="rounded-full bg-violet-500/20 px-2.5 py-1 text-[10px] font-semibold text-violet-300 transition-colors hover:bg-violet-500/30"
                 >
-                  Apply custom
+                  {t("sight.emulation.applyCustom")}
                 </button>
               </div>
             </div>
@@ -444,17 +440,17 @@ export function SightTab({
 
           {/* Network Simulation */}
           <Section
-            title="Network Simulation"
+            title={t("sight.emulation.networkTitle")}
             icon={<Network size={11} />}
             panelBg={panelBg}
             subtextColor={subtextColor}
           >
             <p className={`mb-2 text-[10px] leading-tight ${subtextColor}`}>
-              Adds artificial latency to all Axios API requests to simulate slow connections.
+              {t("sight.emulation.networkDesc")}
             </p>
             <div className="grid grid-cols-2 gap-2">
               <div className="flex flex-col gap-1">
-                <span className={`text-[10px] ${subtextColor}`}>Base delay (ms)</span>
+                <span className={`text-[10px] ${subtextColor}`}>{t("sight.emulation.baseDelay")}</span>
                 <input
                   type="number"
                   min={0}
@@ -465,7 +461,7 @@ export function SightTab({
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <span className={`text-[10px] ${subtextColor}`}>Jitter ± (ms)</span>
+                <span className={`text-[10px] ${subtextColor}`}>{t("sight.emulation.jitter")}</span>
                 <input
                   type="number"
                   min={0}
@@ -478,13 +474,13 @@ export function SightTab({
             </div>
             <div className="flex items-center justify-between border-t border-current/5 pt-2">
               <span className={`text-[10px] ${subtextColor}`}>
-                Jitter adds random variance (±) to each request delay.
+                {t("sight.emulation.jitterDesc")}
               </span>
               <button
                 onClick={saveNetwork}
                 className="rounded-full bg-blue-500/20 px-2.5 py-1 text-[10px] font-semibold text-blue-300 transition-colors hover:bg-blue-500/30"
               >
-                Apply
+                {t("sight.emulation.apply")}
               </button>
             </div>
           </Section>
@@ -496,7 +492,7 @@ export function SightTab({
         <>
           {/* A11y */}
           <Section
-            title="A11y"
+            title={t("sight.diagnostics.a11yTitle")}
             icon={<Accessibility size={11} />}
             panelBg={panelBg}
             subtextColor={subtextColor}
@@ -518,10 +514,10 @@ export function SightTab({
 
             <div className="flex items-center justify-between gap-2 border-t border-current/5 pt-2">
               <button className="rounded-md border border-current/20 px-3 py-1.5 text-xs focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">
-                Focus ring preview
+                {t("sight.diagnostics.focusRingPreview")}
               </button>
               <input
-                placeholder="Tab into me"
+                placeholder={t("sight.diagnostics.tabIntoMe")}
                 className="h-8 rounded-md border border-current/20 bg-black/10 px-2 text-xs focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none"
               />
             </div>
@@ -529,38 +525,36 @@ export function SightTab({
 
           {/* Render Diagnostics */}
           <Section
-            title="Render Diagnostics"
+            title={t("sight.diagnostics.renderTitle")}
             icon={<Gauge size={11} />}
             panelBg={panelBg}
             subtextColor={subtextColor}
           >
             <InfoRow
-              label="Inspector renders"
+              label={t("sight.diagnostics.inspectorRenders")}
               value={renderCount.current}
               textColor={textColor}
               subtextColor={subtextColor}
               mono
             />
             <InfoRow
-              label="React Query fetching"
+              label={t("sight.diagnostics.rqFetching")}
               value={isFetching}
               textColor={textColor}
               subtextColor={subtextColor}
               mono
             />
             <InfoRow
-              label="React Query mutating"
+              label={t("sight.diagnostics.rqMutating")}
               value={isMutating}
               textColor={textColor}
               subtextColor={subtextColor}
               mono
             />
-            {row("Click target checker", settings.clickTargetChecker, "clickTargetChecker")}
-            {row("Z-index inspector", settings.zIndexInspector, "zIndexInspector")}
+            {row(t("sight.diagnostics.clickTargetChecker"), settings.clickTargetChecker, "clickTargetChecker")}
+            {row(t("sight.diagnostics.zIndexInspector"), settings.zIndexInspector, "zIndexInspector")}
             <p className={`pt-1 text-[10px] leading-tight ${subtextColor}`}>
-              Click target: flags elements smaller than 44×44 px (WCAG touch target). Z-index: shows
-              the stacking order of elements under the cursor. Both require Element inspector to be
-              on.
+              {t("sight.diagnostics.diagDesc")}
             </p>
           </Section>
         </>

@@ -26,6 +26,21 @@
     "unlock": "Feloldás",
     "owned": "Megvan"
   },
+  "create": {
+    "triggerButton": "Tárgy létrehozása",
+    "title": "Új tárgy létrehozása",
+    "description": "Adj hozzá egy új tárgyat a webáruházhoz.",
+    "name": "Név",
+    "namePlaceholder": "Tárgy neve",
+    "rarity": "Ritkaság",
+    "combatType": "Harc típusa",
+    "descriptionLabel": "Leírás",
+    "descriptionPlaceholder": "Tárgy leírása",
+    "price": "Ár",
+    "cancel": "Mégse",
+    "submit": "Tárgy létrehozása",
+    "creating": "Létrehozás…"
+  },
   "delete": {
     "confirm": "Törlés megerősítése",
     "description": "Biztosan törölni szeretnéd ezt a tárgyat? Ez a művelet nem vonható vissza.",

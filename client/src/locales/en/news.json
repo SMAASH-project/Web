@@ -10,8 +10,26 @@
   },
   "add": {
     "title": "Create new News Article",
+    "titleLabel": "Title",
+    "categoryLabel": "Category",
+    "imageSettings": "Image Settings",
+    "imagePosition": "Image Position",
+    "content": "Content",
+    "markdownSupported": "Markdown supported",
+    "previewText": "Preview Text",
+    "current": "Current: {{name}}",
     "cancel": "Cancel",
-    "submit": "Create Article"
+    "submit": "Create Article",
+    "categories": {
+      "Major update": "Major update",
+      "Minor update": "Minor update",
+      "Patch": "Patch",
+      "Unrelated news": "Unrelated news"
+    },
+    "imageTop": "Top",
+    "imageTopDesc": "Place image as a banner above the content.",
+    "imageRight": "Right",
+    "imageRightDesc": "Place image to the right of the content."
   },
   "noResults": "No posts found.",
   "edit": "Edit",
