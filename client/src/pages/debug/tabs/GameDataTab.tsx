@@ -344,7 +344,9 @@ export function GameDataTab({
               <Loader2 size={14} className={`animate-spin ${subtextColor}`} />
             </div>
           ) : characters.length === 0 ? (
-            <p className={`py-3 text-center text-xs opacity-40 ${subtextColor}`}>{t("gameData.none")}</p>
+            <p className={`py-3 text-center text-xs opacity-40 ${subtextColor}`}>
+              {t("gameData.none")}
+            </p>
           ) : (
             <div className="grid grid-cols-2 gap-1.5">
               {characters.map((c) => (
@@ -403,7 +405,9 @@ export function GameDataTab({
               <Loader2 size={14} className={`animate-spin ${subtextColor}`} />
             </div>
           ) : levels.length === 0 ? (
-            <p className={`py-3 text-center text-xs opacity-40 ${subtextColor}`}>{t("gameData.none")}</p>
+            <p className={`py-3 text-center text-xs opacity-40 ${subtextColor}`}>
+              {t("gameData.none")}
+            </p>
           ) : (
             <div className="grid grid-cols-2 gap-1.5">
               {levels.map((l) => (
@@ -563,7 +567,13 @@ export function GameDataTab({
               <table className="w-full border-collapse text-xs">
                 <thead>
                   <tr>
-                    {["#", "Email", "Role", t("gameData.tableStatus"), t("gameData.tableActions")].map((h) => (
+                    {[
+                      "#",
+                      "Email",
+                      "Role",
+                      t("gameData.tableStatus"),
+                      t("gameData.tableActions"),
+                    ].map((h) => (
                       <th
                         key={h}
                         className={`pb-1 text-left text-[10px] font-semibold ${subtextColor}`}
@@ -583,9 +593,13 @@ export function GameDataTab({
                       <td className={`py-1 pr-2 text-xs capitalize ${subtextColor}`}>{u.role}</td>
                       <td className="py-1 pr-2">
                         {u.is_banned ? (
-                          <span className="text-[10px] font-medium text-red-400">{t("gameData.statusBanned")}</span>
+                          <span className="text-[10px] font-medium text-red-400">
+                            {t("gameData.statusBanned")}
+                          </span>
                         ) : (
-                          <span className="text-[10px] text-green-400">{t("gameData.statusActive")}</span>
+                          <span className="text-[10px] text-green-400">
+                            {t("gameData.statusActive")}
+                          </span>
                         )}
                       </td>
                       <td className="py-1">
@@ -685,7 +699,8 @@ export function GameDataTab({
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>
-              {editId !== null ? t("gameData.dialogEdit") : t("gameData.dialogNew")} {editSection ? sectionTitle(editSection) : ""}
+              {editId !== null ? t("gameData.dialogEdit") : t("gameData.dialogNew")}{" "}
+              {editSection ? sectionTitle(editSection) : ""}
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-3 py-1">
@@ -703,7 +718,9 @@ export function GameDataTab({
             {isEditingItem && (
               <>
                 <div className="flex flex-col gap-1">
-                  <label className={`text-[10px] ${subtextColor}`}>{t("gameData.dialogDescription")}</label>
+                  <label className={`text-[10px] ${subtextColor}`}>
+                    {t("gameData.dialogDescription")}
+                  </label>
                   <input
                     type="text"
                     value={formDesc}
@@ -712,7 +729,9 @@ export function GameDataTab({
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className={`text-[10px] ${subtextColor}`}>{t("gameData.dialogPrice")}</label>
+                  <label className={`text-[10px] ${subtextColor}`}>
+                    {t("gameData.dialogPrice")}
+                  </label>
                   <input
                     type="number"
                     min={0}
@@ -722,7 +741,9 @@ export function GameDataTab({
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className={`text-[10px] ${subtextColor}`}>{t("gameData.dialogRarity")}</label>
+                  <label className={`text-[10px] ${subtextColor}`}>
+                    {t("gameData.dialogRarity")}
+                  </label>
                   <select
                     value={formRarityId}
                     onChange={(e) => setFormRarityId(e.target.value)}
@@ -737,7 +758,9 @@ export function GameDataTab({
                   </select>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className={`text-[10px] ${subtextColor}`}>{t("gameData.dialogCategories")}</label>
+                  <label className={`text-[10px] ${subtextColor}`}>
+                    {t("gameData.dialogCategories")}
+                  </label>
                   <div className="flex flex-wrap gap-1">
                     {categories.map((c) => {
                       const active = formCategoryIds.includes(c.id);
@@ -794,7 +817,10 @@ export function GameDataTab({
               {t("gameData.dialogDelete")} {deleteTarget ? sectionTitle(deleteTarget.section) : ""}
             </DialogTitle>
             <DialogDescription className={`text-xs ${subtextColor}`}>
-              {t("gameData.dialogDeleteDesc", { id: deleteTarget?.id ?? "", label: deleteTarget?.label ?? "" })}
+              {t("gameData.dialogDeleteDesc", {
+                id: deleteTarget?.id ?? "",
+                label: deleteTarget?.label ?? "",
+              })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -859,7 +885,9 @@ export function GameDataTab({
               </label>
               {!isPermanentBan && (
                 <div className="flex flex-col gap-1">
-                  <label className={`text-[10px] ${subtextColor}`}>{t("gameData.durationMinutes")}</label>
+                  <label className={`text-[10px] ${subtextColor}`}>
+                    {t("gameData.durationMinutes")}
+                  </label>
                   <input
                     type="number"
                     min={1}
@@ -912,7 +940,10 @@ export function GameDataTab({
             <div className="flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/10 p-2.5">
               <AlertTriangle size={11} className="mt-0.5 shrink-0 text-amber-400" />
               <p className="text-[10px] text-amber-300">
-                {t("gameData.demoteWarning", { email: userActionTarget?.email ?? "", role: userActionTarget?.currentRole ?? "" })}
+                {t("gameData.demoteWarning", {
+                  email: userActionTarget?.email ?? "",
+                  role: userActionTarget?.currentRole ?? "",
+                })}
               </p>
             </div>
           )}

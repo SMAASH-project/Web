@@ -36,12 +36,15 @@ export function LanguageToggle({ language, onChange }: LanguageToggleProps) {
     : {};
 
   return (
-    <div className={cn("flex items-center gap-0.5 text-xs", isDark ? "text-white/65" : "text-gray-500")}>
+    <div
+      className={cn(
+        "flex items-center gap-0.5 text-xs",
+        isDark ? "text-white/65" : "text-gray-500",
+      )}
+    >
       {LANGS.map((lang, i) => (
         <Fragment key={lang.key}>
-          {i > 0 && (
-            <span className={isDark ? "text-white/20" : "text-gray-300"}>|</span>
-          )}
+          {i > 0 && <span className={isDark ? "text-white/20" : "text-gray-300"}>|</span>}
           <button
             type="button"
             onClick={() => onChange(lang.key)}

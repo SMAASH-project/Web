@@ -137,7 +137,13 @@ export function SystemTab({
         panelBg={panelBg}
         subtextColor={subtextColor}
       >
-        <InfoRow label={t("system.role")} value={role} mono textColor={textColor} subtextColor={subtextColor} />
+        <InfoRow
+          label={t("system.role")}
+          value={role}
+          mono
+          textColor={textColor}
+          subtextColor={subtextColor}
+        />
         <InfoRow
           label={t("system.userId")}
           value={userId !== null ? `#${userId}` : "—"}

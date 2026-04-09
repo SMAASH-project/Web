@@ -118,14 +118,14 @@ export function EffectMixDialog() {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button className={`cursor-pointer ${buttonClass} ${textShadow}`}>{t("mixEffects.triggerButton")}</Button>
+        <Button className={`cursor-pointer ${buttonClass} ${textShadow}`}>
+          {t("mixEffects.triggerButton")}
+        </Button>
       </DialogTrigger>
       <DialogContent className={`sm:max-w-3xl ${dialogClass} ${textColor}`}>
         <DialogHeader>
           <DialogTitle className={textColor}>{t("mixEffects.title")}</DialogTitle>
-          <DialogDescription className={textColor}>
-            {t("mixEffects.description")}
-          </DialogDescription>
+          <DialogDescription className={textColor}>{t("mixEffects.description")}</DialogDescription>
         </DialogHeader>
 
         <div className="flex min-h-0 flex-col gap-4 lg:flex-row">

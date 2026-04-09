@@ -286,7 +286,11 @@ export function SightTab({
           >
             {row(t("sight.overlays.fps"), settings.showFps, "showFps")}
             {row(t("sight.overlays.scroll"), settings.showScrollPos, "showScrollPos")}
-            {row(t("sight.visual.breakpointBadge"), settings.showBreakpointBadge, "showBreakpointBadge")}
+            {row(
+              t("sight.visual.breakpointBadge"),
+              settings.showBreakpointBadge,
+              "showBreakpointBadge",
+            )}
             <p className={`pt-1 text-[10px] leading-tight ${subtextColor}`}>
               {t("sight.visual.breakpointBadgeDesc")}
             </p>
@@ -366,19 +370,29 @@ export function SightTab({
             panelBg={panelBg}
             subtextColor={subtextColor}
           >
-            {row(t("sight.emulation.forceReducedMotion"), settings.forceReducedMotion, "forceReducedMotion")}
+            {row(
+              t("sight.emulation.forceReducedMotion"),
+              settings.forceReducedMotion,
+              "forceReducedMotion",
+            )}
             {row(t("sight.emulation.compactDensity"), settings.compactDensity, "compactDensity")}
             <p className={`-mt-0.5 mb-1 text-[10px] leading-tight ${subtextColor}`}>
               {t("sight.emulation.compactDensityDesc")}
             </p>
-            {row(t("sight.emulation.safeAreaOutlines"), settings.safeAreaOutlines, "safeAreaOutlines")}
+            {row(
+              t("sight.emulation.safeAreaOutlines"),
+              settings.safeAreaOutlines,
+              "safeAreaOutlines",
+            )}
             <p className={`-mt-0.5 text-[10px] leading-tight ${subtextColor}`}>
               {t("sight.emulation.safeAreaOutlinesDesc")}
             </p>
 
             <div className="mt-1 flex flex-col gap-2 border-t border-current/5 pt-2">
               <div className="flex items-center justify-between">
-                <span className={`text-xs ${subtextColor}`}>{t("sight.emulation.forceJsViewport")}</span>
+                <span className={`text-xs ${subtextColor}`}>
+                  {t("sight.emulation.forceJsViewport")}
+                </span>
                 <Switch
                   checked={settings.forceViewportEnabled}
                   onCheckedChange={(v) => update({ forceViewportEnabled: v })}
@@ -404,7 +418,9 @@ export function SightTab({
 
               <div className="grid grid-cols-2 gap-2">
                 <div className="flex flex-col gap-1">
-                  <span className={`text-[10px] ${subtextColor}`}>{t("sight.emulation.width")}</span>
+                  <span className={`text-[10px] ${subtextColor}`}>
+                    {t("sight.emulation.width")}
+                  </span>
                   <input
                     type="number"
                     min={320}
@@ -415,7 +431,9 @@ export function SightTab({
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <span className={`text-[10px] ${subtextColor}`}>{t("sight.emulation.height")}</span>
+                  <span className={`text-[10px] ${subtextColor}`}>
+                    {t("sight.emulation.height")}
+                  </span>
                   <input
                     type="number"
                     min={320}
@@ -450,7 +468,9 @@ export function SightTab({
             </p>
             <div className="grid grid-cols-2 gap-2">
               <div className="flex flex-col gap-1">
-                <span className={`text-[10px] ${subtextColor}`}>{t("sight.emulation.baseDelay")}</span>
+                <span className={`text-[10px] ${subtextColor}`}>
+                  {t("sight.emulation.baseDelay")}
+                </span>
                 <input
                   type="number"
                   min={0}
@@ -551,8 +571,16 @@ export function SightTab({
               subtextColor={subtextColor}
               mono
             />
-            {row(t("sight.diagnostics.clickTargetChecker"), settings.clickTargetChecker, "clickTargetChecker")}
-            {row(t("sight.diagnostics.zIndexInspector"), settings.zIndexInspector, "zIndexInspector")}
+            {row(
+              t("sight.diagnostics.clickTargetChecker"),
+              settings.clickTargetChecker,
+              "clickTargetChecker",
+            )}
+            {row(
+              t("sight.diagnostics.zIndexInspector"),
+              settings.zIndexInspector,
+              "zIndexInspector",
+            )}
             <p className={`pt-1 text-[10px] leading-tight ${subtextColor}`}>
               {t("sight.diagnostics.diagDesc")}
             </p>

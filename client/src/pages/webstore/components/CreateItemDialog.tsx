@@ -107,9 +107,7 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
       >
         <DialogHeader>
           <DialogTitle className={textColor}>{t("create.title")}</DialogTitle>
-          <DialogDescription className={subtextColor}>
-            {t("create.description")}
-          </DialogDescription>
+          <DialogDescription className={subtextColor}>{t("create.description")}</DialogDescription>
         </DialogHeader>
 
         <FieldGroup>

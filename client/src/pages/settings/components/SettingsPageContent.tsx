@@ -115,7 +115,9 @@ const ThemeSection = memo(function ThemeSection({
 
       {/* Effect picker */}
       <div className="w-full">
-        <Label className={`mb-2 block text-center ${classes.text} ${classes.shadow}`}>{t("effect.title")}</Label>
+        <Label className={`mb-2 block text-center ${classes.text} ${classes.shadow}`}>
+          {t("effect.title")}
+        </Label>
         <div className="flex flex-wrap justify-center gap-1.5">
           {/* Theme Default */}
           <Button

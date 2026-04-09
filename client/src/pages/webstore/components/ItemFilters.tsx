@@ -10,7 +10,13 @@ interface ItemFiltersProps {
   onSelect: (value: string) => void;
 }
 
-export function ItemFilters({ label, options, displayOptions, selected, onSelect }: ItemFiltersProps) {
+export function ItemFilters({
+  label,
+  options,
+  displayOptions,
+  selected,
+  onSelect,
+}: ItemFiltersProps) {
   const { settings } = useSettings();
   const containerRef = useRef<HTMLDivElement>(null);
   const [highlightPos, setHighlightPos] = useState({ left: 0, width: 0 });

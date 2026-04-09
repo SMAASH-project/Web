@@ -870,7 +870,10 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
         {
           title: t("db.topLevels"),
           icon: <Layers size={11} />,
-          rows: topLevels.map((x) => ({ label: x.name, value: `${x.count_of_plays} ${t("db.plays")}` })),
+          rows: topLevels.map((x) => ({
+            label: x.name,
+            value: `${x.count_of_plays} ${t("db.plays")}`,
+          })),
         },
         {
           title: t("db.leaderboard"),
@@ -887,7 +890,9 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
             <p className="text-[10px] font-semibold tracking-widest uppercase">{title}</p>
           </div>
           {rows.length === 0 ? (
-            <p className={`py-2 text-center text-[10px] opacity-40 ${subtextColor}`}>{t("db.statsNoData")}</p>
+            <p className={`py-2 text-center text-[10px] opacity-40 ${subtextColor}`}>
+              {t("db.statsNoData")}
+            </p>
           ) : (
             rows.slice(0, 8).map((row, i) => (
               <div
@@ -1060,7 +1065,9 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
 
         {/* No-actions note */}
         {currentMeta.noActionsNote && (
-          <p className={`text-[10px] ${subtextColor} opacity-60`}>{noActionsNotes[selected] ?? currentMeta.noActionsNote}</p>
+          <p className={`text-[10px] ${subtextColor} opacity-60`}>
+            {noActionsNotes[selected] ?? currentMeta.noActionsNote}
+          </p>
         )}
 
         {/* Stats special view */}
@@ -1213,9 +1220,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
           </p>
         </div>
         <div className="px-3 py-2.5">
-          <p className={`mb-2 text-[10px] leading-relaxed ${subtextColor}`}>
-            {t("db.dangerDesc")}
-          </p>
+          <p className={`mb-2 text-[10px] leading-relaxed ${subtextColor}`}>{t("db.dangerDesc")}</p>
           <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
             <div className="rounded-lg border border-red-500/15 p-2">
               <p className={`mb-0.5 text-[10px] font-semibold ${textColor}`}>
@@ -1283,7 +1288,9 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
           {deleteTarget?.isDanger && deleteTarget.dangerNote && (
             <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-2.5">
               <AlertTriangle size={11} className="mt-0.5 shrink-0 text-red-400" />
-              <p className="text-[10px] text-red-300">{dangerNotes[selected] ?? deleteTarget.dangerNote}</p>
+              <p className="text-[10px] text-red-300">
+                {dangerNotes[selected] ?? deleteTarget.dangerNote}
+              </p>
             </div>
           )}
           <DialogFooter>

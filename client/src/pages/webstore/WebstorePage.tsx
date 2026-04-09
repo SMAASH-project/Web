@@ -102,7 +102,7 @@ export function WebstorePage() {
               label={t("filters.rarity")}
               options={rarities}
               displayOptions={rarities.map((r) =>
-                r === "All" ? t("filters.all") : t(`rarity.${r.toLowerCase()}`)
+                r === "All" ? t("filters.all") : t(`rarity.${r.toLowerCase()}`),
               )}
               selected={selectedRarity}
               onSelect={handleRarityChange}
@@ -111,7 +111,7 @@ export function WebstorePage() {
               label={t("filters.combat")}
               options={combatTypes}
               displayOptions={combatTypes.map((c) =>
-                c === "All" ? t("filters.all") : t(`filters.${c.toLowerCase()}`)
+                c === "All" ? t("filters.all") : t(`filters.${c.toLowerCase()}`),
               )}
               selected={selectedCombatType}
               onSelect={handleCombatTypeChange}
@@ -120,7 +120,7 @@ export function WebstorePage() {
               label={t("filters.ownership")}
               options={ownershipOptions}
               displayOptions={ownershipOptions.map((o) =>
-                o === "All" ? t("filters.all") : t(`filters.${o.toLowerCase()}`)
+                o === "All" ? t("filters.all") : t(`filters.${o.toLowerCase()}`),
               )}
               selected={selectedOwnership}
               onSelect={handleOwnershipChange}

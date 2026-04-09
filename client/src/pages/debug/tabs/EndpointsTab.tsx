@@ -139,7 +139,8 @@ export function EndpointsTab({
             disabled={loading || !path}
             className="flex h-8 shrink-0 items-center gap-1.5 bg-green-600 px-3 text-xs text-white hover:bg-green-500"
           >
-            {loading ? <Loader2 size={11} className="animate-spin" /> : <Send size={11} />} {t("endpoints.send")}
+            {loading ? <Loader2 size={11} className="animate-spin" /> : <Send size={11} />}{" "}
+            {t("endpoints.send")}
           </Button>
         </div>
         {method !== "GET" && (

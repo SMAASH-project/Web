@@ -171,11 +171,15 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
               </AnimatedAccordionContent>
             </AnimatedAccordionItem>
             <AnimatedAccordionItem value="content">
-              <AnimatedAccordionTrigger className={textColor}>{t("add.content")}</AnimatedAccordionTrigger>
+              <AnimatedAccordionTrigger className={textColor}>
+                {t("add.content")}
+              </AnimatedAccordionTrigger>
               <AnimatedAccordionContent>
                 <FieldGroup>
                   <Field>
-                    <Label className={`text-sm ${subtextColor}`}>{t("add.markdownSupported")}</Label>
+                    <Label className={`text-sm ${subtextColor}`}>
+                      {t("add.markdownSupported")}
+                    </Label>
                     <textarea
                       value={content}
                       onChange={(e) => setContent((e.target as HTMLTextAreaElement).value)}
@@ -248,7 +252,9 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
               <AccordionContent>
                 <FieldGroup>
                   <Field>
-                    <Label className={`text-sm ${subtextColor}`}>{t("add.markdownSupported")}</Label>
+                    <Label className={`text-sm ${subtextColor}`}>
+                      {t("add.markdownSupported")}
+                    </Label>
                     <textarea
                       value={content}
                       onChange={(e) => setContent((e.target as HTMLTextAreaElement).value)}
