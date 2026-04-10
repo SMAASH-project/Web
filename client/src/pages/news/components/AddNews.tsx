@@ -98,7 +98,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
         </Button>
       </DialogTrigger>
       <DialogContent
-        className={`w-full max-w-full sm:max-w-2xl ${dialogClass} ${textShadow}`}
+        className={`w-full max-w-full sm:max-w-3xl ${dialogClass} ${textShadow}`}
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
@@ -130,7 +130,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                   <Field>
                     <Label className={`text-sm ${subtextColor}`}>{t("add.imagePosition")}</Label>
                     <div className="flex flex-row items-start gap-4">
-                      <div className="flex max-w-sm flex-col gap-2">
+                      <div className="flex shrink-0 flex-col gap-2">
                         <RadioGroupChoiceCard
                           value={imagePosition}
                           onValueChange={(v) => setImagePosition(v as "Top" | "Right")}
@@ -161,7 +161,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                           </div>
                         )}
                       </div>
-                      <div className="ml-auto">
+                      <div className="min-w-0 flex-1">
                         {imagePosition === "Top" ? (
                           <ResizableVertical
                             onImageSizeChange={setImageSize}
@@ -218,7 +218,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                   <Field>
                     <Label className={`text-sm ${subtextColor}`}>{t("add.imagePosition")}</Label>
                     <div className="flex flex-row items-start gap-4">
-                      <div className="flex max-w-sm flex-col gap-2">
+                      <div className="flex shrink-0 flex-col gap-2">
                         <RadioGroupChoiceCard
                           value={imagePosition}
                           onValueChange={(v) => setImagePosition(v as "Top" | "Right")}
@@ -249,7 +249,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                           </div>
                         )}
                       </div>
-                      <div className="ml-auto">
+                      <div className="min-w-0 flex-1">
                         {imagePosition === "Top" ? (
                           <ResizableVertical
                             onImageSizeChange={setImageSize}

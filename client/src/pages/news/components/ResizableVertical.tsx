@@ -43,10 +43,7 @@ export function ResizableVertical({
 
   return (
     <div className="flex flex-col gap-3">
-      <ResizablePanelGroup
-        orientation="vertical"
-        className="min-h-50 max-w-sm rounded-lg border md:min-w-112.5"
-      >
+      <ResizablePanelGroup orientation="vertical" className="min-h-50 w-full rounded-lg border">
         <ResizablePanel
           defaultSize={initialImageSize}
           onResize={(size) => handleResize(size.asPercentage)}

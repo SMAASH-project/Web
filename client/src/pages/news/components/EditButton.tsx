@@ -138,7 +138,7 @@ export function EditButton({
                   <Field>
                     <Label className={`text-sm ${subtextColor}`}>Image Position</Label>
                     <div className="flex flex-row items-start gap-4">
-                      <div className="flex max-w-sm flex-col gap-2">
+                      <div className="flex shrink-0 flex-col gap-2">
                         <RadioGroupChoiceCard
                           value={imagePosition}
                           onValueChange={(v) => setImagePosition(v as "Top" | "Right")}
@@ -169,7 +169,7 @@ export function EditButton({
                           </div>
                         )}
                       </div>
-                      <div className="ml-auto">
+                      <div className="min-w-0 flex-1">
                         {imagePosition === "Top" ? (
                           <ResizableVertical
                             onImageSizeChange={setImageSize}
@@ -224,7 +224,7 @@ export function EditButton({
                   <Field>
                     <Label className={`text-sm ${subtextColor}`}>Image Position</Label>
                     <div className="flex flex-row items-start gap-4">
-                      <div className="flex max-w-sm flex-col gap-2">
+                      <div className="flex shrink-0 flex-col gap-2">
                         <RadioGroupChoiceCard
                           value={imagePosition}
                           onValueChange={(v) => setImagePosition(v as "Top" | "Right")}
@@ -255,7 +255,7 @@ export function EditButton({
                           </div>
                         )}
                       </div>
-                      <div className="ml-auto">
+                      <div className="min-w-0 flex-1">
                         {imagePosition === "Top" ? (
                           <ResizableVertical
                             onImageSizeChange={setImageSize}

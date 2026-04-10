@@ -43,10 +43,7 @@ export function ResizableHorizontal({
 
   return (
     <div className="flex flex-col gap-3">
-      <ResizablePanelGroup
-        orientation="horizontal"
-        className="min-h-50 max-w-sm rounded-lg border md:min-w-112.5"
-      >
+      <ResizablePanelGroup orientation="horizontal" className="min-h-50 w-full rounded-lg border">
         <ResizablePanel defaultSize={100 - initialImageSize}>
           <div className="flex h-full items-center justify-center p-6">
             <span className={`font-semibold ${subtextColor}`}>Content</span>
