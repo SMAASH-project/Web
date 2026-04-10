@@ -39,7 +39,7 @@ func CreateDTOToPlayerProfile(p PlayerProfileCreateDTO) models.PlayerProfile {
 	return models.PlayerProfile{
 		DisplayName: p.DisplayName,
 		UserID:      p.UserID,
-		Coins:       1000,
+		Coins:       50,
 	}
 }
 
@@ -54,6 +54,6 @@ func UpdateDTOToPlayerProfile(p PlayerProfileUpdateDTO) models.PlayerProfile {
 func AppendDTOToPlayerProfile(p PlayerProfileAppendDTO) models.PlayerProfile {
 	return models.PlayerProfile{
 		DisplayName: p.DisplayName,
-		Coins:       1000,
+		Coins:       50,
 	}
 }

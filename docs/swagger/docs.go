@@ -4248,6 +4248,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "character_id",
+                "coins_awarded",
                 "network_status",
                 "player_id",
                 "result"
@@ -4255,6 +4256,10 @@ const docTemplate = `{
             "properties": {
                 "character_id": {
                     "type": "integer"
+                },
+                "coins_awarded": {
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "network_status": {
                     "type": "string",

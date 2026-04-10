@@ -237,6 +237,9 @@ definitions:
     properties:
       character_id:
         type: integer
+      coins_awarded:
+        minimum: 0
+        type: integer
       network_status:
         maxLength: 12
         type: string
@@ -247,6 +250,7 @@ definitions:
         type: string
     required:
     - character_id
+    - coins_awarded
     - network_status
     - player_id
     - result

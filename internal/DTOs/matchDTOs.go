@@ -15,6 +15,7 @@ type MatchCreateParticipationDTO struct {
 	CharacterID   uint   `json:"character_id" binding:"required"`
 	Result        string `json:"result" binding:"required,max=4"`
 	NetworkStatus string `json:"network_status" binding:"required,max=12"`
+	CoinsAwarded  int64  `json:"coins_awarded" binding:"required,gte=0"`
 }
 
 type MatchCreateDTO struct {
