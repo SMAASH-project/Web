@@ -134,6 +134,8 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                         <RadioGroupChoiceCard
                           value={imagePosition}
                           onValueChange={(v) => setImagePosition(v as "Top" | "Right")}
+                          textColor={textColor}
+                          subtextColor={subtextColor}
                         />
                         <Input
                           type="file"
@@ -142,6 +144,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                           name="articleImage"
                           ref={fileInputRef}
                           onChange={handleFileChange}
+                          className={inputClass}
                         />
                         {imageAlt && (
                           <div className="flex items-center gap-1">
@@ -160,9 +163,17 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                       </div>
                       <div className="ml-auto">
                         {imagePosition === "Top" ? (
-                          <ResizableVertical onImageSizeChange={setImageSize} />
+                          <ResizableVertical
+                            onImageSizeChange={setImageSize}
+                            subtextColor={subtextColor}
+                            inputClass={inputClass}
+                          />
                         ) : (
-                          <ResizableHorizontal onImageSizeChange={setImageSize} />
+                          <ResizableHorizontal
+                            onImageSizeChange={setImageSize}
+                            subtextColor={subtextColor}
+                            inputClass={inputClass}
+                          />
                         )}
                       </div>
                     </div>
@@ -211,6 +222,8 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                         <RadioGroupChoiceCard
                           value={imagePosition}
                           onValueChange={(v) => setImagePosition(v as "Top" | "Right")}
+                          textColor={textColor}
+                          subtextColor={subtextColor}
                         />
                         <Input
                           type="file"
@@ -219,6 +232,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                           name="articleImage"
                           ref={fileInputRef}
                           onChange={handleFileChange}
+                          className={inputClass}
                         />
                         {imageAlt && (
                           <div className="flex items-center gap-1">
@@ -237,9 +251,17 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                       </div>
                       <div className="ml-auto">
                         {imagePosition === "Top" ? (
-                          <ResizableVertical onImageSizeChange={setImageSize} />
+                          <ResizableVertical
+                            onImageSizeChange={setImageSize}
+                            subtextColor={subtextColor}
+                            inputClass={inputClass}
+                          />
                         ) : (
-                          <ResizableHorizontal onImageSizeChange={setImageSize} />
+                          <ResizableHorizontal
+                            onImageSizeChange={setImageSize}
+                            subtextColor={subtextColor}
+                            inputClass={inputClass}
+                          />
                         )}
                       </div>
                     </div>

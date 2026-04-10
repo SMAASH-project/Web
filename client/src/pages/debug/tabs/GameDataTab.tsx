@@ -1,5 +1,13 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSettings } from "@/pages/settings/SettingsContext";
+import {
+  getDialogClasses,
+  getDialogFooterClasses,
+  getTextShadow,
+  getBackgroundClasses,
+} from "@/lib/utils";
+import { StyledSelect } from "@/components/ui/styled-select";
 import {
   Loader2,
   Sword,
@@ -78,6 +86,12 @@ export function GameDataTab({
   inputClass = "",
 }: GameDataTabProps) {
   const { t } = useTranslation("debug");
+  const { settings } = useSettings();
+  const { useLiquidGlass, useDarkMode } = settings;
+  const dialogClass = getDialogClasses(useLiquidGlass, useDarkMode);
+  const footerClass = getDialogFooterClasses(useLiquidGlass, useDarkMode);
+  const textShadow = getTextShadow(useLiquidGlass, useDarkMode);
+  const bgClass = getBackgroundClasses(useLiquidGlass, useDarkMode, "strong");
   // ── Queries ──────────────────────────────────────────────────────────────
   const { data: characters = [], isLoading: charsLoading } = useDebugCharactersQuery();
   const { data: levels = [], isLoading: levelsLoading } = useDebugLevelsQuery();
@@ -696,9 +710,9 @@ export function GameDataTab({
           if (!o) closeDialog();
         }}
       >
-        <DialogContent className="max-w-sm">
+        <DialogContent className={`max-w-sm ${dialogClass} ${textShadow}`}>
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className={`${textColor} ${textShadow}`}>
               {editId !== null ? t("gameData.dialogEdit") : t("gameData.dialogNew")}{" "}
               {editSection ? sectionTitle(editSection) : ""}
             </DialogTitle>
@@ -744,18 +758,32 @@ export function GameDataTab({
                   <label className={`text-[10px] ${subtextColor}`}>
                     {t("gameData.dialogRarity")}
                   </label>
-                  <select
+                  <StyledSelect
                     value={formRarityId}
-                    onChange={(e) => setFormRarityId(e.target.value)}
-                    className={`rounded-lg px-2.5 py-1.5 text-xs ${inputClass}`}
-                  >
-                    <option value="">{t("gameData.dialogSelectRarity")}</option>
-                    {rarities.map((r) => (
-                      <option key={r.id} value={r.id}>
-                        {r.name}
-                      </option>
-                    ))}
-                  </select>
+                    options={["", ...rarities.map((r) => String(r.id))]}
+                    onChange={setFormRarityId}
+                    inputClass={`py-1.5 text-xs ${inputClass}`}
+                    textColor={textColor}
+                    bgClass={bgClass}
+                    renderOption={(id) => {
+                      if (!id)
+                        return (
+                          <span className="opacity-50">{t("gameData.dialogSelectRarity")}</span>
+                        );
+                      const r = rarities.find((x) => String(x.id) === id);
+                      return r ? (
+                        <>
+                          <span
+                            className="inline-block h-2 w-2 shrink-0 rounded-full"
+                            style={{ backgroundColor: RARITY_COLORS[r.name] ?? "#9ca3af" }}
+                          />
+                          {r.name}
+                        </>
+                      ) : (
+                        id
+                      );
+                    }}
+                  />
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className={`text-[10px] ${subtextColor}`}>
@@ -784,7 +812,7 @@ export function GameDataTab({
               </>
             )}
           </div>
-          <DialogFooter>
+          <DialogFooter className={footerClass}>
             <button
               type="button"
               onClick={closeDialog}
@@ -810,9 +838,9 @@ export function GameDataTab({
           if (!o) setDeleteTarget(null);
         }}
       >
-        <DialogContent className="max-w-sm">
+        <DialogContent className={`max-w-sm ${dialogClass} ${textShadow}`}>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className={`flex items-center gap-2 ${textColor} ${textShadow}`}>
               <Trash2 size={14} className="text-red-400" />
               {t("gameData.dialogDelete")} {deleteTarget ? sectionTitle(deleteTarget.section) : ""}
             </DialogTitle>
@@ -823,7 +851,7 @@ export function GameDataTab({
               })}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className={footerClass}>
             <button
               type="button"
               onClick={() => setDeleteTarget(null)}
@@ -852,9 +880,9 @@ export function GameDataTab({
           }
         }}
       >
-        <DialogContent className="max-w-sm">
+        <DialogContent className={`max-w-sm ${dialogClass} ${textShadow}`}>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className={`flex items-center gap-2 ${textColor} ${textShadow}`}>
               {userAction === "ban" && <ShieldBan size={14} className="text-red-400" />}
               {userAction === "unban" && <ShieldCheck size={14} className="text-green-400" />}
               {userAction === "promote" && <ArrowUpCircle size={14} className="text-violet-400" />}
@@ -879,7 +907,7 @@ export function GameDataTab({
                   className={`relative h-5 w-9 rounded-full transition-colors ${isPermanentBan ? "bg-red-500/40" : "bg-current/20"}`}
                 >
                   <span
-                    className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${isPermanentBan ? "translate-x-4" : "translate-x-0.5"}`}
+                    className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${isPermanentBan ? "translate-x-4" : "translate-x-0.5"}`}
                   />
                 </button>
               </label>
@@ -948,7 +976,7 @@ export function GameDataTab({
             </div>
           )}
 
-          <DialogFooter>
+          <DialogFooter className={footerClass}>
             <button
               type="button"
               onClick={() => {

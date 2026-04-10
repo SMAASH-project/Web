@@ -1,5 +1,13 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useSettings } from "@/pages/settings/SettingsContext";
+import {
+  getDialogClasses,
+  getDialogFooterClasses,
+  getTextShadow,
+  getBackgroundClasses,
+} from "@/lib/utils";
+import { StyledSelect } from "@/components/ui/styled-select";
 import {
   Users,
   UserCircle,
@@ -308,6 +316,12 @@ interface DatabaseTabProps {
 
 export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: DatabaseTabProps) {
   const { t } = useTranslation("debug");
+  const { settings } = useSettings();
+  const { useLiquidGlass, useDarkMode } = settings;
+  const dialogClass = getDialogClasses(useLiquidGlass, useDarkMode);
+  const footerClass = getDialogFooterClasses(useLiquidGlass, useDarkMode);
+  const textShadow = getTextShadow(useLiquidGlass, useDarkMode);
+  const bgClass = getBackgroundClasses(useLiquidGlass, useDarkMode, "strong");
   // ── UI state ──────────────────────────────────────────────────────────────
   const [selected, setSelected] = useState<ResourceId>("users");
   const [filter, setFilter] = useState("");
@@ -804,18 +818,19 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
             {inp("price", "Price", "number")}
             <div className="flex flex-col gap-1">
               <label className={`text-[10px] ${subtextColor}`}>Rarity</label>
-              <select
-                value={form.rarity_id ?? ""}
-                onChange={(e) => setField("rarity_id", e.target.value)}
-                className={`rounded-lg px-2.5 py-1.5 text-xs ${inputClass}`}
-              >
-                <option value="">— select —</option>
-                {rarities.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.name}
-                  </option>
-                ))}
-              </select>
+              <StyledSelect
+                value={String(form.rarity_id ?? "")}
+                options={["", ...rarities.map((r) => String(r.id))]}
+                onChange={(val) => setField("rarity_id", val)}
+                inputClass={`py-1.5 text-xs ${inputClass}`}
+                textColor={textColor}
+                bgClass={bgClass}
+                renderOption={(id) => {
+                  if (!id) return <span className="opacity-50">— select —</span>;
+                  const r = rarities.find((x) => String(x.id) === id);
+                  return r ? r.name : id;
+                }}
+              />
             </div>
             <div className="flex flex-col gap-1">
               <label className={`text-[10px] ${subtextColor}`}>Categories</label>
@@ -1244,9 +1259,9 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
 
       {/* ── Edit / Create dialog ─────────────────────────────────────────── */}
       <Dialog open={formDialogOpen} onOpenChange={(o) => !o && closeFormDialog()}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className={`max-w-sm ${dialogClass} ${textShadow}`}>
           <DialogHeader>
-            <DialogTitle>{formDialogTitle}</DialogTitle>
+            <DialogTitle className={`${textColor} ${textShadow}`}>{formDialogTitle}</DialogTitle>
             {isCreating && (
               <DialogDescription className={`text-xs ${subtextColor}`}>
                 {t("db.fillRequired")}
@@ -1254,7 +1269,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
             )}
           </DialogHeader>
           <div className="flex flex-col gap-3 py-1">{renderFormFields()}</div>
-          <DialogFooter>
+          <DialogFooter className={footerClass}>
             <button
               type="button"
               onClick={closeFormDialog}
@@ -1275,9 +1290,9 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
 
       {/* ── Delete confirm dialog ────────────────────────────────────────── */}
       <Dialog open={deleteTarget !== null} onOpenChange={(o) => !o && setDeleteTarget(null)}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className={`max-w-sm ${dialogClass} ${textShadow}`}>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className={`flex items-center gap-2 ${textColor} ${textShadow}`}>
               <Trash2 size={14} className="text-red-400" />
               {t("db.delete")} {currentMeta.label.replace(/s$/, "")}
             </DialogTitle>
@@ -1293,7 +1308,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
               </p>
             </div>
           )}
-          <DialogFooter>
+          <DialogFooter className={footerClass}>
             <button
               type="button"
               onClick={() => setDeleteTarget(null)}
@@ -1322,9 +1337,9 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
           }
         }}
       >
-        <DialogContent className="max-w-sm">
+        <DialogContent className={`max-w-sm ${dialogClass} ${textShadow}`}>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className={`flex items-center gap-2 ${textColor} ${textShadow}`}>
               {userAction === "ban" && <ShieldBan size={14} className="text-red-400" />}
               {userAction === "unban" && <ShieldCheck size={14} className="text-green-400" />}
               {userAction === "promote" && <ArrowUpCircle size={14} className="text-violet-400" />}
@@ -1349,7 +1364,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
                   className={`relative h-5 w-9 rounded-full transition-colors ${isPermanentBan ? "bg-red-500/40" : "bg-current/20"}`}
                 >
                   <span
-                    className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${isPermanentBan ? "translate-x-4" : "translate-x-0.5"}`}
+                    className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${isPermanentBan ? "translate-x-4" : "translate-x-0.5"}`}
                   />
                 </button>
               </label>
@@ -1404,7 +1419,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
             </div>
           )}
 
-          <DialogFooter>
+          <DialogFooter className={footerClass}>
             <button
               type="button"
               onClick={() => {

@@ -11,9 +11,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 export function RadioGroupChoiceCard({
   value,
   onValueChange,
+  textColor = "",
+  subtextColor = "",
 }: {
   value: string;
   onValueChange: (value: string) => void;
+  textColor?: string;
+  subtextColor?: string;
 }) {
   const { t } = useTranslation("news");
 
@@ -22,8 +26,8 @@ export function RadioGroupChoiceCard({
       <FieldLabel htmlFor="Top">
         <Field orientation="horizontal">
           <FieldContent>
-            <FieldTitle>{t("add.imageTop")}</FieldTitle>
-            <FieldDescription>{t("add.imageTopDesc")}</FieldDescription>
+            <FieldTitle className={textColor}>{t("add.imageTop")}</FieldTitle>
+            <FieldDescription className={subtextColor}>{t("add.imageTopDesc")}</FieldDescription>
           </FieldContent>
           <RadioGroupItem value="Top" id="Top" />
         </Field>
@@ -31,8 +35,8 @@ export function RadioGroupChoiceCard({
       <FieldLabel htmlFor="Right">
         <Field orientation="horizontal">
           <FieldContent>
-            <FieldTitle>{t("add.imageRight")}</FieldTitle>
-            <FieldDescription>{t("add.imageRightDesc")}</FieldDescription>
+            <FieldTitle className={textColor}>{t("add.imageRight")}</FieldTitle>
+            <FieldDescription className={subtextColor}>{t("add.imageRightDesc")}</FieldDescription>
           </FieldContent>
           <RadioGroupItem value="Right" id="Right" />
         </Field>

@@ -142,6 +142,8 @@ export function EditButton({
                         <RadioGroupChoiceCard
                           value={imagePosition}
                           onValueChange={(v) => setImagePosition(v as "Top" | "Right")}
+                          textColor={textColor}
+                          subtextColor={subtextColor}
                         />
                         <Input
                           type="file"
@@ -150,6 +152,7 @@ export function EditButton({
                           name="articleImage"
                           ref={fileInputRef}
                           onChange={handleFileChange}
+                          className={inputClass}
                         />
                         {imageAlt && (
                           <div className="flex items-center gap-1">
@@ -171,11 +174,15 @@ export function EditButton({
                           <ResizableVertical
                             onImageSizeChange={setImageSize}
                             initialImageSize={post.imageSize ?? 25}
+                            subtextColor={subtextColor}
+                            inputClass={inputClass}
                           />
                         ) : (
                           <ResizableHorizontal
                             onImageSizeChange={setImageSize}
                             initialImageSize={post.imageSize ?? 25}
+                            subtextColor={subtextColor}
+                            inputClass={inputClass}
                           />
                         )}
                       </div>
@@ -221,6 +228,8 @@ export function EditButton({
                         <RadioGroupChoiceCard
                           value={imagePosition}
                           onValueChange={(v) => setImagePosition(v as "Top" | "Right")}
+                          textColor={textColor}
+                          subtextColor={subtextColor}
                         />
                         <Input
                           type="file"
@@ -229,6 +238,7 @@ export function EditButton({
                           name="articleImage"
                           ref={fileInputRef}
                           onChange={handleFileChange}
+                          className={inputClass}
                         />
                         {imageAlt && (
                           <div className="flex items-center gap-1">
@@ -250,11 +260,15 @@ export function EditButton({
                           <ResizableVertical
                             onImageSizeChange={setImageSize}
                             initialImageSize={post.imageSize ?? 25}
+                            subtextColor={subtextColor}
+                            inputClass={inputClass}
                           />
                         ) : (
                           <ResizableHorizontal
                             onImageSizeChange={setImageSize}
                             initialImageSize={post.imageSize ?? 25}
+                            subtextColor={subtextColor}
+                            inputClass={inputClass}
                           />
                         )}
                       </div>

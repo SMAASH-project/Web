@@ -17,6 +17,16 @@ import { generateRandomUsername } from "@/lib/generateUsername";
 import { useProfiles } from "./useProfiles";
 import { useEffect, useState } from "react";
 import { AxiosError } from "axios";
+import { useSettings } from "@/pages/settings/SettingsContext";
+import {
+  getDialogClasses,
+  getDialogFooterClasses,
+  getTextShadow,
+  getTextColor,
+  getSubtextColor,
+  getInputClasses,
+  getButtonClasses,
+} from "@/lib/utils";
 
 interface AddNewProfileProps {
   open: boolean;
@@ -26,6 +36,15 @@ interface AddNewProfileProps {
 export function AddNewProfileDialog({ open, onOpenChange }: AddNewProfileProps) {
   const { addProfile, profiles } = useProfiles();
   const { t } = useTranslation("profile");
+  const { settings } = useSettings();
+  const { useLiquidGlass, useDarkMode } = settings;
+  const dialogClass = getDialogClasses(useLiquidGlass, useDarkMode);
+  const footerClass = getDialogFooterClasses(useLiquidGlass, useDarkMode);
+  const textShadow = getTextShadow(useLiquidGlass, useDarkMode);
+  const textColor = getTextColor(useLiquidGlass, useDarkMode);
+  const subtextColor = getSubtextColor(useLiquidGlass, useDarkMode);
+  const inputClass = getInputClasses(useLiquidGlass, useDarkMode);
+  const btnClass = getButtonClasses(useLiquidGlass, useDarkMode);
   const [username, setUsername] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -128,15 +147,19 @@ export function AddNewProfileDialog({ open, onOpenChange }: AddNewProfileProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent className={`sm:max-w-sm ${dialogClass} ${textShadow}`}>
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>{t("addProfile.title")}</DialogTitle>
-            <DialogDescription>{t("addProfile.description")}</DialogDescription>
+            <DialogTitle className={`${textColor} ${textShadow}`}>
+              {t("addProfile.title")}
+            </DialogTitle>
+            <DialogDescription className={subtextColor}>
+              {t("addProfile.description")}
+            </DialogDescription>
           </DialogHeader>
           <FieldGroup>
             <Field>
-              <Label htmlFor="username-1" className="text-gray-900!">
+              <Label htmlFor="username-1" className={textColor}>
                 {t("addProfile.username")}
               </Label>
               <Input
@@ -145,6 +168,7 @@ export function AddNewProfileDialog({ open, onOpenChange }: AddNewProfileProps) 
                 name="username"
                 value={username}
                 maxLength={20}
+                className={inputClass}
                 onChange={(e) => {
                   setUsername(e.target.value);
                   if (error) setError(null);
@@ -152,13 +176,14 @@ export function AddNewProfileDialog({ open, onOpenChange }: AddNewProfileProps) 
               />
             </Field>
             <Field>
-              <Label htmlFor="profile-picture-1" className="text-gray-900!">
+              <Label htmlFor="profile-picture-1" className={textColor}>
                 {t("addProfile.profilePicture")}
               </Label>
               <Input
                 type="file"
                 id="profile-picture-1"
                 name="profilePicture"
+                className={inputClass}
                 onChange={(e) => {
                   if (e.target.files) {
                     const file = e.target.files[0];
@@ -169,13 +194,21 @@ export function AddNewProfileDialog({ open, onOpenChange }: AddNewProfileProps) 
             </Field>
             {error && <FormAlert variant="error" message={error} />}
           </FieldGroup>
-          <DialogFooter>
+          <DialogFooter className={footerClass}>
             <DialogClose asChild>
-              <Button variant="outline" disabled={isSubmitting}>
+              <Button
+                variant="outline"
+                disabled={isSubmitting}
+                className={`cursor-pointer ${btnClass} ${textShadow}`}
+              >
                 {t("addProfile.cancel")}
               </Button>
             </DialogClose>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className={`cursor-pointer ${btnClass} ${textShadow}`}
+            >
               {isSubmitting ? t("addProfile.saving") : t("addProfile.save")}
             </Button>
           </DialogFooter>

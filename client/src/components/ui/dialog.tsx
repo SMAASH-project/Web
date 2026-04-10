@@ -62,7 +62,20 @@ function DialogContent({
         {children}
         {showCloseButton && (
           <DialogPrimitive.Close data-slot="dialog-close" asChild>
-            <Button variant="ghost" className="absolute top-2 right-2" size="icon-sm">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className={cn(
+                "absolute top-2 right-2 opacity-70 transition-all duration-150 hover:opacity-100",
+                settings.useLiquidGlass
+                  ? settings.useDarkMode
+                    ? "hover:bg-white/15"
+                    : "hover:bg-black/10"
+                  : settings.useDarkMode
+                    ? "hover:bg-white/10"
+                    : "hover:bg-black/8",
+              )}
+            >
               <XIcon className={getTextColor(settings.useLiquidGlass, settings.useDarkMode)} />
               <span className="sr-only">Close</span>
             </Button>

@@ -115,7 +115,7 @@ export function Item({
               <Crosshair className="h-3 w-3 text-sky-400/70" />
             )}
             <span className={`text-[10px] font-medium tracking-wider uppercase ${subtextColor}`}>
-              {t(`filters.${item.combatType.toLowerCase()}`)}
+              {item.combatType ? t(`filters.${item.combatType.toLowerCase()}`) : item.combatType}
             </span>
           </div>
           <div className="flex items-center gap-1">
