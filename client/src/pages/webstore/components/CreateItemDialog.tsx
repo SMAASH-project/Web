@@ -140,7 +140,7 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
                       className="inline-block h-2 w-2 shrink-0 rounded-full"
                       style={{ backgroundColor: RARITY_COLORS[r] }}
                     />
-                    {r}
+                    {t(`rarity.${r.toLowerCase()}`)}
                   </>
                 )}
               />
@@ -154,6 +154,7 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
                 inputClass={inputClass}
                 textColor={textColor}
                 bgClass={bgClass}
+                renderOption={(c) => t(`filters.${c.toLowerCase()}`)}
               />
             </Field>
           </div>

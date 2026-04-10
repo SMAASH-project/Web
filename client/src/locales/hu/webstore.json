@@ -12,7 +12,7 @@
     "owned": "Saját",
     "unowned": "Nem saját",
     "melee": "Közelharci",
-    "ranged": "Távolsági",
+    "ranged": "Távolharci",
     "character": "Karakter"
   },
   "rarity": {
@@ -24,6 +24,7 @@
   },
   "item": {
     "unlock": "Feloldás",
+    "unlocking": "Feloldás…",
     "owned": "Megvan"
   },
   "create": {

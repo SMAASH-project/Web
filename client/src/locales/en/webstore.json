@@ -24,6 +24,7 @@
   },
   "item": {
     "unlock": "Unlock",
+    "unlocking": "Unlocking…",
     "owned": "Owned"
   },
   "create": {

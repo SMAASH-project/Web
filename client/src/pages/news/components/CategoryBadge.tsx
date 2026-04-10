@@ -1,9 +1,11 @@
 import { CATEGORY_COLORS } from "@/types/PageTypes";
 import { useSettings } from "@/pages/settings/SettingsContext";
 import { getTextShadow } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export function CategoryBadge({ category }: { category: string }) {
   const { settings } = useSettings();
+  const { t } = useTranslation("news");
   const textShadow = getTextShadow(settings.useLiquidGlass, settings.useDarkMode);
   const categoryColor = CATEGORY_COLORS[category] || CATEGORY_COLORS["Unrelated news"];
 
@@ -15,7 +17,7 @@ export function CategoryBadge({ category }: { category: string }) {
         borderColor: categoryColor,
       }}
     >
-      {category}
+      {t(`add.categories.${category}`)}
     </div>
   );
 }

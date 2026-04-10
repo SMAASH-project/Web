@@ -87,7 +87,7 @@ export function Item({
               border: `1px solid ${rarityColor}40`,
             }}
           >
-            {item.rarity}
+            {t(`rarity.${item.rarity.toLowerCase()}`)}
           </Badge>
         </div>
 
@@ -115,7 +115,7 @@ export function Item({
               <Crosshair className="h-3 w-3 text-sky-400/70" />
             )}
             <span className={`text-[10px] font-medium tracking-wider uppercase ${subtextColor}`}>
-              {item.combatType}
+              {t(`filters.${item.combatType.toLowerCase()}`)}
             </span>
           </div>
           <div className="flex items-center gap-1">
@@ -138,7 +138,7 @@ export function Item({
               }}
             >
               <CheckCircle className="h-3 w-3" />
-              Owned
+              {t("item.owned")}
             </div>
           ) : (
             <Button
@@ -152,7 +152,7 @@ export function Item({
               ) : (
                 <Unlock className="h-3 w-3" />
               )}
-              {isPurchasing ? "Unlocking…" : "Unlock"}
+              {isPurchasing ? t("item.unlocking") : t("item.unlock")}
             </Button>
           )}
         </div>

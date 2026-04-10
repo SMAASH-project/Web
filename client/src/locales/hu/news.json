@@ -21,10 +21,10 @@
     "cancel": "Mégse",
     "submit": "Cikk létrehozása",
     "categories": {
-      "Major update": "Major update",
-      "Minor update": "Minor update",
-      "Patch": "Patch",
-      "Unrelated news": "Unrelated news"
+      "Major update": "Nagy frissítés",
+      "Minor update": "Kis frissítés",
+      "Patch": "Javítás",
+      "Unrelated news": "Egyéb hírek"
     },
     "imageTop": "Fent",
     "imageTopDesc": "Kép elhelyezése bannerként a tartalom fölé.",
