@@ -106,7 +106,7 @@ export function EditButton({
         </Button>
       </DialogTrigger>
       <DialogContent
-        className={`max-w-[calc(100%-2rem)] overflow-visible sm:max-w-4xl! ${dialogClass} ${textShadow}`}
+        className={`max-w-[calc(100%-2rem)] sm:max-w-4xl! ${dialogClass} ${textShadow}`}
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
