@@ -1,6 +1,6 @@
 # SMAASH Client — User Guide
 
-**Last updated:** 2026-04-13 (rev 7)
+**Last updated:** 2026-04-13 (rev 8)
 
 > Welcome! This guide walks you through SMAASH's features, settings, and common tasks. Think of it as a companion while you explore.
 
@@ -149,7 +149,7 @@ The leaderboards update periodically as the server processes stats. If numbers l
 
 ## Gallery
 
-Explore **game media**, **player art**, and **community showcases** in the Gallery. Use the navigation controls to browse through entries.
+Explore **game media**, **player art**, and **community showcases** in the Gallery. Use the tab buttons at the top to switch between the **Characters** grid and the **OST** music player. Use the navigation controls to browse through entries.
 
 ---
 
@@ -237,6 +237,8 @@ Try:
 
 We've made the app faster and smoother:
 
+- **Consistent tab styling across all pages:** The tab selectors on the Gallery and Leaderboard pages now match the same visual style used in the Webstore and Releases pages — sliding highlight in Liquid Glass mode, proper dark/light active states in all other modes
+- **Character images in the Webstore:** Each character card now shows a portrait image. If no image has been uploaded yet, a styled placeholder is shown instead. Admins can upload a character image when creating a new character
 - **Leaderboard redesign:** The leaderboard now has a tab selector. Pick a category to see a full podium (top 3), runners-up, a search bar, and a scrollable ranked list. The "All" tab shows a stat bar and all four panels at once
 - **Leaderboard loads instantly:** The previous animation delay (up to 2 seconds before content appeared) has been removed — data shows up as soon as it arrives
 - **Smaller download size:** Optimized assets; app loads quicker on slower connections

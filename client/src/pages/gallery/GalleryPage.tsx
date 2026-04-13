@@ -383,46 +383,62 @@ function CharacterCard({
 function TabButton({
   active,
   onClick,
+  onMouseEnter,
   icon,
   label,
   count,
+  dataTab,
   useLiquidGlass,
   useDarkMode,
   textColor,
   subtextColor,
+  isHovering,
 }: {
   active: boolean;
   onClick: () => void;
+  onMouseEnter: (e: React.MouseEvent<HTMLButtonElement>) => void;
   icon: React.ReactNode;
   label: string;
   count?: number;
+  dataTab: string;
   useLiquidGlass: boolean;
   useDarkMode: boolean;
   textColor: string;
   subtextColor: string;
+  isHovering: boolean;
 }) {
   const activeClass = useLiquidGlass
-    ? useDarkMode
-      ? "bg-white/20 border border-white/25"
-      : "bg-black/12 border border-black/15"
+    ? ""
     : useDarkMode
-      ? "bg-gray-700 border border-gray-600"
-      : "bg-white border border-gray-200 shadow-sm";
+      ? "bg-gray-700 shadow-md"
+      : "bg-gray-200 shadow-md";
   const inactiveClass = useLiquidGlass
-    ? "bg-transparent border border-transparent hover:bg-white/8"
+    ? ""
     : useDarkMode
-      ? "bg-transparent border border-transparent hover:bg-gray-800"
-      : "bg-transparent border border-transparent hover:bg-white/60";
+      ? "hover:bg-gray-700"
+      : "hover:bg-gray-100";
   return (
     <button
+      data-tab={dataTab}
       onClick={onClick}
-      className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${active ? `${activeClass} ${textColor}` : `${inactiveClass} ${subtextColor}`}`}
+      onMouseEnter={onMouseEnter}
+      className={`relative z-10 flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${active ? activeClass : inactiveClass}`}
     >
-      {icon}
-      {label}
+      <span
+        className={`flex items-center gap-2 transition-opacity ${
+          useLiquidGlass ? "text-white" : useDarkMode ? "text-white" : "text-gray-900"
+        } ${active && !isHovering ? "opacity-100" : isHovering ? "" : "opacity-60"}`}
+      >
+        {icon}
+        {label}
+      </span>
       {count !== undefined && count > 0 && (
         <span
-          className={`rounded-full px-1.5 py-0.5 text-[10px] ${useLiquidGlass ? "bg-white/15" : useDarkMode ? "bg-gray-600" : "bg-gray-100"}`}
+          className={`relative z-10 rounded-full px-1.5 py-0.5 text-[10px] transition-opacity ${
+            useLiquidGlass ? "bg-white/15" : useDarkMode ? "bg-gray-600" : "bg-gray-100"
+          } ${useLiquidGlass ? "text-white" : useDarkMode ? "text-white" : "text-gray-900"} ${
+            active && !isHovering ? "opacity-100" : isHovering ? "" : "opacity-60"
+          }`}
         >
           {count}
         </span>
@@ -437,6 +453,45 @@ export function GalleryPage() {
   const { settings } = useSettings();
   const { useLiquidGlass, useDarkMode, useAnimations } = settings;
   const [activeTab, setActiveTab] = useState<Tab>("characters");
+
+  const tabContainerRef = useRef<HTMLDivElement>(null);
+  const [highlightPos, setHighlightPos] = useState({ left: 0, width: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+
+  const updateHighlightToSelected = useCallback(() => {
+    if (!tabContainerRef.current) return;
+    const btn = tabContainerRef.current.querySelector(
+      `[data-tab="${activeTab}"]`,
+    ) as HTMLElement | null;
+    if (btn) {
+      const rect = btn.getBoundingClientRect();
+      const parentRect = tabContainerRef.current.getBoundingClientRect();
+      setHighlightPos({ left: rect.left - parentRect.left, width: rect.width });
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    updateHighlightToSelected();
+  }, [updateHighlightToSelected]);
+
+  const handleTabMouseEnter = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (!useLiquidGlass) return;
+      setIsHovering(true);
+      const rect = e.currentTarget.getBoundingClientRect();
+      if (tabContainerRef.current) {
+        const parentRect = tabContainerRef.current.getBoundingClientRect();
+        setHighlightPos({ left: rect.left - parentRect.left, width: rect.width });
+      }
+    },
+    [useLiquidGlass],
+  );
+
+  const handleTabContainerMouseLeave = useCallback(() => {
+    if (!useLiquidGlass) return;
+    setIsHovering(false);
+    updateHighlightToSelected();
+  }, [useLiquidGlass, updateHighlightToSelected]);
 
   const textColor = getTextColor(useLiquidGlass, useDarkMode);
   const subtextColor = getSubtextColor(useLiquidGlass, useDarkMode);
@@ -459,10 +514,29 @@ export function GalleryPage() {
           <p className={`text-sm ${subtextColor}`}>{t("subtitle")}</p>
         </div>
 
-        <div className={`flex items-center gap-1 self-start rounded-2xl p-1 ${panelBg}`}>
+        <div
+          ref={tabContainerRef}
+          className={`relative flex items-center gap-1 self-start rounded-2xl p-1 ${panelBg}`}
+          onMouseLeave={handleTabContainerMouseLeave}
+        >
+          {useLiquidGlass && (
+            <div
+              className={`pointer-events-none absolute rounded-lg shadow-sm transition-all duration-300 ease-out ${
+                useDarkMode ? "bg-black/25 shadow-black/20" : "bg-white/25 shadow-white/20"
+              }`}
+              style={{
+                left: `${highlightPos.left}px`,
+                width: `${highlightPos.width}px`,
+                top: "4px",
+                bottom: "4px",
+              }}
+            />
+          )}
           <TabButton
             active={activeTab === "characters"}
             onClick={() => setActiveTab("characters")}
+            onMouseEnter={handleTabMouseEnter}
+            dataTab="characters"
             icon={<Swords size={14} />}
             label={t("tabs.characters")}
             count={characters.length}
@@ -470,10 +544,13 @@ export function GalleryPage() {
             useDarkMode={useDarkMode}
             textColor={textColor}
             subtextColor={subtextColor}
+            isHovering={isHovering}
           />
           <TabButton
             active={activeTab === "ost"}
             onClick={() => setActiveTab("ost")}
+            onMouseEnter={handleTabMouseEnter}
+            dataTab="ost"
             icon={<Music2 size={14} />}
             label={t("tabs.ost")}
             count={OST_TRACKS.length || undefined}
@@ -481,6 +558,7 @@ export function GalleryPage() {
             useDarkMode={useDarkMode}
             textColor={textColor}
             subtextColor={subtextColor}
+            isHovering={isHovering}
           />
         </div>
 

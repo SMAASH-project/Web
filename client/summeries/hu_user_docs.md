@@ -1,6 +1,6 @@
 # SMAASH kliens — felhasználói útmutató
 
-**Frissítve:** 2026-04-13 (rev 7)
+**Frissítve:** 2026-04-13 (rev 8)
 
 > Ez az útmutató röviden, érthetően vezet végig az app fő részein, a beállításokon és a leggyakoribb teendőkön.
 
@@ -149,7 +149,7 @@ A ranglisták időszakosan frissülnek, ahogy a szerver kiszámolja az összesí
 
 ## Gallery
 
-A **Gallery** oldalon játékos média, képek és közösségi tartalmak között böngészhetsz. Ahol támogatott, ott előre-hátra gombokkal is navigálhatsz.
+A **Gallery** oldalon játékos média, képek és közösségi tartalmak között böngészhetsz. A felső tab gombokkal válthatsz a **Karakterek** rács és az **OST** zenelejátszó között. Ahol támogatott, ott előre-hátra gombokkal is navigálhatsz.
 
 ---
 
@@ -238,6 +238,8 @@ Ilyenkor ezeket próbáld:
 
 Az alkalmazás gyorsabbá és simábbá vált:
 
+- **Egységes tab stílus az összes oldalon:** A Gallery és a Leaderboard oldalakon lévő tab választók mostantól ugyanolyan vizuális stílusban jelennek meg, mint a Webstore és a Releases oldalakon — csúszó kiemelés Liquid Glass módban, helyes sötét/világos aktív állapotok minden más módban
+- **Karakterképek a Webstore-ban:** Minden karakterkártya most mutat egy portré képet. Ha még nem töltöttek fel képet, egy stílus szerinti helyőrző jelenik meg. Az adminok feltölthetnek karakterképet az új karakter létrehozásakor
 - **Ranglista átdolgozás:** A leaderboard mostantól tab választóval működik. Válassz egy kategóriát, és megjelenik a dobogó (top 3), a továbbjutók, egy keresőmező és egy görgethető teljes rangsor. Az „Összes" tab stat sávot és mind a négy panelt egyszerre mutatja
 - **A ranglista azonnal tölt:** A korábbi animációs késleltetés (akár 2 másodperc várakozás tartalom előtt) eltűnt — az adatok megjelennek, ahogy megérkeznek
 - **Kisebb letöltési méret:** Optimalizált eszközök; gyorsabb betöltés lassú kapcsolaton

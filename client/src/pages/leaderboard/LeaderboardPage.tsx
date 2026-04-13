@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "motion/react";
 import Navbar from "@/components/nav/Navbar";
@@ -277,6 +277,45 @@ export function LeaderboardPage() {
 
   const [activeTab, setActiveTab] = useState<TabId>("all");
 
+  const tabContainerRef = useRef<HTMLDivElement>(null);
+  const [highlightPos, setHighlightPos] = useState({ left: 0, width: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+
+  const updateHighlightToSelected = useCallback(() => {
+    if (!tabContainerRef.current) return;
+    const btn = tabContainerRef.current.querySelector(
+      `[data-tab="${activeTab}"]`,
+    ) as HTMLElement | null;
+    if (btn) {
+      const rect = btn.getBoundingClientRect();
+      const parentRect = tabContainerRef.current.getBoundingClientRect();
+      setHighlightPos({ left: rect.left - parentRect.left, width: rect.width });
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    updateHighlightToSelected();
+  }, [updateHighlightToSelected]);
+
+  const handleTabMouseEnter = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (!useLiquidGlass) return;
+      setIsHovering(true);
+      const rect = e.currentTarget.getBoundingClientRect();
+      if (tabContainerRef.current) {
+        const parentRect = tabContainerRef.current.getBoundingClientRect();
+        setHighlightPos({ left: rect.left - parentRect.left, width: rect.width });
+      }
+    },
+    [useLiquidGlass],
+  );
+
+  const handleTabContainerMouseLeave = useCallback(() => {
+    if (!useLiquidGlass) return;
+    setIsHovering(false);
+    updateHighlightToSelected();
+  }, [useLiquidGlass, updateHighlightToSelected]);
+
   const { data: topItems = [], isLoading: itemsLoading } = useTopItemsQuery();
   const { data: topPlayers = [], isLoading: playersLoading } = useTopPlayersQuery();
   const { data: topLevels = [], isLoading: levelsLoading } = useTopLevelsQuery();
@@ -450,23 +489,55 @@ export function LeaderboardPage() {
         </div>
 
         {/* Tab selector */}
-        <div className={`flex gap-1 rounded-2xl p-1 ${panelBg}`}>
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all duration-200 ${
-                activeTab === tab.id
-                  ? useDarkMode
-                    ? "bg-white/15 text-white shadow"
-                    : "bg-white text-gray-900 shadow"
-                  : `${subtextColor} hover:bg-black/5`
+        <div
+          ref={tabContainerRef}
+          className={`relative flex gap-1 rounded-2xl p-1 ${panelBg}`}
+          onMouseLeave={handleTabContainerMouseLeave}
+        >
+          {useLiquidGlass && (
+            <div
+              className={`pointer-events-none absolute rounded-lg shadow-sm transition-all duration-300 ease-out ${
+                useDarkMode ? "bg-black/25 shadow-black/20" : "bg-white/25 shadow-white/20"
               }`}
-            >
-              {tab.icon}
-              <span className="hidden sm:inline">{tab.label}</span>
-            </button>
-          ))}
+              style={{
+                left: `${highlightPos.left}px`,
+                width: `${highlightPos.width}px`,
+                top: "4px",
+                bottom: "4px",
+              }}
+            />
+          )}
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id;
+            const activeClass = useLiquidGlass
+              ? ""
+              : useDarkMode
+                ? "bg-gray-700 shadow-md"
+                : "bg-gray-200 shadow-md";
+            const inactiveClass = useLiquidGlass
+              ? ""
+              : useDarkMode
+                ? "hover:bg-gray-700"
+                : "hover:bg-gray-100";
+            return (
+              <button
+                key={tab.id}
+                data-tab={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                onMouseEnter={handleTabMouseEnter}
+                className={`relative z-10 flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all duration-200 ${isActive ? activeClass : inactiveClass}`}
+              >
+                <span
+                  className={`flex items-center gap-1.5 transition-opacity ${
+                    useLiquidGlass ? "text-white" : useDarkMode ? "text-white" : "text-gray-900"
+                  } ${isActive && !isHovering ? "opacity-100" : isHovering ? "" : "opacity-60"}`}
+                >
+                  {tab.icon}
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Tab content — AnimatePresence gives clean cross-fade on switch */}

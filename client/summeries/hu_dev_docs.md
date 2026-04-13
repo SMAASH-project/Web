@@ -1,6 +1,6 @@
 # SMAASH kliens — fejlesztői dokumentáció
 
-**Frissítve:** 2026-04-13 (rev 7)
+**Frissítve:** 2026-04-13 (rev 8)
 
 > Ez az összefoglaló a kliens architektúráját, a közös mintákat és a legfontosabb fejlesztési szabályokat foglalja össze. Nem csak azt mondja meg, _mit_ használunk, hanem azt is, _miért_ így.
 
@@ -161,9 +161,23 @@ A debug emulációs mód hálózati késleltetést is tud szimulálni. Ez fejles
 - itemlista + vásárlás + tulajdonállapot merge
 - coin érték a kiválasztott profilból
 
+### Gallery (`/app/gallery`)
+
+Két tabos oldal: **Karakterek** rács és **OST** zenelejátszó.
+
+**Tab választó:** A közös pill-container mintát alkalmazza — `panelBg` wrapper `relative` pozícionálással, csúszó kiemelés div (csak LG módban), `data-tab` attribútumok a gombokhoz. Aktív állapot: `bg-gray-700 shadow-md` (nem-LG sötét) / `bg-gray-200 shadow-md` (nem-LG világos). Inaktív hover: `hover:bg-gray-700` / `hover:bg-gray-100`. LG módban a gombok átlátszók, a csúszó kiemelés adja az aktív vizuált. Az egér gombra lépésekor frissül a `highlightPos`, a containert elhagyva visszaáll a kiválasztott tabra.
+
+A `TabButton` komponens a `GalleryPage`-hez lokális. `dataTab`, `onMouseEnter` és `isHovering` propokat kap a container szintű kiemelés követéséhez.
+
+**Karakterek tab:** `useDebugCharactersQuery`-n keresztül tölt (ADMIN szükséges — lásd `docs/problems.md`). Minden karaktert `CharacterCard` jelenít meg, ami `GET /api/characters/:id/img`-et tölt be, és hibánál `Swords` ikonra esik vissza. `LoadPost`-tal animálva, ha `useAnimations` be van kapcsolva.
+
+**OST tab:** Statikus `OstTrack[]` lista a fájl tetején. Trackeket hozzáadni az `OST_TRACKS` szerkesztésével lehet. Teljesen működő audiojátszó seekerrel, hangerővel és tracklista nézettel.
+
 ### Leaderboard (`/app/leaderboard`)
 
 Tab alapú ranglétra: kategóriánként podium nézet, globális "Összes" áttekintővel.
+
+**Tab választó:** Ugyanaz a pill-container minta, mint a Gallery-nél és az `ItemFilters`-nél — `tabContainerRef`, `highlightPos`, `isHovering` állapot page szinten; csúszó kiemelés div LG módban; `data-tab` a gombokon. Aktív állapot: `bg-gray-700 shadow-md` / `bg-gray-200 shadow-md`. Inaktív hover: `hover:bg-gray-700` / `hover:bg-gray-100`.
 
 **Tab struktúra (`TabId`):**
 
@@ -282,3 +296,4 @@ A leaderboardon több statisztikai lekérdezés fut párhuzamosan. A React Query
 - Route/page szinten legyen explicit jogosultságellenőrzés.
 - UI változtatásnál a lokalizációt és a dokumentációt is frissíteni kell.
 - Reszponzív viselkedésnél előbb a meglévő shadcn komponenseket nézd meg, és csak utána vezess be új UI elemet.
+- **Tab választóknál** kövesd a pill-container mintát (lásd Gallery, Leaderboard, `ItemFilters`, `SelectOs`): `panelBg` wrapper `relative` pozícionálással, csúszó kiemelés div (csak LG), `data-tab` attribútumok, container szintű `highlightPos` + `isHovering` állapot. Aktív nem-LG: `bg-gray-700 shadow-md` / `bg-gray-200 shadow-md`. Inaktív hover: `hover:bg-gray-700` / `hover:bg-gray-100`. **Ne** használj `bg-white/15` / `bg-white` hardkódolt értékeket LG kezelés nélkül.
