@@ -40,7 +40,9 @@ function dtoToNewsPost(dto: PostReadDTO): NewsPost {
     imagePosition: isRight ? "Right" : "Top",
     // Legacy img_pos=1 (old boolean Right) → default 25 %; new values: multiply by 10
     imageSize: isRight
-      ? (pos === 1 ? 25 : Math.round(pos * 10))
+      ? pos === 1
+        ? 25
+        : Math.round(pos * 10)
       : pos === 0
         ? 50
         : Math.round(-pos * 10),
