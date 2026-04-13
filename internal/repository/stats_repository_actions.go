@@ -9,7 +9,7 @@ import (
 
 type StatsRepository interface {
 	ReadMostActivePlayers(context.Context) ([]*models.TopPlayersResult, error)
-	ReadMostPopularItems(context.Context) ([]*models.TopItemsResult, error)
+	ReadMostPopularCharacters(context.Context) ([]*models.TopCharactersResult, error)
 	ReadFavouriteCharactersOfPlayer(context.Context, uint) ([]*models.FavouriteCharacterResult, error)
 	ReadMostPlayedLevels(context.Context) ([]*models.TopLevelsResult, error)
 	ReadPlayersWithMostWins(context.Context) ([]*models.BestPlayersResult, error)
@@ -36,14 +36,14 @@ func (sra StatsRepositoryActions) ReadMostActivePlayers(c context.Context) ([]*m
 	return result, err
 }
 
-func (sra StatsRepositoryActions) ReadMostPopularItems(c context.Context) ([]*models.TopItemsResult, error) {
-	var result []*models.TopItemsResult
+func (sra StatsRepositoryActions) ReadMostPopularCharacters(c context.Context) ([]*models.TopCharactersResult, error) {
+	var result []*models.TopCharactersResult
 	err := sra.conn.
 		WithContext(c).
-		Model(&models.Item{}).
-		Select("items.*, SUM(purchases.count) AS count_of_purchases").
-		Joins("JOIN purchases ON purchases.item_id = items.id").
-		Group("items.id").
+		Model(&models.Character{}).
+		Select("characters.*, SUM(purchases.count) AS count_of_purchases").
+		Joins("JOIN purchases ON purchases.character_id = characters.id").
+		Group("characters.id").
 		Order("count_of_purchases DESC").
 		Scan(&result).Error
 
@@ -56,8 +56,8 @@ func (sra StatsRepositoryActions) ReadMostPopularItems(c context.Context) ([]*mo
 		var categories []*models.Category
 		err := sra.conn.
 			Table("categories").
-			Joins("JOIN item_category ON item_category.category_id = categories.id").
-			Where("item_category.item_id = ?", topResult.ID).
+			Joins("JOIN character_category ON character_category.category_id = categories.id").
+			Where("character_category.character_id = ?", topResult.ID).
 			Find(&categories).Error
 		if err != nil {
 			return nil, err
@@ -67,7 +67,7 @@ func (sra StatsRepositoryActions) ReadMostPopularItems(c context.Context) ([]*mo
 		var rarity models.Rarity
 		err = sra.conn.
 			Table("rarities").
-			Joins("JOIN items ON items.rarity_id = rarities.id").
+			Joins("JOIN characters ON characters.rarity_id = rarities.id").
 			Where("rarities.id = ?", topResult.RarityID).
 			Find(&rarity).Error
 		if err != nil {

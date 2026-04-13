@@ -41,18 +41,18 @@ func (sc StatsController) ReadMostActivePlayers(c *gin.Context) {
 // @tags stats
 // @accept json
 // @produce json
-// @success 200 {array} dtos.TopItemsDTO "returns items ordered by count of purchsases"
+// @success 200 {array} dtos.TopCharactersDTO "returns items ordered by count of purchsases"
 // @failure 401 {object} dtos.ErrResp "unauthorized"
 // @failure 500 {object} dtos.ErrResp "internal server error"
-// @router /stats/top/items [get]
-func (sc StatsController) ReadMostPopularItems(c *gin.Context) {
-	res, err := sc.statsRepo.ReadMostPopularItems(c.Request.Context())
+// @router /stats/top/characters [get]
+func (sc StatsController) ReadMostPopularCharacters(c *gin.Context) {
+	res, err := sc.statsRepo.ReadMostPopularCharacters(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
 	}
 
-	c.JSON(http.StatusOK, utils.Map(res, dtos.TopItemsToDTO))
+	c.JSON(http.StatusOK, utils.Map(res, dtos.TopCharactersToDTO))
 }
 
 // @description Reads the most popular items
@@ -118,7 +118,7 @@ func (sc StatsController) ReadPlayersWithMostWins(c *gin.Context) {
 
 func (sc StatsController) MountRoutes(apiGroup *gin.RouterGroup) {
 	stats := apiGroup.Group("/stats")
-	stats.GET("top/items", sc.ReadMostPopularItems)
+	stats.GET("top/items", sc.ReadMostPopularCharacters)
 	stats.GET("top/players", sc.ReadMostActivePlayers)
 	stats.GET("top/levels", sc.ReadMostPlayedLevels)
 	stats.GET("profiles/:id/favourite", sc.ReadFavouriteCharactersOfPlayer)

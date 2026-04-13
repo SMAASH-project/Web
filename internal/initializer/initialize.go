@@ -16,6 +16,7 @@ func Initialize() *server.Server {
 	profilesRepo := repository.NewProfilesRepositoryActions(conn)
 	rarityRepo := repository.NewRarityRepositoryActions(conn)
 	categoriesRepo := repository.NewCategoryRepositoryActions(conn)
+	charactersRepo := repository.NewCharactersRepositoryActions(conn)
 
 	authService := services.NewAuthenticationService(userRepo)
 
@@ -25,14 +26,13 @@ func Initialize() *server.Server {
 		AddController(controllers.NewAuthnController(authService, repository.NewRolesRepositoryActions(conn))).
 		AddController(controllers.NewGameAuthController(userRepo)).
 		AddController(controllers.NewLevelsController(repository.NewBaseRepositoryActions[models.Level](conn))).
-		AddController(controllers.NewPlayerProfileController(profilesRepo)).
+		AddController(controllers.NewPlayerProfileController(profilesRepo, charactersRepo)).
 		AddController(controllers.NewRolesController(repository.NewBaseRepositoryActions[models.Role](conn))).
 		AddController(controllers.NewCategoriesController(categoriesRepo)).
-		AddController(controllers.NewItemsController(repository.NewItemsRepositoryActions(conn), rarityRepo, categoriesRepo)).
 		AddController(controllers.NewRaritiesController(rarityRepo)).
 		AddController(controllers.NewStatsController(repository.NewStatsRepositoryActions(conn))).
-		AddController(controllers.NewPurchasesController(repository.NewBaseRepositoryActions[models.Purchase](conn), profilesRepo)).
+		AddController(controllers.NewPurchasesController(repository.NewPurchasesRepositoryActions(conn), profilesRepo)).
 		AddController(controllers.NewPostsController(repository.NewBaseRepositoryActions[models.Post](conn))).
 		AddController(controllers.NewMatchController(conn)).
-		AddController(controllers.NewCharactersController(repository.NewBaseRepositoryActions[models.Character](conn)))
+		AddController(controllers.NewCharactersController(charactersRepo))
 }

@@ -7,6 +7,7 @@ type MatchParticipation struct {
 	Character       Character `gorm:"foreignKey:CharacterID;constraint:OnDelete:RESTRICT"`
 	Result          string    `gorm:"not null;type:varchar(4)"`
 	NetworkStatus   string    `gorm:"not null;type:varchar(12)"`
+	CoinsAwarded    int64     `gorm:"not null;default:0"`
 }
 
 func (mp MatchParticipation) GetID() uint {

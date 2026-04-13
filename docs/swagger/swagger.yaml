@@ -39,31 +39,69 @@ definitions:
     type: object
   dtos.CharacterCreateDTO:
     properties:
+      category_ids:
+        items:
+          type: integer
+        type: array
+      description:
+        maxLength: 70
+        type: string
       name:
         maxLength: 20
         type: string
+      price:
+        type: integer
+      rarity_id:
+        type: integer
     required:
+    - description
     - name
+    - price
+    - rarity_id
     type: object
   dtos.CharacterReadDTO:
     properties:
+      categories:
+        items:
+          type: string
+        type: array
+      description:
+        type: string
       id:
         type: integer
       img_uri:
         type: string
       name:
         type: string
+      price:
+        type: integer
+      rarity:
+        type: string
     type: object
   dtos.CharacterUpdateDTO:
     properties:
+      category_ids:
+        items:
+          type: integer
+        type: array
+      description:
+        maxLength: 70
+        type: string
       id:
         type: integer
       name:
         maxLength: 20
         type: string
+      price:
+        type: integer
+      rarity_id:
+        type: integer
     required:
+    - description
     - id
     - name
+    - price
+    - rarity_id
     type: object
   dtos.ErrResp:
     properties:
@@ -76,108 +114,24 @@ definitions:
     type: object
   dtos.FavouriteCharactersDTO:
     properties:
+      categories:
+        items:
+          type: string
+        type: array
       count_of_plays:
         type: integer
+      description:
+        type: string
       id:
         type: integer
       img_uri:
         type: string
       name:
         type: string
-    type: object
-  dtos.ItemCreateDTO:
-    properties:
-      categories:
-        items:
-          type: string
-        type: array
-      description:
-        maxLength: 50
-        type: string
-      name:
-        maxLength: 20
-        type: string
-      price:
-        minimum: 0
-        type: integer
-      rarity:
-        maxLength: 9
-        type: string
-    required:
-    - categories
-    - description
-    - name
-    - price
-    - rarity
-    type: object
-  dtos.ItemReadDTO:
-    properties:
-      categories:
-        items:
-          type: string
-        type: array
-      description:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
       price:
         type: integer
       rarity:
         type: string
-    type: object
-  dtos.ItemUpdateDTO:
-    properties:
-      categories:
-        items:
-          type: string
-        type: array
-      description:
-        maxLength: 50
-        type: string
-      id:
-        type: integer
-      name:
-        maxLength: 20
-        type: string
-      price:
-        minimum: 0
-        type: integer
-      rarity:
-        maxLength: 9
-        type: string
-    required:
-    - categories
-    - description
-    - id
-    - name
-    - price
-    - rarity
-    type: object
-  dtos.ItemWithOwnedReadDTO:
-    properties:
-      categories:
-        items:
-          type: string
-        type: array
-      description:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-      owned:
-        type: boolean
-      price:
-        type: integer
-      rarity:
-        type: string
-    type: object
-  dtos.ItemWithOwnedReqDTO:
-    properties:
-      profile_id:
-        type: integer
     type: object
   dtos.LevelCreateDTO:
     properties:
@@ -237,6 +191,9 @@ definitions:
     properties:
       character_id:
         type: integer
+      coins_awarded:
+        minimum: 0
+        type: integer
       network_status:
         maxLength: 12
         type: string
@@ -247,6 +204,7 @@ definitions:
         type: string
     required:
     - character_id
+    - coins_awarded
     - network_status
     - player_id
     - result
@@ -468,7 +426,7 @@ definitions:
     required:
     - refreshToken
     type: object
-  dtos.TopItemsDTO:
+  dtos.TopCharactersDTO:
     properties:
       categories:
         items:
@@ -480,6 +438,8 @@ definitions:
         type: string
       id:
         type: integer
+      img_uri:
+        type: string
       name:
         type: string
       price:
@@ -1147,248 +1107,6 @@ paths:
             $ref: '#/definitions/dtos.ErrResp'
       tags:
       - game-auth
-  /items:
-    get:
-      consumes:
-      - application/json
-      description: Reads items (owned by a profile)
-      parameters:
-      - description: dto for reading an item with an owned field
-        in: body
-        name: item_with_owned_req_dto
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.ItemWithOwnedReqDTO'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: returns all categories
-          schema:
-            items:
-              $ref: '#/definitions/dtos.ItemWithOwnedReadDTO'
-            type: array
-        "401":
-          description: unauthorized
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-        "422":
-          description: request body in wrong format
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-        "500":
-          description: internal server error
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-      tags:
-      - items
-    post:
-      consumes:
-      - application/json
-      description: Creates a new item
-      parameters:
-      - description: dto for creating a new item
-        in: body
-        name: item_create_dto
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.ItemCreateDTO'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: returns newly created item
-          schema:
-            $ref: '#/definitions/dtos.ItemReadDTO'
-        "401":
-          description: unauthorized
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-        "409":
-          description: unique key violation
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-        "422":
-          description: request body in wrong format
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-        "500":
-          description: internal server error
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-      tags:
-      - items
-  /items/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Deletes an item with the given id
-      parameters:
-      - description: id of desired item
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: doesn't return anything
-          schema:
-            type: ""
-        "401":
-          description: unauthorized
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-        "404":
-          description: record not found
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-        "500":
-          description: internal server error
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-      tags:
-      - items
-    get:
-      consumes:
-      - application/json
-      description: Reads an item by it's id
-      parameters:
-      - description: the id of the desired item
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: returns the desired item
-          schema:
-            $ref: '#/definitions/dtos.ItemReadDTO'
-        "401":
-          description: unauthorized
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-        "404":
-          description: record not found
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-        "500":
-          description: internal server error
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-      tags:
-      - items
-    put:
-      consumes:
-      - application/json
-      description: Updates the item with the given id
-      parameters:
-      - description: dto for updating an item
-        in: body
-        name: item_update_dto
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.ItemUpdateDTO'
-      - description: id of desired item
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: doesn't return anything
-          schema:
-            type: ""
-        "400":
-          description: id from url and id from request body doesn't match
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-        "401":
-          description: unauthorized
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-        "404":
-          description: record not found
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-        "409":
-          description: unique key violation
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-        "422":
-          description: request body in wrong format
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-        "500":
-          description: internal server error
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-      tags:
-      - items
-  /items/{id}/pfp:
-    get:
-      consumes:
-      - application/json
-      description: Returns an uploaded item image
-      parameters:
-      - description: id of desired item
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - multipart/form-data
-      responses:
-        "404":
-          description: record not found
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-        "500":
-          description: internal server error
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-      tags:
-      - items
-    post:
-      consumes:
-      - multipart/form-data
-      description: Uploads an image for item with given id
-      parameters:
-      - description: id of desired items
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: returns newly created image's URI
-          schema:
-            type: string
-        "400":
-          description: no file sent
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-        "401":
-          description: unauthorized
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-        "415":
-          description: invalid media type
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-        "500":
-          description: internal server error
-          schema:
-            $ref: '#/definitions/dtos.ErrResp'
-      tags:
-      - items
   /levels:
     get:
       consumes:
@@ -2661,7 +2379,7 @@ paths:
             $ref: '#/definitions/dtos.ErrResp'
       tags:
       - stats
-  /stats/top/items:
+  /stats/top/characters:
     get:
       consumes:
       - application/json
@@ -2673,7 +2391,7 @@ paths:
           description: returns items ordered by count of purchsases
           schema:
             items:
-              $ref: '#/definitions/dtos.TopItemsDTO'
+              $ref: '#/definitions/dtos.TopCharactersDTO'
             type: array
         "401":
           description: unauthorized

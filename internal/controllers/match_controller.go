@@ -71,12 +71,23 @@ func (mc *MatchController) Create(c *gin.Context) {
 		}
 
 		participation := body.Participation
+		var previousParticipation models.MatchParticipation
+		previousCoinsAwarded := int64(0)
+		if err := tx.Where("match_id = ? AND player_profile_id = ?", createdMatch.ID, participation.PlayerID).First(&previousParticipation).Error; err != nil {
+			if !errors.Is(err, gorm.ErrRecordNotFound) {
+				return err
+			}
+		} else {
+			previousCoinsAwarded = previousParticipation.CoinsAwarded
+		}
+
 		newParticipation := models.MatchParticipation{
 			MatchID:         createdMatch.ID,
 			PlayerProfileID: participation.PlayerID,
 			CharacterID:     participation.CharacterID,
 			Result:          participation.Result,
 			NetworkStatus:   participation.NetworkStatus,
+			CoinsAwarded:    participation.CoinsAwarded,
 		}
 
 		if err := tx.Clauses(clause.OnConflict{
@@ -85,14 +96,32 @@ func (mc *MatchController) Create(c *gin.Context) {
 				"character_id":   newParticipation.CharacterID,
 				"result":         newParticipation.Result,
 				"network_status": newParticipation.NetworkStatus,
+				"coins_awarded":  newParticipation.CoinsAwarded,
 			}),
 		}).Create(&newParticipation).Error; err != nil {
 			return err
 		}
 
+		coinDelta := newParticipation.CoinsAwarded - previousCoinsAwarded
+		if coinDelta != 0 {
+			result := tx.Model(&models.PlayerProfile{}).
+				Where("id = ?", participation.PlayerID).
+				Update("coins", gorm.Expr("coins + ?", coinDelta))
+			if result.Error != nil {
+				return result.Error
+			}
+			if result.RowsAffected == 0 {
+				return gorm.ErrRecordNotFound
+			}
+		}
+
 		return nil
 	})
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("Player profile with given id not found", path))
+			return
+		}
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			c.JSON(http.StatusConflict, dtos.NewErrResp(err.Error(), path))
 			return
