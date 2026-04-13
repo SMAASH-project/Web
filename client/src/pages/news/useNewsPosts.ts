@@ -14,7 +14,13 @@ interface PostReadDTO {
   category: string;
   img_url?: string;
   img_alt?: string;
-  /** 0 = Top layout, positive = Right (side) layout */
+  /**
+   * Encodes both layout and image size:
+   *   0          → Top, default 50 vh  (omitempty — not sent when 0)
+   *   positive   → Right, img_pos * 10 = width %  (e.g. 2.5 → 25 %)
+   *   negative   → Top,  |img_pos| * 10 = max-height vh  (e.g. -2.5 → 25 vh)
+   * Legacy: img_pos === 1 treated as Right + 25 % default.
+   */
   img_pos?: number;
   content: string;
   created_at: string; // YYYY-MM-DD
@@ -23,14 +29,21 @@ interface PostReadDTO {
 // ─── Mapping helpers ──────────────────────────────────────────────────────────
 
 function dtoToNewsPost(dto: PostReadDTO): NewsPost {
+  const pos = dto.img_pos ?? 0;
+  const isRight = pos > 0;
   return {
     id: String(dto.id),
     title: dto.title,
     category: dto.category as NewsPost["category"],
     image: dto.img_url || undefined,
     imageAlt: dto.img_alt || undefined,
-    imagePosition: dto.img_pos && dto.img_pos > 0 ? "Right" : "Top",
-    imageSize: 25,
+    imagePosition: isRight ? "Right" : "Top",
+    // Legacy img_pos=1 (old boolean Right) → default 25 %; new values: multiply by 10
+    imageSize: isRight
+      ? (pos === 1 ? 25 : Math.round(pos * 10))
+      : pos === 0
+        ? 50
+        : Math.round(-pos * 10),
     content: dto.content,
     createdAt: DateTime.fromFormat(dto.created_at, "yyyy-MM-dd").isValid
       ? DateTime.fromFormat(dto.created_at, "yyyy-MM-dd")
@@ -39,12 +52,14 @@ function dtoToNewsPost(dto: PostReadDTO): NewsPost {
 }
 
 function newsPostToCreateBody(post: NewsPost) {
+  // Clamp 1–99 so the encoded value stays within the DB constraint (img_pos < 10)
+  const size = Math.min(Math.max(post.imageSize ?? 25, 1), 99);
   return {
     title: post.title,
     category: post.category,
     img_url: post.image ?? "",
     img_alt: post.imageAlt ?? "",
-    img_pos: post.imagePosition === "Right" ? 1 : 0,
+    img_pos: post.imagePosition === "Right" ? size / 10 : -(size / 10),
     content: post.content,
   };
 }
