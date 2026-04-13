@@ -98,7 +98,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
         </Button>
       </DialogTrigger>
       <DialogContent
-        className={`w-full max-w-full sm:max-w-3xl ${dialogClass} ${textShadow}`}
+        className={`max-w-[calc(100%-2rem)] sm:max-w-3xl ${dialogClass} ${textShadow}`}
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
@@ -129,8 +129,8 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                 <FieldGroup>
                   <Field>
                     <Label className={`text-sm ${subtextColor}`}>{t("add.imagePosition")}</Label>
-                    <div className="flex flex-row items-start gap-4">
-                      <div className="flex shrink-0 flex-col gap-2">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                      <div className="flex flex-col gap-2 sm:shrink-0">
                         <RadioGroupChoiceCard
                           value={imagePosition}
                           onValueChange={(v) => setImagePosition(v as "Top" | "Right")}
@@ -217,8 +217,8 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                 <FieldGroup>
                   <Field>
                     <Label className={`text-sm ${subtextColor}`}>{t("add.imagePosition")}</Label>
-                    <div className="flex flex-row items-start gap-4">
-                      <div className="flex shrink-0 flex-col gap-2">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                      <div className="flex flex-col gap-2 sm:shrink-0">
                         <RadioGroupChoiceCard
                           value={imagePosition}
                           onValueChange={(v) => setImagePosition(v as "Top" | "Right")}

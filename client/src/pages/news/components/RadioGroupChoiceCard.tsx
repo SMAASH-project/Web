@@ -22,7 +22,7 @@ export function RadioGroupChoiceCard({
   const { t } = useTranslation("news");
 
   return (
-    <RadioGroup value={value} onValueChange={onValueChange} className="max-w-sm">
+    <RadioGroup value={value} onValueChange={onValueChange} className="w-full sm:max-w-sm">
       <FieldLabel htmlFor="Top">
         <Field orientation="horizontal">
           <FieldContent>
