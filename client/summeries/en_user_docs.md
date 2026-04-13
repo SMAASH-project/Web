@@ -1,6 +1,6 @@
 # SMAASH Client — User Guide
 
-**Last updated:** 2026-04-13 (rev 6)
+**Last updated:** 2026-04-13 (rev 7)
 
 > Welcome! This guide walks you through SMAASH's features, settings, and common tasks. Think of it as a companion while you explore.
 
@@ -128,14 +128,22 @@ You can search posts by keyword or browse the full feed. Admins can create and e
 
 ## Leaderboards
 
-Compete on **four different leaderboards**:
+The leaderboard has a **tab selector** at the top. Pick a category to explore it in depth, or stay on **All** for a quick overview.
 
-1. **Players** — Most wins / highest rank
-2. **Levels** — Most played / hardest difficulty
-3. **Items** — Most purchased / most rare items owned
-4. **Global Stats** — Various metrics
+### "All" tab
 
-The leaderboards update periodically as the server processes stats. If numbers look stale, the server might still be computing—give it a moment and refresh.
+- **Stat bar** — four highlight chips showing the current #1 in each category (top winner, most active player, hottest level, best-selling item)
+- **Four panels** — top 5 entries per category, side by side
+
+### Category tabs (Wins / Active / Levels / Items)
+
+Each category tab shows:
+
+1. **Podium** — the top 3 displayed on a gold/silver/bronze podium. 1st place stands tallest in the centre; 2nd is to the left, 3rd to the right
+2. **Runners-up** — 4th and 5th place listed just below the podium, if they exist
+3. **Full rankings** — a scrollable list of all entries with their rank number. Use the **search bar** to jump straight to a player, level, or item by name
+
+The leaderboards update periodically as the server processes stats. If numbers look stale, give it a moment and refresh.
 
 ---
 
@@ -229,13 +237,15 @@ Try:
 
 We've made the app faster and smoother:
 
+- **Leaderboard redesign:** The leaderboard now has a tab selector. Pick a category to see a full podium (top 3), runners-up, a search bar, and a scrollable ranked list. The "All" tab shows a stat bar and all four panels at once
+- **Leaderboard loads instantly:** The previous animation delay (up to 2 seconds before content appeared) has been removed — data shows up as soon as it arrives
 - **Smaller download size:** Optimized assets; app loads quicker on slower connections
 - **Smoother theme switching:** Background animations now respond instantly to your settings changes
 - **Better performance:** Less CPU usage when animations are playing, especially on mobile devices
 - **More stable profile creation feedback:** clearer errors when a name is already taken or profile limits are reached
 - **Improved News dialogs on mobile:** The post creation and editing dialogs now display with proper side padding on phones, scroll correctly when content is tall, and the image settings section stacks neatly instead of overflowing
 
-You might not notice these changes directly, but they mean the app should feel snappier overall.
+You might not notice all these changes directly, but the app should feel snappier and more polished overall.
 
 ---
 

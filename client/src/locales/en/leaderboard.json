@@ -1,12 +1,30 @@
 {
   "title": "Leaderboard",
   "subtitle": "Community stats and top performers",
+  "tabs": {
+    "all": "All",
+    "wins": "Wins",
+    "active": "Active",
+    "levels": "Levels",
+    "items": "Items"
+  },
   "panels": {
     "winLeaderboard": "Win Leaderboard",
     "mostActivePlayers": "Most Active Players",
     "mostPlayedLevels": "Most Played Levels",
     "mostPurchasedItems": "Most Purchased Items"
   },
+  "podium": {
+    "runnersUp": "Runners Up",
+    "fullRankings": "Full Rankings"
+  },
+  "statBar": {
+    "topWinner": "Top Winner",
+    "mostActive": "Most Active",
+    "hottestLevel": "Hottest Level",
+    "bestSeller": "Best Seller"
+  },
+  "search": "Search...",
   "noData": "No data yet",
   "stats": {
     "wins": "W",
