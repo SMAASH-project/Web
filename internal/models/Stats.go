@@ -1,7 +1,7 @@
 package models
 
-type TopItemsResult struct {
-	Item
+type TopCharactersResult struct {
+	Character
 	CountOfPurchases uint
 }
 
@@ -25,7 +25,7 @@ type BestPlayersResult struct {
 	CountOfWins uint
 }
 
-type ItemsWithOwned struct {
-	Item
+type CharactersWithOwned struct {
+	Character
 	Owned bool
 }

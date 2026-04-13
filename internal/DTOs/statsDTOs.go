@@ -2,8 +2,8 @@ package dtos
 
 import "smaash-web/internal/models"
 
-type TopItemsDTO struct {
-	ItemReadDTO
+type TopCharactersDTO struct {
+	CharacterReadDTO
 	CountOfPurchases uint `json:"count_of_purchases"`
 }
 
@@ -27,10 +27,10 @@ type BestPlayersDTO struct {
 	CountOfWins uint `json:"count_of_wins"`
 }
 
-func TopItemsToDTO(topItem *models.TopItemsResult) TopItemsDTO {
-	return TopItemsDTO{
-		ItemReadDTO:      ItemToDTO(topItem.Item),
-		CountOfPurchases: topItem.CountOfPurchases,
+func TopCharactersToDTO(topCharacters *models.TopCharactersResult) TopCharactersDTO {
+	return TopCharactersDTO{
+		CharacterReadDTO: CharacterToDTO(topCharacters.Character),
+		CountOfPurchases: topCharacters.CountOfPurchases,
 	}
 }
 

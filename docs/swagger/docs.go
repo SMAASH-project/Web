@@ -865,375 +865,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/items": {
-            "get": {
-                "description": "Reads items (owned by a profile)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "items"
-                ],
-                "parameters": [
-                    {
-                        "description": "dto for reading an item with an owned field",
-                        "name": "item_with_owned_req_dto",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ItemWithOwnedReqDTO"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "returns all categories",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dtos.ItemWithOwnedReadDTO"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
-                    "422": {
-                        "description": "request body in wrong format",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
-                    "500": {
-                        "description": "internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Creates a new item",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "items"
-                ],
-                "parameters": [
-                    {
-                        "description": "dto for creating a new item",
-                        "name": "item_create_dto",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ItemCreateDTO"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "returns newly created item",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ItemReadDTO"
-                        }
-                    },
-                    "401": {
-                        "description": "unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
-                    "409": {
-                        "description": "unique key violation",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
-                    "422": {
-                        "description": "request body in wrong format",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
-                    "500": {
-                        "description": "internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    }
-                }
-            }
-        },
-        "/items/{id}": {
-            "get": {
-                "description": "Reads an item by it's id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "items"
-                ],
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "the id of the desired item",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "returns the desired item",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ItemReadDTO"
-                        }
-                    },
-                    "401": {
-                        "description": "unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
-                    "404": {
-                        "description": "record not found",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
-                    "500": {
-                        "description": "internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Updates the item with the given id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "items"
-                ],
-                "parameters": [
-                    {
-                        "description": "dto for updating an item",
-                        "name": "item_update_dto",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ItemUpdateDTO"
-                        }
-                    },
-                    {
-                        "type": "integer",
-                        "description": "id of desired item",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "doesn't return anything",
-                        "schema": {
-                            "type": ""
-                        }
-                    },
-                    "400": {
-                        "description": "id from url and id from request body doesn't match",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
-                    "401": {
-                        "description": "unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
-                    "404": {
-                        "description": "record not found",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
-                    "409": {
-                        "description": "unique key violation",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
-                    "422": {
-                        "description": "request body in wrong format",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
-                    "500": {
-                        "description": "internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Deletes an item with the given id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "items"
-                ],
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "id of desired item",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "doesn't return anything",
-                        "schema": {
-                            "type": ""
-                        }
-                    },
-                    "401": {
-                        "description": "unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
-                    "404": {
-                        "description": "record not found",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
-                    "500": {
-                        "description": "internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    }
-                }
-            }
-        },
-        "/items/{id}/pfp": {
-            "get": {
-                "description": "Returns an uploaded item image",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "multipart/form-data"
-                ],
-                "tags": [
-                    "items"
-                ],
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "id of desired item",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "404": {
-                        "description": "record not found",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
-                    "500": {
-                        "description": "internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Uploads an image for item with given id",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "items"
-                ],
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "id of desired items",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "returns newly created image's URI",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "no file sent",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
-                    "401": {
-                        "description": "unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
-                    "415": {
-                        "description": "invalid media type",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
-                    "500": {
-                        "description": "internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    }
-                }
-            }
-        },
         "/levels": {
             "get": {
                 "description": "Reads all levels",
@@ -3172,7 +2803,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/stats/top/items": {
+        "/stats/top/characters": {
             "get": {
                 "description": "Reads the most popular items",
                 "consumes": [
@@ -3190,7 +2821,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dtos.TopItemsDTO"
+                                "$ref": "#/definitions/dtos.TopCharactersDTO"
                             }
                         }
                     },
@@ -3961,18 +3592,46 @@ const docTemplate = `{
         "dtos.CharacterCreateDTO": {
             "type": "object",
             "required": [
-                "name"
+                "description",
+                "name",
+                "price",
+                "rarity_id"
             ],
             "properties": {
+                "category_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 70
+                },
                 "name": {
                     "type": "string",
                     "maxLength": 20
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "rarity_id": {
+                    "type": "integer"
                 }
             }
         },
         "dtos.CharacterReadDTO": {
             "type": "object",
             "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -3981,22 +3640,47 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "rarity": {
+                    "type": "string"
                 }
             }
         },
         "dtos.CharacterUpdateDTO": {
             "type": "object",
             "required": [
+                "description",
                 "id",
-                "name"
+                "name",
+                "price",
+                "rarity_id"
             ],
             "properties": {
+                "category_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 70
+                },
                 "id": {
                     "type": "integer"
                 },
                 "name": {
                     "type": "string",
                     "maxLength": 20
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "rarity_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -4017,8 +3701,17 @@ const docTemplate = `{
         "dtos.FavouriteCharactersDTO": {
             "type": "object",
             "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "count_of_plays": {
                     "type": "integer"
+                },
+                "description": {
+                    "type": "string"
                 },
                 "id": {
                     "type": "integer"
@@ -4028,141 +3721,12 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
-                }
-            }
-        },
-        "dtos.ItemCreateDTO": {
-            "type": "object",
-            "required": [
-                "categories",
-                "description",
-                "name",
-                "price",
-                "rarity"
-            ],
-            "properties": {
-                "categories": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "description": {
-                    "type": "string",
-                    "maxLength": 50
-                },
-                "name": {
-                    "type": "string",
-                    "maxLength": 20
-                },
-                "price": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "rarity": {
-                    "type": "string",
-                    "maxLength": 9
-                }
-            }
-        },
-        "dtos.ItemReadDTO": {
-            "type": "object",
-            "properties": {
-                "categories": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
                 },
                 "price": {
                     "type": "integer"
                 },
                 "rarity": {
                     "type": "string"
-                }
-            }
-        },
-        "dtos.ItemUpdateDTO": {
-            "type": "object",
-            "required": [
-                "categories",
-                "description",
-                "id",
-                "name",
-                "price",
-                "rarity"
-            ],
-            "properties": {
-                "categories": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "description": {
-                    "type": "string",
-                    "maxLength": 50
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string",
-                    "maxLength": 20
-                },
-                "price": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "rarity": {
-                    "type": "string",
-                    "maxLength": 9
-                }
-            }
-        },
-        "dtos.ItemWithOwnedReadDTO": {
-            "type": "object",
-            "properties": {
-                "categories": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "owned": {
-                    "type": "boolean"
-                },
-                "price": {
-                    "type": "integer"
-                },
-                "rarity": {
-                    "type": "string"
-                }
-            }
-        },
-        "dtos.ItemWithOwnedReqDTO": {
-            "type": "object",
-            "properties": {
-                "profile_id": {
-                    "type": "integer"
                 }
             }
         },
@@ -4598,7 +4162,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.TopItemsDTO": {
+        "dtos.TopCharactersDTO": {
             "type": "object",
             "properties": {
                 "categories": {
@@ -4615,6 +4179,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "img_uri": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"

@@ -6,7 +6,6 @@ import (
 	"os"
 	dtos "smaash-web/internal/DTOs"
 	"smaash-web/internal/middlewares"
-	"smaash-web/internal/models"
 	"smaash-web/internal/repository"
 	"smaash-web/internal/utils"
 
@@ -15,11 +14,11 @@ import (
 )
 
 type CharactersController struct {
-	charactersBaseRepo repository.BaseRepository[models.Character]
+	charactersRepo repository.CharactersRepository
 }
 
-func NewCharactersController(charactersBaseRepo repository.BaseRepository[models.Character]) *CharactersController {
-	return &CharactersController{charactersBaseRepo: charactersBaseRepo}
+func NewCharactersController(charactersRepo repository.CharactersRepository) *CharactersController {
+	return &CharactersController{charactersRepo: charactersRepo}
 }
 
 // @description Creates a new character
@@ -43,7 +42,9 @@ func (cc CharactersController) Create(c *gin.Context) {
 	}
 
 	newCharacter := dtos.CreateDTOToCharacter(body)
-	if err := cc.charactersBaseRepo.Create(c.Request.Context(), newCharacter); err != nil {
+	cc.charactersRepo.AppendCategories(c.Request.Context(), newCharacter, body.CategoryIDs...)
+
+	if err := cc.charactersRepo.Create(c.Request.Context(), newCharacter); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			c.JSON(http.StatusConflict, dtos.NewErrResp("Character with given name alreaddy exists", path))
 			return
@@ -52,7 +53,8 @@ func (cc CharactersController) Create(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, dtos.CharacterToDTO(*newCharacter))
+	preloaded, _ := cc.charactersRepo.ReadByID(c.Request.Context(), newCharacter.ID, "Rarity", "Categories")
+	c.JSON(http.StatusCreated, dtos.CharacterToDTO(preloaded))
 }
 
 // @description Reads characters
@@ -64,12 +66,23 @@ func (cc CharactersController) Create(c *gin.Context) {
 // @failure 500 {object} dtos.ErrResp "internal server error"
 // @router /characters [get]
 func (cc CharactersController) ReadAll(c *gin.Context) {
-	characters, err := cc.charactersBaseRepo.ReadAll(c.Request.Context())
+	filter := c.Query("filter")
+
+	if filter != "implemented" {
+		characters, err := cc.charactersRepo.ReadAll(c.Request.Context(), "Rarity", "Categories")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+			return
+		}
+		c.JSON(http.StatusOK, utils.Map(characters, dtos.CharacterToDTO))
+		return
+	}
+
+	characters, err := cc.charactersRepo.ReadFilteredByImplemented(c.Request.Context(), "Rarity", "Categories")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
 	}
-
 	c.JSON(http.StatusOK, utils.Map(characters, dtos.CharacterToDTO))
 }
 
@@ -87,7 +100,7 @@ func (cc CharactersController) ReadByID(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
 
-	character, err := cc.charactersBaseRepo.ReadByID(c.Request.Context(), id.(uint))
+	character, err := cc.charactersRepo.ReadByID(c.Request.Context(), id.(uint), "Rarity", "Categories")
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Character with given id not found", path))
@@ -129,7 +142,9 @@ func (cc CharactersController) Update(c *gin.Context) {
 		return
 	}
 
-	if err := cc.charactersBaseRepo.Update(c.Request.Context(), dtos.UpdateDTOToCharacter(body)); err != nil {
+	updatedCharacter := dtos.UpdateDTOToCharacter(body)
+	cc.charactersRepo.AppendCategories(c.Request.Context(), &updatedCharacter, body.CategoryIDs...)
+	if err := cc.charactersRepo.Update(c.Request.Context(), updatedCharacter); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Character with given id not found", path))
 			return
@@ -159,7 +174,7 @@ func (cc CharactersController) Delete(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
 
-	if err := cc.charactersBaseRepo.Delete(c.Request.Context(), id.(uint)); err != nil {
+	if err := cc.charactersRepo.Delete(c.Request.Context(), id.(uint)); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Character with given id not found", path))
 			return
@@ -202,7 +217,7 @@ func (cc CharactersController) UploadImg(c *gin.Context) {
 		return
 	}
 
-	if err := cc.charactersBaseRepo.UpdateOne(c.Request.Context(), id.(uint), "img_uri", uri); err != nil {
+	if err := cc.charactersRepo.UpdateOne(c.Request.Context(), id.(uint), "img_uri", uri); err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
 		return
 	}
@@ -222,7 +237,7 @@ func (cc CharactersController) ReadImg(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
 
-	character, err := cc.charactersBaseRepo.ReadByID(c.Request.Context(), id.(uint))
+	character, err := cc.charactersRepo.ReadByID(c.Request.Context(), id.(uint))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Character with given id not found", path))

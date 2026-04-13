@@ -15,11 +15,12 @@ import (
 )
 
 type PlayerProfileController struct {
-	profilesRepo repository.ProfilesRepository
+	profilesRepo   repository.ProfilesRepository
+	charactersRepo repository.CharactersRepository
 }
 
-func NewPlayerProfileController(profilesRepo repository.ProfilesRepository) *PlayerProfileController {
-	return &PlayerProfileController{profilesRepo: profilesRepo}
+func NewPlayerProfileController(profilesRepo repository.ProfilesRepository, charactersRepo repository.CharactersRepository) *PlayerProfileController {
+	return &PlayerProfileController{profilesRepo: profilesRepo, charactersRepo: charactersRepo}
 }
 
 // @description Reads all profile
@@ -288,6 +289,23 @@ func (pc PlayerProfileController) ReadPurchases(c *gin.Context) {
 	c.JSON(http.StatusOK, utils.Map(profile.Purchases, dtos.PurchaseToDTO))
 }
 
+func (pc PlayerProfileController) ReadCharacters(c *gin.Context) {
+	path := c.Request.URL.Path
+	id, _ := c.Get("id")
+
+	player, err := pc.profilesRepo.ReadByID(c.Request.Context(), id.(uint), "Characters")
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("Player profile with given id not found", path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	c.JSON(http.StatusOK, utils.Map(player.Characters, dtos.CharacterToDTO))
+}
+
 func (pc PlayerProfileController) MountRoutes(apiGroup *gin.RouterGroup) {
 	profiles := apiGroup.Group("/profiles")
 	profiles.GET("", middlewares.Authorize(middlewares.ADMIN), pagination.New(), pc.ReadAll)
@@ -298,4 +316,5 @@ func (pc PlayerProfileController) MountRoutes(apiGroup *gin.RouterGroup) {
 	profiles.POST("/:id/pfp", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.UploadPFP)
 	profiles.GET("/:id/pfp", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.GetPFP)
 	profiles.GET("/:id/purchases", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.ReadPurchases)
+	profiles.GET("/:id/characters", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.ReadCharacters)
 }

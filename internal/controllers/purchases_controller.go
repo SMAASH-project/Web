@@ -42,12 +42,9 @@ func (pc PurchasesController) Create(c *gin.Context) {
 		return
 	}
 
-	newPurchase, err := dtos.CreateDTOToPurchase(body)
-	if errors.Is(err, dtos.ErrDateFormatIncorrect) {
-		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
-		return
-	}
-	err = pc.purchasesBaseRepo.Create(c.Request.Context(), newPurchase)
+	newPurchase := dtos.CreateDTOToPurchase(body)
+
+	err := pc.purchasesBaseRepo.Create(c.Request.Context(), newPurchase)
 	if err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			c.JSON(http.StatusConflict, dtos.NewErrResp(err.Error(), path))
@@ -65,7 +62,7 @@ func (pc PurchasesController) Create(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
 		return
 	}
-	result, _ := pc.purchasesBaseRepo.ReadByID(c.Request.Context(), newPurchase.ID, "Item", "PlayerProfile")
+	result, _ := pc.purchasesBaseRepo.ReadByID(c.Request.Context(), newPurchase.ID, "Character", "PlayerProfile")
 	dto := dtos.PurchaseToDTO(result)
 	currentProfile.Coins -= int64(dto.Total)
 	if err := pc.profilesBaseRepo.Update(c.Request.Context(), currentProfile); err != nil {
@@ -85,7 +82,7 @@ func (pc PurchasesController) Create(c *gin.Context) {
 // @failure 500 {object} dtos.ErrResp "internal server error"
 // @router /purchases [get]
 func (pc PurchasesController) ReadAll(c *gin.Context) {
-	purchases, err := pc.purchasesBaseRepo.ReadAll(c.Request.Context(), "Item", "PlayerProfile")
+	purchases, err := pc.purchasesBaseRepo.ReadAll(c.Request.Context(), "Character", "PlayerProfile")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
@@ -108,7 +105,7 @@ func (pc PurchasesController) ReadByID(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
 
-	purchase, err := pc.purchasesBaseRepo.ReadByID(c.Request.Context(), id.(uint), "Item", "PlayerProfile")
+	purchase, err := pc.purchasesBaseRepo.ReadByID(c.Request.Context(), id.(uint), "Character", "PlayerProfile")
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Purchase with given id not found", path))
@@ -149,13 +146,8 @@ func (pc PurchasesController) Update(c *gin.Context) {
 		return
 	}
 
-	updatedPurchase, err := dtos.UpdateDTOToPurchase(body)
-	if errors.Is(err, dtos.ErrDateFormatIncorrect) {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), path))
-		return
-	}
-
-	if err := pc.purchasesBaseRepo.Update(c.Request.Context(), *updatedPurchase); err != nil {
+	updatedPurchase := dtos.UpdateDTOToPurchase(body)
+	if err := pc.purchasesBaseRepo.Update(c.Request.Context(), updatedPurchase); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Purchase with given id not found", path))
 			return

@@ -16,7 +16,6 @@ func AutoMigrate(db *gorm.DB) error {
 		&models.Match{},
 		&models.MatchParticipation{},
 		&models.Purchase{},
-		&models.Item{},
 		&models.Category{},
 		&models.Rarity{},
 		&models.Post{},
