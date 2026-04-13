@@ -38,6 +38,8 @@
     "descriptionLabel": "Description",
     "descriptionPlaceholder": "Item description",
     "price": "Price",
+    "image": "Character Image",
+    "imagePlaceholder": "Click to upload (JPEG, PNG, WebP, GIF)",
     "cancel": "Cancel",
     "submit": "Create Item",
     "creating": "Creating…"

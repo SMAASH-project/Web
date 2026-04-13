@@ -204,7 +204,7 @@ const RESOURCES: ResourceMeta[] = [
     id: "purchases",
     label: "Purchases",
     icon: <Receipt size={11} />,
-    columns: ["id", "player_profile_id", "item_id", "count"],
+    columns: ["id", "player_profile_id", "character_id", "count"],
     canCreate: true,
     canUpdate: true,
     canDelete: true,
@@ -288,7 +288,7 @@ const SCHEMAS: Record<string, Array<{ field: string; type: string; notes?: strin
   purchases: [
     { field: "id", type: "uint" },
     { field: "player_profile_id", type: "uint → profiles.id", notes: "FK" },
-    { field: "item_id", type: "uint → items.id", notes: "FK" },
+    { field: "character_id", type: "uint → items.id", notes: "FK" },
     { field: "count", type: "uint" },
   ],
   roles: [
@@ -569,8 +569,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
           case "purchases":
             await createPurchase.mutateAsync({
               player_profile_id: Number(form.player_profile_id),
-              item_id: Number(form.item_id),
-              count: Number(form.count) || 1,
+              character_id: Number(form.character_id),
             });
             addHistory(`Created purchase for profile #${form.player_profile_id}`, true);
             toast.success(t("toast.purchaseCreated"));
@@ -634,8 +633,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
             await updatePurchase.mutateAsync({
               id,
               player_profile_id: Number(form.player_profile_id),
-              item_id: Number(form.item_id),
-              count: Number(form.count) || 1,
+              character_id: Number(form.character_id),
             });
             addHistory(`Updated purchase #${id}`, true);
             toast.success(t("toast.purchaseUpdated"));
@@ -806,7 +804,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
         return (
           <>
             {inp("player_profile_id", "Profile ID", "number")}
-            {inp("item_id", "Item ID", "number")}
+            {inp("character_id", "Item ID", "number")}
             {inp("count", "Count", "number")}
           </>
         );

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dialog,
@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { StyledSelect } from "@/components/ui/styled-select";
 import { useSettings } from "@/pages/settings/SettingsContext";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, Upload, X, ImageOff } from "lucide-react";
 import {
   getButtonClasses,
   getInputClasses,
@@ -27,6 +27,7 @@ import {
   getTextColor,
   getBackgroundClasses,
 } from "@/lib/utils";
+import { motion, AnimatePresence } from "motion/react";
 
 const RARITIES = ["Common", "Uncommon", "Rare", "Epic", "Legendary"] as const;
 const COMBAT_TYPES = ["Melee", "Ranged"] as const;
@@ -39,6 +40,8 @@ const RARITY_COLORS: Record<string, string> = {
   Legendary: "#f59e0b",
 };
 
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
 interface CreateItemDialogProps {
   onCreate: (data: {
     name: string;
@@ -46,6 +49,7 @@ interface CreateItemDialogProps {
     rarity: (typeof RARITIES)[number];
     description: string;
     price: number;
+    imageFile?: File;
   }) => void;
   isLoading?: boolean;
 }
@@ -60,6 +64,9 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
   const [rarity, setRarity] = useState<(typeof RARITIES)[number]>("Common");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { t } = useTranslation("webstore");
   const buttonClass = getButtonClasses(settings.useLiquidGlass, settings.useDarkMode);
@@ -71,6 +78,33 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
   const bgClass = getBackgroundClasses(settings.useLiquidGlass, settings.useDarkMode, "strong");
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) return;
+    setImageFile(file);
+    const url = URL.createObjectURL(file);
+    setImagePreview(url);
+  };
+
+  const clearImage = () => {
+    setImageFile(null);
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+      setImagePreview(null);
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const reset = () => {
+    setName("");
+    setCombatType("Melee");
+    setRarity("Common");
+    setDescription("");
+    setPrice("");
+    clearImage();
+  };
+
   const handleSubmit = () => {
     if (!name.trim() || !description.trim() || !price) return;
     onCreate({
@@ -79,12 +113,9 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
       rarity,
       description: description.trim(),
       price: Number(price),
+      imageFile: imageFile ?? undefined,
     });
-    setName("");
-    setCombatType("Melee");
-    setRarity("Common");
-    setDescription("");
-    setPrice("");
+    reset();
     setOpen(false);
   };
 
@@ -92,7 +123,13 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
     name.trim() !== "" && description.trim() !== "" && price !== "" && Number(price) > 0;
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v);
+        if (!v) reset();
+      }}
+    >
       <DialogTrigger asChild>
         <Button size="sm" className={`cursor-pointer gap-2 ${buttonClass} ${textShadow}`}>
           <Plus className="h-4 w-4" />
@@ -166,7 +203,7 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
               value={description}
               onChange={(e) => setDescription((e.target as HTMLInputElement).value)}
               placeholder={t("create.descriptionPlaceholder")}
-              maxLength={50}
+              maxLength={70}
               className={inputClass}
             />
           </Field>
@@ -182,6 +219,54 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
               placeholder="0"
               className={inputClass}
             />
+          </Field>
+
+          {/* Image upload */}
+          <Field>
+            <Label className={textColor}>{t("create.image")}</Label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={ACCEPTED_IMAGE_TYPES.join(",")}
+              className="hidden"
+              onChange={handleImageChange}
+            />
+            <AnimatePresence mode="wait">
+              {imagePreview ? (
+                <motion.div
+                  key="preview"
+                  initial={{ opacity: 0, scale: 0.97 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.97 }}
+                  transition={{ duration: 0.2 }}
+                  className="relative h-32 w-full overflow-hidden rounded-lg"
+                >
+                  <img src={imagePreview} alt="preview" className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={clearImage}
+                    className="absolute top-1.5 right-1.5 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.button
+                  key="upload"
+                  type="button"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`flex h-20 w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed transition-colors ${inputClass}`}
+                >
+                  <ImageOff className={`h-5 w-5 ${subtextColor} opacity-50`} />
+                  <span className={`text-xs ${subtextColor}`}>{t("create.imagePlaceholder")}</span>
+                  <Upload className={`h-3.5 w-3.5 ${subtextColor} opacity-50`} />
+                </motion.button>
+              )}
+            </AnimatePresence>
           </Field>
         </FieldGroup>
 

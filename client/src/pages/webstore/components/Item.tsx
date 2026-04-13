@@ -4,11 +4,12 @@ import { useSettings } from "@/pages/settings/SettingsContext";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Coins, Unlock, CheckCircle, Swords, Crosshair, Loader2 } from "lucide-react";
+import { Coins, Unlock, CheckCircle, Swords, Crosshair, Loader2, ImageOff } from "lucide-react";
 import { RemoveItemButton } from "./RemoveItemButton";
 import { getBackgroundClasses, getTextColor, getTextShadow, getSubtextColor } from "@/lib/utils";
 import { useContext } from "react";
 import { AuthContext } from "@/context/AuthContext";
+import { motion } from "motion/react";
 
 const RARITY_COLORS: Record<string, string> = {
   Common: "#9ca3af",
@@ -71,7 +72,28 @@ export function Item({
         style={{ backgroundColor: rarityColor }}
       />
 
-      <div className="flex h-full flex-col gap-3 p-5 pt-4">
+      {/* Character image */}
+      <div className="relative h-36 w-full overflow-hidden">
+        {item.imgUri ? (
+          <motion.img
+            src={`/api/characters/${item.id}/img`}
+            alt={item.name}
+            className="h-full w-full object-cover"
+            initial={{ opacity: 0, scale: 1.04 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+          />
+        ) : (
+          <div
+            className="flex h-full w-full items-center justify-center"
+            style={{ backgroundColor: `${rarityColor}15` }}
+          >
+            <ImageOff className="h-8 w-8 opacity-20" style={{ color: rarityColor }} />
+          </div>
+        )}
+      </div>
+
+      <div className="flex h-full flex-col gap-3 p-5 pt-2">
         {/* Header: name + rarity badge */}
         <div
           className={`flex items-start justify-between gap-2 ${isAdmin && onDelete ? "pr-8" : ""}`}

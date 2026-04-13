@@ -135,27 +135,31 @@ export function WebstorePage() {
               {Array.from({ length: 8 }).map((_, i) => (
                 <div
                   key={i}
-                  className={`relative flex flex-col gap-3 overflow-hidden rounded-xl p-5 pt-4 ${bgClass}`}
+                  className={`relative flex flex-col overflow-hidden rounded-xl ${bgClass}`}
                 >
                   {/* accent bar */}
                   <Skeleton className="absolute top-0 right-0 left-0 h-1 rounded-none" />
-                  {/* name + rarity badge */}
-                  <div className="flex items-start justify-between gap-2 pt-1">
-                    <Skeleton className="h-4 w-1/2" />
-                    <Skeleton className="h-4 w-14 rounded-full" />
+                  {/* image */}
+                  <Skeleton className="h-36 w-full rounded-none" />
+                  <div className="flex flex-col gap-3 p-5 pt-2">
+                    {/* name + rarity badge */}
+                    <div className="flex items-start justify-between gap-2">
+                      <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-4 w-14 rounded-full" />
+                    </div>
+                    {/* description lines */}
+                    <div className="flex min-h-10 flex-col gap-1.5">
+                      <Skeleton className="h-3 w-full" />
+                      <Skeleton className="h-3 w-4/5" />
+                    </div>
+                    {/* footer */}
+                    <div className="flex items-center justify-between border-t border-white/10 pt-2">
+                      <Skeleton className="h-3 w-14" />
+                      <Skeleton className="h-4 w-12" />
+                    </div>
+                    {/* button */}
+                    <Skeleton className="h-7 w-full rounded-md" />
                   </div>
-                  {/* description lines */}
-                  <div className="flex min-h-10 flex-col gap-1.5">
-                    <Skeleton className="h-3 w-full" />
-                    <Skeleton className="h-3 w-4/5" />
-                  </div>
-                  {/* footer */}
-                  <div className="flex items-center justify-between border-t border-white/10 pt-2">
-                    <Skeleton className="h-3 w-14" />
-                    <Skeleton className="h-4 w-12" />
-                  </div>
-                  {/* button */}
-                  <Skeleton className="h-7 w-full rounded-md" />
                 </div>
               ))}
             </div>

@@ -38,6 +38,8 @@
     "descriptionLabel": "Leírás",
     "descriptionPlaceholder": "Tárgy leírása",
     "price": "Ár",
+    "image": "Karakter képe",
+    "imagePlaceholder": "Kattints a feltöltéshez (JPEG, PNG, WebP, GIF)",
     "cancel": "Mégse",
     "submit": "Tárgy létrehozása",
     "creating": "Létrehozás…"
