@@ -6,9 +6,15 @@ import { Label } from "@/components/ui/label";
 export function ResizableVertical({
   onImageSizeChange,
   initialImageSize = 25,
+  textColor = "",
+  subtextColor = "",
+  inputClass = "",
 }: {
   onImageSizeChange?: (size: number) => void;
   initialImageSize?: number;
+  textColor?: string;
+  subtextColor?: string;
+  inputClass?: string;
 }) {
   const [imageSize, setImageSize] = useState(initialImageSize);
   const contentSize = 100 - imageSize;
@@ -37,28 +43,25 @@ export function ResizableVertical({
 
   return (
     <div className="flex flex-col gap-3">
-      <ResizablePanelGroup
-        orientation="vertical"
-        className="min-h-50 max-w-sm rounded-lg border md:min-w-112.5"
-      >
+      <ResizablePanelGroup orientation="vertical" className="min-h-50 w-full rounded-lg border">
         <ResizablePanel
           defaultSize={initialImageSize}
           onResize={(size) => handleResize(size.asPercentage)}
         >
           <div className="flex h-full items-center justify-center p-6">
-            <span className="font-semibold">Banner Image</span>
+            <span className={`font-semibold ${subtextColor}`}>Banner Image</span>
           </div>
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={100 - initialImageSize}>
           <div className="flex h-full items-center justify-center p-6">
-            <span className="font-semibold">Content</span>
+            <span className={`font-semibold ${subtextColor}`}>Content</span>
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>
       <div className="flex items-end gap-2">
         <div className="flex-1">
-          <Label className="text-muted-foreground text-xs">Image %</Label>
+          <Label className={`text-xs ${subtextColor}`}>Image %</Label>
           <Input
             type="number"
             min="0"
@@ -66,11 +69,11 @@ export function ResizableVertical({
             step="1"
             value={imageSize.toFixed(1)}
             onChange={(e) => handleImageInputChange(e.target.value)}
-            className="text-sm"
+            className={inputClass || "text-sm"}
           />
         </div>
         <div className="flex-1">
-          <Label className="text-muted-foreground text-xs">Content %</Label>
+          <Label className={`text-xs ${subtextColor}`}>Content %</Label>
           <Input
             type="number"
             min="0"
@@ -78,7 +81,7 @@ export function ResizableVertical({
             step="1"
             value={contentSize.toFixed(1)}
             onChange={(e) => handleContentInputChange(e.target.value)}
-            className="text-sm"
+            className={inputClass || "text-sm"}
           />
         </div>
       </div>

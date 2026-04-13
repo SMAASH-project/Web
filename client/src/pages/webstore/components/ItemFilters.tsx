@@ -5,11 +5,18 @@ import { getBackgroundClasses, getSubtextColor } from "@/lib/utils";
 interface ItemFiltersProps {
   label: string;
   options: string[];
+  displayOptions?: string[];
   selected: string;
   onSelect: (value: string) => void;
 }
 
-export function ItemFilters({ label, options, selected, onSelect }: ItemFiltersProps) {
+export function ItemFilters({
+  label,
+  options,
+  displayOptions,
+  selected,
+  onSelect,
+}: ItemFiltersProps) {
   const { settings } = useSettings();
   const containerRef = useRef<HTMLDivElement>(null);
   const [highlightPos, setHighlightPos] = useState({ left: 0, width: 0 });
@@ -80,8 +87,9 @@ export function ItemFilters({ label, options, selected, onSelect }: ItemFiltersP
             }}
           />
         )}
-        {options.map((option) => {
+        {options.map((option, i) => {
           const isSelected = selected === option;
+          const displayLabel = displayOptions?.[i] ?? option;
           return (
             <button
               key={option}
@@ -112,7 +120,7 @@ export function ItemFilters({ label, options, selected, onSelect }: ItemFiltersP
                   isSelected && !isHovering ? "opacity-100" : isHovering ? "" : "opacity-60"
                 }`}
               >
-                {option}
+                {displayLabel}
               </span>
             </button>
           );

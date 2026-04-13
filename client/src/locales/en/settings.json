@@ -17,6 +17,21 @@
   "themes": {
     "title": "Themes"
   },
+  "effect": {
+    "title": "Effect",
+    "default": "Default",
+    "none": "None",
+    "custom": "Custom"
+  },
+  "customTheme": "Custom Theme",
+  "applyChanges": "Apply changes",
+  "mixEffects": {
+    "triggerButton": "Mix Effects",
+    "title": "Mix Effects",
+    "description": "Toggle animation layers and preview the combined result.",
+    "clear": "Clear",
+    "apply": "Apply"
+  },
   "language": {
     "title": "Language",
     "en": "English",

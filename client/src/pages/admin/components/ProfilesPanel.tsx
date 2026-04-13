@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Coins, Plus, Minus, Check, Loader2 } from "lucide-react";
 import type { AdminPageLogic } from "@/pages/admin/useAdminPageLogic";
 import { getButtonClasses, getInputClasses } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export default function ProfilesPanel({ logic }: { logic: AdminPageLogic }) {
+  const { t } = useTranslation("admin");
   const {
     profiles,
     profilesLoading,
@@ -63,7 +65,7 @@ export default function ProfilesPanel({ logic }: { logic: AdminPageLogic }) {
       {/* Header */}
       <div className="flex items-center gap-2 px-1">
         <div className={`text-xs font-semibold tracking-wider uppercase ${subtextColor}`}>
-          Profiles
+          {t("profiles.title")}
         </div>
         {profiles.length > 0 && <span className={countBadge}>{profiles.length}</span>}
       </div>
@@ -73,13 +75,13 @@ export default function ProfilesPanel({ logic }: { logic: AdminPageLogic }) {
       {/* Profile list */}
       <div className="flex max-h-48 flex-col gap-2 overflow-y-auto xl:max-h-none xl:min-h-0 xl:flex-1">
         {!selectedUser ? (
-          <p className={`py-4 text-center text-xs ${subtextColor}`}>No user selected</p>
+          <p className={`py-4 text-center text-xs ${subtextColor}`}>{t("profiles.noSelected")}</p>
         ) : profilesLoading ? (
           <div className="flex items-center justify-center py-6">
             <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-current opacity-40" />
           </div>
         ) : profiles.length === 0 ? (
-          <p className={`py-4 text-center text-xs ${subtextColor}`}>No profiles</p>
+          <p className={`py-4 text-center text-xs ${subtextColor}`}>{t("profiles.noProfiles")}</p>
         ) : (
           profiles.map((profile, idx) => {
             const isSelected = idx === selectedProfileIdx;
@@ -103,7 +105,7 @@ export default function ProfilesPanel({ logic }: { logic: AdminPageLogic }) {
                     {profile.display_name}
                   </p>
                   <p className={`text-xs ${subtextColor}`}>
-                    {(profile.coins ?? 0).toLocaleString()} coins
+                    {(profile.coins ?? 0).toLocaleString()} {t("common:common.coins")}
                   </p>
                 </div>
                 {isSelected && (
@@ -125,7 +127,7 @@ export default function ProfilesPanel({ logic }: { logic: AdminPageLogic }) {
             <div className="flex items-center gap-1.5">
               <Coins size={11} className="shrink-0 text-amber-400" />
               <p className={`text-xs font-semibold tracking-wider uppercase ${subtextColor}`}>
-                Coins
+                {t("profiles.coinsTitle")}
               </p>
             </div>
 
@@ -196,10 +198,10 @@ export default function ProfilesPanel({ logic }: { logic: AdminPageLogic }) {
                 <Loader2 size={11} className="animate-spin" />
               ) : saved ? (
                 <>
-                  <Check size={11} /> Saved
+                  <Check size={11} /> {t("profiles.saved")}
                 </>
               ) : (
-                "Set Coins"
+                t("profiles.setCoins")
               )}
             </Button>
           </div>

@@ -1,6 +1,6 @@
 {
   "title": "Webáruház",
-  "subtitle": "Karakterek és kinézetek feloldása",
+  "subtitle": "Karakterek feloldása",
   "searchPlaceholder": "Keresés tárgy neve alapján…",
   "noResults": "Nem található tárgy.",
   "filters": {
@@ -12,9 +12,8 @@
     "owned": "Saját",
     "unowned": "Nem saját",
     "melee": "Közelharci",
-    "ranged": "Távolsági",
-    "character": "Karakter",
-    "skin": "Kinézet"
+    "ranged": "Távolharci",
+    "character": "Karakter"
   },
   "rarity": {
     "common": "Közönséges",
@@ -25,7 +24,29 @@
   },
   "item": {
     "unlock": "Feloldás",
+    "unlocking": "Feloldás…",
     "owned": "Megvan"
+  },
+  "create": {
+    "triggerButton": "Tárgy létrehozása",
+    "title": "Új tárgy létrehozása",
+    "description": "Adj hozzá egy új tárgyat a webáruházhoz.",
+    "name": "Név",
+    "namePlaceholder": "Tárgy neve",
+    "rarity": "Ritkaság",
+    "combatType": "Harc típusa",
+    "descriptionLabel": "Leírás",
+    "descriptionPlaceholder": "Tárgy leírása",
+    "price": "Ár",
+    "cancel": "Mégse",
+    "submit": "Tárgy létrehozása",
+    "creating": "Létrehozás…"
+  },
+  "toast": {
+    "unlocked": "Tárgy feloldva!",
+    "created": "Tárgy létrehozva.",
+    "deleted": "Tárgy törölve.",
+    "deleteFailed": "Nem sikerült törölni a tárgyat."
   },
   "delete": {
     "confirm": "Törlés megerősítése",

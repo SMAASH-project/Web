@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogTrigger,
@@ -28,7 +29,6 @@ import {
 } from "@/lib/utils";
 
 const RARITIES = ["Common", "Uncommon", "Rare", "Epic", "Legendary"] as const;
-const KINDS = ["Character", "Skin"] as const;
 const COMBAT_TYPES = ["Melee", "Ranged"] as const;
 
 const RARITY_COLORS: Record<string, string> = {
@@ -42,8 +42,7 @@ const RARITY_COLORS: Record<string, string> = {
 interface CreateItemDialogProps {
   onCreate: (data: {
     name: string;
-    kind: (typeof KINDS)[number];
-    combatType?: (typeof COMBAT_TYPES)[number];
+    combatType: (typeof COMBAT_TYPES)[number];
     rarity: (typeof RARITIES)[number];
     description: string;
     price: number;
@@ -57,12 +56,12 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
   const { settings } = useSettings();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
-  const [kind, setKind] = useState<(typeof KINDS)[number]>("Character");
   const [combatType, setCombatType] = useState<(typeof COMBAT_TYPES)[number]>("Melee");
   const [rarity, setRarity] = useState<(typeof RARITIES)[number]>("Common");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
 
+  const { t } = useTranslation("webstore");
   const buttonClass = getButtonClasses(settings.useLiquidGlass, settings.useDarkMode);
   const inputClass = getInputClasses(settings.useLiquidGlass, settings.useDarkMode);
   const dialogClass = getDialogClasses(settings.useLiquidGlass, settings.useDarkMode);
@@ -76,14 +75,12 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
     if (!name.trim() || !description.trim() || !price) return;
     onCreate({
       name: name.trim(),
-      kind,
-      ...(kind === "Character" ? { combatType } : {}),
+      combatType,
       rarity,
       description: description.trim(),
       price: Number(price),
     });
     setName("");
-    setKind("Character");
     setCombatType("Melee");
     setRarity("Common");
     setDescription("");
@@ -99,7 +96,7 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
       <DialogTrigger asChild>
         <Button size="sm" className={`cursor-pointer gap-2 ${buttonClass} ${textShadow}`}>
           <Plus className="h-4 w-4" />
-          <span className="text-sm font-medium">Create Item</span>
+          <span className="text-sm font-medium">{t("create.triggerButton")}</span>
         </Button>
       </DialogTrigger>
 
@@ -109,40 +106,27 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle className={textColor}>Create New Item</DialogTitle>
-          <DialogDescription className={subtextColor}>
-            Add a new item to the webstore.
-          </DialogDescription>
+          <DialogTitle className={textColor}>{t("create.title")}</DialogTitle>
+          <DialogDescription className={subtextColor}>{t("create.description")}</DialogDescription>
         </DialogHeader>
 
         <FieldGroup>
           {/* Name */}
           <Field>
-            <Label className={textColor}>Name</Label>
+            <Label className={textColor}>{t("create.name")}</Label>
             <Input
               value={name}
               onChange={(e) => setName((e.target as HTMLInputElement).value)}
-              placeholder="Item name"
+              placeholder={t("create.namePlaceholder")}
               maxLength={20}
               className={inputClass}
             />
           </Field>
 
-          {/* Kind + Rarity row */}
+          {/* Rarity + Combat Type row */}
           <div className="grid grid-cols-2 gap-3">
             <Field>
-              <Label className={textColor}>Kind</Label>
-              <StyledSelect
-                value={kind}
-                options={KINDS}
-                onChange={setKind}
-                inputClass={inputClass}
-                textColor={textColor}
-                bgClass={bgClass}
-              />
-            </Field>
-            <Field>
-              <Label className={textColor}>Rarity</Label>
+              <Label className={textColor}>{t("create.rarity")}</Label>
               <StyledSelect
                 value={rarity}
                 options={RARITIES}
@@ -156,18 +140,13 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
                       className="inline-block h-2 w-2 shrink-0 rounded-full"
                       style={{ backgroundColor: RARITY_COLORS[r] }}
                     />
-                    {r}
+                    {t(`rarity.${r.toLowerCase()}`)}
                   </>
                 )}
               />
             </Field>
-          </div>
-
-          {/* Combat type — only for Characters */}
-          {/* Combat type — only for Characters */}
-          {kind === "Character" && (
             <Field>
-              <Label className={textColor}>Combat Type</Label>
+              <Label className={textColor}>{t("create.combatType")}</Label>
               <StyledSelect
                 value={combatType}
                 options={COMBAT_TYPES}
@@ -175,17 +154,18 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
                 inputClass={inputClass}
                 textColor={textColor}
                 bgClass={bgClass}
+                renderOption={(c) => t(`filters.${c.toLowerCase()}`)}
               />
             </Field>
-          )}
+          </div>
 
           {/* Description */}
           <Field>
-            <Label className={textColor}>Description</Label>
+            <Label className={textColor}>{t("create.descriptionLabel")}</Label>
             <Input
               value={description}
               onChange={(e) => setDescription((e.target as HTMLInputElement).value)}
-              placeholder="Item description"
+              placeholder={t("create.descriptionPlaceholder")}
               maxLength={50}
               className={inputClass}
             />
@@ -193,7 +173,7 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
 
           {/* Price */}
           <Field>
-            <Label className={textColor}>Price</Label>
+            <Label className={textColor}>{t("create.price")}</Label>
             <Input
               type="number"
               min={1}
@@ -208,7 +188,7 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
         <DialogFooter className={footerClass}>
           <DialogClose asChild>
             <Button variant="outline" className={`cursor-pointer ${buttonClass} ${textShadow}`}>
-              Cancel
+              {t("create.cancel")}
             </Button>
           </DialogClose>
           <Button
@@ -219,10 +199,10 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
             {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Creating…
+                {t("create.creating")}
               </>
             ) : (
-              "Create Item"
+              t("create.submit")
             )}
           </Button>
         </DialogFooter>

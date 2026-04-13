@@ -24,7 +24,7 @@ export type Rarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
 export interface WebstoreItem {
   id: string;
   name: string;
-  kind: "Skin" | "Character";
+  kind: "Character";
   combatType?: "Melee" | "Ranged";
   rarity: Rarity;
   description: string;

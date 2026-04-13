@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Field,
   FieldContent,
@@ -10,17 +11,23 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 export function RadioGroupChoiceCard({
   value,
   onValueChange,
+  textColor = "",
+  subtextColor = "",
 }: {
   value: string;
   onValueChange: (value: string) => void;
+  textColor?: string;
+  subtextColor?: string;
 }) {
+  const { t } = useTranslation("news");
+
   return (
-    <RadioGroup value={value} onValueChange={onValueChange} className="max-w-sm">
+    <RadioGroup value={value} onValueChange={onValueChange} className="w-full sm:max-w-sm">
       <FieldLabel htmlFor="Top">
         <Field orientation="horizontal">
           <FieldContent>
-            <FieldTitle>Top</FieldTitle>
-            <FieldDescription>Place image as a banner above the content.</FieldDescription>
+            <FieldTitle className={textColor}>{t("add.imageTop")}</FieldTitle>
+            <FieldDescription className={subtextColor}>{t("add.imageTopDesc")}</FieldDescription>
           </FieldContent>
           <RadioGroupItem value="Top" id="Top" />
         </Field>
@@ -28,8 +35,8 @@ export function RadioGroupChoiceCard({
       <FieldLabel htmlFor="Right">
         <Field orientation="horizontal">
           <FieldContent>
-            <FieldTitle>Right</FieldTitle>
-            <FieldDescription>Place image to the right of the content.</FieldDescription>
+            <FieldTitle className={textColor}>{t("add.imageRight")}</FieldTitle>
+            <FieldDescription className={subtextColor}>{t("add.imageRightDesc")}</FieldDescription>
           </FieldContent>
           <RadioGroupItem value="Right" id="Right" />
         </Field>

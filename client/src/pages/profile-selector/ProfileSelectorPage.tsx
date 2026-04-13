@@ -139,7 +139,7 @@ export function ProfileSelectorPage() {
           {t("selector.title")}
         </Label>
         <div className="mt-1 text-sm text-white/80">
-          {profileCount} profile{profileCount === 1 ? "" : "s"} available
+          {t("selector.profilesAvailable", { count: profileCount })}
         </div>
       </div>
       <div className="flex flex-1 flex-col items-center justify-center gap-10">
@@ -166,7 +166,7 @@ export function ProfileSelectorPage() {
                   <span
                     className={`text-sm text-white ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)}`}
                   >
-                    Add New
+                    {t("selector.addNew")}
                   </span>
                 </div>,
               )}

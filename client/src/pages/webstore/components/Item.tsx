@@ -4,7 +4,7 @@ import { useSettings } from "@/pages/settings/SettingsContext";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Coins, Unlock, CheckCircle, Swords, Crosshair, Paintbrush, Loader2 } from "lucide-react";
+import { Coins, Unlock, CheckCircle, Swords, Crosshair, Loader2 } from "lucide-react";
 import { RemoveItemButton } from "./RemoveItemButton";
 import { getBackgroundClasses, getTextColor, getTextShadow, getSubtextColor } from "@/lib/utils";
 import { useContext } from "react";
@@ -87,7 +87,7 @@ export function Item({
               border: `1px solid ${rarityColor}40`,
             }}
           >
-            {item.rarity}
+            {t(`rarity.${item.rarity.toLowerCase()}`)}
           </Badge>
         </div>
 
@@ -109,17 +109,13 @@ export function Item({
           }`}
         >
           <div className="flex items-center gap-1.5">
-            {item.kind === "Character" ? (
-              item.combatType === "Melee" ? (
-                <Swords className="h-3 w-3 text-orange-400/70" />
-              ) : (
-                <Crosshair className="h-3 w-3 text-sky-400/70" />
-              )
+            {item.combatType === "Melee" ? (
+              <Swords className="h-3 w-3 text-orange-400/70" />
             ) : (
-              <Paintbrush className="h-3 w-3 text-pink-400/70" />
+              <Crosshair className="h-3 w-3 text-sky-400/70" />
             )}
             <span className={`text-[10px] font-medium tracking-wider uppercase ${subtextColor}`}>
-              {item.kind === "Character" ? item.combatType : "Skin"}
+              {item.combatType ? t(`filters.${item.combatType.toLowerCase()}`) : item.combatType}
             </span>
           </div>
           <div className="flex items-center gap-1">
@@ -142,7 +138,7 @@ export function Item({
               }}
             >
               <CheckCircle className="h-3 w-3" />
-              Owned
+              {t("item.owned")}
             </div>
           ) : (
             <Button
@@ -156,7 +152,7 @@ export function Item({
               ) : (
                 <Unlock className="h-3 w-3" />
               )}
-              {isPurchasing ? "Unlocking…" : "Unlock"}
+              {isPurchasing ? t("item.unlocking") : t("item.unlock")}
             </Button>
           )}
         </div>

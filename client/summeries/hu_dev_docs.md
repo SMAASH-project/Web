@@ -1,6 +1,6 @@
 # SMAASH kliens — fejlesztői dokumentáció
 
-**Frissítve:** 2026-04-04 (rev 5)
+**Frissítve:** 2026-04-13 (rev 7)
 
 > Ez az összefoglaló a kliens architektúráját, a közös mintákat és a legfontosabb fejlesztési szabályokat foglalja össze. Nem csak azt mondja meg, _mit_ használunk, hanem azt is, _miért_ így.
 
@@ -161,6 +161,46 @@ A debug emulációs mód hálózati késleltetést is tud szimulálni. Ez fejles
 - itemlista + vásárlás + tulajdonállapot merge
 - coin érték a kiválasztott profilból
 
+### Leaderboard (`/app/leaderboard`)
+
+Tab alapú ranglétra: kategóriánként podium nézet, globális "Összes" áttekintővel.
+
+**Tab struktúra (`TabId`):**
+
+| Tab | Adatforrás | Fő stat |
+|---|---|---|
+| `all` | Mind a négy lekérdezés | Stat sáv + top-5 panelek |
+| `wins` | `useLeaderboardQuery` | `count_of_wins` |
+| `active` | `useTopPlayersQuery` | `count_of_matches` |
+| `levels` | `useTopLevelsQuery` | `count_of_plays` |
+| `items` | `useTopItemsQuery` | `count_of_purchases` |
+
+**„Összes" nézet:**
+
+- Stat sáv: 4 chip, kategóriánként az #1 szereplőt mutatja
+- 2×2-es rács, panelenként top 5 sorral (korábban 10 volt)
+- Minden panel saját skeletonnel tölt
+
+**Kategória nézet (minden tab az "all"-on kívül):**
+
+- `PodiumSlot` komponensek az 1–3. helyeknek, sorrendben `[2. | 1. | 3.]` (igazi dobogó vizuál); `motion.div` animáció 0,4 s ease-out, 0 / 0,15 / 0,30 s késleltetéssel rangsoronként
+- Runners-up sor a 4–5. helyeknek, ha léteznek
+- A `CategoryView` komponens saját `search` állapotot tart; az adatok `RankedEntry[]` formátumra normalizálódnak a page szinten, mielőtt belekerülnek
+- Görgethető lista (`max-h-72 overflow-y-auto`) az összes bejegyzéssel, az eredeti sorrend szerinti rangszámokkal
+
+**Adatnormalizálás:**
+
+Mind a négy dataset `RankedEntry { id, name, stat, statLabel, sub? }` formára képeződik le a page komponensben, hogy a `PodiumSlot` és a `CategoryView` teljesen generikus maradjon.
+
+**Teljesítmény:**
+
+- A `CardAnimation` (1,5 s spring) és a `LoadPost` sor-stagger ebben az oldalban már nem szerepelnek — a tartalom azonnal látható
+- Tab váltáshoz `AnimatePresence mode="wait"` van használva, 0,18 s opacity/y fade-del
+- Minden `CategoryView` mount reseteli a search állapotot (szándékos; a `key={activeTab}` prop biztosítja)
+- Mind a négy lekérdezés párhuzamosan indul; az egyedi skeleton állapotokat panelenként kezeli
+
+**Új locale kulcsok** (mindkét nyelvhez): `tabs.*`, `podium.runnersUp`, `podium.fullRankings`, `statBar.*`, `search`.
+
 ---
 
 ## i18n
@@ -207,7 +247,12 @@ A leaderboardon több statisztikai lekérdezés fut párhuzamosan. A React Query
 
 - `src/components/ui/styled-select.tsx` — theme-aware dropdown a `DropdownMenu` alapjain. Ezt használd natív `<select>` helyett, ha a kinézetet illeszteni kell a felülethez.
 - `src/components/ui/skeleton.tsx` — egyszerű pulse skeleton betöltési állapotokhoz
-- `src/components/ui/dialog.tsx` — közös dialog shell, most már `max-h-[90svh]` és görgethető tartalom támogatással
+- `src/components/ui/dialog.tsx` — közös dialog shell, `max-h-[90svh]` és görgethető tartalom támogatással. Mobilon a helyes szélesség `max-w-[calc(100%-2rem)]`; **ne írj felül** `max-w-full`-lal, mert az eltünteti az oldalsó margókat. A `overflow-visible` hozzáadása szintén tiltott, mert felülírja az `overflow-y-auto`-t és a tartalom kilóg a dialogból ahelyett, hogy görgethetővé válna.
+
+**News dialógusok (Hozzáadás és Szerkesztés) specifikusan:**
+
+- A képbeállítások szekció mobilon függőlegesen stacked: `flex flex-col gap-4 sm:flex-row sm:items-start`. A rádiógombok, fájl input és a méretező panel mobilon teljes szélességű, `sm+` breakpointon egymás mellé kerülnek
+- `RadioGroupChoiceCard`: `w-full sm:max-w-sm` — mobilon teljes széles, nagyobb képernyőn korlátozott
 
 ---
 

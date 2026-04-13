@@ -106,7 +106,7 @@ export function EditButton({
         </Button>
       </DialogTrigger>
       <DialogContent
-        className={`w-full max-w-4xl! overflow-visible sm:max-w-4xl! ${dialogClass} ${textShadow}`}
+        className={`max-w-[calc(100%-2rem)] sm:max-w-4xl! ${dialogClass} ${textShadow}`}
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
@@ -137,11 +137,13 @@ export function EditButton({
                 <FieldGroup>
                   <Field>
                     <Label className={`text-sm ${subtextColor}`}>Image Position</Label>
-                    <div className="flex flex-row items-start gap-4">
-                      <div className="flex max-w-sm flex-col gap-2">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                      <div className="flex flex-col gap-2 sm:shrink-0">
                         <RadioGroupChoiceCard
                           value={imagePosition}
                           onValueChange={(v) => setImagePosition(v as "Top" | "Right")}
+                          textColor={textColor}
+                          subtextColor={subtextColor}
                         />
                         <Input
                           type="file"
@@ -150,6 +152,7 @@ export function EditButton({
                           name="articleImage"
                           ref={fileInputRef}
                           onChange={handleFileChange}
+                          className={inputClass}
                         />
                         {imageAlt && (
                           <div className="flex items-center gap-1">
@@ -166,16 +169,20 @@ export function EditButton({
                           </div>
                         )}
                       </div>
-                      <div className="ml-auto">
+                      <div className="min-w-0 flex-1">
                         {imagePosition === "Top" ? (
                           <ResizableVertical
                             onImageSizeChange={setImageSize}
                             initialImageSize={post.imageSize ?? 25}
+                            subtextColor={subtextColor}
+                            inputClass={inputClass}
                           />
                         ) : (
                           <ResizableHorizontal
                             onImageSizeChange={setImageSize}
                             initialImageSize={post.imageSize ?? 25}
+                            subtextColor={subtextColor}
+                            inputClass={inputClass}
                           />
                         )}
                       </div>
@@ -216,11 +223,13 @@ export function EditButton({
                 <FieldGroup>
                   <Field>
                     <Label className={`text-sm ${subtextColor}`}>Image Position</Label>
-                    <div className="flex flex-row items-start gap-4">
-                      <div className="flex max-w-sm flex-col gap-2">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                      <div className="flex flex-col gap-2 sm:shrink-0">
                         <RadioGroupChoiceCard
                           value={imagePosition}
                           onValueChange={(v) => setImagePosition(v as "Top" | "Right")}
+                          textColor={textColor}
+                          subtextColor={subtextColor}
                         />
                         <Input
                           type="file"
@@ -229,6 +238,7 @@ export function EditButton({
                           name="articleImage"
                           ref={fileInputRef}
                           onChange={handleFileChange}
+                          className={inputClass}
                         />
                         {imageAlt && (
                           <div className="flex items-center gap-1">
@@ -245,16 +255,20 @@ export function EditButton({
                           </div>
                         )}
                       </div>
-                      <div className="ml-auto">
+                      <div className="min-w-0 flex-1">
                         {imagePosition === "Top" ? (
                           <ResizableVertical
                             onImageSizeChange={setImageSize}
                             initialImageSize={post.imageSize ?? 25}
+                            subtextColor={subtextColor}
+                            inputClass={inputClass}
                           />
                         ) : (
                           <ResizableHorizontal
                             onImageSizeChange={setImageSize}
                             initialImageSize={post.imageSize ?? 25}
+                            subtextColor={subtextColor}
+                            inputClass={inputClass}
                           />
                         )}
                       </div>

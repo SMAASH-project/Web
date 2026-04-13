@@ -1,4 +1,13 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { useSettings } from "@/pages/settings/SettingsContext";
+import {
+  getDialogClasses,
+  getDialogFooterClasses,
+  getTextShadow,
+  getBackgroundClasses,
+} from "@/lib/utils";
+import { StyledSelect } from "@/components/ui/styled-select";
 import {
   Users,
   UserCircle,
@@ -306,6 +315,13 @@ interface DatabaseTabProps {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: DatabaseTabProps) {
+  const { t } = useTranslation("debug");
+  const { settings } = useSettings();
+  const { useLiquidGlass, useDarkMode } = settings;
+  const dialogClass = getDialogClasses(useLiquidGlass, useDarkMode);
+  const footerClass = getDialogFooterClasses(useLiquidGlass, useDarkMode);
+  const textShadow = getTextShadow(useLiquidGlass, useDarkMode);
+  const bgClass = getBackgroundClasses(useLiquidGlass, useDarkMode, "strong");
   // ── UI state ──────────────────────────────────────────────────────────────
   const [selected, setSelected] = useState<ResourceId>("users");
   const [filter, setFilter] = useState("");
@@ -517,12 +533,12 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
           case "characters":
             await createChar.mutateAsync({ name: form.name });
             addHistory(`Created character "${form.name}"`, true);
-            toast.success("Character created");
+            toast.success(t("toast.charCreated"));
             break;
           case "levels":
             await createLevel.mutateAsync({ name: form.name });
             addHistory(`Created level "${form.name}"`, true);
-            toast.success("Level created");
+            toast.success(t("toast.levelCreated"));
             break;
           case "items":
             await createItem.mutateAsync({
@@ -533,22 +549,22 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
               category_ids: formCategoryIds,
             });
             addHistory(`Created item "${form.name}"`, true);
-            toast.success("Item created");
+            toast.success(t("toast.itemCreated"));
             break;
           case "categories":
             await createCat.mutateAsync({ name: form.name });
             addHistory(`Created category "${form.name}"`, true);
-            toast.success("Category created");
+            toast.success(t("toast.catCreated"));
             break;
           case "rarities":
             await createRarity.mutateAsync({ name: form.name });
             addHistory(`Created rarity "${form.name}"`, true);
-            toast.success("Rarity created");
+            toast.success(t("toast.rarCreated"));
             break;
           case "roles":
             await createRole.mutateAsync({ name: form.name });
             addHistory(`Created role "${form.name}"`, true);
-            toast.success("Role created");
+            toast.success(t("toast.roleCreated"));
             break;
           case "purchases":
             await createPurchase.mutateAsync({
@@ -557,7 +573,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
               count: Number(form.count) || 1,
             });
             addHistory(`Created purchase for profile #${form.player_profile_id}`, true);
-            toast.success("Purchase created");
+            toast.success(t("toast.purchaseCreated"));
             break;
         }
       } else if (editTarget) {
@@ -566,7 +582,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
           case "users":
             await updateUser.mutateAsync({ id, email: form.email });
             addHistory(`Updated user #${id} email → ${form.email}`, true);
-            toast.success("User updated");
+            toast.success(t("toast.userUpdated"));
             break;
           case "profiles":
             await updateProfile.mutateAsync({
@@ -575,17 +591,17 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
               coins: Number(form.coins) || 0,
             });
             addHistory(`Updated profile #${id}`, true);
-            toast.success("Profile updated");
+            toast.success(t("toast.profileUpdated"));
             break;
           case "characters":
             await updateChar.mutateAsync({ id, name: form.name });
             addHistory(`Updated character #${id} → "${form.name}"`, true);
-            toast.success("Character updated");
+            toast.success(t("toast.charUpdated"));
             break;
           case "levels":
             await updateLevel.mutateAsync({ id, name: form.name });
             addHistory(`Updated level #${id} → "${form.name}"`, true);
-            toast.success("Level updated");
+            toast.success(t("toast.levelUpdated"));
             break;
           case "items":
             await updateItem.mutateAsync({
@@ -597,22 +613,22 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
               category_ids: formCategoryIds,
             });
             addHistory(`Updated item #${id}`, true);
-            toast.success("Item updated");
+            toast.success(t("toast.itemUpdated"));
             break;
           case "categories":
             await updateCat.mutateAsync({ id, name: form.name });
             addHistory(`Updated category #${id}`, true);
-            toast.success("Category updated");
+            toast.success(t("toast.catUpdated"));
             break;
           case "rarities":
             await updateRarity.mutateAsync({ id, name: form.name });
             addHistory(`Updated rarity #${id}`, true);
-            toast.success("Rarity updated");
+            toast.success(t("toast.rarUpdated"));
             break;
           case "roles":
             await updateRole.mutateAsync({ id, name: form.name });
             addHistory(`Updated role #${id}`, true);
-            toast.success("Role updated");
+            toast.success(t("toast.roleUpdated"));
             break;
           case "purchases":
             await updatePurchase.mutateAsync({
@@ -622,14 +638,14 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
               count: Number(form.count) || 1,
             });
             addHistory(`Updated purchase #${id}`, true);
-            toast.success("Purchase updated");
+            toast.success(t("toast.purchaseUpdated"));
             break;
         }
       }
       closeFormDialog();
     } catch {
       addHistory(`Failed to ${isCreating ? "create" : "update"} ${selected}`, false);
-      toast.error("Operation failed");
+      toast.error(t("toast.opFailed"));
     }
   };
 
@@ -667,11 +683,11 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
           break;
       }
       addHistory(`Deleted ${selected.replace(/s$/, "")} #${id} "${deleteTarget.label}"`, true);
-      toast.success("Deleted");
+      toast.success(t("toast.deleted"));
       setDeleteTarget(null);
     } catch {
       addHistory(`Failed to delete ${selected.replace(/s$/, "")} #${id}`, false);
-      toast.error("Delete failed");
+      toast.error(t("toast.deleteFailed"));
       setDeleteTarget(null);
     }
   };
@@ -695,28 +711,28 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
             `Banned user #${userId} (${email}) ${isPermanentBan ? "permanently" : `for ${banMinutes}m`}`,
             true,
           );
-          toast.success("User banned");
+          toast.success(t("toast.userBanned"));
           break;
         case "unban":
           await unbanUser.mutateAsync({ userId });
           addHistory(`Unbanned user #${userId} (${email})`, true);
-          toast.success("User unbanned");
+          toast.success(t("toast.userUnbanned"));
           break;
         case "promote":
           await promoteUser.mutateAsync({ userId, targetRole: promoteTarget });
           addHistory(`Promoted #${userId} (${email}) → ${promoteTarget}`, true);
-          toast.success(`Promoted to ${promoteTarget}`);
+          toast.success(t("toast.promotedTo", { role: promoteTarget }));
           break;
         case "demote":
           await demoteUser.mutateAsync({ userId });
           addHistory(`Demoted #${userId} (${email}) → user`, true);
-          toast.success("User demoted");
+          toast.success(t("toast.userDemoted"));
           break;
       }
       setUserActionTarget(null);
       setUserAction(null);
     } catch {
-      toast.error("Action failed");
+      toast.error(t("toast.actionFailed"));
       setUserActionTarget(null);
       setUserAction(null);
     }
@@ -733,9 +749,9 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
     const value = row[col];
     if (col === "is_banned") {
       return value ? (
-        <span className="font-medium text-red-400">Banned</span>
+        <span className="font-medium text-red-400">{t("db.bannedStatus")}</span>
       ) : (
-        <span className="text-green-400">Active</span>
+        <span className="text-green-400">{t("db.activeStatus")}</span>
       );
     }
     if (col === "last_login" || col === "created_at" || col === "updated_at") {
@@ -802,18 +818,19 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
             {inp("price", "Price", "number")}
             <div className="flex flex-col gap-1">
               <label className={`text-[10px] ${subtextColor}`}>Rarity</label>
-              <select
-                value={form.rarity_id ?? ""}
-                onChange={(e) => setField("rarity_id", e.target.value)}
-                className={`rounded-lg px-2.5 py-1.5 text-xs ${inputClass}`}
-              >
-                <option value="">— select —</option>
-                {rarities.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.name}
-                  </option>
-                ))}
-              </select>
+              <StyledSelect
+                value={String(form.rarity_id ?? "")}
+                options={["", ...rarities.map((r) => String(r.id))]}
+                onChange={(val) => setField("rarity_id", val)}
+                inputClass={`py-1.5 text-xs ${inputClass}`}
+                textColor={textColor}
+                bgClass={bgClass}
+                renderOption={(id) => {
+                  if (!id) return <span className="opacity-50">— select —</span>;
+                  const r = rarities.find((x) => String(x.id) === id);
+                  return r ? r.name : id;
+                }}
+              />
             </div>
             <div className="flex flex-col gap-1">
               <label className={`text-[10px] ${subtextColor}`}>Categories</label>
@@ -840,7 +857,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
           </>
         );
       default:
-        return <p className={`text-xs ${subtextColor}`}>No editable fields for this resource.</p>;
+        return <p className={`text-xs ${subtextColor}`}>{t("db.noEditableFields")}</p>;
     }
   };
 
@@ -850,32 +867,35 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       {[
         {
-          title: "Top Items",
+          title: t("db.topItems"),
           icon: <ShoppingBag size={11} />,
           rows: topItems.map((x) => ({
             label: x.name,
-            value: `${x.count_of_purchases} purchases`,
+            value: `${x.count_of_purchases} ${t("db.purchases")}`,
           })),
         },
         {
-          title: "Top Players",
+          title: t("db.topPlayers"),
           icon: <UserCircle size={11} />,
           rows: topPlayers.map((x) => ({
             label: x.display_name,
-            value: `${x.count_of_matches} matches`,
+            value: `${x.count_of_matches} ${t("db.matches")}`,
           })),
         },
         {
-          title: "Top Levels",
+          title: t("db.topLevels"),
           icon: <Layers size={11} />,
-          rows: topLevels.map((x) => ({ label: x.name, value: `${x.count_of_plays} plays` })),
+          rows: topLevels.map((x) => ({
+            label: x.name,
+            value: `${x.count_of_plays} ${t("db.plays")}`,
+          })),
         },
         {
-          title: "Leaderboard",
+          title: t("db.leaderboard"),
           icon: <Star size={11} />,
           rows: leaderboard.map((x) => ({
             label: x.display_name,
-            value: `${x.count_of_wins} wins`,
+            value: `${x.count_of_wins} ${t("db.wins")}`,
           })),
         },
       ].map(({ title, icon, rows }) => (
@@ -885,7 +905,9 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
             <p className="text-[10px] font-semibold tracking-widest uppercase">{title}</p>
           </div>
           {rows.length === 0 ? (
-            <p className={`py-2 text-center text-[10px] opacity-40 ${subtextColor}`}>No data</p>
+            <p className={`py-2 text-center text-[10px] opacity-40 ${subtextColor}`}>
+              {t("db.statsNoData")}
+            </p>
           ) : (
             rows.slice(0, 8).map((row, i) => (
               <div
@@ -948,10 +970,19 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
   // Render
   // ─────────────────────────────────────────────────────────────────────────
 
+  const noActionsNotes: Partial<Record<ResourceId, string>> = {
+    posts: t("db.postsNoActionsNote"),
+    stats: t("db.statsNoActionsNote"),
+  };
+  const dangerNotes: Partial<Record<ResourceId, string>> = {
+    users: t("db.usersDangerNote"),
+    profiles: t("db.profilesDangerNote"),
+  };
+
   const formDialogOpen = isCreating || editTarget !== null;
   const formDialogTitle = isCreating
-    ? `New ${currentMeta.label.replace(/s$/, "")}`
-    : `Edit ${currentMeta.label.replace(/s$/, "")} #${editTarget?.id ?? ""}`;
+    ? `${t("db.dialogNew")} ${currentMeta.label.replace(/s$/, "")}`
+    : `${t("db.edit")} ${currentMeta.label.replace(/s$/, "")} #${editTarget?.id ?? ""}`;
 
   return (
     <div className="flex flex-col gap-3">
@@ -997,7 +1028,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
             <>
               <input
                 type="text"
-                placeholder="Filter…"
+                placeholder={t("db.filter")}
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
                 className={`w-32 rounded-lg px-2 py-1 text-[10px] ${inputClass}`}
@@ -1008,7 +1039,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
                   className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] transition-colors ${subtextColor} hover:bg-current/10`}
                 >
                   {showSchema ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
-                  Schema
+                  {t("db.schema")}
                 </button>
               )}
               {currentMeta.canCreate && (
@@ -1016,7 +1047,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
                   onClick={openCreate}
                   className="flex items-center gap-1 rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] font-medium text-violet-300 transition-colors hover:bg-violet-500/30"
                 >
-                  <Plus size={10} /> Add
+                  <Plus size={10} /> {t("db.add")}
                 </button>
               )}
             </>
@@ -1029,9 +1060,9 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
             <table className="w-full text-[10px]">
               <thead>
                 <tr className={subtextColor}>
-                  <th className="pb-1 text-left font-semibold">Field</th>
-                  <th className="pb-1 text-left font-semibold">Type</th>
-                  <th className="pb-1 text-left font-semibold">Notes</th>
+                  <th className="pb-1 text-left font-semibold">{t("db.schemaField")}</th>
+                  <th className="pb-1 text-left font-semibold">{t("db.schemaType")}</th>
+                  <th className="pb-1 text-left font-semibold">{t("db.schemaLabelNotes")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1049,7 +1080,9 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
 
         {/* No-actions note */}
         {currentMeta.noActionsNote && (
-          <p className={`text-[10px] ${subtextColor} opacity-60`}>{currentMeta.noActionsNote}</p>
+          <p className={`text-[10px] ${subtextColor} opacity-60`}>
+            {noActionsNotes[selected] ?? currentMeta.noActionsNote}
+          </p>
         )}
 
         {/* Stats special view */}
@@ -1064,7 +1097,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
               </div>
             ) : filteredRows.length === 0 ? (
               <p className={`py-4 text-center text-xs opacity-40 ${subtextColor}`}>
-                {filter ? "No matches" : "No data"}
+                {filter ? t("db.noMatches") : t("db.noData")}
               </p>
             ) : (
               <div className="max-h-80 overflow-y-auto">
@@ -1081,7 +1114,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
                       ))}
                       {(currentMeta.canUpdate || currentMeta.canDelete || selected === "users") && (
                         <th className={`pb-1 text-right text-[10px] font-semibold ${subtextColor}`}>
-                          Actions
+                          {t("db.actions")}
                         </th>
                       )}
                     </tr>
@@ -1149,7 +1182,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
         >
           <div className="flex items-center gap-1.5">
             <Clock size={11} />
-            Session History
+            {t("db.sessionHistory")}
             {history.length > 0 && (
               <span className="rounded-full bg-current/10 px-1.5 py-0.5 text-[9px]">
                 {history.length}
@@ -1163,7 +1196,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
           <div className="border-t border-current/10 px-3 pb-3">
             {history.length === 0 ? (
               <p className={`py-3 text-center text-xs opacity-40 ${subtextColor}`}>
-                No actions yet this session
+                {t("db.noActionsYet")}
               </p>
             ) : (
               <div className="flex flex-col gap-0.5 pt-2">
@@ -1185,7 +1218,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
                   onClick={() => setHistory([])}
                   className={`mt-1 flex items-center gap-1 self-end text-[10px] ${subtextColor} hover:opacity-80`}
                 >
-                  <RefreshCw size={9} /> Clear
+                  <RefreshCw size={9} /> {t("db.clearHistory")}
                 </button>
               </div>
             )}
@@ -1198,32 +1231,26 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
         <div className="flex items-center gap-2 border-b border-red-500/15 px-3 py-2">
           <AlertTriangle size={11} className="shrink-0 text-red-400" />
           <p className="text-[10px] font-semibold tracking-widest text-red-400 uppercase">
-            Danger Zone
+            {t("db.dangerZone")}
           </p>
         </div>
         <div className="px-3 py-2.5">
-          <p className={`mb-2 text-[10px] leading-relaxed ${subtextColor}`}>
-            Row-level deletes for <strong className={textColor}>Users</strong> and{" "}
-            <strong className={textColor}>Profiles</strong> cascade to related records and are
-            irreversible. Use the row actions above after selecting those tables.
-          </p>
+          <p className={`mb-2 text-[10px] leading-relaxed ${subtextColor}`}>{t("db.dangerDesc")}</p>
           <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
             <div className="rounded-lg border border-red-500/15 p-2">
               <p className={`mb-0.5 text-[10px] font-semibold ${textColor}`}>
-                Delete User (cascade)
+                {t("db.deleteUserCascade")}
               </p>
               <p className={`text-[9px] leading-relaxed ${subtextColor}`}>
-                Removes the user, all their profiles, purchases, and match participations. Select
-                the <strong>Users</strong> table and use the trash icon on a row.
+                {t("db.deleteUserCascadeDesc")}
               </p>
             </div>
             <div className="rounded-lg border border-red-500/15 p-2">
               <p className={`mb-0.5 text-[10px] font-semibold ${textColor}`}>
-                Delete Profile (cascade)
+                {t("db.deleteProfileCascade")}
               </p>
               <p className={`text-[9px] leading-relaxed ${subtextColor}`}>
-                Removes the profile and all associated purchases. Select <strong>Profiles</strong>{" "}
-                table and use the trash icon on a row.
+                {t("db.deleteProfileCascadeDesc")}
               </p>
             </div>
           </div>
@@ -1232,30 +1259,30 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
 
       {/* ── Edit / Create dialog ─────────────────────────────────────────── */}
       <Dialog open={formDialogOpen} onOpenChange={(o) => !o && closeFormDialog()}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className={`max-w-sm ${dialogClass} ${textShadow}`}>
           <DialogHeader>
-            <DialogTitle>{formDialogTitle}</DialogTitle>
+            <DialogTitle className={`${textColor} ${textShadow}`}>{formDialogTitle}</DialogTitle>
             {isCreating && (
               <DialogDescription className={`text-xs ${subtextColor}`}>
-                Fill in the required fields and click Save.
+                {t("db.fillRequired")}
               </DialogDescription>
             )}
           </DialogHeader>
           <div className="flex flex-col gap-3 py-1">{renderFormFields()}</div>
-          <DialogFooter>
+          <DialogFooter className={footerClass}>
             <button
               type="button"
               onClick={closeFormDialog}
               className={`rounded-lg border border-current/20 px-3 py-1.5 text-xs ${subtextColor} hover:border-current/40`}
             >
-              Cancel
+              {t("db.cancel")}
             </button>
             <button
               type="button"
               onClick={handleFormSubmit}
               className="rounded-lg bg-violet-500/20 px-3 py-1.5 text-xs font-medium text-violet-300 transition-colors hover:bg-violet-500/30"
             >
-              Save
+              {t("db.save")}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -1263,40 +1290,38 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
 
       {/* ── Delete confirm dialog ────────────────────────────────────────── */}
       <Dialog open={deleteTarget !== null} onOpenChange={(o) => !o && setDeleteTarget(null)}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className={`max-w-sm ${dialogClass} ${textShadow}`}>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className={`flex items-center gap-2 ${textColor} ${textShadow}`}>
               <Trash2 size={14} className="text-red-400" />
-              Delete {currentMeta.label.replace(/s$/, "")}
+              {t("db.delete")} {currentMeta.label.replace(/s$/, "")}
             </DialogTitle>
             <DialogDescription className={`text-xs ${subtextColor}`}>
-              Delete{" "}
-              <strong className={textColor}>
-                #{deleteTarget?.id} {deleteTarget?.label}
-              </strong>
-              ? This cannot be undone.
+              {t("db.deleteDesc", { id: deleteTarget?.id ?? "", label: deleteTarget?.label ?? "" })}
             </DialogDescription>
           </DialogHeader>
           {deleteTarget?.isDanger && deleteTarget.dangerNote && (
             <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-2.5">
               <AlertTriangle size={11} className="mt-0.5 shrink-0 text-red-400" />
-              <p className="text-[10px] text-red-300">{deleteTarget.dangerNote}</p>
+              <p className="text-[10px] text-red-300">
+                {dangerNotes[selected] ?? deleteTarget.dangerNote}
+              </p>
             </div>
           )}
-          <DialogFooter>
+          <DialogFooter className={footerClass}>
             <button
               type="button"
               onClick={() => setDeleteTarget(null)}
               className={`rounded-lg border border-current/20 px-3 py-1.5 text-xs ${subtextColor} hover:border-current/40`}
             >
-              Cancel
+              {t("db.cancel")}
             </button>
             <button
               type="button"
               onClick={handleDelete}
               className="rounded-lg bg-red-500/20 px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/30"
             >
-              Delete
+              {t("db.delete")}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -1312,17 +1337,17 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
           }
         }}
       >
-        <DialogContent className="max-w-sm">
+        <DialogContent className={`max-w-sm ${dialogClass} ${textShadow}`}>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className={`flex items-center gap-2 ${textColor} ${textShadow}`}>
               {userAction === "ban" && <ShieldBan size={14} className="text-red-400" />}
               {userAction === "unban" && <ShieldCheck size={14} className="text-green-400" />}
               {userAction === "promote" && <ArrowUpCircle size={14} className="text-violet-400" />}
               {userAction === "demote" && <ArrowDownCircle size={14} className="text-amber-400" />}
-              {userAction === "ban" && "Ban User"}
-              {userAction === "unban" && "Unban User"}
-              {userAction === "promote" && "Promote User"}
-              {userAction === "demote" && "Demote User"}
+              {userAction === "ban" && t("db.banUser")}
+              {userAction === "unban" && t("db.unbanUser")}
+              {userAction === "promote" && t("db.promoteUser")}
+              {userAction === "demote" && t("db.demoteUser")}
             </DialogTitle>
             <DialogDescription className={`text-xs ${subtextColor}`}>
               {userActionTarget?.email} #{userActionTarget?.userId}
@@ -1332,20 +1357,20 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
           {userAction === "ban" && (
             <div className="flex flex-col gap-3 py-1">
               <label className="flex items-center justify-between">
-                <span className={`text-xs ${subtextColor}`}>Permanent</span>
+                <span className={`text-xs ${subtextColor}`}>{t("db.permanent")}</span>
                 <button
                   type="button"
                   onClick={() => setIsPermanentBan((v) => !v)}
                   className={`relative h-5 w-9 rounded-full transition-colors ${isPermanentBan ? "bg-red-500/40" : "bg-current/20"}`}
                 >
                   <span
-                    className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${isPermanentBan ? "translate-x-4" : "translate-x-0.5"}`}
+                    className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${isPermanentBan ? "translate-x-4" : "translate-x-0.5"}`}
                   />
                 </button>
               </label>
               {!isPermanentBan && (
                 <div className="flex flex-col gap-1">
-                  <label className={`text-[10px] ${subtextColor}`}>Duration (minutes)</label>
+                  <label className={`text-[10px] ${subtextColor}`}>{t("db.durationMinutes")}</label>
                   <input
                     type="number"
                     min={1}
@@ -1394,7 +1419,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
             </div>
           )}
 
-          <DialogFooter>
+          <DialogFooter className={footerClass}>
             <button
               type="button"
               onClick={() => {
@@ -1403,7 +1428,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
               }}
               className={`rounded-lg border border-current/20 px-3 py-1.5 text-xs ${subtextColor} hover:border-current/40`}
             >
-              Cancel
+              {t("db.cancel")}
             </button>
             <button
               type="button"
@@ -1418,7 +1443,7 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
                       : "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
               }`}
             >
-              Confirm
+              {t("db.confirm")}
             </button>
           </DialogFooter>
         </DialogContent>

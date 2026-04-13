@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback, useContext } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DateTime } from "luxon";
 import apiClient from "@/lib/apiClient";
@@ -20,9 +21,7 @@ interface ItemReadDTO {
   description: string;
   price: number;
   rarity: string;
-  // Category names encode kind + combat type:
-  //   "Character" | "Skin"    → kind
-  //   "Melee"     | "Ranged"  → combatType (only when kind is Character)
+  // Category names: "Character" + optionally "Melee" | "Ranged" (combatType)
   categories: string[];
 }
 
@@ -39,8 +38,6 @@ interface PurchaseReadDTO {
 // ─── Mapping helpers ──────────────────────────────────────────────────────────
 
 function itemDTOToWebstoreItem(dto: ItemReadDTO): WebstoreItem {
-  const kind: WebstoreItem["kind"] = dto.categories.includes("Character") ? "Character" : "Skin";
-
   const combatType: WebstoreItem["combatType"] = dto.categories.includes("Melee")
     ? "Melee"
     : dto.categories.includes("Ranged")
@@ -53,7 +50,7 @@ function itemDTOToWebstoreItem(dto: ItemReadDTO): WebstoreItem {
     description: dto.description,
     price: dto.price,
     rarity: dto.rarity as Rarity,
-    kind,
+    kind: "Character",
     combatType,
     owned: false, // will be overridden via ownedNames merge below
     createdAt: DateTime.now(),
@@ -74,6 +71,7 @@ function nowDateString(): string {
 
 export function useItems() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation("webstore");
   const { selectedProfile } = useProfiles();
   const { userId } = useContext(AuthContext);
   const profileId = selectedProfile?.id ?? null;
@@ -84,6 +82,7 @@ export function useItems() {
     queryFn: async () => {
       const { data } = await apiClient.get<ItemReadDTO[]>("/items", {
         params: { page: 1, page_size: 100 },
+        data: { profile_id: 0 },
       });
       return data.map(itemDTOToWebstoreItem);
     },
@@ -139,7 +138,7 @@ export function useItems() {
           queryKey: queryKeys.profiles.byUserId(Number(userId)),
         });
       }
-      toast.success("Item unlocked!");
+      toast.success(t("toast.unlocked"));
     },
     onError: (err) => {
       const msg = (err as any)?.response?.data?.error ?? err?.message ?? "Purchase failed.";
@@ -153,7 +152,6 @@ export function useItems() {
     Error,
     {
       name: string;
-      kind: string;
       combatType?: string;
       rarity: string;
       description: string;
@@ -161,8 +159,8 @@ export function useItems() {
     }
   >({
     mutationFn: async (data) => {
-      const categories: string[] = [data.kind];
-      if (data.kind === "Character" && data.combatType) {
+      const categories: string[] = ["Character"];
+      if (data.combatType) {
         categories.push(data.combatType);
       }
       await apiClient.post("/items", {
@@ -175,7 +173,7 @@ export function useItems() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items.all });
-      toast.success("Item created.");
+      toast.success(t("toast.created"));
     },
     onError: (err) => {
       const msg = (err as any)?.response?.data?.error ?? err?.message ?? "Failed to create item.";
@@ -201,11 +199,11 @@ export function useItems() {
       if (ctx?.previousItems !== undefined) {
         queryClient.setQueryData(queryKeys.items.all, ctx.previousItems);
       }
-      toast.error("Failed to delete item.");
+      toast.error(t("toast.deleteFailed"));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items.all });
-      toast.success("Item deleted.");
+      toast.success(t("toast.deleted"));
     },
   });
 
@@ -214,36 +212,28 @@ export function useItems() {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedKind, setSelectedKind] = useState("All");
   const [selectedRarity, setSelectedRarity] = useState("All");
   const [selectedCombatType, setSelectedCombatType] = useState("All");
   const [selectedOwnership, setSelectedOwnership] = useState("All");
   const [isLoading, setIsLoading] = useState(false);
   const loadTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const kinds: string[] = ["All", "Character", "Skin"];
   const rarities: string[] = ["All", "Common", "Uncommon", "Rare", "Epic", "Legendary"];
   const combatTypes: string[] = ["All", "Melee", "Ranged"];
   const ownershipOptions: string[] = ["All", "Owned", "Unowned"];
 
-  const showOwnershipFilter = true;
-  const showCombatTypeFilter = selectedKind !== "Skin";
-
   const filteredItems = useMemo(() => {
     return allItems.filter((item) => {
-      const matchesKind = selectedKind === "All" || item.kind === selectedKind;
       const matchesRarity = selectedRarity === "All" || item.rarity === selectedRarity;
       const matchesCombatType =
-        selectedCombatType === "All" ||
-        item.kind !== "Character" ||
-        item.combatType === selectedCombatType;
+        selectedCombatType === "All" || item.combatType === selectedCombatType;
       const matchesOwnership =
         selectedOwnership === "All" ||
         (selectedOwnership === "Owned" && item.owned) ||
         (selectedOwnership === "Unowned" && !item.owned);
-      return matchesKind && matchesRarity && matchesCombatType && matchesOwnership;
+      return matchesRarity && matchesCombatType && matchesOwnership;
     });
-  }, [allItems, selectedKind, selectedRarity, selectedCombatType, selectedOwnership]);
+  }, [allItems, selectedRarity, selectedCombatType, selectedOwnership]);
 
   const hasMore = useMemo(() => {
     if (searchQuery) return false;
@@ -296,14 +286,6 @@ export function useItems() {
     setPage(1);
   }
 
-  function handleKindChange(kind: string) {
-    setSelectedKind(kind);
-    setPage(1);
-    if (kind === "Skin" || kind === "All") {
-      setSelectedCombatType("All");
-    }
-  }
-
   function handleRarityChange(rarity: string) {
     setSelectedRarity(rarity);
     setPage(1);
@@ -311,9 +293,6 @@ export function useItems() {
   function handleCombatTypeChange(combatType: string) {
     setSelectedCombatType(combatType);
     setPage(1);
-    if (combatType !== "All") {
-      setSelectedKind("Character");
-    }
   }
   function handleOwnershipChange(ownership: string) {
     setSelectedOwnership(ownership);
@@ -328,7 +307,6 @@ export function useItems() {
 
   function handleCreateItem(data: {
     name: string;
-    kind: string;
     combatType?: string;
     rarity: string;
     description: string;
@@ -348,18 +326,13 @@ export function useItems() {
     sentinelRef,
     hasMore,
     isLoading: itemsLoading || isLoading,
-    kinds,
     rarities,
     combatTypes,
     ownershipOptions,
-    selectedKind,
     selectedRarity,
     selectedCombatType,
     selectedOwnership,
-    showOwnershipFilter,
-    showCombatTypeFilter,
     handleSearch,
-    handleKindChange,
     handleRarityChange,
     handleCombatTypeChange,
     handleOwnershipChange,

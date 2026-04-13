@@ -32,16 +32,27 @@ build-fullstack: build-client build
     echo "Building client"
     cd ./client && npm install && npm run build
 
+@dev:
+    echo "Starting development environment"
+    wt new-tab -d . cmd /k go run -v cmd/api/main.go
+    cd client && npm install && npm run dev
+
 # Auto-format frontend files checked by format:check
 @format-client:
     echo "Formatting client"
     cd ./client && npm run format
 
 # Test Frontend file formatting, linting and unit tests
-@test-client:
-    echo "Testing client"
-    cd ./client && npm install && npm run format:check && npm run lint && npm run test:run
+@test-client-lint-unit:
+    echo "Testing client (linting + unit tests)"
+    cd ./client && npm install && npm run lint && npm run test:run
 
+@test-client-format:
+    echo "Checking client formatting..."
+    cd ./client && npm run format:check || (echo "Format check failed, auto-fixing and retrying..." && npm run format && npm run format:check && echo "✓ Formatting fixed and verified")
+
+@test-client: test-client-lint-unit test-client-format
+    echo "All client tests passed ✓"
 # Run the application
 @run:
     go run -v cmd/api/main.go

@@ -1,6 +1,6 @@
 # SMAASH kliens — felhasználói útmutató
 
-**Frissítve:** 2026-04-04 (rev 5)
+**Frissítve:** 2026-04-13 (rev 7)
 
 > Ez az útmutató röviden, érthetően vezet végig az app fő részein, a beállításokon és a leggyakoribb teendőkön.
 
@@ -128,14 +128,22 @@ A **Releases** oldal a játék különböző verzióit mutatja.
 
 ## Ranglisták
 
-A **Leaderboard** több különböző statisztikát mutat:
+A ranglétránál felül megjelenik egy **tab választó**. Válassz egy kategóriát a részletes nézethez, vagy maradj az **Összes** tabon az áttekintőhöz.
 
-1. **Játékosok** — győzelmek, rangsor, aktív teljesítmény
-2. **Pályák** — legtöbbet játszott vagy legnépszerűbb pályák
-3. **Itemek** — legtöbbet vásárolt vagy legritkább tárgyak
-4. **Globális statisztikák** — egyéb összesített mutatók
+### „Összes" tab
 
-Ha a számok lassan jelennek meg, az általában azt jelenti, hogy a szerver még számolja az aggregált adatokat. Ilyenkor érdemes egy pillanatot várni, majd frissíteni.
+- **Stat sáv** — négy kiemelő chip mutatja az aktuális #1-est kategóriánként (legjobb győztes, legaktívabb játékos, legnépszerűbb pálya, legtöbbet vásárolt tárgy)
+- **Négy panel** — panelenként top 5 bejegyzés, egymás mellett
+
+### Kategória tabok (Győzelmek / Aktív / Pályák / Tárgyak)
+
+Minden kategória tab ezt mutatja:
+
+1. **Dobogó** — a legjobb 3 arany/ezüst/bronz dobogón. Az 1. hely középen áll a legmagasabb emelvényen; a 2. hely balra, a 3. jobbra
+2. **Továbbjutók** — a 4. és 5. hely a dobogó alatt, ha léteznek
+3. **Teljes rangsor** — az összes bejegyzés görgethető listában rangszámmal. A **keresőmező** segítségével név alapján gyorsan megtalálhatod a keresett játékost, pályát vagy tárgyat
+
+A ranglisták időszakosan frissülnek, ahogy a szerver kiszámolja az összesített adatokat. Ha elavult számokat látsz, várj egy pillanatot, majd frissítsd az oldalt.
 
 ---
 
@@ -230,12 +238,15 @@ Ilyenkor ezeket próbáld:
 
 Az alkalmazás gyorsabbá és simábbá vált:
 
+- **Ranglista átdolgozás:** A leaderboard mostantól tab választóval működik. Válassz egy kategóriát, és megjelenik a dobogó (top 3), a továbbjutók, egy keresőmező és egy görgethető teljes rangsor. Az „Összes" tab stat sávot és mind a négy panelt egyszerre mutatja
+- **A ranglista azonnal tölt:** A korábbi animációs késleltetés (akár 2 másodperc várakozás tartalom előtt) eltűnt — az adatok megjelennek, ahogy megérkeznek
 - **Kisebb letöltési méret:** Optimalizált eszközök; gyorsabb betöltés lassú kapcsolaton
-- **Zökkenőmentesebb témavá ltás:** A háttéranimációk azonnal reagálnak a beállítások változására
+- **Zökkenőmentesebb témaváltás:** A háttéranimációk azonnal reagálnak a beállítások változására
 - **Jobb teljesítmény:** Kevesebb CPU-használat az animációk lejátszásakor
 - **Stabilabb profil-létrehozási visszajelzések:** tisztább hibaüzenetek, ha a név foglalt vagy elérted a profil-limitet
+- **Javított News dialógusok mobilon:** A hírek létrehozásához és szerkesztéséhez szükséges dialógusok mostantól megfelelő oldalsó margóval jelennek meg telefonon, magas tartalom esetén görgethetők, és a képbeállítások szekció rendezetten egymás alá kerül ahelyett, hogy kilógna a felületből
 
-Lehet, hogy közvetlenül nem figyeled meg ezeket a változásokat, de az app összességében gyorsabbnak, simábbnak fogja érezni magát.
+Lehet, hogy nem minden változást veszel észre közvetlenül, de az app összességében gyorsabbnak és kidolgozottabbnak fog érezni magát.
 
 ---
 

@@ -143,7 +143,7 @@ export default function BanDialog({
               <p
                 className={cn("mb-2 text-xs font-semibold tracking-wider uppercase", subtextColor)}
               >
-                Permanent
+                {t("ban.permanent")}
               </p>
               <div
                 role="button"
@@ -215,8 +215,10 @@ export default function BanDialog({
                 )}
               >
                 <MessageSquare size={11} />
-                Reason{" "}
-                <span className={cn("font-normal normal-case", subtextColor)}>(optional)</span>
+                {t("ban.reason")}{" "}
+                <span className={cn("font-normal normal-case", subtextColor)}>
+                  {t("ban.reasonOptional")}
+                </span>
               </p>
 
               {/* Preset reason chips */}
@@ -236,7 +238,7 @@ export default function BanDialog({
 
                 {/* Custom message textarea */}
                 <div className="flex flex-col gap-1">
-                  <label className={cn("text-xs", subtextColor)}>Custom message</label>
+                  <label className={cn("text-xs", subtextColor)}>{t("ban.customMessage")}</label>
                   <textarea
                     rows={3}
                     placeholder={t("ban.customMessagePlaceholder")}
@@ -255,7 +257,7 @@ export default function BanDialog({
               <p
                 className={cn("mb-2 text-xs font-semibold tracking-wider uppercase", subtextColor)}
               >
-                Custom Range
+                {t("ban.customRange")}
               </p>
               <BanCustomRange
                 from={logic.customStart}
@@ -278,7 +280,7 @@ export default function BanDialog({
               disabled={isLoading}
               className={cn(getButtonClasses(useLiquidGlass, useDarkMode, "secondary"), textColor)}
             >
-              Cancel
+              {t("ban.cancel")}
             </Button>
             <Button
               onClick={handleConfirm}

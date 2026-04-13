@@ -9,7 +9,10 @@
   "profiles": {
     "title": "Profilok",
     "noSelected": "Nincs kiválasztott felhasználó",
-    "noProfiles": "Nincsenek profilok"
+    "noProfiles": "Nincsenek profilok",
+    "coinsTitle": "Érmék",
+    "saved": "Mentve",
+    "setCoins": "Érmék beállítása"
   },
   "detail": {
     "accountDetails": "Fiók adatok",
@@ -30,6 +33,18 @@
     "admin": "Admin",
     "support": "Támogató",
     "user": "Felhasználó"
+  },
+  "toast": {
+    "bannedSuccess": "Felhasználó sikeresen tiltva.",
+    "banFailed": "Nem sikerült tiltani a felhasználót. Kérjük, próbálja újra.",
+    "unbannedSuccess": "Tiltás feloldva.",
+    "unbanFailed": "Nem sikerült feloldani a tiltást.",
+    "promotedTo": "Felhasználó előléptetve: {{role}}.",
+    "promoteFailed": "Nem sikerült előléptetni a felhasználót.",
+    "demotedSuccess": "Felhasználó lefokozva.",
+    "demoteFailed": "Nem sikerült lefokozni a felhasználót.",
+    "coinsUpdated": "Érmék frissítve.",
+    "coinsFailed": "Nem sikerült frissíteni az érméket."
   },
   "ban": {
     "title": "Felhasználó tiltása — {{name}}",

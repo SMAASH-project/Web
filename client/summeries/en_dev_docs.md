@@ -1,6 +1,6 @@
 # SMAASH Client — Developer Documentation
 
-**Last updated:** 2026-04-04 (rev 5)
+**Last updated:** 2026-04-13 (rev 7)
 
 > This guide covers the architecture, conventions, and practical workflows for the SMAASH web client. It's meant to be helpful—not just a checklist.
 
@@ -358,16 +358,43 @@ Browse and purchase in-game items.
 
 ### Leaderboard (`/app/leaderboard`)
 
-Display top players/levels/items globally.
+Tab-based leaderboard with a podium view per category and a global "All" overview.
 
-**Performance story:**
+**Tab structure (`TabId`):**
 
-- 4 separate stats queries fire in parallel (React Query deduplicates if the same request runs twice)
-- Slowest endpoint gates all four panels (they wait for all data before rendering)
-- **Skeleton loading:** 5 skeleton rows per panel appear immediately while data loads, instead of a spinner
-- **Panel stagger:** panels reveal in sequence (40ms, 80ms, 120ms, 160ms) for perceived progress
+| Tab | Data source | Key stat |
+|---|---|---|
+| `all` | All four queries | Stat bar + top-5 panels |
+| `wins` | `useLeaderboardQuery` | `count_of_wins` |
+| `active` | `useTopPlayersQuery` | `count_of_matches` |
+| `levels` | `useTopLevelsQuery` | `count_of_plays` |
+| `items` | `useTopItemsQuery` | `count_of_purchases` |
 
-**Known latency:** Most of the delay is server-side DB aggregation. Client can't do much except prefetch on route hover (future optimization).
+**"All" view:**
+
+- Stat bar: 4 chips showing the #1 performer in each category
+- 2×2 grid with top 5 rows per panel (reduced from 10 to reduce dead space)
+- Each panel has its own skeleton while its query loads
+
+**Category view (any tab except "all"):**
+
+- `PodiumSlot` components for ranks 1–3, rendered in order `[2nd | 1st | 3rd]` to match a physical podium; animated with `motion.div` (0.4s ease-out, staggered 0 / 0.15 / 0.30 s)
+- Runners-up row for ranks 4–5 if they exist
+- `CategoryView` component holds local `search` state; data is normalised to `RankedEntry[]` before passing in
+- Scrollable list (`max-h-72 overflow-y-auto`) of all entries with their original rank numbers preserved through filtering
+
+**Data normalisation:**
+
+All four datasets are mapped to `RankedEntry { id, name, stat, statLabel, sub? }` in the page component before being passed down. This keeps `PodiumSlot` and `CategoryView` fully generic.
+
+**Performance:**
+
+- `CardAnimation` (1.5 s spring) and `LoadPost` row stagger are no longer used on this page — content is visible immediately
+- Tab switching uses `AnimatePresence mode="wait"` with a 0.18 s opacity/y fade
+- Each `CategoryView` mount resets search state (desirable; enforced by `key={activeTab}` on the wrapper)
+- All four queries still fire in parallel; skeleton per panel covers the individual loading states
+
+**Locale keys added** (both `en` and `hu`): `tabs.*`, `podium.runnersUp`, `podium.fullRankings`, `statBar.*`, `search`.
 
 ---
 
@@ -437,8 +464,14 @@ The drawer auto-closes after selecting a tab so content gets full width.
 All dialogs now have:
 
 - `max-h-[90svh]` with `overflow-y-auto` (scrollable, fits viewport)
-- Responsive max-width (e.g., `sm:max-w-2xl max-w-full`)
+- Responsive max-width using `max-w-[calc(100%-2rem)]` on mobile with a `sm:max-w-*` cap on larger screens — this preserves the base dialog's side gutter. **Do not** override with `max-w-full` on mobile, as it eliminates the side margins entirely
 - No fixed widths that break on phones
+
+**News dialogs (Add & Edit) specifically:**
+
+- Image settings section stacks vertically on mobile: `flex flex-col gap-4 sm:flex-row sm:items-start`. The radio cards, file input, and resizable size panel each take full width on small screens and go side-by-side on `sm+`
+- `RadioGroupChoiceCard` uses `w-full sm:max-w-sm` — full-width on mobile, capped on larger screens
+- **Do not add `overflow-visible` to `DialogContent`** — it overrides the base `overflow-y-auto` and breaks scrollability, causing content to spill outside the dialog instead of scrolling
 
 ---
 

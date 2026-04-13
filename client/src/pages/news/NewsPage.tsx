@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import {
-  formatDateTime,
+  formatDate,
   getBackgroundClasses,
   getTextColor,
   getTextShadow,
@@ -60,9 +60,9 @@ export function NewsPage() {
   });
 
   return (
-    <div className="min-h-screen p-3 sm:p-4">
+    <div className="min-h-screen w-full px-4 pb-8 sm:px-8 lg:px-25">
       <Navbar />
-      <div className="z-0 mt-20 flex flex-col items-center justify-start gap-4">
+      <div className="z-0 mt-25 flex w-full flex-col items-center justify-start gap-4">
         {/* ── Toolbar ── */}
         <div className="flex w-full flex-row items-center justify-between gap-2">
           <ButtonGroup orientation="horizontal" className={`${buttonClass} shrink-0 rounded-lg`}>
@@ -81,7 +81,9 @@ export function NewsPage() {
               <span
                 className={`rounded-full px-2.5 py-1 text-xs font-medium ${bgClass} ${subtextColor}`}
               >
-                {isSearching ? `${visiblePosts.length} results` : `${totalCount} posts`}
+                {isSearching
+                  ? t("results", { count: visiblePosts.length })
+                  : t("posts", { count: totalCount })}
               </span>
             )}
             <FilterSelect
@@ -120,12 +122,14 @@ export function NewsPage() {
             const post = visiblePosts[virtualRow.index] as NewsPost;
             const index = virtualRow.index;
             const cardContent = (
-              <Card className={`z-0 flex w-full flex-col p-4 sm:p-6 md:p-8 ${bgClass}`}>
+              <Card
+                className={`z-0 flex w-full min-w-0 flex-col overflow-hidden p-4 sm:p-6 md:p-8 ${bgClass}`}
+              >
                 {/* Header: title+badge left, date+actions right */}
-                <div className="mb-3 flex w-full flex-row items-start justify-between gap-3">
+                <div className="mb-3 flex w-full min-w-0 flex-row items-start justify-between gap-3">
                   <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                     <Label
-                      className={`text-base font-semibold sm:text-lg ${textColor} ${textShadow} wrap-break-word`}
+                      className={`text-[clamp(0.85rem,1.8vw,1.125rem)] font-semibold ${textColor} ${textShadow} wrap-break-word`}
                     >
                       {post.title}
                     </Label>
@@ -134,9 +138,9 @@ export function NewsPage() {
 
                   <div className="flex shrink-0 flex-col items-end gap-2">
                     <Label
-                      className={`text-xs sm:text-sm ${textColor} ${textShadow} text-right whitespace-nowrap italic`}
+                      className={`text-[clamp(0.65rem,1.2vw,0.875rem)] ${textColor} ${textShadow} text-right whitespace-nowrap italic`}
                     >
-                      {formatDateTime(post.createdAt)}
+                      {formatDate(post.createdAt)}
                     </Label>
                     {isAdmin && (
                       <ButtonGroup>
@@ -149,17 +153,17 @@ export function NewsPage() {
 
                 {/* Body: image + content */}
                 {post.imagePosition === "Top" ? (
-                  <div className="flex w-full flex-col gap-3">
+                  <div className="flex w-full min-w-0 flex-col gap-3">
                     {post.image && (
                       <img
                         src={post.image}
                         alt={post.imageAlt}
-                        className="w-full rounded-md object-cover"
+                        className="w-full rounded-md"
                         style={{ maxHeight: `${post.imageSize}vh` }}
                       />
                     )}
                     <div
-                      className={`text-sm ${textColor} ${textShadow} prose prose-sm prose-invert max-w-none text-justify`}
+                      className={`text-[clamp(0.7rem,1.5vw,0.875rem)] ${textColor} ${textShadow} prose prose-sm prose-invert max-w-none min-w-0 text-justify wrap-break-word`}
                     >
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
                     </div>
@@ -168,7 +172,7 @@ export function NewsPage() {
                   /* Side image — stacks on mobile, side-by-side on sm+ */
                   <div className="flex w-full flex-col gap-3 sm:flex-row">
                     <div
-                      className={`text-sm ${textColor} ${textShadow} prose prose-sm prose-invert w-full max-w-none text-justify sm:flex-1`}
+                      className={`text-[clamp(0.7rem,1.5vw,0.875rem)] ${textColor} ${textShadow} prose prose-sm prose-invert w-full max-w-none min-w-0 text-justify wrap-break-word sm:flex-1`}
                     >
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
                     </div>
@@ -176,7 +180,7 @@ export function NewsPage() {
                       <img
                         src={post.image}
                         alt={post.imageAlt}
-                        className="w-full rounded-md object-cover sm:w-(--img-size)"
+                        className="w-full flex-none self-start rounded-md sm:w-(--img-size)"
                         style={
                           {
                             "--img-size": `${post.imageSize}%`,

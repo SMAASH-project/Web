@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Loader2, Send } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { StyledSelect } from "@/components/ui/styled-select";
 import apiClient from "@/lib/apiClient";
@@ -51,6 +52,7 @@ export function EndpointsTab({
   inputClass: string;
   bgClass: string;
 }) {
+  const { t } = useTranslation("debug");
   const [method, setMethod] = useState<Method>("GET");
   const [path, setPath] = useState("/users/whoami");
   const [body, setBody] = useState("");
@@ -137,7 +139,8 @@ export function EndpointsTab({
             disabled={loading || !path}
             className="flex h-8 shrink-0 items-center gap-1.5 bg-green-600 px-3 text-xs text-white hover:bg-green-500"
           >
-            {loading ? <Loader2 size={11} className="animate-spin" /> : <Send size={11} />} Send
+            {loading ? <Loader2 size={11} className="animate-spin" /> : <Send size={11} />}{" "}
+            {t("endpoints.send")}
           </Button>
         </div>
         {method !== "GET" && (
@@ -156,7 +159,7 @@ export function EndpointsTab({
         <div className={`flex flex-1 flex-col gap-2 overflow-hidden rounded-xl p-3 ${panelBg}`}>
           <div className="flex items-center gap-2">
             <p className={`text-[10px] font-semibold tracking-wider uppercase ${subtextColor}`}>
-              Response
+              {t("endpoints.response")}
             </p>
             {response && (
               <>

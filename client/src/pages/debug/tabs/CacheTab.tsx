@@ -9,6 +9,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 export function CacheTab({
   textColor,
@@ -22,6 +23,7 @@ export function CacheTab({
   inputClass: string;
 }) {
   const queryClient = useQueryClient();
+  const { t } = useTranslation("debug");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState("");
   const [, forceUpdate] = useState(0);
@@ -63,7 +65,7 @@ export function CacheTab({
       <div className="flex items-center gap-2">
         <input
           type="text"
-          placeholder="Filter…"
+          placeholder={t("cache.filter")}
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           className={`flex-1 rounded-lg px-3 py-1.5 text-xs ${inputClass}`}
@@ -75,7 +77,7 @@ export function CacheTab({
           }}
           className={`rounded-lg border border-current/20 px-2.5 py-1.5 text-[10px] ${subtextColor} flex items-center gap-1 hover:border-current/40`}
         >
-          <Trash2 size={10} /> Clear
+          <Trash2 size={10} /> {t("cache.clear")}
         </button>
         <button
           onClick={() => forceUpdate((n) => n + 1)}
@@ -86,7 +88,7 @@ export function CacheTab({
       </div>
       <div className={`flex-1 overflow-auto rounded-xl ${panelBg}`}>
         {filtered.length === 0 ? (
-          <p className={`py-8 text-center text-xs ${subtextColor}`}>No cache entries</p>
+          <p className={`py-8 text-center text-xs ${subtextColor}`}>{t("cache.noEntries")}</p>
         ) : (
           <div className="divide-y divide-current/5">
             {filtered.map((query) => {
@@ -138,7 +140,7 @@ export function CacheTab({
                           }}
                           className={`rounded border border-current/20 px-2 py-0.5 text-[10px] ${subtextColor} hover:border-current/40`}
                         >
-                          Invalidate
+                          {t("cache.invalidate")}
                         </button>
                         <button
                           onClick={() => {
@@ -149,7 +151,7 @@ export function CacheTab({
                           }}
                           className="rounded border border-red-500/30 px-2 py-0.5 text-[10px] text-red-400 hover:border-red-500/60"
                         >
-                          Remove
+                          {t("cache.remove")}
                         </button>
                       </div>
                     </div>
@@ -161,7 +163,7 @@ export function CacheTab({
         )}
       </div>
       <p className={`text-center text-[10px] ${subtextColor} opacity-50`}>
-        {filtered.length} / {queries.length} entries
+        {t("cache.count", { filtered: filtered.length, total: queries.length })}
       </p>
     </div>
   );

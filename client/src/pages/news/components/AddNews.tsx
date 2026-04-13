@@ -98,16 +98,16 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
         </Button>
       </DialogTrigger>
       <DialogContent
-        className={`w-full max-w-full sm:max-w-2xl ${dialogClass} ${textShadow}`}
+        className={`max-w-[calc(100%-2rem)] sm:max-w-3xl ${dialogClass} ${textShadow}`}
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle className={textColor}>Create new News Article</DialogTitle>
+          <DialogTitle className={textColor}>{t("add.title")}</DialogTitle>
         </DialogHeader>
         <FieldGroup>
           <Field>
-            <Label>Title</Label>
+            <Label>{t("add.titleLabel")}</Label>
             <Input
               value={title}
               onChange={(e) => setTitle((e.target as HTMLInputElement).value)}
@@ -115,7 +115,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
             />
           </Field>
           <Field>
-            <Label>Category</Label>
+            <Label>{t("add.categoryLabel")}</Label>
             <CategorySelector value={category} onValueChange={setCategory} />
           </Field>
         </FieldGroup>
@@ -123,17 +123,19 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
           <AnimatedAccordion type="multiple" defaultValue={["content"]} className="w-full">
             <AnimatedAccordionItem value="image">
               <AnimatedAccordionTrigger className={textColor}>
-                Image Settings
+                {t("add.imageSettings")}
               </AnimatedAccordionTrigger>
               <AnimatedAccordionContent>
                 <FieldGroup>
                   <Field>
-                    <Label className={`text-sm ${subtextColor}`}>Image Position</Label>
-                    <div className="flex flex-row items-start gap-4">
-                      <div className="flex max-w-sm flex-col gap-2">
+                    <Label className={`text-sm ${subtextColor}`}>{t("add.imagePosition")}</Label>
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                      <div className="flex flex-col gap-2 sm:shrink-0">
                         <RadioGroupChoiceCard
                           value={imagePosition}
                           onValueChange={(v) => setImagePosition(v as "Top" | "Right")}
+                          textColor={textColor}
+                          subtextColor={subtextColor}
                         />
                         <Input
                           type="file"
@@ -142,11 +144,12 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                           name="articleImage"
                           ref={fileInputRef}
                           onChange={handleFileChange}
+                          className={inputClass}
                         />
                         {imageAlt && (
                           <div className="flex items-center gap-1">
                             <span className="text-muted-foreground truncate text-xs">
-                              Current: {imageAlt}
+                              {t("add.current", { name: imageAlt })}
                             </span>
                             <button
                               type="button"
@@ -158,11 +161,19 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                           </div>
                         )}
                       </div>
-                      <div className="ml-auto">
+                      <div className="min-w-0 flex-1">
                         {imagePosition === "Top" ? (
-                          <ResizableVertical onImageSizeChange={setImageSize} />
+                          <ResizableVertical
+                            onImageSizeChange={setImageSize}
+                            subtextColor={subtextColor}
+                            inputClass={inputClass}
+                          />
                         ) : (
-                          <ResizableHorizontal onImageSizeChange={setImageSize} />
+                          <ResizableHorizontal
+                            onImageSizeChange={setImageSize}
+                            subtextColor={subtextColor}
+                            inputClass={inputClass}
+                          />
                         )}
                       </div>
                     </div>
@@ -171,11 +182,15 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
               </AnimatedAccordionContent>
             </AnimatedAccordionItem>
             <AnimatedAccordionItem value="content">
-              <AnimatedAccordionTrigger className={textColor}>Content</AnimatedAccordionTrigger>
+              <AnimatedAccordionTrigger className={textColor}>
+                {t("add.content")}
+              </AnimatedAccordionTrigger>
               <AnimatedAccordionContent>
                 <FieldGroup>
                   <Field>
-                    <Label className={`text-sm ${subtextColor}`}>Markdown supported</Label>
+                    <Label className={`text-sm ${subtextColor}`}>
+                      {t("add.markdownSupported")}
+                    </Label>
                     <textarea
                       value={content}
                       onChange={(e) => setContent((e.target as HTMLTextAreaElement).value)}
@@ -185,7 +200,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                       <div
                         className={`mt-2 rounded-md border ${bgClass} prose prose-sm prose-invert max-h-64 max-w-none overflow-y-auto p-3`}
                       >
-                        <Label className="mb-1 text-xs">Preview Text</Label>
+                        <Label className="mb-1 text-xs">{t("add.previewText")}</Label>
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
                       </div>
                     )}
@@ -197,16 +212,18 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
         ) : (
           <Accordion type="multiple" defaultValue={["content"]} className="w-full">
             <AccordionItem value="image">
-              <AccordionTrigger className={textColor}>Image Settings</AccordionTrigger>
+              <AccordionTrigger className={textColor}>{t("add.imageSettings")}</AccordionTrigger>
               <AccordionContent>
                 <FieldGroup>
                   <Field>
-                    <Label className={`text-sm ${subtextColor}`}>Image Position</Label>
-                    <div className="flex flex-row items-start gap-4">
-                      <div className="flex max-w-sm flex-col gap-2">
+                    <Label className={`text-sm ${subtextColor}`}>{t("add.imagePosition")}</Label>
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                      <div className="flex flex-col gap-2 sm:shrink-0">
                         <RadioGroupChoiceCard
                           value={imagePosition}
                           onValueChange={(v) => setImagePosition(v as "Top" | "Right")}
+                          textColor={textColor}
+                          subtextColor={subtextColor}
                         />
                         <Input
                           type="file"
@@ -215,11 +232,12 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                           name="articleImage"
                           ref={fileInputRef}
                           onChange={handleFileChange}
+                          className={inputClass}
                         />
                         {imageAlt && (
                           <div className="flex items-center gap-1">
                             <span className={`text-xs ${subtextColor} truncate`}>
-                              Current: {imageAlt}
+                              {t("add.current", { name: imageAlt })}
                             </span>
                             <button
                               type="button"
@@ -231,11 +249,19 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                           </div>
                         )}
                       </div>
-                      <div className="ml-auto">
+                      <div className="min-w-0 flex-1">
                         {imagePosition === "Top" ? (
-                          <ResizableVertical onImageSizeChange={setImageSize} />
+                          <ResizableVertical
+                            onImageSizeChange={setImageSize}
+                            subtextColor={subtextColor}
+                            inputClass={inputClass}
+                          />
                         ) : (
-                          <ResizableHorizontal onImageSizeChange={setImageSize} />
+                          <ResizableHorizontal
+                            onImageSizeChange={setImageSize}
+                            subtextColor={subtextColor}
+                            inputClass={inputClass}
+                          />
                         )}
                       </div>
                     </div>
@@ -244,11 +270,13 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="content">
-              <AccordionTrigger className={textColor}>Content</AccordionTrigger>
+              <AccordionTrigger className={textColor}>{t("add.content")}</AccordionTrigger>
               <AccordionContent>
                 <FieldGroup>
                   <Field>
-                    <Label className={`text-sm ${subtextColor}`}>Markdown supported</Label>
+                    <Label className={`text-sm ${subtextColor}`}>
+                      {t("add.markdownSupported")}
+                    </Label>
                     <textarea
                       value={content}
                       onChange={(e) => setContent((e.target as HTMLTextAreaElement).value)}
@@ -258,7 +286,7 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
                       <div
                         className={`mt-2 rounded-md border ${bgClass} prose prose-sm prose-invert max-h-64 max-w-none overflow-y-auto p-3`}
                       >
-                        <Label className="mb-1 text-xs">Preview Text</Label>
+                        <Label className="mb-1 text-xs">{t("add.previewText")}</Label>
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
                       </div>
                     )}
@@ -274,11 +302,11 @@ export function AddNews({ onCreate }: { onCreate?: (post: NewsPost) => void }) {
               variant="outline"
               className={`cursor-pointer ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "outline")} ${textShadow}`}
             >
-              Cancel
+              {t("add.cancel")}
             </Button>
           </DialogClose>
           <Button onClick={handleSave} className={`cursor-pointer ${buttonClass} ${textShadow}`}>
-            Create Article
+            {t("add.submit")}
           </Button>
         </DialogFooter>
       </DialogContent>
