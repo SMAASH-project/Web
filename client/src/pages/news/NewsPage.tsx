@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import {
-  formatDateTime,
+  formatDate,
   getBackgroundClasses,
   getTextColor,
   getTextShadow,
@@ -60,9 +60,9 @@ export function NewsPage() {
   });
 
   return (
-    <div className="min-h-screen w-full px-4 sm:px-8 lg:px-25 pb-8">
+    <div className="min-h-screen w-full px-4 pb-8 sm:px-8 lg:px-25">
       <Navbar />
-      <div className="z-0 mt-20 flex flex-col items-center justify-start gap-4 w-full">
+      <div className="z-0 mt-25 flex w-full flex-col items-center justify-start gap-4">
         {/* ── Toolbar ── */}
         <div className="flex w-full flex-row items-center justify-between gap-2">
           <ButtonGroup orientation="horizontal" className={`${buttonClass} shrink-0 rounded-lg`}>
@@ -129,7 +129,7 @@ export function NewsPage() {
                 <div className="mb-3 flex w-full min-w-0 flex-row items-start justify-between gap-3">
                   <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                     <Label
-                      className={`font-semibold text-[clamp(0.85rem,1.8vw,1.125rem)] ${textColor} ${textShadow} wrap-break-word`}
+                      className={`text-[clamp(0.85rem,1.8vw,1.125rem)] font-semibold ${textColor} ${textShadow} wrap-break-word`}
                     >
                       {post.title}
                     </Label>
@@ -140,7 +140,7 @@ export function NewsPage() {
                     <Label
                       className={`text-[clamp(0.65rem,1.2vw,0.875rem)] ${textColor} ${textShadow} text-right whitespace-nowrap italic`}
                     >
-                      {formatDateTime(post.createdAt)}
+                      {formatDate(post.createdAt)}
                     </Label>
                     {isAdmin && (
                       <ButtonGroup>
@@ -158,7 +158,7 @@ export function NewsPage() {
                       <img
                         src={post.image}
                         alt={post.imageAlt}
-                        className="w-full rounded-md object-contain"
+                        className="w-full rounded-md"
                         style={{ maxHeight: `${post.imageSize}vh` }}
                       />
                     )}
@@ -180,7 +180,7 @@ export function NewsPage() {
                       <img
                         src={post.image}
                         alt={post.imageAlt}
-                        className="w-full flex-none self-start rounded-md object-contain sm:w-(--img-size)"
+                        className="w-full flex-none self-start rounded-md sm:w-(--img-size)"
                         style={
                           {
                             "--img-size": `${post.imageSize}%`,
