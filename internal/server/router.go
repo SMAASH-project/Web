@@ -1,15 +1,19 @@
 package server
 
 import (
+	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"smaash-web/docs/swagger"
+	"smaash-web/internal/middlewares"
 	"strings"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 func (s *Server) MountRoutes() *Server {
@@ -33,7 +37,15 @@ func (s *Server) MountRoutes() *Server {
 		allowedOrigins[i] = strings.TrimSpace(allowedOrigins[i])
 	}
 
+	requestLogger := slog.New(slog.NewJSONHandler(io.MultiWriter(&lumberjack.Logger{
+		Filename:   "./logs/gin.log",
+		MaxSize:    100,
+		MaxAge:     30,
+		MaxBackups: 5,
+	}, os.Stdout), nil))
+
 	r := gin.Default()
+	r.Use(middlewares.Logger(requestLogger))
 
 	// NOTE: this is for develompent only, the built project is running on one server
 	r.Use(cors.New(cors.Config{

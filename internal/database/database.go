@@ -1,11 +1,13 @@
 package database
 
 import (
+	"io"
 	"log"
 	"os"
 	"smaash-web/internal/models"
 
 	"github.com/glebarez/sqlite"
+	"gopkg.in/natefinch/lumberjack.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
@@ -19,7 +21,12 @@ func NewGormDBConn() *gorm.DB {
 	}
 
 	logger := logger.New(
-		log.New(os.Stdout, "/r/n", log.LstdFlags),
+		log.New(io.MultiWriter(&lumberjack.Logger{
+			Filename:   "./logs/gorm.log",
+			MaxSize:    100,
+			MaxAge:     30,
+			MaxBackups: 10,
+		}, os.Stdout), "/r/n", log.LstdFlags),
 		logger.Config{
 			LogLevel: logger.Info,
 		},
