@@ -438,7 +438,7 @@ export function LeaderboardPage() {
   ];
 
   return (
-    <div className={`flex min-h-screen w-full flex-col self-start p-4 ${textColor}`}>
+    <div className={`flex min-h-dvh w-full flex-col self-start p-4 ${textColor}`}>
       <Navbar />
       <div className="mx-auto mt-20 flex w-full max-w-4xl flex-col gap-5 pb-8">
         {/* Header */}

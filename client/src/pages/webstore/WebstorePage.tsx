@@ -57,7 +57,7 @@ export function WebstorePage() {
   const bgClass = getBackgroundClasses(settings.useLiquidGlass, settings.useDarkMode, "light");
 
   return (
-    <div className="flex min-h-screen w-full flex-col self-start p-4">
+    <div className="flex min-h-dvh w-full flex-col self-start p-4">
       <Navbar />
       <div className="z-0 mx-auto mt-20 flex w-full max-w-6xl flex-col items-center justify-start gap-6 pb-8">
         {/* Header section */}

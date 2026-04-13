@@ -15,7 +15,7 @@ export function ProfilePage() {
   const handleAnimationComplete = useCallback(() => setAnimDone(true), []);
 
   return (
-    <div className={`flex min-h-screen w-full flex-col items-center self-start ${textColor}`}>
+    <div className={`flex min-h-dvh w-full flex-col items-center self-start ${textColor}`}>
       <Navbar />
       {settings.useAnimations ? (
         <CardAnimation

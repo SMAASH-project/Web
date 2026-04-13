@@ -63,7 +63,7 @@ export function Wrapper({ children }: WrapperProps) {
 
   return (
     <div
-      className={`${textColor} absolute top-0 left-0 flex min-h-screen w-screen items-center justify-center transition-[background-image] duration-600 ease-in-out`}
+      className={`${textColor} absolute top-0 left-0 flex min-h-dvh w-screen items-center justify-center transition-[background-image] duration-600 ease-in-out`}
       style={{ backgroundImage: currentGradient, ...cssVars }}
     >
       {useComposite ? (

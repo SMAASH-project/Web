@@ -60,7 +60,7 @@ export function NewsPage() {
   });
 
   return (
-    <div className="min-h-screen w-full px-4 pb-8 sm:px-8 lg:px-25">
+    <div className="min-h-dvh w-full px-4 pb-8 sm:px-8 lg:px-25">
       <Navbar />
       <div className="z-0 mt-25 flex w-full flex-col items-center justify-start gap-4">
         {/* ── Toolbar ── */}
