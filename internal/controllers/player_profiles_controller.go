@@ -306,6 +306,23 @@ func (pc PlayerProfileController) ReadCharacters(c *gin.Context) {
 	c.JSON(http.StatusOK, utils.Map(player.Characters, dtos.CharacterToDTO))
 }
 
+func (pc PlayerProfileController) ReadNotOwnedCharacters(c *gin.Context) {
+	path := c.Request.URL.Path
+	id, _ := c.Get("id")
+
+	player, err := pc.profilesRepo.ReadByID(c.Request.Context(), id.(uint), "Characters")
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("Player profile with given id not found", path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	c.JSON(http.StatusOK, utils.Map(player.Characters, dtos.CharacterToDTO))
+}
+
 func (pc PlayerProfileController) MountRoutes(apiGroup *gin.RouterGroup) {
 	profiles := apiGroup.Group("/profiles")
 	profiles.GET("", middlewares.Authorize(middlewares.ADMIN), pagination.New(), pc.ReadAll)

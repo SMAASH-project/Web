@@ -11,6 +11,7 @@ type ProfilesRepository interface {
 	BaseRepository[models.PlayerProfile]
 	ReadByUserID(context.Context, uint) ([]models.PlayerProfile, error)
 	HardDelete(context.Context, uint) error
+	ReadNotOwnedCharacters(context.Context, uint) ([]models.Character, error)
 }
 
 type ProfilesRepositoryActions struct {
@@ -31,4 +32,16 @@ func (pra ProfilesRepositoryActions) ReadByUserID(c context.Context, userID uint
 
 func (pra ProfilesRepositoryActions) HardDelete(c context.Context, id uint) error {
 	return pra.conn.Unscoped().Model(&models.PlayerProfile{}).Where("id = ?", id).Delete(&models.PlayerProfile{}).Error
+}
+
+func (pra ProfilesRepositoryActions) ReadNotOwnedCharacters(c context.Context, playerID uint) ([]models.Character, error) {
+	var result []models.Character
+	err := pra.conn.
+		Select("characters.*").
+		Table("characters").
+		Joins("LEFT JOIN player_characters ON characters.id = player_characters.character_id AND player_characters.player_profile_id = ?", playerID).
+		Where("player_characters.character_id IS NULL").
+		Find(&result).Error
+
+	return result, err
 }
