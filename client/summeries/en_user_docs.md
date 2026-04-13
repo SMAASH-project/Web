@@ -1,6 +1,6 @@
 # SMAASH Client — User Guide
 
-**Last updated:** 2026-04-04 (rev 5)
+**Last updated:** 2026-04-13 (rev 6)
 
 > Welcome! This guide walks you through SMAASH's features, settings, and common tasks. Think of it as a companion while you explore.
 
@@ -233,6 +233,7 @@ We've made the app faster and smoother:
 - **Smoother theme switching:** Background animations now respond instantly to your settings changes
 - **Better performance:** Less CPU usage when animations are playing, especially on mobile devices
 - **More stable profile creation feedback:** clearer errors when a name is already taken or profile limits are reached
+- **Improved News dialogs on mobile:** The post creation and editing dialogs now display with proper side padding on phones, scroll correctly when content is tall, and the image settings section stacks neatly instead of overflowing
 
 You might not notice these changes directly, but they mean the app should feel snappier overall.
 

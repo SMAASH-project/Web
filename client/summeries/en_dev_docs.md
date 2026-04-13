@@ -1,6 +1,6 @@
 # SMAASH Client — Developer Documentation
 
-**Last updated:** 2026-04-04 (rev 5)
+**Last updated:** 2026-04-13 (rev 6)
 
 > This guide covers the architecture, conventions, and practical workflows for the SMAASH web client. It's meant to be helpful—not just a checklist.
 
@@ -437,8 +437,14 @@ The drawer auto-closes after selecting a tab so content gets full width.
 All dialogs now have:
 
 - `max-h-[90svh]` with `overflow-y-auto` (scrollable, fits viewport)
-- Responsive max-width (e.g., `sm:max-w-2xl max-w-full`)
+- Responsive max-width using `max-w-[calc(100%-2rem)]` on mobile with a `sm:max-w-*` cap on larger screens — this preserves the base dialog's side gutter. **Do not** override with `max-w-full` on mobile, as it eliminates the side margins entirely
 - No fixed widths that break on phones
+
+**News dialogs (Add & Edit) specifically:**
+
+- Image settings section stacks vertically on mobile: `flex flex-col gap-4 sm:flex-row sm:items-start`. The radio cards, file input, and resizable size panel each take full width on small screens and go side-by-side on `sm+`
+- `RadioGroupChoiceCard` uses `w-full sm:max-w-sm` — full-width on mobile, capped on larger screens
+- **Do not add `overflow-visible` to `DialogContent`** — it overrides the base `overflow-y-auto` and breaks scrollability, causing content to spill outside the dialog instead of scrolling
 
 ---
 

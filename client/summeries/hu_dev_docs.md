@@ -1,6 +1,6 @@
 # SMAASH kliens — fejlesztői dokumentáció
 
-**Frissítve:** 2026-04-04 (rev 5)
+**Frissítve:** 2026-04-13 (rev 6)
 
 > Ez az összefoglaló a kliens architektúráját, a közös mintákat és a legfontosabb fejlesztési szabályokat foglalja össze. Nem csak azt mondja meg, _mit_ használunk, hanem azt is, _miért_ így.
 
@@ -207,7 +207,12 @@ A leaderboardon több statisztikai lekérdezés fut párhuzamosan. A React Query
 
 - `src/components/ui/styled-select.tsx` — theme-aware dropdown a `DropdownMenu` alapjain. Ezt használd natív `<select>` helyett, ha a kinézetet illeszteni kell a felülethez.
 - `src/components/ui/skeleton.tsx` — egyszerű pulse skeleton betöltési állapotokhoz
-- `src/components/ui/dialog.tsx` — közös dialog shell, most már `max-h-[90svh]` és görgethető tartalom támogatással
+- `src/components/ui/dialog.tsx` — közös dialog shell, `max-h-[90svh]` és görgethető tartalom támogatással. Mobilon a helyes szélesség `max-w-[calc(100%-2rem)]`; **ne írj felül** `max-w-full`-lal, mert az eltünteti az oldalsó margókat. A `overflow-visible` hozzáadása szintén tiltott, mert felülírja az `overflow-y-auto`-t és a tartalom kilóg a dialogból ahelyett, hogy görgethetővé válna.
+
+**News dialógusok (Hozzáadás és Szerkesztés) specifikusan:**
+
+- A képbeállítások szekció mobilon függőlegesen stacked: `flex flex-col gap-4 sm:flex-row sm:items-start`. A rádiógombok, fájl input és a méretező panel mobilon teljes szélességű, `sm+` breakpointon egymás mellé kerülnek
+- `RadioGroupChoiceCard`: `w-full sm:max-w-sm` — mobilon teljes széles, nagyobb képernyőn korlátozott
 
 ---
 

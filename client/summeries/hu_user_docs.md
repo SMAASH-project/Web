@@ -1,6 +1,6 @@
 # SMAASH kliens — felhasználói útmutató
 
-**Frissítve:** 2026-04-04 (rev 5)
+**Frissítve:** 2026-04-13 (rev 6)
 
 > Ez az útmutató röviden, érthetően vezet végig az app fő részein, a beállításokon és a leggyakoribb teendőkön.
 
@@ -231,9 +231,10 @@ Ilyenkor ezeket próbáld:
 Az alkalmazás gyorsabbá és simábbá vált:
 
 - **Kisebb letöltési méret:** Optimalizált eszközök; gyorsabb betöltés lassú kapcsolaton
-- **Zökkenőmentesebb témavá ltás:** A háttéranimációk azonnal reagálnak a beállítások változására
+- **Zökkenőmentesebb témaváltás:** A háttéranimációk azonnal reagálnak a beállítások változására
 - **Jobb teljesítmény:** Kevesebb CPU-használat az animációk lejátszásakor
 - **Stabilabb profil-létrehozási visszajelzések:** tisztább hibaüzenetek, ha a név foglalt vagy elérted a profil-limitet
+- **Javított News dialógusok mobilon:** A hírek létrehozásához és szerkesztéséhez szükséges dialógusok mostantól megfelelő oldalsó margóval jelennek meg telefonon, magas tartalom esetén görgethetők, és a képbeállítások szekció rendezetten egymás alá kerül ahelyett, hogy kilógna a felületből
 
 Lehet, hogy közvetlenül nem figyeled meg ezeket a változásokat, de az app összességében gyorsabbnak, simábbnak fogja érezni magát.
 
