@@ -50,13 +50,13 @@ export function AdminPage() {
       </div>
       {settings.useAnimations ? (
         <CardAnimation
-          className="z-0 flex w-full flex-1 items-start justify-center px-4 pt-20 sm:px-6 lg:px-10 xl:items-center xl:pt-0"
+          className="z-0 flex w-full flex-1 items-start justify-center px-4 pt-24 sm:px-6 lg:px-10"
           onAnimationComplete={handleAnimationComplete}
         >
           <AdminPageContent animReady={animDone} />
         </CardAnimation>
       ) : (
-        <div className="z-0 flex w-full flex-1 items-start justify-center px-4 pt-20 sm:px-6 lg:px-10 xl:items-center xl:pt-0">
+        <div className="z-0 flex w-full flex-1 items-start justify-center px-4 pt-24 sm:px-6 lg:px-10">
           <AdminPageContent animReady={true} />
         </div>
       )}

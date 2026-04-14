@@ -124,47 +124,52 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, delay: 0, ease: "easeOut" }}
-          className={`flex items-center gap-4 rounded-xl p-4 ${panelBg}`}
+          className={`flex flex-wrap items-center gap-4 rounded-xl p-4 ${panelBg}`}
         >
-          <Avatar size="lg">
-            <AvatarImage
-              src={selectedProfile ? `/api/profiles/${selectedProfile.id}/pfp` : undefined}
-              alt={selectedUser.username || selectedUser.email}
-            />
-            <AvatarFallback className={`text-lg font-bold ${avatarFallbackClass}`}>
-              {(selectedUser.username || selectedUser.email).slice(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          {/* Avatar + info — grouped so they never split when wrapping */}
+          <div className="flex min-w-0 flex-1 items-center gap-4">
+            <Avatar size="lg">
+              <AvatarImage
+                src={selectedProfile ? `/api/profiles/${selectedProfile.id}/pfp` : undefined}
+                alt={selectedUser.username || selectedUser.email}
+              />
+              <AvatarFallback className={`text-lg font-bold ${avatarFallbackClass}`}>
+                {(selectedUser.username || selectedUser.email).slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
 
-          <div className="min-w-0 flex-1">
-            <h2 className={`truncate text-lg font-bold ${textColor} ${textShadow}`}>
-              {selectedUser.username || "—"}
-            </h2>
-            <p className={`flex items-center gap-1.5 truncate text-sm ${subtextColor}`}>
-              <Mail size={12} />
-              {selectedUser.email}
-            </p>
-            <div className="mt-1.5 flex flex-wrap items-center gap-2">
-              <span
-                className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${roleConfig.badgeClass}`}
-              >
-                {roleConfig.icon}
-                {roleConfig.label}
-              </span>
-              {selectedUser.is_banned && (
-                <span className="flex items-center gap-1 rounded-full border border-red-500/30 bg-red-500/20 px-2 py-0.5 text-xs font-medium text-red-400">
-                  <Ban size={10} />
-                  {selectedUser.banned_until
-                    ? t("detail.bannedUntil", {
-                        date: formatBannedUntil(selectedUser.banned_until),
-                      })
-                    : t("detail.bannedPermanent")}
+            <div className="min-w-0 flex-1">
+              <h2 className={`truncate text-lg font-bold ${textColor} ${textShadow}`}>
+                {selectedUser.username || "—"}
+              </h2>
+              <p className={`flex items-center gap-1.5 truncate text-sm ${subtextColor}`}>
+                <Mail size={12} />
+                {selectedUser.email}
+              </p>
+              <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                <span
+                  className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${roleConfig.badgeClass}`}
+                >
+                  {roleConfig.icon}
+                  {roleConfig.label}
                 </span>
-              )}
+                {selectedUser.is_banned && (
+                  <span className="flex items-center gap-1 rounded-full border border-red-500/30 bg-red-500/20 px-2 py-0.5 text-xs font-medium text-red-400">
+                    <Ban size={10} />
+                    {selectedUser.banned_until
+                      ? t("detail.bannedUntil", {
+                          date: formatBannedUntil(selectedUser.banned_until),
+                        })
+                      : t("detail.bannedPermanent")}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="flex shrink-0 flex-col gap-2">
+          {/* Action buttons — flex-1 on the group above means these sit on the right
+              when there's room; when they wrap they get mx-auto so they center */}
+          <div className="mx-auto flex shrink-0 flex-col gap-2">
             {selectedUser.is_banned ? (
               <Button
                 size="sm"
