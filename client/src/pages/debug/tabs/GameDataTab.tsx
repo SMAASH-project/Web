@@ -93,12 +93,20 @@ export function GameDataTab({
   const textShadow = getTextShadow(useLiquidGlass, useDarkMode);
   const bgClass = getBackgroundClasses(useLiquidGlass, useDarkMode, "strong");
   // ── Queries ──────────────────────────────────────────────────────────────
-  const { data: characters = [], isLoading: charsLoading } = useDebugCharactersQuery();
-  const { data: levels = [], isLoading: levelsLoading } = useDebugLevelsQuery();
-  const { data: items = [], isLoading: itemsLoading } = useDebugItemsQuery();
+  const {
+    data: characters = [],
+    isLoading: charsLoading,
+    isError: charsError,
+  } = useDebugCharactersQuery();
+  const {
+    data: levels = [],
+    isLoading: levelsLoading,
+    isError: levelsError,
+  } = useDebugLevelsQuery();
+  const { data: items = [], isLoading: itemsLoading, isError: itemsError } = useDebugItemsQuery();
   const { data: categories = [] } = useCategoriesQuery();
   const { data: rarities = [] } = useRaritiesQuery();
-  const { data: users = [], isLoading: usersLoading } = useAdminUsersQuery();
+  const { data: users = [], isLoading: usersLoading, isError: usersError } = useAdminUsersQuery();
 
   // ── Mutations ─────────────────────────────────────────────────────────────
   const createChar = useCreateCharacterMutation();
@@ -296,14 +304,14 @@ export function GameDataTab({
   // ── Filtered data ─────────────────────────────────────────────────────────
 
   const filteredItems = itemSearch
-    ? items.filter((x) => x.name.toLowerCase().includes(itemSearch.toLowerCase()))
+    ? items.filter((x) => (x.name ?? "").toLowerCase().includes(itemSearch.toLowerCase()))
     : items;
 
   const filteredUsers = userSearch
     ? users.filter(
         (u) =>
-          u.email.toLowerCase().includes(userSearch.toLowerCase()) ||
-          u.role.toLowerCase().includes(userSearch.toLowerCase()),
+          (u.email ?? "").toLowerCase().includes(userSearch.toLowerCase()) ||
+          (u.role ?? "").toLowerCase().includes(userSearch.toLowerCase()),
       )
     : users;
 
@@ -357,6 +365,8 @@ export function GameDataTab({
             <div className="flex justify-center py-4">
               <Loader2 size={14} className={`animate-spin ${subtextColor}`} />
             </div>
+          ) : charsError ? (
+            <p className="py-3 text-center text-xs text-red-400 opacity-70">{t("gameData.none")}</p>
           ) : characters.length === 0 ? (
             <p className={`py-3 text-center text-xs opacity-40 ${subtextColor}`}>
               {t("gameData.none")}
@@ -418,6 +428,8 @@ export function GameDataTab({
             <div className="flex justify-center py-4">
               <Loader2 size={14} className={`animate-spin ${subtextColor}`} />
             </div>
+          ) : levelsError ? (
+            <p className="py-3 text-center text-xs text-red-400 opacity-70">{t("gameData.none")}</p>
           ) : levels.length === 0 ? (
             <p className={`py-3 text-center text-xs opacity-40 ${subtextColor}`}>
               {t("gameData.none")}
@@ -492,6 +504,8 @@ export function GameDataTab({
             <div className="flex justify-center py-4">
               <Loader2 size={14} className={`animate-spin ${subtextColor}`} />
             </div>
+          ) : itemsError ? (
+            <p className="py-3 text-center text-xs text-red-400 opacity-70">{t("gameData.none")}</p>
           ) : filteredItems.length === 0 ? (
             <p className={`py-3 text-center text-xs opacity-40 ${subtextColor}`}>
               {itemSearch ? t("gameData.noMatches") : t("gameData.none")}
@@ -572,6 +586,10 @@ export function GameDataTab({
             <div className="flex justify-center py-4">
               <Loader2 size={14} className={`animate-spin ${subtextColor}`} />
             </div>
+          ) : usersError ? (
+            <p className="py-3 text-center text-xs text-red-400 opacity-70">
+              {t("gameData.noUsers")}
+            </p>
           ) : filteredUsers.length === 0 ? (
             <p className={`py-3 text-center text-xs opacity-40 ${subtextColor}`}>
               {userSearch ? t("gameData.noMatches") : t("gameData.noUsers")}
