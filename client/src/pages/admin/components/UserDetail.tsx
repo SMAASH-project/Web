@@ -124,10 +124,11 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, delay: 0, ease: "easeOut" }}
-          className={`flex flex-wrap items-center gap-4 rounded-xl p-4 ${panelBg}`}
+          className={`flex flex-wrap items-center gap-3 rounded-xl p-3 sm:p-4 ${panelBg}`}
         >
-          {/* Avatar + info — grouped so they never split when wrapping */}
-          <div className="flex min-w-0 flex-1 items-center gap-4">
+          {/* Avatar + info — w-full on mobile forces buttons to their own row below;
+              sm:flex-1 lets them share a row with buttons on larger screens */}
+          <div className="flex w-full min-w-0 items-center gap-3 sm:flex-1">
             <Avatar size="lg">
               <AvatarImage
                 src={selectedProfile ? `/api/profiles/${selectedProfile.id}/pfp` : undefined}
@@ -139,11 +140,13 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
             </Avatar>
 
             <div className="min-w-0 flex-1">
-              <h2 className={`truncate text-lg font-bold ${textColor} ${textShadow}`}>
+              <h2 className={`truncate text-base font-bold sm:text-lg ${textColor} ${textShadow}`}>
                 {selectedUser.username || "—"}
               </h2>
-              <p className={`flex items-center gap-1.5 truncate text-sm ${subtextColor}`}>
-                <Mail size={12} />
+              <p
+                className={`flex items-center gap-1.5 truncate text-xs sm:text-sm ${subtextColor}`}
+              >
+                <Mail size={11} />
                 {selectedUser.email}
               </p>
               <div className="mt-1.5 flex flex-wrap items-center gap-2">
@@ -167,9 +170,10 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
             </div>
           </div>
 
-          {/* Action buttons — flex-1 on the group above means these sit on the right
-              when there's room; when they wrap they get mx-auto so they center */}
-          <div className="mx-auto flex shrink-0 flex-col gap-2">
+          {/* Buttons — on mobile: w-full group above forces these to their own row,
+              mx-auto centres them, flex-row lays them out horizontally.
+              On sm+: flex-col stacks them vertically on the right of the avatar group. */}
+          <div className="mx-auto flex shrink-0 flex-row flex-wrap justify-center gap-2 sm:flex-col">
             {selectedUser.is_banned ? (
               <Button
                 size="sm"
