@@ -37,6 +37,11 @@ function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Clear any error from a previous attempt so the UI is fresh.
+    signupMutation.reset();
+    setValidationError("");
+
     if (password !== confirmPassword) {
       setValidationError(t("signup.errorPasswordMismatch"));
       return;
@@ -61,7 +66,6 @@ function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
       }
     }
 
-    setValidationError("");
     try {
       await signupMutation.mutateAsync({ email, password });
       navigate("/app/login");
