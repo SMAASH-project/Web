@@ -79,7 +79,9 @@ const Navbar = () => {
                   title={t("account.adminPanel")}
                 >
                   <ShieldAlert size={13} />
-                  <span className="hidden lg:block max-w-[44px] text-center leading-tight">{t("account.adminPanel")}</span>
+                  <span className="hidden max-w-[44px] text-center leading-tight lg:block">
+                    {t("account.adminPanel")}
+                  </span>
                 </Link>
               )}
               {(isAdmin || isSupport) && (
@@ -89,7 +91,9 @@ const Navbar = () => {
                   title={t("account.debugPanel")}
                 >
                   <Bug size={13} />
-                  <span className="hidden lg:block max-w-[44px] text-center leading-tight">{t("account.debugPanel")}</span>
+                  <span className="hidden max-w-[44px] text-center leading-tight lg:block">
+                    {t("account.debugPanel")}
+                  </span>
                 </Link>
               )}
             </div>
