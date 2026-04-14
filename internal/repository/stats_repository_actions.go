@@ -41,7 +41,7 @@ func (sra StatsRepositoryActions) ReadMostPopularCharacters(c context.Context) (
 	err := sra.conn.
 		WithContext(c).
 		Model(&models.Character{}).
-		Select("characters.*, SUM(purchases.count) AS count_of_purchases").
+		Select("characters.*, COUNT(characters.id) AS count_of_purchases").
 		Joins("JOIN purchases ON purchases.character_id = characters.id").
 		Group("characters.id").
 		Order("count_of_purchases DESC").
