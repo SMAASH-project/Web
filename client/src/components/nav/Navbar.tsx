@@ -75,21 +75,21 @@ const Navbar = () => {
               {isAdmin && (
                 <Link
                   to="/app/admin"
-                  className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium no-underline transition-all duration-200 ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "secondary")} ${textColor}`}
+                  className={`flex shrink-0 flex-col items-center gap-0.5 rounded-lg px-2 py-1 text-[10px] font-medium no-underline transition-all duration-200 ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "secondary")} ${textColor}`}
                   title={t("account.adminPanel")}
                 >
-                  <ShieldAlert size={14} />
-                  <span className="hidden lg:inline">{t("account.adminPanel")}</span>
+                  <ShieldAlert size={13} />
+                  <span className="hidden lg:block max-w-[44px] text-center leading-tight">{t("account.adminPanel")}</span>
                 </Link>
               )}
               {(isAdmin || isSupport) && (
                 <Link
                   to="/app/debug"
-                  className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium no-underline transition-all duration-200 ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "secondary")} ${textColor}`}
+                  className={`flex shrink-0 flex-col items-center gap-0.5 rounded-lg px-2 py-1 text-[10px] font-medium no-underline transition-all duration-200 ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "secondary")} ${textColor}`}
                   title={t("account.debugPanel")}
                 >
-                  <Bug size={14} />
-                  <span className="hidden lg:inline">{t("account.debugPanel")}</span>
+                  <Bug size={13} />
+                  <span className="hidden lg:block max-w-[44px] text-center leading-tight">{t("account.debugPanel")}</span>
                 </Link>
               )}
             </div>

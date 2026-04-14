@@ -84,7 +84,7 @@ export function NavMenu({ useLiquidGlass, useDarkMode = false }: NavMenuProps) {
   return (
     <ul
       ref={ulRef}
-      className={`nav-links relative m-0 flex list-none gap-2 rounded-lg p-0 whitespace-nowrap lg:gap-6 xl:gap-10 ${navBackground}`}
+      className={`nav-links relative m-0 flex list-none gap-1 rounded-lg p-0 whitespace-nowrap lg:gap-4 xl:gap-8 ${navBackground}`}
       onMouseLeave={handleMouseLeave}
     >
       {useLiquidGlass && isHovering && (
@@ -101,7 +101,7 @@ export function NavMenu({ useLiquidGlass, useDarkMode = false }: NavMenuProps) {
       {navItems.map((item) => (
         <li
           key={item.path}
-          className={`relative z-10 m-2 cursor-pointer p-0.5 transition-colors duration-300 lg:m-4 ${
+          className={`relative z-10 m-1 cursor-pointer p-0.5 transition-colors duration-300 lg:m-2 ${
             !useLiquidGlass
               ? item.path === location.pathname
                 ? "font-bold text-(--theme-accent)"
