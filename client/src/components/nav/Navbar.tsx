@@ -31,7 +31,7 @@ const Navbar = () => {
   const username = selectedProfile?.name ?? "PlaceholderUserName";
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const navigate = useNavigate();
-  const { setIsLoggedIn, setUserId, setIsAdmin, setIsSupport, isAdmin, isSupport } =
+  const { userId, setIsLoggedIn, setUserId, setIsAdmin, setIsSupport, isAdmin, isSupport } =
     useContext(AuthContext);
   const logoutMutation = useLogoutMutation();
   const { t } = useTranslation("nav");
@@ -46,6 +46,7 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
+      if (userId) localStorage.removeItem(`selected_profile_${Number(userId)}`);
       await logoutMutation.mutateAsync();
       setIsLoggedIn(false);
       setUserId(null);

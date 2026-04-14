@@ -137,6 +137,7 @@ export function MobileNavMenu({
           <SheetClose asChild>
             <Link
               to="/app/profile-selector"
+              state={{ change: true }}
               className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium no-underline transition-colors duration-200 ${textColor} ${hoverClass}`}
             >
               <ArrowLeftRight size={16} />

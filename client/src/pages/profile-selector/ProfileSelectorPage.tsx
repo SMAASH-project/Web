@@ -6,8 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Play, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useCallback, memo, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useCallback, memo, useContext, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { AddNewProfileDialog } from "./AddNewProfileDialog";
 import { useProfiles } from "./useProfiles";
 import * as motion from "motion/react-client";
@@ -90,11 +90,20 @@ export function ProfileSelectorPage() {
   const [isManaging, setIsManaging] = useState(false);
   const navigate = useNavigate();
 
-  const { setIsLoggedIn, setUserId, setIsAdmin } = useContext(AuthContext);
+  const location = useLocation();
+  const { userId, setIsLoggedIn, setUserId, setIsAdmin } = useContext(AuthContext);
   const logoutMutation = useLogoutMutation();
+
+  useEffect(() => {
+    if (location.state?.change) return;
+    if (!userId) return;
+    const stored = localStorage.getItem(`selected_profile_${Number(userId)}`);
+    if (stored) navigate("/app/releases", { replace: true });
+  }, [userId, location.state, navigate]);
 
   const handleLogout = async () => {
     try {
+      if (userId) localStorage.removeItem(`selected_profile_${Number(userId)}`);
       await logoutMutation.mutateAsync();
       setIsLoggedIn(false);
       setUserId(null);
