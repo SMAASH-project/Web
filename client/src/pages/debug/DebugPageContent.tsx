@@ -135,7 +135,10 @@ export function DebugPageContent({ animReady = true }: { animReady?: boolean }) 
       {/* Refresh at bottom */}
       <div className="mt-auto border-t border-current/10 pt-3">
         <button
-          onClick={() => queryClient.invalidateQueries({ queryKey: ["debug"] })}
+          onClick={() => {
+            queryClient.invalidateQueries({ queryKey: ["debug"] });
+            queryClient.refetchQueries({ queryKey: ["debug"] });
+          }}
           className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs transition-all duration-200 ${subtextColor} hover:bg-current/8`}
         >
           <RefreshCw size={13} />
@@ -283,6 +286,7 @@ export function DebugPageContent({ animReady = true }: { animReady?: boolean }) 
                 <button
                   onClick={() => {
                     queryClient.invalidateQueries({ queryKey: ["debug"] });
+                    queryClient.refetchQueries({ queryKey: ["debug"] });
                     setDrawerOpen(false);
                   }}
                   className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs transition-all duration-200 ${subtextColor} hover:bg-current/8`}
