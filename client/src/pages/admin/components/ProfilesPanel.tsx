@@ -61,7 +61,9 @@ export default function ProfilesPanel({ logic }: { logic: AdminPageLogic }) {
   const inputClass = getInputClasses(useLiquidGlass, useDarkMode);
 
   return (
-    <div className={`flex w-full flex-col gap-3 rounded-xl p-3 xl:w-60 xl:shrink-0 ${panelBg}`}>
+    <div
+      className={`flex w-full flex-col gap-3 rounded-xl p-3 xl:w-60 xl:shrink-0 xl:overflow-hidden ${panelBg}`}
+    >
       {/* Header */}
       <div className="flex items-center gap-2 px-1">
         <div className={`text-xs font-semibold tracking-wider uppercase ${subtextColor}`}>
@@ -73,7 +75,7 @@ export default function ProfilesPanel({ logic }: { logic: AdminPageLogic }) {
       <Separator className={logic.sepClass} />
 
       {/* Profile list */}
-      <div className="flex max-h-48 flex-col gap-2 overflow-y-auto xl:max-h-none xl:min-h-0 xl:flex-1">
+      <div className="flex max-h-48 flex-col gap-2 overflow-y-auto xl:max-h-[calc(100dvh-20rem)] xl:min-h-0 xl:flex-1">
         {!selectedUser ? (
           <p className={`py-4 text-center text-xs ${subtextColor}`}>{t("profiles.noSelected")}</p>
         ) : profilesLoading ? (

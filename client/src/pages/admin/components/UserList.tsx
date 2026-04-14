@@ -28,7 +28,9 @@ export default function UserList({ logic }: { logic: AdminPageLogic }) {
   } = logic;
 
   return (
-    <div className={`flex w-full flex-col gap-3 rounded-xl p-3 xl:w-72 xl:shrink-0 ${panelBg}`}>
+    <div
+      className={`flex w-full flex-col gap-3 rounded-xl p-3 xl:w-72 xl:shrink-0 xl:overflow-hidden ${panelBg}`}
+    >
       <div className="flex items-center gap-2 px-1">
         <Shield size={14} className={subtextColor} />
         <span className={`text-xs font-semibold tracking-wider uppercase ${subtextColor}`}>
@@ -51,7 +53,7 @@ export default function UserList({ logic }: { logic: AdminPageLogic }) {
         />
       </div>
 
-      <div className="flex max-h-100 flex-1 flex-col gap-1 overflow-y-auto xl:max-h-none xl:min-h-0">
+      <div className="flex max-h-100 flex-1 flex-col gap-1 overflow-y-auto xl:max-h-[calc(100dvh-15rem)] xl:min-h-0">
         {usersLoading ? (
           Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="flex items-center gap-2.5 rounded-xl px-2.5 py-2">
