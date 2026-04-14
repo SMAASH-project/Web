@@ -54,20 +54,31 @@ Starting prompt: {Firstly there are alot of buttons on debug which appear to wor
 
 ## Progress
 
-### [ ] Task 5 — Navbar overlap
-- Status: **In progress**
+### [x] Task 5 — Navbar overlap
+- Commit: `50421d0` fix(navbar): prevent admin/debug button overlap at mid-range viewports
+- Changed `flex justify-between` + `flex-1 min-w-0` to `grid-cols-[1fr_auto_1fr]` in Navbar.tsx desktop layout.
 
-### [ ] Task 1 — Debug buttons
-- Status: Pending
+### [x] Task 1 — Debug buttons
+- Commit: `325cbfb` fix(debug): make Cache clear and refresh buttons actually work
+- CacheTab Clear: `invalidateQueries()` → `queryClient.clear()`
+- CacheTab Refresh: forceUpdate only → + `queryClient.refetchQueries()`
+- Sidebar Refresh (both desktop + mobile): + `queryClient.refetchQueries({ queryKey: ["debug"] })`
 
-### [ ] Task 2 — Captcha
-- Status: Pending
+### [x] Task 2 — Captcha
+- Commit: `406883c` fix(auth): make reCAPTCHA non-blocking on signup
+- Removed hard-blocking early returns on captcha failure. Token is now best-effort.
 
-### [ ] Task 3 — Registration
-- Status: Pending
+### [x] Task 3 — Registration
+- Commit: `ded7aae` fix(auth): reset mutation state on each signup attempt
+- Added `signupMutation.reset()` + `setValidationError("")` at top of handleSubmit.
 
-### [ ] Task 4 — Game tab crash
-- Status: Pending
+### [x] Task 4 — Game tab crash
+- Commit: `6a75161` fix(debug): add null guards and error states to GameDataTab
+- Null guards: `(field ?? "").toLowerCase()` in filteredItems and filteredUsers.
+- Error state: `isError` captured for all 4 queries; red indicator shown on failure.
 
-### [ ] Final — Docs
-- Status: Pending (en_user.md, en_dev.md, hu_user.md, hu_dev.md)
+### [x] Final — Docs
+- Created: `docs/en_user.md`, `docs/en_dev.md`, `docs/hu_user.md`, `docs/hu_dev.md`
+- en_user: user-facing guide (account, navigation, pages, settings, troubleshooting)
+- en_dev: developer guide (stack, layout, dev setup, frontend/backend architecture, known issues, commit convention)
+- hu_user / hu_dev: full Hungarian translations of the above
