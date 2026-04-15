@@ -21,7 +21,7 @@ export interface AdminUserDTO {
   id: number;
   email: string;
   /** Not yet returned by the backend; components fall back to email. */
-  username: string;
+  username?: string;
   role: string;
   is_banned: boolean;
   /** Formatted datetime string of when the ban expires; empty string = not banned. */
