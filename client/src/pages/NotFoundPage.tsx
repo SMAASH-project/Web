@@ -32,7 +32,7 @@ export function NotFoundPage() {
   const ready = useAnimations ? animDone : true;
 
   const inner = (
-    <div className="z-0 flex min-h-screen w-full flex-col items-center justify-center gap-6 p-6">
+    <div className="z-0 flex min-h-dvh w-full flex-col items-center justify-center gap-6 p-6">
       {/* Floating 404 */}
       <motion.div
         animate={{ y: [0, -10, 0] }}
@@ -68,7 +68,7 @@ export function NotFoundPage() {
   );
 
   return (
-    <div className={`relative flex min-h-screen w-full flex-col ${textColor}`}>
+    <div className={`relative flex min-h-dvh w-full flex-col ${textColor}`}>
       {useAnimations ? (
         <CardAnimation className="w-full flex-1" onAnimationComplete={handleAnimationComplete}>
           {inner}

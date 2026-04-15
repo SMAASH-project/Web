@@ -1,6 +1,6 @@
 # SMAASH Client — Developer Documentation
 
-**Last updated:** 2026-04-13 (rev 7)
+**Last updated:** 2026-04-13 (rev 8)
 
 > This guide covers the architecture, conventions, and practical workflows for the SMAASH web client. It's meant to be helpful—not just a checklist.
 
@@ -356,9 +356,23 @@ Browse and purchase in-game items.
 - Coins balance comes from selected profile's context
 - Purchases are fetched and merged per user
 
+### Gallery (`/app/gallery`)
+
+Two-tab page: **Characters** grid and **OST** music player.
+
+**Tab picker:** Uses the shared pill-container pattern — `panelBg` container with `relative` positioning, a sliding highlight div (LG mode only), and `data-tab` attributes on each button for selector-based position tracking. Active state: `bg-gray-700 shadow-md` (non-LG dark) / `bg-gray-200 shadow-md` (non-LG light). Inactive hover: `hover:bg-gray-700` / `hover:bg-gray-100`. In LG mode the buttons are transparent and the sliding highlight provides the active visual. Mouse-enter on each button updates `highlightPos`; mouse-leave on the container resets it to the selected tab.
+
+The `TabButton` component is local to `GalleryPage`. It receives `dataTab`, `onMouseEnter`, and `isHovering` props to participate in the container-level highlight tracking.
+
+**Characters tab:** Fetches via `useDebugCharactersQuery` (requires ADMIN — see `GET /characters` auth issue in `docs/problems.md`). Each character is rendered by `CharacterCard`, which loads `GET /api/characters/:id/img` and falls back to a `Swords` placeholder icon on error. Animated via `LoadPost` when `useAnimations` is on.
+
+**OST tab:** Static `OstTrack[]` list defined at the top of the file. Add tracks by editing `OST_TRACKS`. Fully functional audio player with scrubber, volume, and a track list.
+
 ### Leaderboard (`/app/leaderboard`)
 
 Tab-based leaderboard with a podium view per category and a global "All" overview.
+
+**Tab picker:** Same pill-container pattern as Gallery and `ItemFilters` — `tabContainerRef`, `highlightPos`, `isHovering` state at the page level; sliding highlight div in LG mode; `data-tab` on each button. Active state: `bg-gray-700 shadow-md` / `bg-gray-200 shadow-md`. Inactive hover: `hover:bg-gray-700` / `hover:bg-gray-100`.
 
 **Tab structure (`TabId`):**
 
@@ -525,6 +539,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 - **Keep role checks explicit.** Don't bury permission logic in nested components—check at the page boundary.
 - **Translate UI strings.** Use the i18n namespace for all user-facing text.
 - **Test on mobile.** Use the debug panel's force viewport feature or browser DevTools.
+- **Follow the pill-container tab picker pattern** for any new tab selectors. See Gallery and Leaderboard for the reference implementation: `panelBg` wrapper with `relative`, a conditionally rendered sliding highlight div (LG only), `data-tab` attributes on buttons, `containerRef` + `highlightPos` + `isHovering` state at the container level, and `onMouseEnter`/`onMouseLeave` handlers to drive the highlight. Active non-LG style: `bg-gray-700 shadow-md` (dark) / `bg-gray-200 shadow-md` (light). Inactive hover: `hover:bg-gray-700` / `hover:bg-gray-100`. This matches `ItemFilters` and `SelectOs`.
 
 ### ❌ Avoid
 
@@ -533,6 +548,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 - Hardcoded theme colors (use CSS variables or theme helpers)
 - Skipping navbar padding (always add mt-20 or pt-20)
 - Mixing camelCase and snake_case in localStorage keys
+- Tab picker active states that ignore `useLiquidGlass` (the old leaderboard pattern of `bg-white/15`/`bg-white` without LG handling)
 
 ---
 

@@ -7,7 +7,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userId, setUserId] = useState<bigint | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSupport, setIsSupport] = useState(false);
-
   const { data, isLoading } = useWhoAmIQuery();
 
   useEffect(() => {

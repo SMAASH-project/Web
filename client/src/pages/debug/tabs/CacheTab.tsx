@@ -72,7 +72,7 @@ export function CacheTab({
         />
         <button
           onClick={() => {
-            queryClient.invalidateQueries();
+            queryClient.clear();
             forceUpdate((n) => n + 1);
           }}
           className={`rounded-lg border border-current/20 px-2.5 py-1.5 text-[10px] ${subtextColor} flex items-center gap-1 hover:border-current/40`}
@@ -80,7 +80,10 @@ export function CacheTab({
           <Trash2 size={10} /> {t("cache.clear")}
         </button>
         <button
-          onClick={() => forceUpdate((n) => n + 1)}
+          onClick={() => {
+            queryClient.refetchQueries();
+            forceUpdate((n) => n + 1);
+          }}
           className={`rounded-lg border border-current/20 px-2.5 py-1.5 text-[10px] ${subtextColor} hover:border-current/40`}
         >
           <RefreshCw size={10} />

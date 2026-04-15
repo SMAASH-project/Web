@@ -37,6 +37,11 @@ function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Clear any error from a previous attempt so the UI is fresh.
+    signupMutation.reset();
+    setValidationError("");
+
     if (password !== confirmPassword) {
       setValidationError(t("signup.errorPasswordMismatch"));
       return;
@@ -46,26 +51,21 @@ function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
       return;
     }
 
+    // Best-effort captcha: attempt to get a token but never hard-block on
+    // failure. The token is not sent to or verified by the backend, so a
+    // captcha execution failure should not prevent a legitimate user from
+    // registering (especially common on mobile where reCAPTCHA v3 can fail
+    // silently due to network restrictions or browser limitations).
     let captchaToken: string | null = null;
-    if (captchaEnabled) {
-      if (!executeRecaptcha) {
-        setValidationError(t("signup.errorCaptcha"));
-        return;
-      }
+    if (captchaEnabled && executeRecaptcha) {
       try {
         captchaToken = await executeRecaptcha("signup");
       } catch {
-        setValidationError(t("signup.errorCaptcha"));
-        return;
+        // Silently ignore — registration proceeds without the token.
+        console.warn("reCAPTCHA execution failed; continuing without token.");
       }
     }
 
-    if (captchaEnabled && !captchaToken) {
-      setValidationError(t("signup.errorCaptcha"));
-      return;
-    }
-
-    setValidationError("");
     try {
       await signupMutation.mutateAsync({ email, password });
       navigate("/app/login");

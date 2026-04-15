@@ -25,7 +25,7 @@ export function AdminPageContent({ animReady = true }: { animReady?: boolean }) 
   return (
     <>
       <div
-        className={`z-0 flex min-h-150 w-full max-w-7xl flex-col gap-4 rounded-xl p-4 sm:gap-6 sm:p-6 xl:flex-row ${cardBg}`}
+        className={`z-0 flex w-full max-w-7xl flex-col gap-3 rounded-xl p-3 sm:gap-5 sm:p-5 xl:min-h-150 xl:flex-row ${cardBg}`}
       >
         {useAnimations ? (
           <motion.div

@@ -71,7 +71,7 @@ export interface AdminProfileDTO {
 export interface PurchaseDTO {
   id: number;
   player_profile_id: number;
-  item_id: number;
+  character_id: number;
   count: number;
 }
 
@@ -189,9 +189,7 @@ export function useDebugItemsQuery() {
   return useQuery<DebugItemDTO[], AxiosError>({
     queryKey: debugQueryKeys.items,
     queryFn: async () => {
-      const { data } = await apiClient.get<DebugItemDTO[]>("/items", {
-        params: { page: 1, page_size: 100 },
-      });
+      const { data } = await apiClient.get<DebugItemDTO[]>("/characters");
       return data ?? [];
     },
     staleTime: 2 * 60 * 1000,
@@ -309,7 +307,7 @@ export function useDeleteLevelMutation() {
 /**
  * Create a new store item (admin only).
  *
- * Route:   POST /api/items
+ * Route:   POST /api/characters
  * Auth:    Requires admin role
  * Body:    { name, description, price, rarity_id, category_ids? }
  * Returns: 201 Created
@@ -322,7 +320,7 @@ export function useCreateItemMutation() {
     { name: string; description: string; price: number; rarity_id: number; category_ids?: number[] }
   >({
     mutationFn: async (body) => {
-      await apiClient.post("/items", body);
+      await apiClient.post("/characters", body);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: debugQueryKeys.items }),
   });
@@ -331,7 +329,7 @@ export function useCreateItemMutation() {
 /**
  * Update an existing store item (admin only).
  *
- * Route:   PUT /api/items/:id
+ * Route:   PUT /api/characters/:id
  * Auth:    Requires admin role
  * Body:    { name, description, price, rarity_id, category_ids? }
  * Returns: 204 No Content
@@ -351,7 +349,7 @@ export function useUpdateItemMutation() {
     }
   >({
     mutationFn: async ({ id, ...body }) => {
-      await apiClient.put(`/items/${id}`, body);
+      await apiClient.put(`/characters/${id}`, body);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: debugQueryKeys.items }),
   });
@@ -360,7 +358,7 @@ export function useUpdateItemMutation() {
 /**
  * Delete a store item by ID (admin only).
  *
- * Route:   DELETE /api/items/:id
+ * Route:   DELETE /api/characters/:id
  * Auth:    Requires admin role
  * Returns: 204 No Content
  */
@@ -368,7 +366,7 @@ export function useDeleteItemMutation() {
   const qc = useQueryClient();
   return useMutation<void, AxiosError, number>({
     mutationFn: async (id) => {
-      await apiClient.delete(`/items/${id}`);
+      await apiClient.delete(`/characters/${id}`);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: debugQueryKeys.items }),
   });
@@ -521,16 +519,12 @@ export function useDeleteProfileMutation() {
  *
  * Route:   POST /api/purchases
  * Auth:    Any authenticated user (admin in debug context)
- * Body:    { player_profile_id, item_id, count }
+ * Body:    { player_profile_id, character_id }
  * Returns: 201 Created
  */
 export function useCreatePurchaseMutation() {
   const qc = useQueryClient();
-  return useMutation<
-    void,
-    AxiosError,
-    { player_profile_id: number; item_id: number; count: number }
-  >({
+  return useMutation<void, AxiosError, { player_profile_id: number; character_id: number }>({
     mutationFn: async (body) => {
       await apiClient.post("/purchases", body);
     },
@@ -543,7 +537,7 @@ export function useCreatePurchaseMutation() {
  *
  * Route:   PUT /api/purchases/:id
  * Auth:    Requires admin role
- * Body:    { player_profile_id, item_id, count }
+ * Body:    { player_profile_id, character_id }
  * Returns: 204 No Content
  */
 export function useUpdatePurchaseMutation() {
@@ -551,7 +545,7 @@ export function useUpdatePurchaseMutation() {
   return useMutation<
     void,
     AxiosError,
-    { id: number; player_profile_id: number; item_id: number; count: number }
+    { id: number; player_profile_id: number; character_id: number }
   >({
     mutationFn: async ({ id, ...body }) => {
       await apiClient.put(`/purchases/${id}`, body);

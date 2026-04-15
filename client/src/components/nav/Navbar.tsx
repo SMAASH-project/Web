@@ -31,7 +31,7 @@ const Navbar = () => {
   const username = selectedProfile?.name ?? "PlaceholderUserName";
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const navigate = useNavigate();
-  const { setIsLoggedIn, setUserId, setIsAdmin, setIsSupport, isAdmin, isSupport } =
+  const { userId, setIsLoggedIn, setUserId, setIsAdmin, setIsSupport, isAdmin, isSupport } =
     useContext(AuthContext);
   const logoutMutation = useLogoutMutation();
   const { t } = useTranslation("nav");
@@ -46,6 +46,7 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
+      if (userId) localStorage.removeItem(`selected_profile_${Number(userId)}`);
       await logoutMutation.mutateAsync();
       setIsLoggedIn(false);
       setUserId(null);
@@ -67,41 +68,53 @@ const Navbar = () => {
     >
       {isDesktop ? (
         <>
-          {/* Desktop layout — left/right have equal min-width so center stays centered */}
-          <div className="flex min-w-0 flex-1 items-center gap-2">
-            {isAdmin && (
-              <Link
-                to="/app/admin"
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium no-underline transition-all duration-200 ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "secondary")} ${textColor}`}
-                title={t("account.adminPanel")}
-              >
-                <ShieldAlert size={14} />
-                <span className="hidden lg:inline">{t("account.adminPanel")}</span>
-              </Link>
-            )}
-            {(isAdmin || isSupport) && (
-              <Link
-                to="/app/debug"
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium no-underline transition-all duration-200 ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "secondary")} ${textColor}`}
-                title={t("account.debugPanel")}
-              >
-                <Bug size={14} />
-                <span className="hidden lg:inline">{t("account.debugPanel")}</span>
-              </Link>
-            )}
-          </div>
-          <div className="shrink-0">
-            <NavMenu useLiquidGlass={settings.useLiquidGlass} useDarkMode={settings.useDarkMode} />
-          </div>
-          <div className="flex min-w-0 flex-1 items-center justify-end gap-2 overflow-hidden lg:gap-4">
-            <span className={`truncate whitespace-nowrap ${textColor} ${textShadow}`}>
-              <span className={`hidden xl:inline ${subtextColor}`}>{t("loggedInAs")} </span>
-              <Link to="/app/profile/" className="hidden lg:inline">
-                {username}
-              </Link>
-            </span>
-            <div className="shrink-0">
-              <AccountMenu />
+          {/* Desktop layout — grid with equal side columns keeps center always centered */}
+          <div className="grid w-full grid-cols-[1fr_auto_1fr] items-center">
+            {/* Left: admin / debug buttons */}
+            <div className="flex shrink-0 items-center gap-2">
+              {isAdmin && (
+                <Link
+                  to="/app/admin"
+                  className={`flex shrink-0 flex-col items-center gap-0.5 rounded-lg px-2 py-1 text-[10px] font-medium no-underline transition-all duration-200 ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "secondary")} ${textColor}`}
+                  title={t("account.adminPanel")}
+                >
+                  <ShieldAlert size={13} />
+                  <span className="hidden max-w-[44px] text-center leading-tight lg:block">
+                    {t("account.adminPanel")}
+                  </span>
+                </Link>
+              )}
+              {(isAdmin || isSupport) && (
+                <Link
+                  to="/app/debug"
+                  className={`flex shrink-0 flex-col items-center gap-0.5 rounded-lg px-2 py-1 text-[10px] font-medium no-underline transition-all duration-200 ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "secondary")} ${textColor}`}
+                  title={t("account.debugPanel")}
+                >
+                  <Bug size={13} />
+                  <span className="hidden max-w-[44px] text-center leading-tight lg:block">
+                    {t("account.debugPanel")}
+                  </span>
+                </Link>
+              )}
+            </div>
+            {/* Center: main nav */}
+            <div>
+              <NavMenu
+                useLiquidGlass={settings.useLiquidGlass}
+                useDarkMode={settings.useDarkMode}
+              />
+            </div>
+            {/* Right: username + account menu */}
+            <div className="flex items-center justify-end gap-2 overflow-hidden lg:gap-4">
+              <span className={`truncate whitespace-nowrap ${textColor} ${textShadow}`}>
+                <span className={`hidden xl:inline ${subtextColor}`}>{t("loggedInAs")} </span>
+                <Link to="/app/profile/" className="hidden lg:inline">
+                  {username}
+                </Link>
+              </span>
+              <div className="shrink-0">
+                <AccountMenu />
+              </div>
             </div>
           </div>
         </>

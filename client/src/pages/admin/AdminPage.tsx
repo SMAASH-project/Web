@@ -33,7 +33,7 @@ export function AdminPage() {
 
   if (isInitializing) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-dvh items-center justify-center">
         <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-white" />
       </div>
     );
@@ -43,23 +43,28 @@ export function AdminPage() {
     return <NotFoundPage />;
   }
 
+  // h-dvh + overflow-y-auto on the inner container means content scrolls within
+  // the area below the spacer — it can never scroll behind the fixed navbar.
+  const contentClass =
+    "z-0 flex w-full flex-col items-center px-3 py-4 pb-8 sm:px-6 sm:py-5 lg:px-10";
+
   return (
-    <div className={`flex min-h-screen w-full flex-col items-center self-start ${textColor}`}>
-      <div className="w-full">
-        <Navbar />
+    <div className={`flex h-dvh w-full flex-col ${textColor}`}>
+      <Navbar />
+      {/* Physical spacer matching the fixed navbar height.
+          The scrollable container starts here, so content never slides under the navbar. */}
+      <div className="h-24 shrink-0" aria-hidden="true" />
+      <div className="flex flex-1 overflow-y-auto">
+        {settings.useAnimations ? (
+          <CardAnimation className={contentClass} onAnimationComplete={handleAnimationComplete}>
+            <AdminPageContent animReady={animDone} />
+          </CardAnimation>
+        ) : (
+          <div className={contentClass}>
+            <AdminPageContent animReady={true} />
+          </div>
+        )}
       </div>
-      {settings.useAnimations ? (
-        <CardAnimation
-          className="z-0 flex w-full flex-1 items-start justify-center px-4 pt-20 sm:px-6 lg:px-10 xl:items-center xl:pt-0"
-          onAnimationComplete={handleAnimationComplete}
-        >
-          <AdminPageContent animReady={animDone} />
-        </CardAnimation>
-      ) : (
-        <div className="z-0 flex w-full flex-1 items-start justify-center px-4 pt-20 sm:px-6 lg:px-10 xl:items-center xl:pt-0">
-          <AdminPageContent animReady={true} />
-        </div>
-      )}
     </div>
   );
 }

@@ -157,7 +157,13 @@ export function useNewsPosts(selectedCategories: NewsPost["category"][] = []) {
 
   const filteredPosts = useMemo(() => {
     if (selectedCategories.length === 0) return [];
-    return allPosts.filter((post) => selectedCategories.includes(post.category));
+    return allPosts
+      .filter((post) => selectedCategories.includes(post.category))
+      .sort((a, b) => {
+        const ms = (dt: DateTime) =>
+          DateTime.isDateTime(dt) ? dt.toMillis() : +new Date(dt as unknown as string);
+        return ms(b.createdAt) - ms(a.createdAt);
+      });
   }, [allPosts, selectedCategories]);
 
   useEffect(() => {

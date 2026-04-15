@@ -31,6 +31,7 @@ export interface WebstoreItem {
   price: number;
   owned: boolean;
   createdAt: DateTime;
+  imgUri: string;
 }
 
 export interface Release {

@@ -23,7 +23,7 @@ export default function AccountMenu() {
   const { setIsDropdownHovering, setIsDropdownOpen } = useNavbarContext();
   const { settings } = useSettings();
   const { t } = useTranslation("nav");
-  const { setIsLoggedIn, setUserId, setIsAdmin, setIsSupport } = useContext(AuthContext);
+  const { userId, setIsLoggedIn, setUserId, setIsAdmin, setIsSupport } = useContext(AuthContext);
   const navigate = useNavigate();
   const logoutMutation = useLogoutMutation();
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
@@ -37,6 +37,7 @@ export default function AccountMenu() {
 
   const handleLogout = async () => {
     try {
+      if (userId) localStorage.removeItem(`selected_profile_${Number(userId)}`);
       await logoutMutation.mutateAsync();
       setIsLoggedIn(false);
       setUserId(null);
@@ -106,7 +107,9 @@ export default function AccountMenu() {
             : "hover:bg-gray-100 hover:text-gray-900"
         }`}
       >
-        <Link to="/app/profile-selector">{t("account.changeProfile")}</Link>
+        <Link to="/app/profile-selector" state={{ change: true }}>
+          {t("account.changeProfile")}
+        </Link>
       </DropdownMenuItem>
       <DropdownMenuSeparator
         className={`my-2 ${settings.useDarkMode ? "bg-white/10" : "bg-gray-200"}`}

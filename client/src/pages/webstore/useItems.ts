@@ -23,13 +23,13 @@ interface ItemReadDTO {
   rarity: string;
   // Category names: "Character" + optionally "Melee" | "Ranged" (combatType)
   categories: string[];
+  img_uri: string;
 }
 
 // Go's PurchaseReadDTO json tags are snake_case
 interface PurchaseReadDTO {
   id: number;
-  item: string; // item name (unique, used to match ownership)
-  count: number;
+  character: string; // character name (unique, used to match ownership)
   total: number;
   profile: string;
   date: string;
@@ -54,6 +54,7 @@ function itemDTOToWebstoreItem(dto: ItemReadDTO): WebstoreItem {
     combatType,
     owned: false, // will be overridden via ownedNames merge below
     createdAt: DateTime.now(),
+    imgUri: dto.img_uri,
   };
 }
 
@@ -80,10 +81,7 @@ export function useItems() {
   const { data: fetchedItems = [], isLoading: itemsLoading } = useQuery<WebstoreItem[]>({
     queryKey: queryKeys.items.all,
     queryFn: async () => {
-      const { data } = await apiClient.get<ItemReadDTO[]>("/items", {
-        params: { page: 1, page_size: 100 },
-        data: { profile_id: 0 },
-      });
+      const { data } = await apiClient.get<ItemReadDTO[]>("/characters");
       return data.map(itemDTOToWebstoreItem);
     },
     staleTime: 5 * 60 * 1000,
@@ -103,8 +101,8 @@ export function useItems() {
     staleTime: 2 * 60 * 1000,
   });
 
-  // Build a set of owned item names from purchase history
-  const ownedNames = useMemo(() => new Set((purchases ?? []).map((p) => p.item)), [purchases]);
+  // Build a set of owned character names from purchase history
+  const ownedNames = useMemo(() => new Set((purchases ?? []).map((p) => p.character)), [purchases]);
 
   // Merge ownership into items
   const allItems = useMemo(
@@ -122,9 +120,7 @@ export function useItems() {
       if (!profileId) throw new Error("No profile selected");
       await apiClient.post("/purchases", {
         player_profile_id: profileId,
-        item_id: itemId,
-        count: 1,
-        date: nowDateString(),
+        character_id: itemId,
       });
     },
     onSuccess: () => {
@@ -148,7 +144,7 @@ export function useItems() {
 
   // ── Admin: create item mutation ──────────────────────────────────────────
   const createMutation = useMutation<
-    void,
+    { id: number },
     Error,
     {
       name: string;
@@ -156,20 +152,40 @@ export function useItems() {
       rarity: string;
       description: string;
       price: number;
+      imageFile?: File;
     }
   >({
     mutationFn: async (data) => {
-      const categories: string[] = ["Character"];
-      if (data.combatType) {
-        categories.push(data.combatType);
-      }
-      await apiClient.post("/items", {
+      // Resolve rarity name → rarity_id
+      const { data: rarities } = await apiClient.get<{ id: number; name: string }[]>("/rarities");
+      const rarity = rarities.find((r) => r.name === data.rarity);
+      if (!rarity) throw new Error(`Rarity "${data.rarity}" not found`);
+
+      // Resolve category names → category_ids
+      const { data: categories } =
+        await apiClient.get<{ id: number; name: string }[]>("/categories");
+      const categoryNames = ["Character"];
+      if (data.combatType) categoryNames.push(data.combatType);
+      const categoryIds = categoryNames
+        .map((name) => categories.find((c) => c.name === name)?.id)
+        .filter((id): id is number => id !== undefined);
+
+      const { data: created } = await apiClient.post<{ id: number }>("/characters", {
         name: data.name,
         description: data.description,
         price: data.price,
-        rarity: data.rarity,
-        categories,
+        rarity_id: rarity.id,
+        category_ids: categoryIds,
       });
+
+      // Upload image if provided
+      if (data.imageFile) {
+        const form = new FormData();
+        form.append("CharacterImage", data.imageFile);
+        await apiClient.post(`/characters/${created.id}/img`, form);
+      }
+
+      return created;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items.all });
@@ -184,7 +200,7 @@ export function useItems() {
   // ── Admin: delete item mutation ──────────────────────────────────────────
   const deleteMutation = useMutation<void, Error, string>({
     mutationFn: async (itemId) => {
-      await apiClient.delete(`/items/${itemId}`);
+      await apiClient.delete(`/characters/${itemId}`);
     },
     onMutate: async (itemId) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.items.all });
@@ -311,6 +327,7 @@ export function useItems() {
     rarity: string;
     description: string;
     price: number;
+    imageFile?: File;
   }) {
     createMutation.mutate(data);
   }
