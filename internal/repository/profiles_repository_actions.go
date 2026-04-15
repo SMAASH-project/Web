@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"log"
 	"smaash-web/internal/models"
 
 	"gorm.io/gorm"
@@ -38,10 +39,9 @@ func (pra ProfilesRepositoryActions) HardDelete(c context.Context, id uint) erro
 func (pra ProfilesRepositoryActions) ReadNotOwnedCharacters(c context.Context, playerID uint) ([]models.Character, error) {
 	var result []models.Character
 	err := pra.conn.
-		Select("characters.*").
-		Table("characters").
-		Joins("LEFT JOIN player_characters ON characters.id = player_characters.character_id AND player_characters.player_profile_id = ?", playerID).
-		Where("player_characters.character_id IS NULL").
+		Model(&models.Character{}).
+		Joins("LEFT JOIN profile_character ON characters.id = profile_character.character_id AND profile_character.player_profile_id = ?", playerID).
+		Where("profile_character.character_id IS NULL").
 		Find(&result).Error
 
 	return result, err
@@ -49,18 +49,20 @@ func (pra ProfilesRepositoryActions) ReadNotOwnedCharacters(c context.Context, p
 
 func (pra ProfilesRepositoryActions) CreateWithBaseCharacters(c context.Context, profile *models.PlayerProfile) error {
 	return pra.conn.Transaction(func(tx *gorm.DB) error {
-		if err := gorm.G[models.PlayerProfile](pra.conn).Create(c, profile); err != nil {
+		log.Printf("profiles.create tx start: user_id=%d display_name=%q", profile.UserID, profile.DisplayName)
+
+		if err := gorm.G[models.PlayerProfile](tx).Create(c, profile); err != nil {
+			log.Printf("profiles.create tx profile insert failed: err=%v", err)
 			return err
 		}
 
 		// These characters are seeded into the database, so they're guaranteed to have ids of 1 and 2
-		if err := pra.conn.
+		characters, _ := gorm.G[models.Character](tx).Where("id IN (1, 2)").Find(c)
+
+		if err := tx.
 			Model(profile).
 			Association("Characters").
-			Append([]models.Character{
-				{Model: gorm.Model{ID: 1}},
-				{Model: gorm.Model{ID: 2}},
-			}); err != nil {
+			Append(characters); err != nil {
 			return err
 		}
 

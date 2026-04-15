@@ -1,0 +1,26 @@
+[
+  {
+    "Name": "Samurai",
+    "Description": "A balanced melee character for new profiles.",
+    "RarityID": 1,
+    "Price": 0,
+    "Implemented": true,
+    "ImgURI": "/characters/samurai.png",
+    "Categories": [
+      "Character",
+      "Melee"
+    ]
+  },
+  {
+    "Name": "Slime",
+    "Description": "A ranged character with simple starter stats.",
+    "RarityID": 1,
+    "Price": 0,
+    "Implemented": true,
+    "ImgURI": "/characters/slime.png",
+    "Categories": [
+      "Character",
+      "Ranged"
+    ]
+  }
+]

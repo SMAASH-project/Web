@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"os"
 	dtos "smaash-web/internal/DTOs"
@@ -94,8 +95,12 @@ func (pc PlayerProfileController) Create(c *gin.Context) {
 	path := c.Request.URL.Path
 	var body dtos.PlayerProfileCreateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
+		log.Printf("profiles.create bind error: %v", err)
 		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
+		return
 	}
+
+	log.Printf("profiles.create requested: user_id=%d display_name=%q", body.UserID, body.DisplayName)
 
 	currentProfiles, err := pc.profilesRepo.ReadByUserID(c.Request.Context(), body.UserID)
 	if err != nil {
@@ -109,7 +114,8 @@ func (pc PlayerProfileController) Create(c *gin.Context) {
 	}
 
 	newProfile := dtos.CreateDTOToPlayerProfile(body)
-	if err := pc.profilesRepo.CreateWithBaseCharacters(c, &newProfile); err != nil {
+	if err := pc.profilesRepo.CreateWithBaseCharacters(c.Request.Context(), &newProfile); err != nil {
+		log.Printf("profiles.create failed: user_id=%d display_name=%q err=%v", body.UserID, body.DisplayName, err)
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			c.JSON(http.StatusConflict, dtos.NewErrResp("Display name already taken", path))
 			return
@@ -117,6 +123,8 @@ func (pc PlayerProfileController) Create(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
 		return
 	}
+
+	log.Printf("profiles.create success: profile_id=%d user_id=%d", newProfile.ID, newProfile.UserID)
 
 	c.JSON(http.StatusCreated, newProfile)
 }
@@ -330,7 +338,13 @@ func (pc PlayerProfileController) ReadNotOwnedCharacters(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, utils.Map(player.Characters, dtos.CharacterToDTO))
+	characters, err := pc.profilesRepo.ReadNotOwnedCharacters(c.Request.Context(), player.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	c.JSON(http.StatusOK, utils.Map(characters, dtos.CharacterToDTO))
 }
 
 func (pc PlayerProfileController) MountRoutes(apiGroup *gin.RouterGroup) {
@@ -344,4 +358,5 @@ func (pc PlayerProfileController) MountRoutes(apiGroup *gin.RouterGroup) {
 	profiles.GET("/:id/pfp", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.GetPFP)
 	profiles.GET("/:id/purchases", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.ReadPurchases)
 	profiles.GET("/:id/characters", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.ReadCharacters)
+	profiles.GET("/:id/unowned", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.ReadNotOwnedCharacters)
 }

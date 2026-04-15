@@ -3,6 +3,8 @@
  * Organized by domain for easy cache invalidation.
  */
 
+import { all } from "axios";
+
 export const queryKeys = {
   profiles: {
     all: ["profiles"],
@@ -13,6 +15,9 @@ export const queryKeys = {
   },
   items: {
     all: ["items"],
+  },
+  characters: {
+    all: ["characters"]
   },
   purchases: {
     byProfileId: (profileId: number) => ["purchases", "byProfileId", profileId],

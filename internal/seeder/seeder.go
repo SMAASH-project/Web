@@ -15,6 +15,8 @@ import (
 
 type Seeder interface {
 	Seed(ctx context.Context, seed_data_root string, conn *gorm.DB, errStream chan error, logger logger.Interface)
+	GetChildren() []Seeder
+	AppendChildren(...Seeder)
 }
 
 type SeederManager struct {
@@ -48,8 +50,9 @@ func NewSeedManager(seed_data_root string, dbUrl string, errStream chan error, o
 	return seederManager
 }
 
-func WithSeeder(seeder Seeder) SeederOpt {
+func WithSeeder(seeder Seeder, children ...Seeder) SeederOpt {
 	return func(sm *SeederManager) {
+		seeder.AppendChildren(children...)
 		sm.seeders = append(sm.seeders, seeder)
 	}
 }
@@ -82,6 +85,10 @@ func (sm *SeederManager) Seed() {
 
 	for _, seeder := range sm.seeders {
 		wg.Go(func() {
+			log.Println(seeder)
+			for _, child := range seeder.GetChildren() {
+				child.Seed(sm.ctx, sm.seed_data_root, conn, sm.errStream, sm.logger)
+			}
 			seeder.Seed(sm.ctx, sm.seed_data_root, conn, sm.errStream, sm.logger)
 		})
 	}
