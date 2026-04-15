@@ -97,13 +97,13 @@ export function ProfileSelectorPage() {
   useEffect(() => {
     if (location.state?.change) return;
     if (!userId) return;
-    const stored = localStorage.getItem(`selected_profile_${Number(userId)}`);
+    const stored = localStorage.getItem(`selected_profile_${String(userId)}`);
     if (stored) navigate("/app/releases", { replace: true });
   }, [userId, location.state, navigate]);
 
   const handleLogout = async () => {
     try {
-      if (userId) localStorage.removeItem(`selected_profile_${Number(userId)}`);
+      if (userId) localStorage.removeItem(`selected_profile_${String(userId)}`);
       await logoutMutation.mutateAsync();
       setIsLoggedIn(false);
       setUserId(null);

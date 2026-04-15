@@ -128,7 +128,10 @@ export function useItems() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.purchases.byProfileId(profileId ?? 0),
       });
-      // Refetch profile so coin balance updates after purchase
+      // Refetch profile so coin balance updates after purchase.
+      // Note: Number(bigint) loses precision for IDs > 2^53-1; acceptable here
+      // because queryKeys.profiles.byUserId requires a number and sequential DB
+      // IDs never reach that magnitude. If the ID strategy changes, update this.
       if (userId !== null) {
         queryClient.invalidateQueries({
           queryKey: queryKeys.profiles.byUserId(Number(userId)),
