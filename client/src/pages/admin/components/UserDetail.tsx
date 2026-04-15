@@ -128,7 +128,7 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
         >
           {/* Avatar + info — w-full on mobile forces buttons to their own row below;
               sm:flex-1 lets them share a row with buttons on larger screens */}
-          <div className="flex w-full min-w-0 items-center gap-3 sm:flex-1">
+          <div className="flex w-full min-w-0 items-center justify-center gap-3 sm:flex-1 sm:justify-start">
             <Avatar size="lg">
               <AvatarImage
                 src={selectedProfile ? `/api/profiles/${selectedProfile.id}/pfp` : undefined}
@@ -139,7 +139,7 @@ export default function UserDetail({ logic }: { logic: AdminPageLogic }) {
               </AvatarFallback>
             </Avatar>
 
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 sm:flex-1">
               <h2 className={`truncate text-base font-bold sm:text-lg ${textColor} ${textShadow}`}>
                 {selectedUser.username || "—"}
               </h2>

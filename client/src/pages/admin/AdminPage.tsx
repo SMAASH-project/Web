@@ -46,7 +46,7 @@ export function AdminPage() {
   // h-dvh + overflow-y-auto on the inner container means content scrolls within
   // the area below the spacer — it can never scroll behind the fixed navbar.
   const contentClass =
-    "z-0 flex w-full flex-col items-center px-3 py-4 pb-8 sm:px-6 sm:py-5 lg:px-10";
+    "z-0 flex min-h-full w-full flex-1 flex-col items-center px-3 py-4 sm:px-6 sm:py-5 lg:px-10";
 
   return (
     <div className={`flex h-dvh w-full flex-col ${textColor}`}>
