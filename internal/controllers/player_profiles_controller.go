@@ -99,7 +99,7 @@ func (pc PlayerProfileController) Create(c *gin.Context) {
 	}
 
 	newProfile := dtos.CreateDTOToPlayerProfile(body)
-	if err := pc.profilesRepo.Create(c, &newProfile); err != nil {
+	if err := pc.profilesRepo.CreateWithBaseCharacters(c, &newProfile); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			c.JSON(http.StatusConflict, dtos.NewErrResp("Display name already taken", path))
 			return

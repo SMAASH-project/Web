@@ -267,10 +267,10 @@ func (cc CharactersController) ReadImg(c *gin.Context) {
 func (cc CharactersController) MountRoutes(apiGroup *gin.RouterGroup) {
 	characters := apiGroup.Group("/characters")
 	characters.POST("", middlewares.Authorize(middlewares.ADMIN), cc.Create)
-	characters.GET("", middlewares.Authorize(middlewares.ADMIN), cc.ReadAll)
+	characters.GET("", middlewares.Authorize(middlewares.ANY), cc.ReadAll)
 	characters.GET("/:id", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, cc.ReadByID)
 	characters.PUT("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, cc.Update)
 	characters.DELETE("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, cc.Delete)
-	characters.POST("/:id/img", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, cc.UploadImg)
+	characters.POST("/:id/img", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, cc.UploadImg)
 	characters.GET("/:id/img", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, cc.ReadImg)
 }
