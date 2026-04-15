@@ -8,6 +8,7 @@ import (
 	"smaash-web/internal/models"
 	"smaash-web/internal/repository"
 	"smaash-web/internal/utils"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/webstradev/gin-pagination/v2/pkg/pagination"
@@ -62,8 +63,16 @@ func (pc PostsController) Create(c *gin.Context) {
 func (pc PostsController) ReadAll(c *gin.Context) {
 	page, _ := c.Get("page")
 	size, _ := c.Get("size")
+	sortBy := c.Query("sortBy")
+	desc, _ := strconv.ParseBool(c.Query("desc"))
 
-	posts, err := pc.postsBaseRepo.ReadAllPaginated(c.Request.Context(), page.(int), size.(int))
+	posts, err := pc.postsBaseRepo.ReadAllWithParams(c.Request.Context(), repository.QueryParams{
+		Page:              page.(int),
+		PageSize:          size.(int),
+		SortBy:            sortBy,
+		AllowedSortFileds: []string{"id", "created_at", "updated_at", "title", "category"},
+		Desc:              &desc,
+	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return

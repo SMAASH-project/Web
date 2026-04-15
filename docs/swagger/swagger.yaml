@@ -325,27 +325,22 @@ definitions:
     type: object
   dtos.PurchaseCreateDTO:
     properties:
-      count:
-        type: integer
-      item_id:
+      character_id:
         type: integer
       player_profile_id:
         type: integer
     required:
-    - count
-    - item_id
+    - character_id
     - player_profile_id
     type: object
   dtos.PurchaseReadDTO:
     properties:
-      count:
-        type: integer
+      character:
+        type: string
       date:
         type: string
       id:
         type: integer
-      item:
-        type: string
       profile:
         type: string
       total:
@@ -353,18 +348,15 @@ definitions:
     type: object
   dtos.PurchaseUpdateDTO:
     properties:
-      count:
+      character_id:
         type: integer
       id:
-        type: integer
-      item_id:
         type: integer
       player_profile_id:
         type: integer
     required:
-    - count
+    - character_id
     - id
-    - item_id
     - player_profile_id
     type: object
   dtos.RarityCreateDTO:
