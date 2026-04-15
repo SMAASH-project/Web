@@ -6,16 +6,25 @@ import (
 	"errors"
 	"log"
 	"os"
+	"slices"
 	"smaash-web/internal/models"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-type CategorySeeder struct{}
+type CategorySeeder struct{ children []Seeder }
 
-func NewCategorySeeder() *CategorySeeder {
+func NewCategorySeeder() Seeder {
 	return &CategorySeeder{}
+}
+
+func (cs CategorySeeder) GetChildren() []Seeder {
+	return cs.children
+}
+
+func (cs CategorySeeder) AppendChildren(children ...Seeder) {
+	cs.children = slices.Concat(cs.children, children)
 }
 
 type CategoryDataFormat struct {
