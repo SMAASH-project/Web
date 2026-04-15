@@ -19,28 +19,6 @@ func Map[T, U any](in []T, f func(T) U) (out []U) {
 	return out
 }
 
-func Filter[T any](in []T, f func(T) bool) (out []T) {
-	for _, val := range in {
-		if f(val) {
-			out = append(out, val)
-		}
-	}
-	return out
-}
-
-func MaxBy[T any, U ~int | ~uint | ~float32](in []T, f func(T) U) int {
-	var highest U = 0
-	var current U = 0
-	for _, val := range in {
-		current = f(val)
-		if current > highest {
-			highest = current
-		}
-	}
-
-	return int(highest)
-}
-
 func Must[T any](val T, err error) T {
 	if err != nil {
 		panic(err)
@@ -48,12 +26,21 @@ func Must[T any](val T, err error) T {
 	return val
 }
 
+type FileUploadKind string
+
+const (
+	PROFILE_PICTURE FileUploadKind = "pfps"
+	CHARACTER_IMAGE FileUploadKind = "characters"
+	LEVEL_IMAGE     FileUploadKind = "levels"
+	ITEM_IMAGE      FileUploadKind = "items"
+)
+
 var (
 	ErrUnsupportedMediaType = errors.New("Media type unsupported. Uploaded image can only be .png, .jpg, .jpeg, .webp or .svg")
 	allowedFileTypes        = []string{".png", ".jpg", ".jpeg", ".webp", ".svg"}
 )
 
-func SaveFileToDisc(c *gin.Context, file *multipart.FileHeader) (*string, error) {
+func SaveFileToDisc(c *gin.Context, file *multipart.FileHeader, kind FileUploadKind) (*string, error) {
 	extension := filepath.Ext(file.Filename)
 
 	if !slices.Contains(allowedFileTypes, extension) {
@@ -62,14 +49,16 @@ func SaveFileToDisc(c *gin.Context, file *multipart.FileHeader) (*string, error)
 
 	uploadDir := os.Getenv("UPLOAD_DIR")
 	if uploadDir == "" {
-		uploadDir = "./uploads/pfps"
+		uploadDir = "./uploads"
 	}
 
-	if err := os.MkdirAll(uploadDir, 0o755); err != nil {
+	path := filepath.Join(uploadDir, string(kind))
+
+	if err := os.MkdirAll(path, 0o755); err != nil {
 		return nil, err
 	}
 
-	uri := filepath.Join(uploadDir, uuid.NewString()+extension)
+	uri := filepath.Join(path, uuid.NewString()+extension)
 
 	if err := c.SaveUploadedFile(file, uri); err != nil {
 		return nil, err

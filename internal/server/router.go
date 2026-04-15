@@ -1,19 +1,32 @@
 package server
 
 import (
+	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"smaash-web/docs/swagger"
+	"smaash-web/internal/middlewares"
 	"strings"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 func (s *Server) MountRoutes() *Server {
-	r := gin.Default()
+	appEnv := os.Getenv("APP_ENV")
+	if appEnv == "" || strings.ToLower(appEnv) == "release" {
+		appEnv = "release"
+	} else {
+		appEnv = "debug"
+	}
+
+	if appEnv == "release" {
+		gin.SetMode(gin.ReleaseMode)
+	}
 
 	allowedOrigins := strings.Split(os.Getenv("ALLOWED_ORIGINS"), ",")
 	if len(allowedOrigins) == 1 && allowedOrigins[0] == "" {
@@ -23,6 +36,16 @@ func (s *Server) MountRoutes() *Server {
 	for i := range allowedOrigins {
 		allowedOrigins[i] = strings.TrimSpace(allowedOrigins[i])
 	}
+
+	requestLogger := slog.New(slog.NewJSONHandler(io.MultiWriter(&lumberjack.Logger{
+		Filename:   "./logs/gin.log",
+		MaxSize:    100,
+		MaxAge:     30,
+		MaxBackups: 5,
+	}, os.Stdout), nil))
+
+	r := gin.Default()
+	r.Use(middlewares.Logger(requestLogger))
 
 	// NOTE: this is for develompent only, the built project is running on one server
 	r.Use(cors.New(cors.Config{
@@ -43,8 +66,10 @@ func (s *Server) MountRoutes() *Server {
 		c.MountRoutes(api)
 	}
 
-	swagger.SwaggerInfo.BasePath = "/api"
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	if appEnv == "debug" {
+		swagger.SwaggerInfo.BasePath = "/api"
+		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	}
 
 	// SPA fallback
 	r.NoRoute(func(c *gin.Context) {

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	dtos "smaash-web/internal/DTOs"
+	"smaash-web/internal/repository"
 	"smaash-web/internal/services"
 
 	"github.com/gin-gonic/gin"
@@ -12,10 +13,11 @@ import (
 
 type AuthnController struct {
 	authService services.Authentication
+	rolesRepo   repository.RolesRepository
 }
 
-func NewAuthnController(authService services.Authentication) *AuthnController {
-	return &AuthnController{authService: authService}
+func NewAuthnController(authService services.Authentication, rolesRepo repository.RolesRepository) *AuthnController {
+	return &AuthnController{authService: authService, rolesRepo: rolesRepo}
 }
 
 // @description Register a new user
@@ -24,24 +26,33 @@ func NewAuthnController(authService services.Authentication) *AuthnController {
 // @produce json
 // @param user_create_dto body dtos.UserCreateDTO true "dto for creating a new user"
 // @success 201 {object} dtos.UserReadDTO "returns newly created user"
-// @failure 400 {object} dtos.ErrResp "request body in wrong format"
 // @failure 409 {object} dtos.ErrResp "unique key violation"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
 // @failure 500 {object} dtos.ErrResp "internal server error"
 // @router /auth/signup [post]
 func (a AuthnController) SignUp(c *gin.Context) {
+	path := c.Request.URL.Path
 	var body dtos.UserCreateDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
 	}
 
-	newUser, err := a.authService.SignUp(c.Request.Context(), dtos.CreateDTOToUser(&body))
+	newUser, err := dtos.CreateDTOToUser(&body, a.rolesRepo.ReadByName)
 	if err != nil {
-		if errors.Is(err, gorm.ErrDuplicatedKey) { // gorm returns this error when a unique constraint is violated
-			c.JSON(http.StatusConflict, dtos.NewErrResp("User already exists", c.Request.URL.Path))
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusInternalServerError, dtos.NewErrResp("Role 'user' doesn't exist", path))
 			return
 		}
-		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+	}
+
+	if err := a.authService.SignUp(c.Request.Context(), newUser); err != nil {
+		if errors.Is(err, gorm.ErrDuplicatedKey) { // gorm returns this error when a unique constraint is violated
+			c.JSON(http.StatusConflict, dtos.NewErrResp("User already exists", path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
 		return
 	}
 
@@ -54,15 +65,15 @@ func (a AuthnController) SignUp(c *gin.Context) {
 // @produce json
 // @param user_login_dto body dtos.UserLoginDTO true "dto for logging in a user"
 // @success 200 {int} int "returns the id of the logged in user"
-// @failure 400 {object} dtos.ErrResp "request body in wrong format"
 // @failure 401 {object} dtos.ErrResp "unauthorized"
 // @failure 404 {object} dtos.ErrResp "record not found"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
 // @failure 500 {object} dtos.ErrResp "internal server error"
 // @router /auth/login [post]
 func (a AuthnController) Login(c *gin.Context) {
 	var body dtos.UserLoginDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
 	}
 

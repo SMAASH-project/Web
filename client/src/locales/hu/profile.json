@@ -25,8 +25,8 @@
     "emailPlaceholder": "te@email.com",
     "password": "Jelszó",
     "passwordPlaceholder": "Jelszóváltoztatás hamarosan",
-    "passwordHint": "A jelszóváltoztatás itt még nem elérhető.",
-    "passwordReset": "Használd a jelszó-visszaállítás oldalt.",
+    "passwordHint": "A jelszóváltoztatás még nem elérhető.",
+    "passwordReset": "Jelszó-visszaállításhoz lépj kapcsolatba egy adminisztrátorral.",
     "saved": "Sikeresen mentve!",
     "cancel": "Mégse",
     "save": "Módosítások mentése",
@@ -38,7 +38,9 @@
     "addNew": "Új hozzáadása",
     "manage": "Profilok kezelése",
     "done": "Kész",
-    "logout": "Kijelentkezés"
+    "logout": "Kijelentkezés",
+    "profilesAvailable_one": "{{count}} profil elérhető",
+    "profilesAvailable_other": "{{count}} profil elérhető"
   },
   "addProfile": {
     "title": "Új profil létrehozása",
@@ -51,6 +53,7 @@
     "errorUsernameRequired": "A felhasználónév megadása kötelező.",
     "errorUsernameTooLong": "A felhasználónév legfeljebb 20 karakter lehet.",
     "errorUsernameTaken": "Ez a felhasználónév már foglalt. Kérjük, válassz másikat.",
+    "errorMaxProfiles": "Már elérted a profilok maximális számát.",
     "errorSaveFailed": "A profil mentése sikertelen. Kérjük, próbáld újra."
   }
 }

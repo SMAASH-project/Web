@@ -1,6 +1,6 @@
 {
   "title": "Webstore",
-  "subtitle": "Unlock characters and skins",
+  "subtitle": "Unlock characters",
   "searchPlaceholder": "Search by item name…",
   "noResults": "No items found.",
   "filters": {
@@ -13,8 +13,7 @@
     "unowned": "Unowned",
     "melee": "Melee",
     "ranged": "Ranged",
-    "character": "Character",
-    "skin": "Skin"
+    "character": "Character"
   },
   "rarity": {
     "common": "Common",
@@ -25,7 +24,31 @@
   },
   "item": {
     "unlock": "Unlock",
+    "unlocking": "Unlocking…",
     "owned": "Owned"
+  },
+  "create": {
+    "triggerButton": "Create Item",
+    "title": "Create New Item",
+    "description": "Add a new item to the webstore.",
+    "name": "Name",
+    "namePlaceholder": "Item name",
+    "rarity": "Rarity",
+    "combatType": "Combat Type",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Item description",
+    "price": "Price",
+    "image": "Character Image",
+    "imagePlaceholder": "Click to upload (JPEG, PNG, WebP, GIF)",
+    "cancel": "Cancel",
+    "submit": "Create Item",
+    "creating": "Creating…"
+  },
+  "toast": {
+    "unlocked": "Item unlocked!",
+    "created": "Item created.",
+    "deleted": "Item deleted.",
+    "deleteFailed": "Failed to delete item."
   },
   "delete": {
     "confirm": "Confirm Deletion",

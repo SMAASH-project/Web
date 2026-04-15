@@ -1,0 +1,321 @@
+import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
+import {
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+  Dialog,
+} from "@/components/ui/dialog";
+import {
+  getButtonClasses,
+  getInputClasses,
+  getDialogClasses,
+  getDialogFooterClasses,
+  getTextShadow,
+  getSubtextColor,
+  getBackgroundClasses,
+  getTextColor,
+} from "@/lib/utils";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  AnimatedAccordion,
+  AnimatedAccordionContent,
+  AnimatedAccordionItem,
+  AnimatedAccordionTrigger,
+} from "@/animations/AnimatedAccordion";
+import { SquarePen, X } from "lucide-react";
+import { useSettings } from "@/pages/settings/SettingsContext";
+import { FieldGroup, Field } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import type { NewsPost } from "@/types/PageTypes";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { RadioGroupChoiceCard } from "./RadioGroupChoiceCard";
+import { ResizableVertical } from "./ResizableVertical";
+import { ResizableHorizontal } from "./ResizableHorizontal";
+import { CategorySelector } from "./CategorySelector";
+import { useNewsForm } from "../useNewsForm";
+
+export function EditButton({
+  post,
+  onUpdate,
+}: {
+  post: NewsPost;
+  onUpdate?: (p: NewsPost) => void;
+}) {
+  const { settings } = useSettings();
+  const { t } = useTranslation("news");
+  const buttonClass = getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "primary");
+  const inputClass = getInputClasses(settings.useLiquidGlass, settings.useDarkMode);
+  const dialogClass = getDialogClasses(settings.useLiquidGlass, settings.useDarkMode);
+  const footerClass = getDialogFooterClasses(settings.useLiquidGlass, settings.useDarkMode);
+  const textShadow = getTextShadow(settings.useLiquidGlass, settings.useDarkMode);
+  const subtextColor = getSubtextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const bgClass = getBackgroundClasses(settings.useLiquidGlass, settings.useDarkMode, "light");
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+
+  const {
+    open,
+    setOpen,
+    title,
+    setTitle,
+    content,
+    setContent,
+    category,
+    setCategory,
+    imagePosition,
+    setImagePosition,
+    imageAlt,
+    setImageSize,
+    fileInputRef,
+    handleFileChange,
+    clearImage,
+    resetForm,
+    getFormValues,
+  } = useNewsForm({ initial: post });
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (isOpen) {
+      resetForm(post);
+    }
+  };
+
+  const handleSave = () => {
+    onUpdate?.({
+      ...post,
+      ...getFormValues(),
+    });
+    setOpen(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        <Button className={`${buttonClass} ${textShadow} cursor-pointer rounded-lg`}>
+          <SquarePen />
+        </Button>
+      </DialogTrigger>
+      <DialogContent
+        className={`max-w-[calc(100%-2rem)] sm:max-w-4xl! ${dialogClass} ${textShadow}`}
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
+        <DialogHeader>
+          <DialogTitle className={textColor}>{t("edit")}</DialogTitle>
+        </DialogHeader>
+        <FieldGroup>
+          <Field>
+            <Label>Title</Label>
+            <Input
+              value={title}
+              onChange={(e) => setTitle((e.target as HTMLInputElement).value)}
+              className={inputClass}
+            />
+          </Field>
+          <Field>
+            <Label>Category</Label>
+            <CategorySelector value={category} onValueChange={setCategory} />
+          </Field>
+        </FieldGroup>
+        {settings.useAnimations ? (
+          <AnimatedAccordion type="multiple" defaultValue={["content"]} className="w-full">
+            <AnimatedAccordionItem value="image">
+              <AnimatedAccordionTrigger className={textColor}>
+                Image Settings
+              </AnimatedAccordionTrigger>
+              <AnimatedAccordionContent>
+                <FieldGroup>
+                  <Field>
+                    <Label className={`text-sm ${subtextColor}`}>Image Position</Label>
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                      <div className="flex flex-col gap-2 sm:shrink-0">
+                        <RadioGroupChoiceCard
+                          value={imagePosition}
+                          onValueChange={(v) => setImagePosition(v as "Top" | "Right")}
+                          textColor={textColor}
+                          subtextColor={subtextColor}
+                        />
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          id="article-image"
+                          name="articleImage"
+                          ref={fileInputRef}
+                          onChange={handleFileChange}
+                          className={inputClass}
+                        />
+                        {imageAlt && (
+                          <div className="flex items-center gap-1">
+                            <span className="text-muted-foreground truncate text-xs">
+                              Current: {imageAlt}
+                            </span>
+                            <button
+                              type="button"
+                              className="hover:bg-muted shrink-0 cursor-pointer rounded-md p-0.5 hover:text-red-500"
+                              onClick={clearImage}
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        {imagePosition === "Top" ? (
+                          <ResizableVertical
+                            onImageSizeChange={setImageSize}
+                            initialImageSize={post.imageSize ?? 25}
+                            subtextColor={subtextColor}
+                            inputClass={inputClass}
+                          />
+                        ) : (
+                          <ResizableHorizontal
+                            onImageSizeChange={setImageSize}
+                            initialImageSize={post.imageSize ?? 25}
+                            subtextColor={subtextColor}
+                            inputClass={inputClass}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </Field>
+                </FieldGroup>
+              </AnimatedAccordionContent>
+            </AnimatedAccordionItem>
+            <AnimatedAccordionItem value="content">
+              <AnimatedAccordionTrigger className={textColor}>Content</AnimatedAccordionTrigger>
+              <AnimatedAccordionContent>
+                <FieldGroup>
+                  <Field>
+                    <Label className={`text-sm ${subtextColor}`}>Markdown supported</Label>
+                    <textarea
+                      value={content}
+                      onChange={(e) => setContent((e.target as HTMLTextAreaElement).value)}
+                      className={`min-h-32 w-full rounded-md px-3 py-2 text-sm ${inputClass}`}
+                    />
+                    {content && (
+                      <div
+                        className={`mt-2 rounded-md border ${bgClass} prose prose-sm prose-invert max-h-64 max-w-none overflow-y-auto p-3`}
+                      >
+                        <Label className="mb-1 text-xs">Preview Text</Label>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+                      </div>
+                    )}
+                  </Field>
+                </FieldGroup>
+              </AnimatedAccordionContent>
+            </AnimatedAccordionItem>
+          </AnimatedAccordion>
+        ) : (
+          <Accordion type="multiple" defaultValue={["content"]} className="w-full">
+            <AccordionItem value="image">
+              <AccordionTrigger className={textColor}>Image Settings</AccordionTrigger>
+              <AccordionContent>
+                <FieldGroup>
+                  <Field>
+                    <Label className={`text-sm ${subtextColor}`}>Image Position</Label>
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                      <div className="flex flex-col gap-2 sm:shrink-0">
+                        <RadioGroupChoiceCard
+                          value={imagePosition}
+                          onValueChange={(v) => setImagePosition(v as "Top" | "Right")}
+                          textColor={textColor}
+                          subtextColor={subtextColor}
+                        />
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          id="article-image"
+                          name="articleImage"
+                          ref={fileInputRef}
+                          onChange={handleFileChange}
+                          className={inputClass}
+                        />
+                        {imageAlt && (
+                          <div className="flex items-center gap-1">
+                            <span className={`text-xs ${subtextColor} truncate`}>
+                              Current: {imageAlt}
+                            </span>
+                            <button
+                              type="button"
+                              className="hover:bg-muted shrink-0 cursor-pointer rounded-md p-0.5 hover:text-red-500"
+                              onClick={clearImage}
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        {imagePosition === "Top" ? (
+                          <ResizableVertical
+                            onImageSizeChange={setImageSize}
+                            initialImageSize={post.imageSize ?? 25}
+                            subtextColor={subtextColor}
+                            inputClass={inputClass}
+                          />
+                        ) : (
+                          <ResizableHorizontal
+                            onImageSizeChange={setImageSize}
+                            initialImageSize={post.imageSize ?? 25}
+                            subtextColor={subtextColor}
+                            inputClass={inputClass}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </Field>
+                </FieldGroup>
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="content">
+              <AccordionTrigger className={textColor}>Content</AccordionTrigger>
+              <AccordionContent>
+                <FieldGroup>
+                  <Field>
+                    <Label className={`text-sm ${subtextColor}`}>Markdown supported</Label>
+                    <textarea
+                      value={content}
+                      onChange={(e) => setContent((e.target as HTMLTextAreaElement).value)}
+                      className={`min-h-32 w-full rounded-md px-3 py-2 text-sm ${inputClass}`}
+                    />
+                    {content && (
+                      <div
+                        className={`mt-2 rounded-md border ${bgClass} prose prose-sm prose-invert max-h-64 max-w-none overflow-y-auto p-3`}
+                      >
+                        <Label className="mb-1 text-xs">Preview Text</Label>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+                      </div>
+                    )}
+                  </Field>
+                </FieldGroup>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        )}
+        <DialogFooter className={footerClass}>
+          <DialogClose asChild>
+            <Button
+              variant="outline"
+              className={`cursor-pointer ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "outline")} ${textShadow}`}
+            >
+              Cancel
+            </Button>
+          </DialogClose>
+          <Button onClick={handleSave} className={`cursor-pointer ${buttonClass} ${textShadow}`}>
+            Save changes
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

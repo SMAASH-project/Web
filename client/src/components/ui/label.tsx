@@ -1,13 +1,10 @@
 import * as React from "react";
-import * as LabelPrimitive from "@radix-ui/react-label";
+import { Label as LabelPrimitive } from "radix-ui";
 
 import { cn, getTextColor } from "../../lib/utils";
-import { useSettings } from "../pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { useSettings } from "@/pages/settings/SettingsContext";
 
-function Label({
-  className,
-  ...props
-}: React.ComponentProps<typeof LabelPrimitive.Root>) {
+function Label({ className, ...props }: React.ComponentProps<typeof LabelPrimitive.Root>) {
   const { settings } = useSettings();
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
 

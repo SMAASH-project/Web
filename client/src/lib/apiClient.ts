@@ -10,9 +10,32 @@ const apiClient = axios.create({
   withCredentials: true, // Include cookies in requests
 });
 
-apiClient.interceptors.request.use((config) => {
-  const isFormData =
-    typeof FormData !== "undefined" && config.data instanceof FormData;
+function getDebugNetworkDelayMs(): number {
+  try {
+    const raw = localStorage.getItem("debug-settings");
+    if (!raw) return 0;
+    const parsed = JSON.parse(raw) as {
+      networkDelayMs?: number;
+      networkJitterMs?: number;
+    };
+    const base = Math.max(0, Number(parsed.networkDelayMs ?? 0));
+    const jitter = Math.max(0, Number(parsed.networkJitterMs ?? 0));
+    if (base <= 0 && jitter <= 0) return 0;
+
+    const jitterOffset = jitter > 0 ? (Math.random() * 2 - 1) * jitter : 0;
+    return Math.max(0, Math.round(base + jitterOffset));
+  } catch {
+    return 0;
+  }
+}
+
+apiClient.interceptors.request.use(async (config) => {
+  const debugDelayMs = getDebugNetworkDelayMs();
+  if (debugDelayMs > 0) {
+    await new Promise((resolve) => setTimeout(resolve, debugDelayMs));
+  }
+
+  const isFormData = typeof FormData !== "undefined" && config.data instanceof FormData;
 
   // Let the browser set multipart boundaries for FormData automatically.
   if (isFormData) {
@@ -24,8 +47,7 @@ apiClient.interceptors.request.use((config) => {
 
   config.headers = config.headers ?? {};
   if (!("Content-Type" in config.headers)) {
-    (config.headers as Record<string, unknown>)["Content-Type"] =
-      "application/json";
+    (config.headers as Record<string, unknown>)["Content-Type"] = "application/json";
   }
 
   return config;
@@ -52,8 +74,7 @@ apiClient.interceptors.response.use(
     // Auth endpoints are excluded to avoid a redirect loop when a user simply
     // enters the wrong password (which also returns 401).
     const requestUrl: string = error.config?.url ?? "";
-    const isAuthEndpoint =
-      requestUrl.includes("/auth/") || requestUrl.includes("/users/whoami");
+    const isAuthEndpoint = requestUrl.includes("/auth/") || requestUrl.includes("/users/whoami");
     if (error.response.status === 401 && !isAuthEndpoint) {
       window.location.href = "/app/login";
       // Return a promise that never resolves so no downstream error handler

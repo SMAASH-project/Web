@@ -1,4 +1,4 @@
-import { Label } from "@radix-ui/react-dropdown-menu";
+import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { navItems } from "./navLogic/navItems";
@@ -25,21 +25,13 @@ export function NavMenu({ useLiquidGlass, useDarkMode = false }: NavMenuProps) {
   const textColor = getTextColor(useLiquidGlass, useDarkMode);
   const subtextColor = getSubtextColor(useLiquidGlass, useDarkMode);
   const textShadow = getTextShadow(useLiquidGlass, useDarkMode);
-  const navBackground = getBackgroundClasses(
-    useLiquidGlass,
-    useDarkMode,
-    "light",
-  );
+  const navBackground = getBackgroundClasses(useLiquidGlass, useDarkMode, "light");
 
   useEffect(() => {
     // Find the matching nav item based on current route
-    const currentItem = navItems.find(
-      (item) => item.path === location.pathname,
-    );
+    const currentItem = navItems.find((item) => item.path === location.pathname);
     if (currentItem && ulRef.current) {
-      const liElement = ulRef.current
-        .querySelector(`a[href="${currentItem.path}"]`)
-        ?.closest("li");
+      const liElement = ulRef.current.querySelector(`a[href="${currentItem.path}"]`)?.closest("li");
       if (liElement) {
         const rect = liElement.getBoundingClientRect();
         const parentRect = ulRef.current.getBoundingClientRect();
@@ -71,9 +63,7 @@ export function NavMenu({ useLiquidGlass, useDarkMode = false }: NavMenuProps) {
     if (useLiquidGlass) {
       setIsHovering(false);
       // Reset to current page highlight
-      const currentItem = navItems.find(
-        (item) => item.path === location.pathname,
-      );
+      const currentItem = navItems.find((item) => item.path === location.pathname);
       if (currentItem && ulRef.current) {
         const liElement = ulRef.current
           .querySelector(`a[href="${currentItem.path}"]`)
@@ -94,12 +84,12 @@ export function NavMenu({ useLiquidGlass, useDarkMode = false }: NavMenuProps) {
   return (
     <ul
       ref={ulRef}
-      className={`nav-links list-none flex m-0 p-0 gap-2 lg:gap-6 xl:gap-10 relative whitespace-nowrap rounded-lg ${navBackground}`}
+      className={`nav-links relative m-0 flex list-none gap-1 rounded-lg p-0 whitespace-nowrap lg:gap-4 xl:gap-8 ${navBackground}`}
       onMouseLeave={handleMouseLeave}
     >
       {useLiquidGlass && isHovering && (
         <div
-          className={`absolute rounded-sm transition-all duration-300 ease-out pointer-events-none ${getLiquidGlassNavHighlight(useLiquidGlass, useDarkMode)}`}
+          className={`pointer-events-none absolute rounded-sm transition-all duration-300 ease-out ${getLiquidGlassNavHighlight(useLiquidGlass, useDarkMode)}`}
           style={{
             left: `${highlightPos.left}px`,
             width: `${highlightPos.width}px`,
@@ -111,17 +101,19 @@ export function NavMenu({ useLiquidGlass, useDarkMode = false }: NavMenuProps) {
       {navItems.map((item) => (
         <li
           key={item.path}
-          className={`m-2 lg:m-4 p-0.5 relative z-10 cursor-pointer transition-colors duration-300 ${
+          className={`relative z-10 m-1 cursor-pointer p-0.5 transition-colors duration-300 lg:m-2 ${
             !useLiquidGlass
               ? item.path === location.pathname
-                ? "text-(--theme-accent) font-bold"
+                ? "font-bold text-(--theme-accent)"
                 : `${subtextColor} hover:text-(--theme-accent-hover)`
               : `${textColor} ${textShadow}`
           }`}
           onMouseEnter={handleMouseEnter}
         >
           <Link to={item.path}>
-            <Label className="px-1 lg:px-2">{t(item.labelKey)}</Label>
+            <DropdownMenuPrimitive.Label className="px-1 lg:px-2">
+              {t(item.labelKey)}
+            </DropdownMenuPrimitive.Label>
           </Link>
         </li>
       ))}

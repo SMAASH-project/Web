@@ -26,13 +26,8 @@
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSettings } from "@/components/pages/profileDependents/settings/settingsLogic/SettingsContext";
-import {
-  getBackgroundClasses,
-  getButtonClasses,
-  getTextColor,
-  getSubtextColor,
-} from "@/lib/utils";
+import { useSettings } from "@/pages/settings/SettingsContext";
+import { getBackgroundClasses, getButtonClasses, getTextColor, getSubtextColor } from "@/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -115,9 +110,7 @@ export function Calendar({
 
   // Derive from / to from selected
   const selectedFrom: Date | undefined =
-    mode === "range"
-      ? (selected as DateRange | undefined)?.from
-      : (selected as Date | undefined);
+    mode === "range" ? (selected as DateRange | undefined)?.from : (selected as Date | undefined);
   const selectedTo: Date | undefined =
     mode === "range" ? (selected as DateRange | undefined)?.to : undefined;
 
@@ -214,8 +207,7 @@ export function Calendar({
     const isTo = selectedTo && isSameDay(date, selectedTo);
     const inRange = isInRange(date, selectedFrom, selectedTo);
     const isDisabled =
-      (disabled?.(date) ?? false) ||
-      (fromDate ? date < startOfDay(fromDate) : false);
+      (disabled?.(date) ?? false) || (fromDate ? date < startOfDay(fromDate) : false);
 
     let base =
       "relative flex items-center justify-center w-8 h-8 text-xs rounded-full cursor-pointer select-none transition-all duration-150 ";
@@ -301,20 +293,14 @@ export function Calendar({
   };
 
   return (
-    <div
-      className={cn(
-        "p-3 rounded-xl w-full",
-        useLiquidGlass ? "" : containerBg,
-        className,
-      )}
-    >
+    <div className={cn("w-full rounded-xl p-3", useLiquidGlass ? "" : containerBg, className)}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="mb-3 flex items-center justify-between">
         <button
           type="button"
           onClick={prevMonth}
           className={cn(
-            "flex items-center justify-center w-7 h-7 rounded-lg transition-all",
+            "flex h-7 w-7 items-center justify-center rounded-lg transition-all",
             navBtn,
           )}
           aria-label="Previous month"
@@ -328,7 +314,7 @@ export function Calendar({
           type="button"
           onClick={nextMonth}
           className={cn(
-            "flex items-center justify-center w-7 h-7 rounded-lg transition-all",
+            "flex h-7 w-7 items-center justify-center rounded-lg transition-all",
             navBtn,
           )}
           aria-label="Next month"
@@ -338,14 +324,11 @@ export function Calendar({
       </div>
 
       {/* Day-of-week headers */}
-      <div className="grid grid-cols-7 mb-1">
+      <div className="mb-1 grid grid-cols-7">
         {DAY_NAMES.map((d) => (
           <div
             key={d}
-            className={cn(
-              "flex items-center justify-center h-7 text-xs font-medium",
-              subtextColor,
-            )}
+            className={cn("flex h-7 items-center justify-center text-xs font-medium", subtextColor)}
           >
             {d}
           </div>
@@ -360,10 +343,7 @@ export function Calendar({
         {dayCells.map((day) => (
           <div
             key={day}
-            className={cn(
-              "flex items-center justify-center h-8",
-              getRangeWrapClass(day),
-            )}
+            className={cn("flex h-8 items-center justify-center", getRangeWrapClass(day))}
           >
             <div
               className={getDayClasses(day)}

@@ -12,6 +12,8 @@ type UserRepository interface {
 	ReadByEmail(context.Context, string, ...string) (models.User, error)
 	ReadUsersProfiles(c context.Context, userID uint) ([]models.PlayerProfile, error)
 	Unban(c context.Context, userID uint) error
+	Promote(c context.Context, userID uint, targetRole string) error
+	Demote(c context.Context, userID uint) error
 }
 
 type UserRepositoryActions struct {
@@ -43,4 +45,30 @@ func (ura UserRepositoryActions) Unban(c context.Context, userID uint) error {
 		"is_banned":    false,
 		"banned_until": nil,
 	}).Error
+}
+
+func (ura UserRepositoryActions) Promote(c context.Context, userID uint, targetRole string) error {
+	role, err := gorm.G[models.Role](ura.conn).Where("name = ?", targetRole).First(c)
+	if err != nil {
+		return err
+	}
+
+	if _, err = gorm.G[models.User](ura.conn).Updates(c, models.User{Model: gorm.Model{ID: userID}, RoleID: role.ID}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (ura UserRepositoryActions) Demote(c context.Context, userID uint) error {
+	role, err := gorm.G[models.Role](ura.conn).Where("name = ?", "user").First(c)
+	if err != nil {
+		return err
+	}
+
+	if _, err := gorm.G[models.User](ura.conn).Updates(c, models.User{Model: gorm.Model{ID: userID}, RoleID: role.ID}); err != nil {
+		return err
+	}
+
+	return nil
 }

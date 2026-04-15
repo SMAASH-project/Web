@@ -40,7 +40,7 @@ func NewGameAuthController(
 func (g GameAuthController) GameLogin(c *gin.Context) {
 	var body dtos.UserLoginDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
 	}
 
@@ -99,7 +99,7 @@ func (g GameAuthController) GameLogin(c *gin.Context) {
 func (g GameAuthController) Refresh(c *gin.Context) {
 	var body dtos.TokenRefreshRequest
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
 	}
 

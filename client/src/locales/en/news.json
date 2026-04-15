@@ -10,8 +10,44 @@
   },
   "add": {
     "title": "Create new News Article",
+    "titleLabel": "Title",
+    "categoryLabel": "Category",
+    "imageSettings": "Image Settings",
+    "imagePosition": "Image Position",
+    "content": "Content",
+    "markdownSupported": "Markdown supported",
+    "previewText": "Preview Text",
+    "current": "Current: {{name}}",
     "cancel": "Cancel",
-    "submit": "Create Article"
+    "submit": "Create Article",
+    "categories": {
+      "Major update": "Major update",
+      "Minor update": "Minor update",
+      "Patch": "Patch",
+      "Unrelated news": "Unrelated news"
+    },
+    "imageTop": "Top",
+    "imageTopDesc": "Place image as a banner above the content.",
+    "imageRight": "Right",
+    "imageRightDesc": "Place image to the right of the content."
+  },
+  "filterTitle": "Select Filters",
+  "filterDescription": "Select which types of news posts you want to see.",
+  "results": "{{count}} results",
+  "posts": "{{count}} posts",
+  "filterOptions": {
+    "majorUpdate": { "label": "Major updates" },
+    "minorUpdate": { "label": "Minor updates", "description": "QOL improvements, bug fixes, etc." },
+    "patch": { "label": "Patches", "description": "Security updates, hotfixes, etc." },
+    "unrelatedNews": { "label": "Unrelated news", "description": "Events, community highlights, etc." }
+  },
+  "toast": {
+    "created": "Post created.",
+    "createFailed": "Failed to create post.",
+    "updated": "Post updated.",
+    "updateFailed": "Failed to update post.",
+    "deleted": "Post deleted.",
+    "deleteFailed": "Failed to delete post."
   },
   "noResults": "No posts found.",
   "edit": "Edit",

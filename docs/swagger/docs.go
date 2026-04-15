@@ -49,12 +49,6 @@ const docTemplate = `{
                             "type": "int"
                         }
                     },
-                    "400": {
-                        "description": "request body in wrong format",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
                     "401": {
                         "description": "unauthorized",
                         "schema": {
@@ -63,6 +57,12 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "422": {
+                        "description": "request body in wrong format",
                         "schema": {
                             "$ref": "#/definitions/dtos.ErrResp"
                         }
@@ -128,14 +128,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/dtos.UserReadDTO"
                         }
                     },
-                    "400": {
-                        "description": "request body in wrong format",
+                    "409": {
+                        "description": "unique key violation",
                         "schema": {
                             "$ref": "#/definitions/dtos.ErrResp"
                         }
                     },
-                    "409": {
-                        "description": "unique key violation",
+                    "422": {
+                        "description": "request body in wrong format",
                         "schema": {
                             "$ref": "#/definitions/dtos.ErrResp"
                         }
@@ -214,12 +214,6 @@ const docTemplate = `{
                             "$ref": "#/definitions/dtos.CategoryReadDTO"
                         }
                     },
-                    "400": {
-                        "description": "request body in wrong format",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
                     "401": {
                         "description": "unauthorized",
                         "schema": {
@@ -228,6 +222,12 @@ const docTemplate = `{
                     },
                     "409": {
                         "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "422": {
+                        "description": "request body in wrong format",
                         "schema": {
                             "$ref": "#/definitions/dtos.ErrResp"
                         }
@@ -349,6 +349,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/dtos.ErrResp"
                         }
                     },
+                    "422": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
                     "500": {
                         "description": "internal server error",
                         "schema": {
@@ -392,6 +398,358 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/characters": {
+            "get": {
+                "description": "Reads characters",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "characters"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns all characters",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.CharacterReadDTO"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new character",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "characters"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for creating a new character",
+                        "name": "character_create_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CharacterCreateDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "returns newly created character",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CharacterReadDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "422": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/characters/{id}": {
+            "get": {
+                "description": "Reads a character by it's id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "characters"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "the id of the desired character",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns the desired character",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CharacterReadDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Updates the character with the given id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "characters"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for updating a character",
+                        "name": "character_update_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CharacterUpdateDTO"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "id of desired character",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "400": {
+                        "description": "id from url and id from request body doesn't match",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "422": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a character with the given id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "characters"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of desired character",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/characters/{id}/img": {
+            "get": {
+                "description": "Returns an uploaded character image",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "multipart/form-data"
+                ],
+                "tags": [
+                    "characters"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of desired character",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Uploads an image for the character with given id",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "characters"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of desired character",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "returns newly created image's URI",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "no file sent",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "415": {
+                        "description": "invalid media type",
                         "schema": {
                             "$ref": "#/definitions/dtos.ErrResp"
                         }
@@ -763,6 +1121,415 @@ const docTemplate = `{
                 }
             }
         },
+        "/levels/{id}/img": {
+            "get": {
+                "description": "Returns an uploaded level image",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "multipart/form-data"
+                ],
+                "tags": [
+                    "levels"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of desired level",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Uploads an image for level with given id",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "levels"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of desired level",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "returns newly created image's URI",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "no file sent",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "415": {
+                        "description": "invalid media type",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/matches": {
+            "post": {
+                "description": "Creates a new match",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "matches"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for creating a new match",
+                        "name": "match_create_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.MatchCreateDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "returns newly created match",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.MatchReadDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "422": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/posts": {
+            "get": {
+                "description": "Reads all posts",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns all posts",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.PostReadDTO"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new post",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for creating a new post",
+                        "name": "post_create_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PostCreateDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "returns newly created post",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PostReadDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "422": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/posts/{id}": {
+            "get": {
+                "description": "Reads a post by it's id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "the id of the desired post",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns the desired post",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PostReadDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Updates the post with the given id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for updating a post",
+                        "name": "post_update_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PostUpdateDTO"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "id of desired post",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "400": {
+                        "description": "id from url and id from request body doesn't match",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "422": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a post with the given id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of desired post",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
         "/profiles": {
             "get": {
                 "description": "Reads all profile",
@@ -1019,6 +1786,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/profiles/{id}/favourite": {
+            "get": {
+                "description": "Reads the most popular items",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stats"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "the id of the desired profile",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns characyers ordered by matches played with said characyers by given profile",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.FavouriteCharactersDTO"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
         "/profiles/{id}/pfp": {
             "get": {
                 "description": "Returns an uploaded profile picture",
@@ -1096,6 +1909,594 @@ const docTemplate = `{
                     },
                     "415": {
                         "description": "invalid media type",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/profiles/{id}/purchases": {
+            "get": {
+                "description": "Reads all purchases of given profile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profiles"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the profile whose purchases you attempt to fetch",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "returns purchases of the given profile",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.PurchaseReadDTO"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "user with given ID not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "422": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/purchases": {
+            "get": {
+                "description": "Reads all purchases",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "purchases"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns all purchases",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.PurchaseReadDTO"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new purchase",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "purchases"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for creating a new purchase",
+                        "name": "purchase_create_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PurchaseCreateDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "returns newly created purchase",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PurchaseReadDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "422": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/purchases/{id}": {
+            "get": {
+                "description": "Reads a purchase by it's id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "purchases"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "the id of the desired purchase",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns the desired purchase",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PurchaseReadDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Updates the purchase with the given id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "purchases"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for updating a purchase",
+                        "name": "purchase_update_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PurchaseUpdateDTO"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "id of desired purchase",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "400": {
+                        "description": "id from url and id from request body doesn't match",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "422": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a purchase with the given id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "purchases"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of desired purchase",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/rarities": {
+            "get": {
+                "description": "Reads all rarities",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rarities"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns all rarities",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.RarityReadDTO"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new rarity",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rarities"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for creating a new rarity",
+                        "name": "rarity_create_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.RarityCreateDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "returns newly created rarity",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.RarityReadDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "422": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/rarities/{id}": {
+            "get": {
+                "description": "Reads a rarity by it's id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rarities"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "the id of the desired rarity",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns the desired rarity",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.RarityReadDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Updates the rarity with the given id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rarities"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for updating a rarity",
+                        "name": "rarity_update_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.RarityUpdateDTO"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "id of desired rarity",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "400": {
+                        "description": "id from url and id from request body doesn't match",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "409": {
+                        "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "422": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a rarity with the given id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rarities"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of desired rarity",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
                         "schema": {
                             "$ref": "#/definitions/dtos.ErrResp"
                         }
@@ -1365,6 +2766,154 @@ const docTemplate = `{
                 }
             }
         },
+        "/stats/leaderboard": {
+            "get": {
+                "description": "Reads profiles with most wins",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stats"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns profiles ordered by count of wins",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.BestPlayersDTO"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/stats/top/characters": {
+            "get": {
+                "description": "Reads the most popular items",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stats"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns items ordered by count of purchsases",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.TopCharactersDTO"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/stats/top/levels": {
+            "get": {
+                "description": "Reads the most played levels",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stats"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns levels ordered by count of matches played",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.TopLevelsDTO"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/stats/top/players": {
+            "get": {
+                "description": "Reads the most active players",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stats"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns players ordered by matches played",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.TopPlayersDTO"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "description": "Reads all users",
@@ -1389,6 +2938,290 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/ban": {
+            "post": {
+                "description": "Bans a given user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for banning a user",
+                        "name": "user_ban_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UserBanDTO"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "id of desired user",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns the period of the ban"
+                    },
+                    "400": {
+                        "description": "id from url and id from request body doesn't match",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "422": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/demote": {
+            "post": {
+                "description": "Demonted a user to the minimum level of privilage",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of desired user",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "422": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/promote": {
+            "post": {
+                "description": "Promotes a given user to an elevated privilage",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "parameters": [
+                    {
+                        "description": "dto for promoting a user",
+                        "name": "user_promote_dto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UserPromoteDTO"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "id of desired user",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "400": {
+                        "description": "id from url and id from request body doesn't match",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "422": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/unban": {
+            "post": {
+                "description": "Unbans a given user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of desired user",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "doesn't return anything",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "404": {
+                        "description": "record not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "422": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/whoami": {
+            "get": {
+                "description": "Tells the caller who they're logged in as based on their jwt",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns the user you're logged in as",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.UserReadDTO"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "user with given ID not found",
                         "schema": {
                             "$ref": "#/definitions/dtos.ErrResp"
                         }
@@ -1597,12 +3430,6 @@ const docTemplate = `{
                             }
                         }
                     },
-                    "400": {
-                        "description": "request body in wrong format",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
                     "401": {
                         "description": "unauthorized",
                         "schema": {
@@ -1617,6 +3444,12 @@ const docTemplate = `{
                     },
                     "409": {
                         "description": "unique key violation",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
+                    "422": {
+                        "description": "request body in wrong format",
                         "schema": {
                             "$ref": "#/definitions/dtos.ErrResp"
                         }
@@ -1665,12 +3498,6 @@ const docTemplate = `{
                             "$ref": "#/definitions/dtos.PlayerProfileReadDTO"
                         }
                     },
-                    "400": {
-                        "description": "request body in wrong format",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrResp"
-                        }
-                    },
                     "401": {
                         "description": "unauthorized",
                         "schema": {
@@ -1689,6 +3516,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/dtos.ErrResp"
                         }
                     },
+                    "422": {
+                        "description": "request body in wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResp"
+                        }
+                    },
                     "500": {
                         "description": "internal server error",
                         "schema": {
@@ -1700,6 +3533,23 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dtos.BestPlayersDTO": {
+            "type": "object",
+            "properties": {
+                "coins": {
+                    "type": "integer"
+                },
+                "count_of_wins": {
+                    "type": "integer"
+                },
+                "display_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
         "dtos.CategoryCreateDTO": {
             "type": "object",
             "required": [
@@ -1739,6 +3589,101 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.CharacterCreateDTO": {
+            "type": "object",
+            "required": [
+                "description",
+                "name",
+                "price",
+                "rarity_id"
+            ],
+            "properties": {
+                "category_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 70
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 20
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "rarity_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dtos.CharacterReadDTO": {
+            "type": "object",
+            "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "img_uri": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "rarity": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.CharacterUpdateDTO": {
+            "type": "object",
+            "required": [
+                "description",
+                "id",
+                "name",
+                "price",
+                "rarity_id"
+            ],
+            "properties": {
+                "category_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 70
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 20
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "rarity_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "dtos.ErrResp": {
             "type": "object",
             "properties": {
@@ -1749,6 +3694,38 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.FavouriteCharactersDTO": {
+            "type": "object",
+            "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "count_of_plays": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "img_uri": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "rarity": {
                     "type": "string"
                 }
             }
@@ -1803,6 +3780,84 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.MatchCreateDTO": {
+            "type": "object",
+            "required": [
+                "ended_at",
+                "level_id",
+                "participation",
+                "session_id",
+                "started_at"
+            ],
+            "properties": {
+                "ended_at": {
+                    "type": "string"
+                },
+                "level_id": {
+                    "type": "integer"
+                },
+                "participation": {
+                    "$ref": "#/definitions/dtos.MatchCreateParticipationDTO"
+                },
+                "session_id": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "started_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.MatchCreateParticipationDTO": {
+            "type": "object",
+            "required": [
+                "character_id",
+                "coins_awarded",
+                "network_status",
+                "player_id",
+                "result"
+            ],
+            "properties": {
+                "character_id": {
+                    "type": "integer"
+                },
+                "coins_awarded": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "network_status": {
+                    "type": "string",
+                    "maxLength": 12
+                },
+                "player_id": {
+                    "type": "integer"
+                },
+                "result": {
+                    "type": "string",
+                    "maxLength": 4
+                }
+            }
+        },
+        "dtos.MatchReadDTO": {
+            "type": "object",
+            "properties": {
+                "ended_at": {
+                    "type": "string"
+                },
+                "level_id": {
+                    "type": "integer"
+                },
+                "match_id": {
+                    "type": "integer"
+                },
+                "players": {
+                    "type": "integer"
+                },
+                "started_at": {
+                    "type": "string"
+                }
+            }
+        },
         "dtos.PlayerProfileAppendDTO": {
             "type": "object",
             "required": [
@@ -1842,9 +3897,6 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
-                },
-                "last_login": {
-                    "type": "string"
                 }
             }
         },
@@ -1864,6 +3916,199 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                }
+            }
+        },
+        "dtos.PostCreateDTO": {
+            "type": "object",
+            "required": [
+                "category",
+                "content",
+                "title"
+            ],
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "img_alt": {
+                    "type": "string"
+                },
+                "img_pos": {
+                    "type": "number"
+                },
+                "img_url": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.PostReadDTO": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "img_alt": {
+                    "type": "string"
+                },
+                "img_pos": {
+                    "type": "number"
+                },
+                "img_url": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.PostUpdateDTO": {
+            "type": "object",
+            "required": [
+                "category",
+                "content",
+                "id",
+                "title"
+            ],
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "img_alt": {
+                    "type": "string"
+                },
+                "img_pos": {
+                    "type": "number"
+                },
+                "img_url": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.PurchaseCreateDTO": {
+            "type": "object",
+            "required": [
+                "count",
+                "item_id",
+                "player_profile_id"
+            ],
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "item_id": {
+                    "type": "integer"
+                },
+                "player_profile_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dtos.PurchaseReadDTO": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "item": {
+                    "type": "string"
+                },
+                "profile": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dtos.PurchaseUpdateDTO": {
+            "type": "object",
+            "required": [
+                "count",
+                "id",
+                "item_id",
+                "player_profile_id"
+            ],
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "item_id": {
+                    "type": "integer"
+                },
+                "player_profile_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dtos.RarityCreateDTO": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "maxLength": 9
+                }
+            }
+        },
+        "dtos.RarityReadDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.RarityUpdateDTO": {
+            "type": "object",
+            "required": [
+                "id",
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 9
                 }
             }
         },
@@ -1917,13 +4162,93 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.TopCharactersDTO": {
+            "type": "object",
+            "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "count_of_purchases": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "img_uri": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "rarity": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.TopLevelsDTO": {
+            "type": "object",
+            "properties": {
+                "count_of_plays": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "img_uri": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.TopPlayersDTO": {
+            "type": "object",
+            "properties": {
+                "coins": {
+                    "type": "integer"
+                },
+                "count_of_matches": {
+                    "type": "integer"
+                },
+                "display_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dtos.UserBanDTO": {
+            "type": "object",
+            "required": [
+                "id",
+                "period"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "period": {
+                    "description": "in minutes",
+                    "type": "integer"
+                }
+            }
+        },
         "dtos.UserCreateDTO": {
             "type": "object",
             "required": [
                 "email",
-                "password",
-                "role_id",
-                "username"
+                "password"
             ],
             "properties": {
                 "email": {
@@ -1934,14 +4259,6 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 50,
                     "minLength": 8
-                },
-                "role_id": {
-                    "type": "integer"
-                },
-                "username": {
-                    "type": "string",
-                    "maxLength": 20,
-                    "minLength": 3
                 }
             }
         },
@@ -1960,9 +4277,31 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.UserPromoteDTO": {
+            "type": "object",
+            "required": [
+                "id",
+                "target_role"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "target_role": {
+                    "type": "string",
+                    "enum": [
+                        "admin",
+                        "support"
+                    ]
+                }
+            }
+        },
         "dtos.UserReadDTO": {
             "type": "object",
             "properties": {
+                "banned_until": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
                 },

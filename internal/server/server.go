@@ -24,7 +24,7 @@ type Server struct {
 func NewServer() *Server {
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8000"
+		port = "8080"
 	}
 
 	return &Server{
@@ -58,6 +58,7 @@ func (s *Server) Run(c context.Context) error {
 		}
 		close(srvErrStream)
 	}()
+	log.Println("API server started successfully")
 
 	signal.Notify(quitStream, syscall.SIGINT, syscall.SIGTERM)
 

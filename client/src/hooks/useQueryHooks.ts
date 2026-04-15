@@ -3,9 +3,9 @@
  *
  * Import from here for convenience, or import directly from the
  * domain-specific files for better tree-shaking:
- *   @/hooks/useAuthHooks
- *   @/hooks/useProfileHooks
+ *   @/hooks/useAuth
+ *   @/hooks/useProfile
  */
 
-export * from "./useAuthHooks";
-export * from "./useProfileHooks";
+export * from "./useAuth";
+export * from "./useProfile";

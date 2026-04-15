@@ -4,12 +4,18 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { AuthProvider } from "./context/AuthProvider";
-import { SettingsProvider } from "./components/pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { SettingsProvider } from "@/pages/settings/SettingsContext";
 import { NavbarProvider } from "./context/NavbarContext";
-import { ColorProvider } from "./components/pages/profileDependents/settings/settingsLogic/color/ColorProvider";
-import { ProfileProvider } from "@/components/forms/addNewProfile/ProfilesContext";
+import { ColorProvider } from "@/pages/settings/ColorProvider";
+import { ProfileProvider } from "@/pages/profile-selector/ProfilesContext";
 import { Wrapper } from "./Wrapper";
+import { Toaster } from "@/components/ui/toaster";
 import { Suspense } from "react";
+import { MotionConfig } from "motion/react";
+import { useDebugSettings } from "@/hooks/useDebugSettings";
+import { DebugEffects } from "@/components/debug/DebugEffects";
+import { DebugOverlay, BreakpointOverlay } from "@/components/debug/DebugBadges";
+import { ElementInspectorOverlay } from "@/components/debug/ElementInspectorOverlay";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,6 +38,20 @@ const persister = createSyncStoragePersister({
   storage: window.localStorage,
 });
 
+const SPEED_TO_MOTION: Record<number, number> = {
+  0.25: 2,
+  0.5: 0.8,
+  1: 0.3,
+  2: 0.1,
+  4: 0.05,
+};
+
+function MotionWrapper({ children }: { children: React.ReactNode }) {
+  const { settings } = useDebugSettings();
+  const duration = SPEED_TO_MOTION[settings.animationSpeed] ?? 0.3;
+  return <MotionConfig transition={{ duration }}>{children}</MotionConfig>;
+}
+
 /**
  * Root layout rendered by React Router.
  *
@@ -40,32 +60,40 @@ const persister = createSyncStoragePersister({
  */
 export function RootLayout() {
   return (
-    <PersistQueryClientProvider
-      client={queryClient}
-      persistOptions={{ persister }}
-    >
+    <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
       <AuthProvider>
         <SettingsProvider>
           <NavbarProvider>
             <ColorProvider>
               <ProfileProvider>
-                <Wrapper>
-                  <Suspense
-                    fallback={
-                      <div className="flex items-center justify-center min-h-screen">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
-                      </div>
-                    }
-                  >
-                    <Outlet />
-                  </Suspense>
-                </Wrapper>
+                <MotionWrapper>
+                  <Wrapper>
+                    <Suspense
+                      fallback={
+                        <div className="flex min-h-dvh items-center justify-center">
+                          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-white"></div>
+                        </div>
+                      }
+                    >
+                      <Outlet />
+                    </Suspense>
+                  </Wrapper>
+                  <Toaster />
+                  {import.meta.env.DEV && (
+                    <>
+                      <DebugEffects />
+                      <DebugOverlay />
+                      <BreakpointOverlay />
+                      <ElementInspectorOverlay />
+                    </>
+                  )}
+                </MotionWrapper>
               </ProfileProvider>
             </ColorProvider>
           </NavbarProvider>
         </SettingsProvider>
       </AuthProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
+      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </PersistQueryClientProvider>
   );
 }

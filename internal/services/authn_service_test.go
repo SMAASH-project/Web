@@ -34,15 +34,15 @@ var (
 
 func TestSignup(t *testing.T) {
 	database.AutoMigrate(mockDBConn)
-	newUser := &models.User{Email: "test@example.com", PasswordHash: "test1234", RoleID: 2}
-	createdUser, err := authService.SignUp(context.Background(), newUser)
+	pass := "test1234"
+	newUser := &models.User{Email: "test@example.com", PasswordHash: pass, RoleID: 2}
+	err := authService.SignUp(context.Background(), newUser)
 
 	assert.Nil(t, err, "Signup shouldn't return an error")
-	assert.Equal(t, createdUser.Email, newUser.Email, "Signup should return passed in user, only updated")
-	assert.NotEqual(t, createdUser.ID, uint(0), "Signed up user should have a non-zero id")
-	assert.Equal(t, createdUser.PasswordHash, newUser.PasswordHash, "Signed up user should have a hashed password")
+	assert.NotEqual(t, newUser.ID, uint(0), "Signed up user should have a non-zero id")
+	assert.NotEqual(t, pass, newUser.PasswordHash, "Signed up user should have a hashed password")
 
-	_, err = authService.SignUp(context.Background(), newUser)
+	err = authService.SignUp(context.Background(), newUser)
 	assert.NotNil(t, err, "Signing up existing user should return an error")
 }
 
@@ -59,7 +59,8 @@ func TestLogin(t *testing.T) {
 	assert.NotNil(t, err, "Logging in non-existing user should produce an error")
 
 	correctPass := "password1234"
-	correctUser, err := authService.SignUp(context.Background(), &models.User{Email: "test@test.com", PasswordHash: correctPass})
+	correctUser := &models.User{Email: "test@test.com", PasswordHash: correctPass, RoleID: 2}
+	err = authService.SignUp(context.Background(), correctUser)
 
 	// Wrong password
 	token, user, err = authService.Login(context.Background(), &models.User{Email: correctUser.Email, PasswordHash: "wrongpass1234"})
@@ -82,5 +83,4 @@ func TestLogin(t *testing.T) {
 
 	assert.Equal(t, user.ID, uint(claims["sub"].(float64)), "Successful login should return a token with the logged is user's id in the sub field")
 	assert.True(t, ok, "Successful login should return a token in valid format")
-	log.Println(user.Role.Name, claims)
 }
