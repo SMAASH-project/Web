@@ -338,7 +338,13 @@ func (pc PlayerProfileController) ReadNotOwnedCharacters(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, utils.Map(player.Characters, dtos.CharacterToDTO))
+	characters, err := pc.profilesRepo.ReadNotOwnedCharacters(c.Request.Context(), player.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	c.JSON(http.StatusOK, utils.Map(characters, dtos.CharacterToDTO))
 }
 
 func (pc PlayerProfileController) MountRoutes(apiGroup *gin.RouterGroup) {
@@ -352,4 +358,5 @@ func (pc PlayerProfileController) MountRoutes(apiGroup *gin.RouterGroup) {
 	profiles.GET("/:id/pfp", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.GetPFP)
 	profiles.GET("/:id/purchases", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.ReadPurchases)
 	profiles.GET("/:id/characters", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.ReadCharacters)
+	profiles.GET("/:id/unowned", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.ReadNotOwnedCharacters)
 }
