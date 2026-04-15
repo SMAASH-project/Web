@@ -172,4 +172,5 @@ func (pc PostsController) MountRoutes(apiGroup *gin.RouterGroup) {
 	posts.GET("", middlewares.Authorize(middlewares.ANY), pagination.New(), pc.ReadAll)
 	posts.GET("/:id", middlewares.Authorize(middlewares.ANY), middlewares.ValidateUrl, pc.ReadByID)
 	posts.PUT("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, pc.Update)
+	posts.DELETE("/:id", middlewares.Authorize(middlewares.ADMIN), middlewares.ValidateUrl, pc.Delete)
 }

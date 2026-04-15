@@ -46,7 +46,7 @@ export interface BanPayload {
  * The backend stores a concrete BannedUntil timestamp, so we approximate
  * permanence with this large value.
  */
-const PERMANENT_BAN_MINUTES = 50 * 365 * 24 * 60; // 26 280 000
+const PERMANENT_BAN_MINUTES = 1000 * 365 * 24 * 60; // 26 280 000
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
