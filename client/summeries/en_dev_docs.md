@@ -1,181 +1,209 @@
 # SMAASH Client — Developer Documentation
 
-**Last updated:** 2026-04-13 (rev 8)
-
-> This guide covers the architecture, conventions, and practical workflows for the SMAASH web client. It's meant to be helpful—not just a checklist.
+> This guide covers the architecture, conventions, algorithms, and practical workflows for the SMAASH web client. It explains not just *what* to use, but *why* it works the way it does.
 
 ---
 
-## Getting Started: The Big Picture
+## The Big Picture
 
-The client is a **React 19 + TypeScript** app that serves authenticated game players and admins. It's built for responsiveness (mobile-first mindset with Tailwind), real-time API state (React Query), and a polished visual experience (custom animations and theme system).
+The client is a **React 19 + TypeScript** single-page application serving authenticated game players and admins. It is built mobile-first, with a strong emphasis on visual polish (custom animation system, adaptive theming), real-time API state (React Query), and a consistent developer experience.
 
-**Tech stack at a glance:**
+**Tech stack:**
 
-- **UI Framework:** React 19 + TypeScript + Vite
-- **Styling:** Tailwind CSS 4 + custom theme utilities
-- **Animation:** `motion/react` (Framer Motion)
-- **State & API:** React Query + Axios
-- **i18n:** i18next (English / Hungarian)
-- **Icons:** Lucide React
+| Layer | Technology |
+|---|---|
+| Framework | React 19 + TypeScript + Vite |
+| Styling | Tailwind CSS 4 + shared theme helpers |
+| Animation | `motion/react` (Framer Motion v11) |
+| Data fetching | React Query v5 + Axios |
+| Internationalization | i18next (English / Hungarian) |
+| Icons | Lucide React |
 
-**Where code lives:**
+**Key entry points:**
 
 - `src/main.tsx` — routes, lazy loading, error boundaries
-- `src/RootLayout.tsx` — global providers, React Query setup, persistence
-- `src/Wrapper.tsx` — theme generation, CSS variables, animated backgrounds
-- `src/pages/*` — feature modules (auth, game, admin, debug)
-- `src/hooks/*` — data fetching logic (React Query hooks)
-- `src/lib/utils/*` — shared theme, color, and type helpers
+- `src/RootLayout.tsx` — global providers, React Query setup, persistence, global debug effects
+- `src/Wrapper.tsx` — theme gradient generation, CSS variable emission, animated background selection and layout frame
+- `src/pages/*` — feature modules (auth, game, admin, debug, etc.)
+- `src/hooks/*` — data fetching logic via React Query hooks
+- `src/lib/utils/*` — shared theme, color math, date, and string helpers
 
 ---
 
 ## Authentication & Authorization
 
-### Public vs. Protected
+### Route Structure
 
-Three public routes handle onboarding:
+Three routes are public and require no session:
 
-- `/login` — form, JWT capture
-- `/signup` — new account creation
+- `/login` — credential entry, JWT capture via HTTP-only cookie
+- `/signup` — account creation
 - `/reset-password` — password recovery flow
 
-Everything under `/app/*` requires authentication via `RequireAuth` guard.
+Every route under `/app/*` is gated by the `RequireAuth` wrapper component, which checks `AuthContext.isLoggedIn` and redirects to `/app/login` if the session is absent.
 
-### Role-Gated Features
+### Role-Gated Pages
 
-Some pages are only available to specific roles:
+| Route | Required role |
+|---|---|
+| `/app/admin` | `admin` |
+| `/app/debug` | `admin` |
 
-- `/app/admin` — admin moderation tools (user ban, profile management)
-- `/app/debug` — admin-only diagnostics and operations dashboard
+Role checks happen at the route level, and are re-checked at the component entry point as a defensive measure. Never bury a permission check inside a nested child — keep it at the page boundary so it is impossible to accidentally render privileged UI.
 
-Role checks happen at the route level, but also re-verified at component entry points as a safety measure.
+### Auth Flow
 
-### How Auth Works
+```
+1. User POSTs to /auth/login
+2. Server sets an HTTP-only session cookie
+3. AuthProvider fires GET /users/whoami on mount
+4. Response populates AuthContext: { userId, isAdmin, isSupport, isLoggedIn }
+5. Any 401 from apiClient auto-redirects to /app/login
+```
 
-1. User logs in via `/auth/login`
-2. Session is maintained by HTTP-only cookies (`withCredentials: true`)
-3. `AuthProvider` resolves identity via `GET /users/whoami`
-4. `AuthContext` exposes `userId`, `isAdmin`, `isSupport`, and `isLoggedIn`
-5. For non-auth endpoints, 401 responses trigger redirect to `/app/login`
+This design means the client never stores a token in JS memory or localStorage — the cookie is invisible to scripts, which eliminates a whole class of XSS token-theft vectors.
 
 ---
 
 ## Provider Architecture
 
-Providers wrap the app in this order (see `RootLayout.tsx`):
+Providers are stacked in `RootLayout.tsx` in a deliberate order. Each provider depends on those above it:
 
 ```
-React Query (persisted)
+React Query (persisted cache)
   ↓
-AuthProvider
+AuthProvider          ← resolves identity; everything else depends on this
   ↓
-SettingsProvider
+SettingsProvider      ← loads theme prefs before any visual component renders
   ↓
-NavbarProvider
+NavbarProvider        ← needs settings for theme-aware scroll behavior
   ↓
-ColorProvider
+ColorProvider         ← emits CSS variables from gradient colors; must run before painted UI
   ↓
-ProfileProvider
+ProfileProvider       ← needs auth (userId) to load the correct profile from localStorage
   ↓
-App
+App (routes, pages)
 ```
 
-**Why this order matters:**
-
-- Auth must be available before feature providers
-- Settings must load before theme generation
-- ColorProvider needs to emit CSS variables before child renders
+Changing this order silently breaks things. For example, placing `ColorProvider` above `SettingsProvider` would emit CSS variables before `useLiquidGlass` / `useDarkMode` are known, causing a visible color flash on first render.
 
 ### Persisted State
 
-These values survive page reload (stored in localStorage):
+These values survive hard refreshes via localStorage:
 
-| Key                         | Provider         | Purpose                                |
-| --------------------------- | ---------------- | -------------------------------------- |
-| `settings`                  | SettingsProvider | UI prefs (theme, animations, language) |
-| `color-settings`            | ColorProvider    | gradient colors + animation override   |
-| `selected_profile_<userId>` | ProfileProvider  | which character is active              |
+| Key | Provider | What it stores |
+|---|---|---|
+| `settings` | SettingsProvider | Theme flags, animation prefs, language |
+| `color-settings` | ColorProvider | Gradient colors + animation override |
+| `selected_profile_<userId>` | ProfileProvider | Which character is currently active |
 
 ---
 
 ## Theme & Visual System
 
-### The Unified Approach
+### The Golden Rule
 
-Instead of scattered inline styles, use shared helpers in `src/lib/utils/themeClasses.ts`:
+Every component that renders themed UI must use the shared helpers in `src/lib/utils/themeClasses.ts`. Never write inline ternary theme chains:
 
 ```typescript
-// ✅ Do this
-const bgClass = getBackgroundClasses(useLiquidGlass, useDarkMode);
-const textColor = getTextColor(useLiquidGlass, useDarkMode);
-const inputClass = getInputClasses(useLiquidGlass, useDarkMode);
+// ✅ Do this — centralised, one place to change
+const bg = getBackgroundClasses(useLiquidGlass, useDarkMode);
+const text = getTextColor(useLiquidGlass, useDarkMode);
+const input = getInputClasses(useLiquidGlass, useDarkMode);
 
-// ❌ Avoid this
-const bgClass = useDarkMode ? "bg-gray-900" : "bg-white";
+// ❌ Never this — fragile, duplicated everywhere
+const bg = useDarkMode
+  ? useLiquidGlass ? "bg-white/10 backdrop-blur-md" : "bg-gray-900"
+  : "bg-white";
 ```
 
-This keeps theme changes **centralized**. If you need to adjust dark mode colors, you update _one function_, not 50 component files.
+If the dark-mode color for a card needs to change, you update one function and every card in the app updates automatically.
 
 ### Key Theme Flags
 
-These control the entire visual presentation:
-
-| Setting             | Effect                                         |
-| ------------------- | ---------------------------------------------- |
-| `useLiquidGlass`    | Glassmorphism with blur + transparency         |
-| `useDarkMode`       | Dark / light color scheme                      |
-| `useAnimations`     | Enable / disable motion                        |
+| Setting | Effect |
+|---|---|
+| `useLiquidGlass` | Glassmorphism: `backdrop-blur` + semi-transparent backgrounds |
+| `useDarkMode` | Dark vs. light color scheme |
+| `useAnimations` | Enable / disable all motion |
 | `animationOverride` | Force a specific background effect (see below) |
 
-### CSS Variables from Gradient
+### CSS Variable Generation Algorithm
 
-When a user sets custom theme colors, `ColorProvider` generates CSS variables:
+`ColorProvider` takes the user's 3-point gradient selection and derives a full set of CSS custom properties. The algorithm is:
 
-```css
---theme-accent: #fff700;
---theme-accent-hover: #ffed4e;
---theme-accent-soft: rgba(255, 247, 0, 0.15);
---theme-nav-border: rgba(255, 247, 0, 0.2);
---theme-nav-shadow: 0 2px 8px rgba(255, 247, 0, 0.1);
+```typescript
+// Given: accent = "#fff700" (user-picked primary color)
+
+// 1. Lighten the accent slightly for hover states
+const accentHover = lightenHex(accent, 0.15); // → "#ffed4e"
+
+// 2. Make a transparent soft version for backgrounds/chips
+const accentSoft = hexToRgba(accent, 0.15); // → "rgba(255, 247, 0, 0.15)"
+
+// 3. Make very-low-opacity versions for nav border and shadow
+const navBorder = hexToRgba(accent, 0.2);
+const navShadow = hexToRgba(accent, 0.1);
+
+// 4. Inject all of them into :root
+document.documentElement.style.setProperty("--theme-accent", accent);
+document.documentElement.style.setProperty("--theme-accent-hover", accentHover);
+document.documentElement.style.setProperty("--theme-accent-soft", accentSoft);
+document.documentElement.style.setProperty("--theme-nav-border", navBorder);
+document.documentElement.style.setProperty("--theme-nav-shadow", navShadow);
 ```
 
-These are used in components like Navbar borders and shadows for a cohesive look.
+The result is that every component using `var(--theme-accent)` in CSS automatically reflects the user's color choice — including Navbar borders, button glows, and badge backgrounds — without any React re-render of those components.
 
 ---
 
 ## Animation & Background System
 
-### How Backgrounds Work
+### Background Selection Algorithm
 
-Backgrounds are layered visual effects tied to the theme. Each background has a unique animation style:
+The animated background system supports four modes, controlled by `animationOverride` in settings:
 
-- `aurora` — slow, organic light movements
-- `matrix` — tech-style falling columns
-- `particles` — floating geometric shapes
-- And more, defined in `AnimatedBackground.tsx`
+```
+animationOverride === null       → use the theme's default animation key
+animationOverride === "none"     → render nothing (static page)
+animationOverride === "aurora"   → force a single named effect, ignore theme
+animationOverride === "custom"   → render CompositeBackground (layered effects)
+```
 
-### Selecting Animations
+The selection logic in `Wrapper.tsx` resolves the correct background component before any render:
 
-Users can pick animations in Settings. Three modes:
+```typescript
+function resolveBackground(override: string | null, themeDefault: AnimationKey) {
+  if (override === null) return themeDefault;
+  if (override === "none") return null;
+  if (override === "custom") return "composite";
+  return override as AnimationKey; // validated key
+}
+```
 
-1. **Default mode** (`animationOverride: null`)  
-   Follow the theme's natural animation choice.
+### Crossfade on Switch
 
-2. **Disabled mode** (`animationOverride: "none"`)  
-   Static, no motion. Good for users with reduced-motion preference or performance constraints.
+When the animation changes, the new background fades in while the old one fades out. This avoids a harsh cut. The crossfade is driven by `AnimatePresence` with `mode="wait"` wrapping the background component, keyed by the resolved animation name:
 
-3. **Single effect** (`animationOverride: "aurora"`)  
-   Force one background effect regardless of theme.
-
-4. **Custom mix** (`animationOverride: "custom"`)  
-   Layer multiple sub-effects together using EffectMixDialog.
+```tsx
+<AnimatePresence mode="wait">
+  <motion.div
+    key={resolvedAnimation}
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.6 }}
+  >
+    <BackgroundComponent />
+  </motion.div>
+</AnimatePresence>
+```
 
 ### Performance Notes
 
-- Backgrounds are deferred (fade in after ~500ms) on heavy card pages to avoid jank
-- Switching backgrounds crossfades smoothly
-- Motion pauses when animations are disabled (no flicker, just holds current frame)
+- Backgrounds are **deferred** on heavy card pages: they fade in after ~500ms so the page's primary content renders and paints first, avoiding jank
+- When `useAnimations` is false, motion holds its last rendered frame — there is no flash or re-layout, it simply stops
+- `CompositeBackground` lazily mounts each sub-effect as a canvas layer; layers that are toggled off unmount cleanly
 
 ---
 
@@ -183,58 +211,262 @@ Users can pick animations in Settings. Three modes:
 
 ### The API Client
 
-Located in `src/lib/apiClient.ts`:
+`src/lib/apiClient.ts` is a pre-configured Axios instance:
 
 ```typescript
-const response = await apiClient.get("/api/players");
-// Or with Axios directly
-const response = await axios.get("/api/users/me");
+const apiClient = axios.create({
+  baseURL: "/api",
+  withCredentials: true, // sends the HTTP-only session cookie
+});
+
+// Global 401 interceptor — any unauthorized response redirects to login
+apiClient.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err.response?.status === 401) {
+      window.location.href = "/app/login";
+    }
+    return Promise.reject(err);
+  }
+);
 ```
 
-**Default behavior:**
+### React Query Hook Pattern
 
-- Base URL: `/api`
-- Credentials: included (for auth cookies if needed)
-- 401 errors: auto-redirect to login
-
-### React Query Conventions
-
-All data fetching uses React Query for consistency. Define hooks like this:
+All data fetching lives in hooks under `src/hooks/`. The standard pattern:
 
 ```typescript
 // src/hooks/useGetStats.ts
 export function useGetStats(userId: string) {
   return useQuery({
-    queryKey: ["stats", userId],
-    queryFn: () => apiClient.get(`/stats/${userId}`),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    queryKey: queryKeys.stats(userId),
+    queryFn: () => apiClient.get<StatsResponse>(`/stats/${userId}`).then(r => r.data),
+    staleTime: 1000 * 60 * 5, // 5 minutes before background refetch
+    enabled: !!userId,         // don't fire if userId is empty
   });
 }
 ```
 
-Benefits:
+Benefits over raw `useEffect` + `useState`:
+- Automatic deduplication: multiple components using the same query share one request
+- Background refetch on window focus
+- Built-in loading / error state
+- Cache invalidation after mutations keeps UI consistent
 
-- Automatic caching & deduplication
-- Refetch on focus, with backoff
-- DevTools support for debugging cache state
-- Invalidate on mutations for consistency
+### Query Key Factory
 
-### Key Factory Pattern
-
-Instead of hardcoding query keys everywhere, use a factory (see `src/lib/queryKeys.ts`):
+Hardcoding query key arrays everywhere makes cache invalidation a maintenance nightmare. Use the factory in `src/lib/queryKeys.ts`:
 
 ```typescript
-// Define once
-const queryKeys = {
-  stats: (userId: string) => ["stats", userId],
-  leaderboard: () => ["leaderboard"],
+// Define once, centrally
+export const queryKeys = {
+  stats: (userId: string) => ["stats", userId] as const,
+  leaderboard: () => ["leaderboard"] as const,
+  user: (id: number) => ["user", id] as const,
 };
 
-// Use everywhere
-useQuery({ queryKey: queryKeys.stats(userId), ... })
+// Invalidate precisely after a mutation
+queryClient.invalidateQueries({ queryKey: queryKeys.stats(userId) });
 ```
 
-This makes refactoring cache invalidation much easier later.
+This means renaming a cache key only requires changing one line.
+
+---
+
+## Page Layout Contract
+
+### Fixed Navbar Clearance
+
+The Navbar is `position: fixed`, meaning it is **outside the document flow**. Content starting at `y=0` renders behind it. The correct pattern is used in `AdminPage` and should be followed on all full-page layouts:
+
+```tsx
+<div className="flex h-dvh w-full flex-col">
+
+  {/* Fixed navbar — renders above everything, not in flow */}
+  <Navbar />
+
+  {/* Physical spacer matching the navbar height. This pushes the
+      scroll container below the navbar in the layout flow. */}
+  <div className="h-24 shrink-0" aria-hidden="true" />
+
+  {/* Scroll container: fills the remaining viewport height.
+      overflow-y-auto means the page scrolls here, not on <body>. */}
+  <div className="flex flex-1 overflow-y-auto">
+
+    {/* Content wrapper: min-h-full + flex-1 ensures it fills the
+        scroll container, so py-4/py-5 creates equal top and bottom
+        breathing room even when the card content is short. */}
+    <div className="flex min-h-full w-full flex-1 flex-col items-center px-3 py-4 sm:px-6 sm:py-5 lg:px-10">
+      <PageContent />
+    </div>
+
+  </div>
+</div>
+```
+
+The key insight: `min-h-full flex-1` on the content wrapper makes it always stretch to fill the scroll container, which means the `py-4/py-5` padding is always the only space between the viewport edge and the card — giving perfectly equal top and bottom margins regardless of how much content is on the page.
+
+**Confirmed covered pages:** Gallery, Leaderboard, Webstore, News, Releases, Admin, Debug, Settings, Profile.
+
+---
+
+## The Pill-Container Tab Picker
+
+This is the standard tab selector used across Gallery, Leaderboard, Webstore (ItemFilters), and Releases (SelectOs). It features a sliding highlight that follows the mouse in Liquid Glass mode.
+
+### Algorithm
+
+```tsx
+// 1. State at the container level
+const containerRef = useRef<HTMLDivElement>(null);
+const [highlightPos, setHighlightPos] = useState({ left: 0, width: 0 });
+const [isHovering, setIsHovering] = useState(false);
+
+// 2. On mouse-enter for any tab button:
+function handleTabMouseEnter(tabId: string) {
+  const container = containerRef.current;
+  const btn = container?.querySelector(`[data-tab="${tabId}"]`);
+  if (!container || !btn) return;
+
+  const cRect = container.getBoundingClientRect();
+  const bRect = btn.getBoundingClientRect();
+
+  setHighlightPos({
+    left: bRect.left - cRect.left,
+    width: bRect.width,
+  });
+  setIsHovering(true);
+}
+
+// 3. On mouse-leave from the container:
+function handleContainerMouseLeave() {
+  setIsHovering(false);
+  // Snap highlight back to the currently selected tab
+  const btn = containerRef.current?.querySelector(`[data-tab="${activeTab}"]`);
+  if (btn && containerRef.current) {
+    const cRect = containerRef.current.getBoundingClientRect();
+    const bRect = btn.getBoundingClientRect();
+    setHighlightPos({ left: bRect.left - cRect.left, width: bRect.width });
+  }
+}
+
+// 4. Render
+<div
+  ref={containerRef}
+  className={`relative flex gap-1 rounded-lg p-1 ${panelBg}`}
+  onMouseLeave={handleContainerMouseLeave}
+>
+  {/* Sliding highlight — only in LG (Liquid Glass) mode */}
+  {useLiquidGlass && (
+    <motion.div
+      className="absolute top-1 bottom-1 rounded-md bg-white/15"
+      animate={{ left: highlightPos.left, width: highlightPos.width }}
+      transition={{ type: "spring", stiffness: 400, damping: 35 }}
+    />
+  )}
+
+  {tabs.map((tab) => (
+    <button
+      key={tab.id}
+      data-tab={tab.id}
+      onMouseEnter={() => handleTabMouseEnter(tab.id)}
+      onClick={() => setActiveTab(tab.id)}
+      className={activeTab === tab.id
+        ? "bg-gray-700 shadow-md"   // non-LG active
+        : "hover:bg-gray-700"       // non-LG inactive hover
+      }
+    >
+      {tab.label}
+    </button>
+  ))}
+</div>
+```
+
+The `data-tab` attribute is what ties the button DOM element to the highlight position calculation — it avoids index-based lookups and is resilient to conditional tab rendering.
+
+**Active state classes must handle both LG and non-LG modes.** In LG mode, buttons are transparent (`bg-transparent`) and the sliding highlight provides the active visual. In non-LG mode, the active button uses `bg-gray-700 shadow-md` (dark) / `bg-gray-200 shadow-md` (light). Never use `bg-white/15` or hardcoded `bg-white` for active state — these lack proper LG mode handling.
+
+---
+
+## The Viewport Override (Debug Emulation)
+
+The debug emulation tab can force the browser to behave as if it has specific dimensions, allowing JS-driven responsive logic to be tested without resizing the physical window.
+
+### How It Works
+
+Standard `window.innerWidth` is a read-only property, so you cannot just assign to it. The override uses `Object.defineProperty` to replace the getter:
+
+```typescript
+// Store originals for cleanup
+const origDescriptors = {
+  innerWidth: Object.getOwnPropertyDescriptor(window, "innerWidth"),
+  innerHeight: Object.getOwnPropertyDescriptor(window, "innerHeight"),
+  // ... outerWidth, outerHeight
+};
+
+const origMatchMedia = window.matchMedia.bind(window);
+
+// Patch dimensions
+Object.defineProperty(window, "innerWidth",  { get: () => forcedWidth,  configurable: true });
+Object.defineProperty(window, "innerHeight", { get: () => forcedHeight, configurable: true });
+
+// Patch matchMedia — re-evaluate CSS queries against forced dimensions
+window.matchMedia = (query: string): MediaQueryList => {
+  const match = evaluateCSSMediaQuery(query, forcedWidth, forcedHeight);
+  return {
+    matches: match,
+    media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => false,
+  };
+};
+
+// Signal hooks and components to re-evaluate
+window.dispatchEvent(new CustomEvent("viewport-override", {
+  detail: { width: forcedWidth, height: forcedHeight }
+}));
+```
+
+The `useMediaQuery` hook in `src/components/nav/navLogic/useMediaQuery.ts` listens for the `"viewport-override"` custom event and forces a re-render when it fires, making responsive layout changes take effect immediately in JS-driven code.
+
+### Important Limitation
+
+Tailwind CSS breakpoints (`sm:`, `md:`, `lg:`, `xl:`) are compiled to CSS `@media` queries at build time. The patched `window.matchMedia` only affects JavaScript callers — Tailwind's CSS rules are evaluated by the browser's own CSS engine against the actual physical viewport, which is unaffected. The override is useful for testing `useMediaQuery` hooks, navbar breakpoints, and JS-driven layout logic.
+
+---
+
+## Leaderboard Data Normalisation
+
+All four leaderboard datasets (wins, active players, top levels, top items) have different shapes from the backend. Before being passed to `PodiumSlot` or `CategoryView`, they are normalised to a single `RankedEntry` type:
+
+```typescript
+interface RankedEntry {
+  id: number;
+  name: string;
+  stat: number;
+  statLabel: string; // e.g. "Wins", "Matches Played"
+  sub?: string;      // optional subtitle (e.g. player name for a level entry)
+}
+
+// Example: normalising the wins dataset
+const winsEntries: RankedEntry[] = leaderboardData.map((entry) => ({
+  id: entry.player_id,
+  name: entry.username,
+  stat: entry.count_of_wins,
+  statLabel: t("tabs.wins"),
+}));
+```
+
+This pattern keeps `PodiumSlot` and `CategoryView` entirely generic — they never import or know about backend response types. Adding a new leaderboard category only requires:
+1. A new query hook
+2. A normalisation mapping to `RankedEntry[]`
+3. A new `TabId` entry
+
+The search filter in `CategoryView` runs on the normalised data and preserves original rank numbers through filtering by tracking rank as a separate field alongside array index.
 
 ---
 
@@ -242,250 +474,120 @@ This makes refactoring cache invalidation much easier later.
 
 ### Admin Panel (`/app/admin`)
 
-Admins manage users, apply bans, and monitor platform health.
+The admin panel is split across three columns at `xl` breakpoint (`xl:flex-row`), each handled by its own component:
 
-**Key components:**
+- `UserList` — searchable user list with client-side filtering; backend pagination is a future improvement
+- `UserDetail` — selected user's full profile, action buttons (ban/unban, promote/demote)
+- `ProfilesPanel` — the selected user's game profiles and stats
+- `BanDialog` — duration-picker dialog for applying bans (preset chips + custom range + free-text reason)
 
-- `UserList` — paginated, searchable user table
-- `UserDetail` — full profile edit, ban history
-- `BanDialog` — role-based ban UI (temporary/permanent, presets, custom reason)
-
-**Current limitations:**
-
-- User search is client-side (backend pagination coming)
-- Ban reasons are preset chips; custom free-text also supported
+The selected user flows through `useAdminPageLogic`, a single hook that owns all state and mutations for the panel. Components only receive the `logic` object — they never own their own mutation state.
 
 ### Debug Panel (`/app/debug`)
 
-Admin-only diagnostics and operations dashboard.
+Admin-only diagnostics and operations dashboard. Eight tabs:
 
-**Core tabs:**
+| Tab | Purpose |
+|---|---|
+| System | Runtime diagnostics and system-level state |
+| Endpoints | Manual HTTP request tester |
+| Cache | React Query cache inspection and invalidation |
+| Game Data | CRUD workflows for characters, levels, items, and user management |
+| Visual | UI debugging tools (see below) |
+| Emulation | Responsive testing and network simulation |
+| Diagnostics | A11y, render counts, z-index, click targets |
+| Database | Generic REST-backed data browser for all resources |
 
-1. **System** — runtime/system-level diagnostics
-2. **Endpoints** — manual endpoint testing
-3. **Cache** — React Query cache inspection/invalidation
-4. **Game Data** — interactive CRUD + moderation workflows
-5. **Visual** — UI debugging
-6. **Emulation** — responsive testing & network simulation
-7. **Diagnostics** — performance & accessibility insights
-8. **Database** — generic REST-backed data browser + schema/reference view
+**Visual tab capabilities:**
+- Animation speed multiplier
+- Navbar override (force show / force hide — useful for testing scroll-hidden navbar behavior)
+- Backdrop blur toggle
+- Layout border highlights (outlines all DOM elements for spacing debugging)
+- Element inspector (hover DOM nodes to see their computed box model)
+- Overlay controls: FPS counter, scroll position indicator, Tailwind breakpoint badge
+- Toast test button
+- CSS variable explorer with live color swatches
 
-Detailed highlights:
+**Emulation tab capabilities:**
+- Reduced motion toggle
+- Compact density mode (tighter fonts and spacing)
+- Safe-area outlines for notch/island device testing
+- Force JS Viewport (see Viewport Override section above)
+  - Presets: Desktop 1920, Desktop 1280, Tablet 768, Mobile 390, Mobile 360
+  - Custom width + height input
+- Network delay simulation (artificial latency + jitter in milliseconds)
 
-- **Database** — new generic admin data browser
-  - Resource selectors: Users, Profiles, Items, Characters, Levels, Categories, Rarities, Purchases, Roles, Posts, Stats
-  - Row-level CRUD via create/edit dialogs and delete confirmations (where backend endpoints exist)
-  - Hardcoded schema/reference view derived from Go/GORM models (client-side documentation layer)
-  - Inline user moderation actions: Ban (duration picker), Unban, Promote, Demote
-  - Session-only action history (in-memory ring, max 20 actions)
-  - Danger Zone area with cascade warnings (notably Users/Profiles)
-  - Current constraints: no seed/reset endpoints, posts delete unavailable, image upload flows intentionally excluded
-
-- **Visual** — UI debugging
-  - Animation speed control
-  - Navbar override (useful for testing mobile behavior)
-  - Backdrop blur toggle
-  - Layout borders (highlight elements)
-  - Element inspector (hover-highlight DOM nodes)
-  - Overlay controls: FPS counter, scroll position, breakpoint badge
-  - Toast test (fire sample notifications)
-  - CSS variable explorer with color swatches
-
-- **Emulation** — Responsive testing & network simulation
-  - Reduced motion toggle (respects OS preference, can override)
-  - Compact density (smaller fonts/spacing)
-  - Safe-area outlines (highlights safe-inset areas on notch devices)
-  - **Force JS Viewport** — emulate device sizes for responsive testing
-    - Presets: Desktop 1280, Desktop 1920, Tablet 768, Mobile 390, Mobile 360
-    - Custom width/height input
-    - **Note:** Tailwind CSS classes are compile-time; only JS-driven media queries respond to viewport forcing
-  - Network simulation (delay + jitter in milliseconds)
-
-- **Diagnostics** — Performance & accessibility insights
-  - A11y contrast checker (CSS variables vs. white/black backgrounds)
-  - Focus ring preview
-  - Render diagnostics (component render count, React Query fetch/mutate operations)
-  - Click target size inspector
-  - z-index stack viewer
-
-- **Game Data** — expanded interaction scope
-  - Full CRUD flows for characters, levels, and items
-  - Item form selectors wired to rarity/category datasets
-  - User management table with moderation actions (ban/promote/demote)
-
-- **Hook surface (`useDebug.ts`)**
-  - Added multiple debug query hooks and broad mutation coverage for CRUD-capable endpoints
-  - New JSDoc coverage on added hooks to keep IntelliSense and usage guidance consistent
-
-**Viewport Override Technical Details:**
-
-- Patches `window.innerWidth`, `window.innerHeight`, `window.outerWidth`, `window.outerHeight`
-- Replaces `window.matchMedia` with a custom function that evaluates CSS queries against forced dimensions
-- Dispatches `CustomEvent("viewport-override")` so hooks like `useMediaQuery` re-evaluate immediately
-- Cleanup effect restores original values on unmount or disable
-
-### Profile (`/app/profile`)
-
-Players manage their account settings.
-
-**Current features:**
-
-- Display name edit
-- Email edit
-- Selected profile stats (if match history endpoint available)
-
-**Not yet wired:**
-
-- Password change (awaiting backend endpoint)
-- Match history / detailed stats
-
-### Webstore (`/app/webstore`)
-
-Browse and purchase in-game items.
-
-**How it works:**
-
-1. Fetch all items from backend
-2. Query user's purchases
-3. Compute "owned" items by checking purchase history
-4. Show purchase button for unowned items
-5. On purchase → deduct coins, add to purchase list, update UI
-
-**State:**
-
-- Coins balance comes from selected profile's context
-- Purchases are fetched and merged per user
+**Database tab:**
+- Resources: Users, Profiles, Items, Characters, Levels, Categories, Rarities, Purchases, Roles, Posts, Stats
+- Row-level CRUD via create/edit dialogs and delete confirmations (where backend endpoints exist)
+- Hardcoded schema/reference view derived from Go/GORM models — acts as inline documentation
+- Inline user moderation: Ban (with duration picker), Unban, Promote, Demote
+- Session-only action history (in-memory ring buffer, capped at 20 entries)
+- Danger Zone section with cascade warnings for destructive operations on Users and Profiles
+- Known gaps: no seed/reset endpoints wired, post deletion unavailable, image upload excluded from CRUD dialogs
 
 ### Gallery (`/app/gallery`)
 
-Two-tab page: **Characters** grid and **OST** music player.
+Two-tab page: Characters grid and OST music player.
 
-**Tab picker:** Uses the shared pill-container pattern — `panelBg` container with `relative` positioning, a sliding highlight div (LG mode only), and `data-tab` attributes on each button for selector-based position tracking. Active state: `bg-gray-700 shadow-md` (non-LG dark) / `bg-gray-200 shadow-md` (non-LG light). Inactive hover: `hover:bg-gray-700` / `hover:bg-gray-100`. In LG mode the buttons are transparent and the sliding highlight provides the active visual. Mouse-enter on each button updates `highlightPos`; mouse-leave on the container resets it to the selected tab.
+- **Characters tab:** Fetches via `useDebugCharactersQuery` (requires admin role — see `docs/problems.md` for the auth gap on `GET /characters`). Each character rendered by `CharacterCard`, which loads `GET /api/characters/:id/img` and falls back to a `Swords` placeholder on error. Animated via `LoadPost` when `useAnimations` is enabled.
 
-The `TabButton` component is local to `GalleryPage`. It receives `dataTab`, `onMouseEnter`, and `isHovering` props to participate in the container-level highlight tracking.
-
-**Characters tab:** Fetches via `useDebugCharactersQuery` (requires ADMIN — see `GET /characters` auth issue in `docs/problems.md`). Each character is rendered by `CharacterCard`, which loads `GET /api/characters/:id/img` and falls back to a `Swords` placeholder icon on error. Animated via `LoadPost` when `useAnimations` is on.
-
-**OST tab:** Static `OstTrack[]` list defined at the top of the file. Add tracks by editing `OST_TRACKS`. Fully functional audio player with scrubber, volume, and a track list.
+- **OST tab:** Static `OstTrack[]` array defined at the top of the file. Add tracks by editing `OST_TRACKS`. Full audio player with seekbar, volume control, and a track list panel.
 
 ### Leaderboard (`/app/leaderboard`)
 
-Tab-based leaderboard with a podium view per category and a global "All" overview.
+Tab-based leaderboard. Tabs: `all`, `wins`, `active`, `levels`, `items`.
 
-**Tab picker:** Same pill-container pattern as Gallery and `ItemFilters` — `tabContainerRef`, `highlightPos`, `isHovering` state at the page level; sliding highlight div in LG mode; `data-tab` on each button. Active state: `bg-gray-700 shadow-md` / `bg-gray-200 shadow-md`. Inactive hover: `hover:bg-gray-700` / `hover:bg-gray-100`.
+- **All tab:** Stat bar (four chips showing the #1 in each category) + 2×2 grid of top-5 panels. Each panel has its own skeleton while its query loads.
+- **Category tabs:** `PodiumSlot` components for ranks 1–3 in the physical podium order `[2nd | 1st | 3rd]`, animated with staggered `motion.div` (0 / 0.15 / 0.30s delays). Runners-up (4th–5th) shown below. Full scrollable ranked list with search.
+- All four queries fire in parallel. Tab switching uses `AnimatePresence mode="wait"` with a 0.18s opacity/y fade. `key={activeTab}` on the `CategoryView` wrapper resets search state on every tab change.
 
-**Tab structure (`TabId`):**
+### Webstore (`/app/webstore`)
 
-| Tab | Data source | Key stat |
-|---|---|---|
-| `all` | All four queries | Stat bar + top-5 panels |
-| `wins` | `useLeaderboardQuery` | `count_of_wins` |
-| `active` | `useTopPlayersQuery` | `count_of_matches` |
-| `levels` | `useTopLevelsQuery` | `count_of_plays` |
-| `items` | `useTopItemsQuery` | `count_of_purchases` |
+1. Fetch all items from backend
+2. Fetch user's purchase history
+3. Compute "owned" status by intersecting item IDs with purchase records
+4. Render purchase button only for unowned items
+5. On purchase: deduct coins from active profile context, add to purchase list, invalidate relevant queries
 
-**"All" view:**
+Coin balance is derived from the selected profile's context, not a global wallet. Switching profiles changes the available balance.
 
-- Stat bar: 4 chips showing the #1 performer in each category
-- 2×2 grid with top 5 rows per panel (reduced from 10 to reduce dead space)
-- Each panel has its own skeleton while its query loads
+### Profile (`/app/profile`)
 
-**Category view (any tab except "all"):**
-
-- `PodiumSlot` components for ranks 1–3, rendered in order `[2nd | 1st | 3rd]` to match a physical podium; animated with `motion.div` (0.4s ease-out, staggered 0 / 0.15 / 0.30 s)
-- Runners-up row for ranks 4–5 if they exist
-- `CategoryView` component holds local `search` state; data is normalised to `RankedEntry[]` before passing in
-- Scrollable list (`max-h-72 overflow-y-auto`) of all entries with their original rank numbers preserved through filtering
-
-**Data normalisation:**
-
-All four datasets are mapped to `RankedEntry { id, name, stat, statLabel, sub? }` in the page component before being passed down. This keeps `PodiumSlot` and `CategoryView` fully generic.
-
-**Performance:**
-
-- `CardAnimation` (1.5 s spring) and `LoadPost` row stagger are no longer used on this page — content is visible immediately
-- Tab switching uses `AnimatePresence mode="wait"` with a 0.18 s opacity/y fade
-- Each `CategoryView` mount resets search state (desirable; enforced by `key={activeTab}` on the wrapper)
-- All four queries still fire in parallel; skeleton per panel covers the individual loading states
-
-**Locale keys added** (both `en` and `hu`): `tabs.*`, `podium.runnersUp`, `podium.fullRankings`, `statBar.*`, `search`.
-
----
-
-## Navbar & Page Layout
-
-### Fixed Navbar Contract
-
-The navbar is `position: fixed`, so it **doesn't take up document flow**. This means **your content starts at y=0 behind the navbar** unless you add padding.
-
-### The Fix
-
-Every page with a navbar must add spacing to its first content container:
-
-```tsx
-// ✅ Good
-<div className="mt-20">  {/* or pt-20 for padding-top */}
-  <h1>Page title</h1>
-  ...
-</div>
-
-// ❌ Bad — content hides behind navbar
-<div>
-  <h1>Page title</h1>
-</div>
-```
-
-### Special Case: Centered Content
-
-If you're using flexbox to center (like Settings or Profile):
-
-```tsx
-// ✅ Good
-<div className="w-full flex flex-col items-center justify-center pt-20">
-  <FormCard>...</FormCard>
-</div>
-
-// ❌ Bad — centering alone doesn't fix navbar overlap
-<div className="w-full flex flex-col items-center justify-center">
-  <FormCard>...</FormCard>
-</div>
-```
-
-**Confirmed covered pages:** Gallery, Leaderboard, Webstore, News, Releases (all have mt-20 or pt-20).
+Currently implemented: display name edit, email edit. Not yet wired: password change (awaiting backend endpoint), full match history / detailed stats.
 
 ---
 
 ## Mobile Responsiveness
 
-### Design Principles
+### Principles
 
-- **Mobile-first:** Start with small-screen styles, use Tailwind breakpoints to enhance for larger screens
-- **No fixed widths:** Use `max-w-*` with `mx-auto` instead of hardcoded widths
-- **Flexible padding:** `px-4 sm:px-6 lg:px-10` for responsive horizontal spacing
-- **Hidden on mobile:** Use `hidden sm:block` to collapse sidebars or secondary content
+- **Mobile-first:** default styles target small screens; breakpoints (`sm:`, `md:`, `lg:`) progressively enhance
+- **No fixed widths:** use `max-w-*` with `w-full` and `mx-auto`
+- **Responsive horizontal padding:** `px-3 sm:px-6 lg:px-10`
+- **Hide secondary content on mobile:** `hidden sm:block` for sidebars, etc.
 
 ### Debug Panel on Mobile
 
-The debug panel's sidebar collapses on screens below `md` breakpoint:
+The debug panel's sidebar collapses below `md` breakpoint:
 
-- Mobile: Hamburger menu → drawer with tab pills
-- Desktop: Fixed left sidebar
-
-The drawer auto-closes after selecting a tab so content gets full width.
+- **Mobile:** hamburger icon → sheet drawer with tab pills; drawer auto-closes after tab selection so the content area is full width
+- **Desktop:** fixed left sidebar, always visible
 
 ### Dialogs on Mobile
 
-All dialogs now have:
+All dialogs must use:
 
-- `max-h-[90svh]` with `overflow-y-auto` (scrollable, fits viewport)
-- Responsive max-width using `max-w-[calc(100%-2rem)]` on mobile with a `sm:max-w-*` cap on larger screens — this preserves the base dialog's side gutter. **Do not** override with `max-w-full` on mobile, as it eliminates the side margins entirely
-- No fixed widths that break on phones
+```tsx
+<DialogContent className="max-h-[90svh] overflow-y-auto max-w-[calc(100%-2rem)] sm:max-w-lg">
+```
 
-**News dialogs (Add & Edit) specifically:**
+- `max-h-[90svh]` + `overflow-y-auto`: dialog scrolls internally, never clips the viewport
+- `max-w-[calc(100%-2rem)]`: preserves a 1rem side gutter on mobile
+- **Never** use `max-w-full` on mobile — it removes the gutter entirely
+- **Never** add `overflow-visible` to `DialogContent` — it overrides `overflow-y-auto` and causes content to spill outside the dialog frame instead of scrolling
 
-- Image settings section stacks vertically on mobile: `flex flex-col gap-4 sm:flex-row sm:items-start`. The radio cards, file input, and resizable size panel each take full width on small screens and go side-by-side on `sm+`
-- `RadioGroupChoiceCard` uses `w-full sm:max-w-sm` — full-width on mobile, capped on larger screens
-- **Do not add `overflow-visible` to `DialogContent`** — it overrides the base `overflow-y-auto` and breaks scrollability, causing content to spill outside the dialog instead of scrolling
+News dialogs (Add & Edit) stack their image settings section vertically on mobile with `flex flex-col gap-4 sm:flex-row sm:items-start`.
 
 ---
 
@@ -493,7 +595,7 @@ All dialogs now have:
 
 ### StyledSelect
 
-Use this instead of native `<select>` for styled, theme-aware dropdowns.
+Use instead of native `<select>` for any dropdown that needs to match the design system:
 
 ```tsx
 import { StyledSelect } from "@/components/ui/styled-select";
@@ -502,78 +604,121 @@ import { StyledSelect } from "@/components/ui/styled-select";
   value={selectedValue}
   onChange={setSelectedValue}
   options={[
-    { value: "option1", label: "Option 1" },
-    { value: "option2", label: "Option 2" },
+    { value: "en", label: "English" },
+    { value: "hu", label: "Hungarian" },
   ]}
   inputClass={inputClass}
   textColor={textColor}
   bgClass={bgClass}
-/>;
+/>
 ```
 
-Used throughout the app: HTTP method selector in Endpoints tab, viewport preset picker in Debug Emulation, item rarity/kind in Webstore.
+Used in: HTTP method selector (Endpoints tab), viewport preset picker (Emulation tab), item rarity/kind filters (Webstore).
 
 ### Skeleton
 
-Loading state component with pulse animation:
+Pulse-animated loading placeholder. Always prefer skeleton over a spinner for content areas:
 
 ```tsx
 import { Skeleton } from "@/components/ui/skeleton";
 
-<div className="grid gap-2">
-  {[1, 2, 3].map((i) => (
-    <Skeleton key={i} className="h-12 w-full" />
-  ))}
-</div>;
+// Mimic the shape of the real content
+<div className="flex flex-col gap-3">
+  <Skeleton className="h-10 w-full rounded-lg" />
+  <Skeleton className="h-10 w-3/4 rounded-lg" />
+  <Skeleton className="h-10 w-1/2 rounded-lg" />
+</div>
+```
+
+### AnimatePresence / LoadPost
+
+For staggered list entrance animations, use `LoadPost`:
+
+```tsx
+{items.map((item, i) => (
+  <LoadPost key={item.id} index={i}>
+    <ItemCard item={item} />
+  </LoadPost>
+))}
+```
+
+`LoadPost` applies a staggered `opacity` + `y` entrance, scaled by `index`. Only renders the animation when `useAnimations` is enabled.
+
+---
+
+## i18n Conventions
+
+Locale files live in:
+- `src/locales/en/` — English strings
+- `src/locales/hu/` — Hungarian strings
+
+Namespaces match the page or feature (e.g. `admin`, `nav`, `leaderboard`). Always add keys to **both** locale files simultaneously. If a key is missing from one language, i18next falls back to the key name itself — this looks broken in production.
+
+Use `useTranslation("namespace")` inside components:
+
+```tsx
+const { t } = useTranslation("admin");
+return <p>{t("detail.bannedPermanent")}</p>;
 ```
 
 ---
 
-## Best Practices & Conventions
+## Best Practices
 
-### ✅ Do
+### Do
 
-- **Reuse theme helpers.** If you're building a button or card, use `getBackgroundClasses()` + `getTextColor()`. Don't inline theme ternaries.
-- **Use StyledSelect** for all dropdowns. It matches the design system.
-- **Type-check React Query hooks.** Ensure `queryFn` and response types align.
-- **Keep role checks explicit.** Don't bury permission logic in nested components—check at the page boundary.
-- **Translate UI strings.** Use the i18n namespace for all user-facing text.
-- **Test on mobile.** Use the debug panel's force viewport feature or browser DevTools.
-- **Follow the pill-container tab picker pattern** for any new tab selectors. See Gallery and Leaderboard for the reference implementation: `panelBg` wrapper with `relative`, a conditionally rendered sliding highlight div (LG only), `data-tab` attributes on buttons, `containerRef` + `highlightPos` + `isHovering` state at the container level, and `onMouseEnter`/`onMouseLeave` handlers to drive the highlight. Active non-LG style: `bg-gray-700 shadow-md` (dark) / `bg-gray-200 shadow-md` (light). Inactive hover: `hover:bg-gray-700` / `hover:bg-gray-100`. This matches `ItemFilters` and `SelectOs`.
+- **Use theme helpers.** `getBackgroundClasses()`, `getTextColor()`, `getInputClasses()` — these are the contract. Inline ternaries fragment the theme system.
+- **Use `StyledSelect`** for all dropdowns. Native `<select>` cannot be themed consistently.
+- **Type React Query responses.** Ensure `queryFn` return type and response interface match.
+- **Keep role checks at page boundaries.** Never bury permission logic in a deeply nested component.
+- **Translate all user-facing strings.** Add to both `en` and `hu` locale files at the same time.
+- **Test on mobile.** Use the debug panel's Force Viewport or browser DevTools device mode.
+- **Follow the pill-container tab picker pattern** for any new tab selectors. Reference implementation: Gallery and Leaderboard.
 
-### ❌ Avoid
+### Avoid
 
-- Inline ternary chains like `useDarkMode ? useLiquidGlass ? "..." : "..." : "..."`
-- Native HTML `<select>` elements (use `StyledSelect`)
-- Hardcoded theme colors (use CSS variables or theme helpers)
-- Skipping navbar padding (always add mt-20 or pt-20)
-- Mixing camelCase and snake_case in localStorage keys
-- Tab picker active states that ignore `useLiquidGlass` (the old leaderboard pattern of `bg-white/15`/`bg-white` without LG handling)
+- Inline ternary theme chains like `useDarkMode ? useLiquidGlass ? "..." : "..." : "..."`
+- Native `<select>` elements
+- Hardcoded hex colors or Tailwind color classes that bypass the theme helpers
+- Skipping navbar clearance on new full-page layouts
+- Mixing `camelCase` and `snake_case` in localStorage keys
+- `overflow-visible` on `DialogContent`
+- Tab active states that only handle one of LG / non-LG mode
 
 ---
 
-## Future Improvements & Known Blockers
+## Known Backend Dependencies
 
-### Backend Dependencies
+| Feature | Status |
+|---|---|
+| Profile match history endpoint | Missing — stats/match records unavailable |
+| Password change endpoint | Missing — profile page change form not wired |
+| Admin user search / pagination | Client-side only for now |
+| `GET /characters` without admin | Auth gap — gallery characters require admin role |
 
-- **Profile match history endpoint** — needed to populate stats & detailed match records
-- **Password change endpoint** — allows in-profile password updates (currently blocked)
-- **Admin search/pagination** — user list needs server-side query support
-- **Role consistency** — some endpoints should pre-populate role data for perf
+---
 
-### Optimizations
+## Optimization Status
 
-- **Image formats:** WebP/AVIF with fallbacks
-- **Virtualization:** Large data grids (admin user list) could use react-window
-- **Prefetching:** Route hover → prefetch leaderboard queries
-- **PWA:** If offline support becomes a requirement
+### Already in place
+
+- Route-level lazy loading with `React.lazy` + `Suspense` fallback
+- Manual vendor chunk splitting (Vite config)
+- Leaderboard skeleton loading (replaces spinner, shows content shape)
+- Staggered panel entrance for readable loading
+- Build bundle visualization support
+
+### Worth considering eventually
+
+- WebP/AVIF image format adoption with `<picture>` fallbacks
+- Virtual list rendering for large data tables (react-window)
+- Route-hover prefetching for leaderboard queries
+- Optional PWA / offline layer if disconnected access becomes a requirement
 
 ---
 
 ## Getting Help
 
-If something is unclear or broken:
-
-1. **Check the debug panel** (`/app/debug`) for system state and error logs
-2. **Review existing page implementations** — there's usually a similar pattern elsewhere
-3. **Update this doc** if you learn something new
+1. **Check the debug panel** (`/app/debug`) for system state, cache inspection, and rendered query counts
+2. **Look at an existing similar page** — there is almost always a pattern already established
+3. **Update this document** if you learn something non-obvious
