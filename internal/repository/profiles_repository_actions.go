@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"log"
 	"smaash-web/internal/models"
 
 	"gorm.io/gorm"
@@ -40,8 +41,8 @@ func (pra ProfilesRepositoryActions) ReadNotOwnedCharacters(c context.Context, p
 	err := pra.conn.
 		Select("characters.*").
 		Table("characters").
-		Joins("LEFT JOIN player_characters ON characters.id = player_characters.character_id AND player_characters.player_profile_id = ?", playerID).
-		Where("player_characters.character_id IS NULL").
+		Joins("LEFT JOIN profile_character ON characters.id = profile_character.character_id AND profile_character.player_profile_id = ?", playerID).
+		Where("profile_character.character_id IS NULL").
 		Find(&result).Error
 
 	return result, err
@@ -49,18 +50,36 @@ func (pra ProfilesRepositoryActions) ReadNotOwnedCharacters(c context.Context, p
 
 func (pra ProfilesRepositoryActions) CreateWithBaseCharacters(c context.Context, profile *models.PlayerProfile) error {
 	return pra.conn.Transaction(func(tx *gorm.DB) error {
-		if err := gorm.G[models.PlayerProfile](pra.conn).Create(c, profile); err != nil {
+		log.Printf("profiles.create tx start: user_id=%d display_name=%q", profile.UserID, profile.DisplayName)
+
+		if err := gorm.G[models.PlayerProfile](tx).Create(c, profile); err != nil {
+			log.Printf("profiles.create tx profile insert failed: err=%v", err)
 			return err
 		}
 
-		// These characters are seeded into the database, so they're guaranteed to have ids of 1 and 2
-		if err := pra.conn.
-			Model(profile).
-			Association("Characters").
-			Append([]models.Character{
-				{Model: gorm.Model{ID: 1}},
-				{Model: gorm.Model{ID: 2}},
-			}); err != nil {
+		log.Printf("profiles.create tx profile inserted: profile_id=%d", profile.ID)
+
+		// Starter characters are seeded with ids 1 and 2.
+		joinRows := []map[string]any{
+			{"player_profile_id": profile.ID, "character_id": 1},
+			{"player_profile_id": profile.ID, "character_id": 2},
+		}
+
+		res := tx.Table("profile_character").Create(&joinRows)
+		if res.Error != nil {
+			log.Printf("profiles.create tx join insert failed: profile_id=%d err=%v", profile.ID, res.Error)
+			return res.Error
+		}
+
+		if res.RowsAffected != int64(len(joinRows)) {
+			log.Printf("profiles.create tx join insert unexpected rows: profile_id=%d expected=%d affected=%d", profile.ID, len(joinRows), res.RowsAffected)
+			return gorm.ErrInvalidData
+		}
+
+		log.Printf("profiles.create tx join insert ok: profile_id=%d affected=%d", profile.ID, res.RowsAffected)
+
+		if err := tx.First(&models.PlayerProfile{}, profile.ID).Error; err != nil {
+			log.Printf("profiles.create tx profile re-read failed: profile_id=%d err=%v", profile.ID, err)
 			return err
 		}
 
