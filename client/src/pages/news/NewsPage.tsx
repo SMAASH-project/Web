@@ -212,6 +212,13 @@ export function NewsPage() {
             );
           })}
         </ul>
+
+        {/* Empty state — shown when loading is done but nothing is visible */}
+        {!postsLoading && visiblePosts.length === 0 && (
+          <p className={`mt-8 text-sm ${subtextColor}`}>
+            {selectedCategories.length === 0 ? t("noCategories") : t("noResults")}
+          </p>
+        )}
       </div>
     </div>
   );

@@ -37,7 +37,7 @@ export default function AccountMenu() {
 
   const handleLogout = async () => {
     try {
-      if (userId) localStorage.removeItem(`selected_profile_${Number(userId)}`);
+      if (userId) localStorage.removeItem(`selected_profile_${String(userId)}`);
       await logoutMutation.mutateAsync();
       setIsLoggedIn(false);
       setUserId(null);

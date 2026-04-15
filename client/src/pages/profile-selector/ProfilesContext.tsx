@@ -20,7 +20,7 @@ const ProfileContext = createContext<ProfileContextType>(defaultProfileContext);
 
 export { ProfileContext };
 
-function profileStorageKey(userId: number) {
+function profileStorageKey(userId: number | string) {
   return `selected_profile_${userId}`;
 }
 
@@ -38,13 +38,13 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
   // fetched profiles list. We validate that the stored ID still exists —
   // the user may have deleted the profile since the last session.
   useEffect(() => {
-    if (!numUserId || fetchedProfiles.length === 0) return;
-    const stored = localStorage.getItem(profileStorageKey(numUserId));
+    if (!userId || !numUserId || fetchedProfiles.length === 0) return;
+    const stored = localStorage.getItem(profileStorageKey(String(userId)));
     if (!stored) return;
     const storedId = parseInt(stored, 10);
     const stillExists = fetchedProfiles.some((p: ProfileResponse) => p.id === storedId);
     if (stillExists) setSelectedProfileId(storedId);
-  }, [numUserId, fetchedProfiles]);
+  }, [userId, numUserId, fetchedProfiles]);
 
   const profiles = useMemo<Profile[]>(
     () =>
@@ -95,15 +95,15 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
       const found = profiles.find((p) => p.name === name) || null;
       const id = found?.id ?? null;
       setSelectedProfileId(id);
-      if (numUserId) {
+      if (userId) {
         if (id !== null) {
-          localStorage.setItem(profileStorageKey(numUserId), String(id));
+          localStorage.setItem(profileStorageKey(String(userId)), String(id));
         } else {
-          localStorage.removeItem(profileStorageKey(numUserId));
+          localStorage.removeItem(profileStorageKey(String(userId)));
         }
       }
     },
-    [profiles, numUserId],
+    [profiles, userId],
   );
 
   return (

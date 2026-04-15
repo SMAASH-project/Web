@@ -50,6 +50,7 @@
     "deleteFailed": "Nem sikerült törölni a bejegyzést."
   },
   "noResults": "Nem található bejegyzés.",
+  "noCategories": "Válassz legalább egy kategóriát a bejegyzések megtekintéséhez.",
   "edit": "Szerkesztés",
   "delete": {
     "confirm": "Törlés megerősítése",

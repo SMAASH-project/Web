@@ -50,6 +50,7 @@
     "deleteFailed": "Failed to delete post."
   },
   "noResults": "No posts found.",
+  "noCategories": "Select at least one category to see posts.",
   "edit": "Edit",
   "delete": {
     "confirm": "Confirm Deletion",
