@@ -37,7 +37,12 @@ export function useSettings() {
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<SettingsState>(() => {
     const saved = localStorage.getItem("settings");
-    const parsed = saved ? JSON.parse(saved) : null;
+    let parsed: Partial<SettingsState> | null = null;
+    try {
+      parsed = saved ? (JSON.parse(saved) as Partial<SettingsState>) : null;
+    } catch {
+      parsed = null;
+    }
     return {
       useAnimations: parsed?.useAnimations ?? true,
       useLiquidGlass: parsed?.useLiquidGlass ?? true,
