@@ -39,12 +39,7 @@ func (pra ProfilesRepositoryActions) HardDelete(c context.Context, id uint) erro
 func (pra ProfilesRepositoryActions) ReadNotOwnedCharacters(c context.Context, playerID uint) ([]models.Character, error) {
 	var result []models.Character
 	err := pra.conn.
-<<<<<<< HEAD
-		Select("characters.*").
-		Table("characters").
-=======
 		Model(&models.Character{}).
->>>>>>> f17dc65 (some bugs fixed)
 		Joins("LEFT JOIN profile_character ON characters.id = profile_character.character_id AND profile_character.player_profile_id = ?", playerID).
 		Where("profile_character.character_id IS NULL").
 		Find(&result).Error
