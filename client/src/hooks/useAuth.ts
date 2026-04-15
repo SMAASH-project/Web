@@ -71,8 +71,13 @@ export function useLogoutMutation() {
       await apiClient.post("/auth/logout");
     },
     onSuccess: () => {
-      queryClient.removeQueries({ queryKey: ["auth", "whoami"] });
-      queryClient.invalidateQueries();
+      // Clear the entire query cache without triggering refetches.
+      // invalidateQueries() would immediately re-fire all active queries
+      // (profiles, whoami, etc.) against a now-dead session; those requests
+      // return 401, hit the response interceptor, and cause a hard page reload
+      // that races with the soft React Router navigation — producing the
+      // flashing loop seen when logging out with no profile.
+      queryClient.clear();
     },
   });
 }
