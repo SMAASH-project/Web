@@ -79,7 +79,7 @@ const Navbar = () => {
                   title={t("account.adminPanel")}
                 >
                   <ShieldAlert size={13} />
-                  <span className="hidden max-w-[44px] text-center leading-tight lg:block">
+                  <span className="hidden max-w-11 text-center leading-tight lg:block">
                     {t("account.adminPanel")}
                   </span>
                 </Link>
@@ -91,7 +91,7 @@ const Navbar = () => {
                   title={t("account.debugPanel")}
                 >
                   <Bug size={13} />
-                  <span className="hidden max-w-[44px] text-center leading-tight lg:block">
+                  <span className="hidden max-w-11 text-center leading-tight lg:block">
                     {t("account.debugPanel")}
                   </span>
                 </Link>
