@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"slices"
 	"smaash-web/internal/models"
 
 	"gorm.io/gorm"
@@ -10,7 +11,7 @@ import (
 type BaseRepository[T models.Model] interface {
 	Create(context.Context, *T) error
 	ReadAll(context.Context, ...string) ([]T, error)
-	ReadAllPaginated(context.Context, int, int, ...string) ([]T, error)
+	ReadAllWithParams(c context.Context, params QueryParams) ([]T, error)
 	ReadByID(context.Context, uint, ...string) (T, error)
 	Update(context.Context, T) error
 	UpdateOne(context.Context, uint, string, any) error
@@ -62,12 +63,30 @@ func (bra BaseRepositoryActions[T]) Delete(c context.Context, id uint) error {
 	return err
 }
 
-func (bra BaseRepositoryActions[T]) ReadAllPaginated(c context.Context, page int, pageSize int, preloads ...string) ([]T, error) {
+type QueryParams struct {
+	Page              int
+	PageSize          int
+	SortBy            string
+	AllowedSortFileds []string
+	Desc              *bool
+	Preloads          []string
+}
+
+func (bra BaseRepositoryActions[T]) ReadAllWithParams(c context.Context, params QueryParams) ([]T, error) {
 	var result []T
-	query := bra.Conn.Model(new(T)).Scopes(Paginate(pageSize*(page-1), pageSize))
-	for _, preload := range preloads {
+	query := bra.Conn.Model(new(T)).Scopes(Paginate(params.PageSize*(params.Page-1), params.PageSize))
+	for _, preload := range params.Preloads {
 		query = query.Preload(preload)
 	}
+
+	if params.SortBy != "" && slices.Contains(params.AllowedSortFileds, params.SortBy) {
+		if params.Desc != nil && *params.Desc {
+			query = query.Order(params.SortBy + " DESC")
+		} else {
+			query = query.Order(params.SortBy)
+		}
+	}
+
 	err := query.Find(&result).Error
 	return result, err
 }

@@ -8,6 +8,7 @@ import (
 	"smaash-web/internal/middlewares"
 	"smaash-web/internal/repository"
 	"smaash-web/internal/utils"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/webstradev/gin-pagination/v2/pkg/pagination"
@@ -34,7 +35,16 @@ func NewPlayerProfileController(profilesRepo repository.ProfilesRepository, char
 func (pc PlayerProfileController) ReadAll(c *gin.Context) {
 	page, _ := c.Get("page")
 	size, _ := c.Get("size")
-	profiles, err := pc.profilesRepo.ReadAllPaginated(c.Request.Context(), page.(int), size.(int))
+	sortBy := c.Query("sortBy")
+	desc, _ := strconv.ParseBool(c.Query("desc"))
+
+	profiles, err := pc.profilesRepo.ReadAllWithParams(c.Request.Context(), repository.QueryParams{
+		Page:              page.(int),
+		PageSize:          size.(int),
+		SortBy:            sortBy,
+		AllowedSortFileds: []string{"id", "display_name", "created_at"},
+		Desc:              &desc,
+	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return
@@ -99,7 +109,7 @@ func (pc PlayerProfileController) Create(c *gin.Context) {
 	}
 
 	newProfile := dtos.CreateDTOToPlayerProfile(body)
-	if err := pc.profilesRepo.Create(c, &newProfile); err != nil {
+	if err := pc.profilesRepo.CreateWithBaseCharacters(c, &newProfile); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			c.JSON(http.StatusConflict, dtos.NewErrResp("Display name already taken", path))
 			return

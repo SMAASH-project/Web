@@ -12,6 +12,7 @@ type ProfilesRepository interface {
 	ReadByUserID(context.Context, uint) ([]models.PlayerProfile, error)
 	HardDelete(context.Context, uint) error
 	ReadNotOwnedCharacters(context.Context, uint) ([]models.Character, error)
+	CreateWithBaseCharacters(context.Context, *models.PlayerProfile) error
 }
 
 type ProfilesRepositoryActions struct {
@@ -44,4 +45,25 @@ func (pra ProfilesRepositoryActions) ReadNotOwnedCharacters(c context.Context, p
 		Find(&result).Error
 
 	return result, err
+}
+
+func (pra ProfilesRepositoryActions) CreateWithBaseCharacters(c context.Context, profile *models.PlayerProfile) error {
+	return pra.conn.Transaction(func(tx *gorm.DB) error {
+		if err := gorm.G[models.PlayerProfile](pra.conn).Create(c, profile); err != nil {
+			return err
+		}
+
+		// These characters are seeded into the database, so they're guaranteed to have ids of 1 and 2
+		if err := pra.conn.
+			Model(profile).
+			Association("Characters").
+			Append([]models.Character{
+				{Model: gorm.Model{ID: 1}},
+				{Model: gorm.Model{ID: 2}},
+			}); err != nil {
+			return err
+		}
+
+		return nil
+	})
 }

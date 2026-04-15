@@ -8,6 +8,7 @@ import (
 	"smaash-web/internal/models"
 	"smaash-web/internal/repository"
 	"smaash-web/internal/utils"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -38,7 +39,17 @@ func NewUserController(
 func (uc *UserController) ReadAll(c *gin.Context) {
 	page, _ := c.Get("page")
 	size, _ := c.Get("size")
-	users, err := uc.userRepo.ReadAllPaginated(c.Request.Context(), page.(int), size.(int), "Role")
+	sortBy := c.Query("sortBy")
+	desc, _ := strconv.ParseBool(c.Query("desc"))
+
+	users, err := uc.userRepo.ReadAllWithParams(c.Request.Context(), repository.QueryParams{
+		Page:              page.(int),
+		PageSize:          size.(int),
+		SortBy:            sortBy,
+		AllowedSortFileds: []string{"id", "last_login"},
+		Desc:              &desc,
+		Preloads:          []string{"Role"},
+	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))
 		return

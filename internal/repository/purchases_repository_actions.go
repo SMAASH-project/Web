@@ -49,7 +49,7 @@ func (pra PurchasesRepositoryActions) MakePurchase(c context.Context, purchase m
 			return err
 		}
 
-		if err := tx.Model(player).Association("Characters").Append(&models.Character{Model: gorm.Model{ID: purchase.CharacterID}}); err != nil {
+		if err := tx.Model(&player).Association("Characters").Append(&models.Character{Model: gorm.Model{ID: purchase.CharacterID}}); err != nil {
 			return err
 		}
 

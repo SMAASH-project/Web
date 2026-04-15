@@ -4011,15 +4011,11 @@ const docTemplate = `{
         "dtos.PurchaseCreateDTO": {
             "type": "object",
             "required": [
-                "count",
-                "item_id",
+                "character_id",
                 "player_profile_id"
             ],
             "properties": {
-                "count": {
-                    "type": "integer"
-                },
-                "item_id": {
+                "character_id": {
                     "type": "integer"
                 },
                 "player_profile_id": {
@@ -4030,17 +4026,14 @@ const docTemplate = `{
         "dtos.PurchaseReadDTO": {
             "type": "object",
             "properties": {
-                "count": {
-                    "type": "integer"
+                "character": {
+                    "type": "string"
                 },
                 "date": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
-                },
-                "item": {
-                    "type": "string"
                 },
                 "profile": {
                     "type": "string"
@@ -4053,19 +4046,15 @@ const docTemplate = `{
         "dtos.PurchaseUpdateDTO": {
             "type": "object",
             "required": [
-                "count",
+                "character_id",
                 "id",
-                "item_id",
                 "player_profile_id"
             ],
             "properties": {
-                "count": {
+                "character_id": {
                     "type": "integer"
                 },
                 "id": {
-                    "type": "integer"
-                },
-                "item_id": {
                     "type": "integer"
                 },
                 "player_profile_id": {
