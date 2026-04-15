@@ -6,16 +6,25 @@ import (
 	"errors"
 	"log"
 	"os"
+	"slices"
 	"smaash-web/internal/models"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-type RaritySeeder struct{}
+type RaritySeeder struct{ children []Seeder }
 
-func NewRaritySeeder() *RaritySeeder {
+func NewRaritySeeder() Seeder {
 	return &RaritySeeder{}
+}
+
+func (rs RaritySeeder) GetChildren() []Seeder {
+	return rs.children
+}
+
+func (rs RaritySeeder) AppendChildren(children ...Seeder) {
+	rs.children = slices.Concat(rs.children, children)
 }
 
 type RarityDataFormat struct {

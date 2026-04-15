@@ -79,7 +79,7 @@ export function useItems() {
 
   // ── Fetch all items ──────────────────────────────────────────────────────
   const { data: fetchedItems = [], isLoading: itemsLoading } = useQuery<WebstoreItem[]>({
-    queryKey: queryKeys.items.all,
+    queryKey: queryKeys.characters.all,
     queryFn: async () => {
       const { data } = await apiClient.get<ItemReadDTO[]>("/characters");
       return data.map(itemDTOToWebstoreItem);

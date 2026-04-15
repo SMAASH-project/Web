@@ -6,6 +6,7 @@ import (
 	"errors"
 	"log"
 	"os"
+	"slices"
 	"smaash-web/internal/models"
 	"time"
 
@@ -14,10 +15,18 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-type UserSeeder struct{}
+type UserSeeder struct{ children []Seeder }
 
-func NewUserSeeder() *UserSeeder {
+func NewUserSeeder() Seeder {
 	return &UserSeeder{}
+}
+
+func (us UserSeeder) GetChildren() []Seeder {
+	return us.children
+}
+
+func (us UserSeeder) AppendChildren(children ...Seeder) {
+	us.children = slices.Concat(us.children, children)
 }
 
 type UserDataFormat struct {

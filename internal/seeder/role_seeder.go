@@ -6,16 +6,25 @@ import (
 	"errors"
 	"log"
 	"os"
+	"slices"
 	"smaash-web/internal/models"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-type RoleSeeder struct{}
+type RoleSeeder struct{ children []Seeder }
 
-func NewRoleSeeder() *RoleSeeder {
+func NewRoleSeeder() Seeder {
 	return &RoleSeeder{}
+}
+
+func (rs RoleSeeder) GetChildren() []Seeder {
+	return rs.children
+}
+
+func (rs RoleSeeder) AppendChildren(children ...Seeder) {
+	rs.children = slices.Concat(rs.children, children)
 }
 
 type RoleDataFormat struct {

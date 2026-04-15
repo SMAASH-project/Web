@@ -200,7 +200,7 @@ func (uc *UserController) AddProfileToUser(c *gin.Context) {
 	newProfile := dtos.AppendDTOToPlayerProfile(body)
 	newProfile.UserID = id.(uint)
 
-	if err := uc.profilesRepo.Create(c.Request.Context(), &newProfile); err != nil {
+	if err := uc.profilesRepo.CreateWithBaseCharacters(c.Request.Context(), &newProfile); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			c.JSON(http.StatusConflict, dtos.NewErrResp("Display name already taken", path))
 			return

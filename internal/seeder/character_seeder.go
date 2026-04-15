@@ -6,16 +6,25 @@ import (
 	"errors"
 	"log"
 	"os"
+	"slices"
 	"smaash-web/internal/models"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-type CharacterSeeder struct{}
+type CharacterSeeder struct{ children []Seeder }
 
-func NewCharacterSeeder() *CharacterSeeder {
+func NewCharacterSeeder() Seeder {
 	return &CharacterSeeder{}
+}
+
+func (cs *CharacterSeeder) GetChildren() []Seeder {
+	return cs.children
+}
+
+func (cs *CharacterSeeder) AppendChildren(children ...Seeder) {
+	cs.children = slices.Concat(cs.children, children)
 }
 
 type CharacterDataFormat struct {
@@ -54,12 +63,14 @@ func (rs CharacterSeeder) Seed(c context.Context, data_root_path string, db *gor
 				return err
 			}
 
+			newCharacter, _ := gorm.G[models.Character](tx).Where("name = ?", val.Name).First(c)
+
 			for _, category := range val.Categories {
 				cat, err := gorm.G[models.Category](tx).Where("name = ?", category).First(c)
 				if err != nil {
 					return err
 				}
-				if err := tx.Model(&val).Association("Categories").Append(cat); err != nil {
+				if err := tx.Model(&newCharacter).Association("Categories").Append(cat); err != nil {
 					return err
 				}
 			}
