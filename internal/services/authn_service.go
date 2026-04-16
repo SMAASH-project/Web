@@ -16,7 +16,7 @@ import (
 type Authentication interface {
 	SignUp(context.Context, *models.User) (*string, error)
 	Login(context.Context, *models.User) (*string, *models.User, error)
-	ChangePassword(context.Context, uint, string, string) error
+	ChangePassword(context.Context, uint, string, string) (*string, error)
 }
 
 type AuthenticationService struct {
@@ -101,25 +101,33 @@ func (a AuthenticationService) Login(c context.Context, u *models.User) (*string
 	return &tokenString, &user, nil
 }
 
-func (a AuthenticationService) ChangePassword(c context.Context, userID uint, newPass string, securityKey string) error {
+func (a AuthenticationService) ChangePassword(c context.Context, userID uint, newPass string, securityKey string) (*string, error) {
 	user, err := a.userRepo.ReadByID(c, userID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.SecurityKey), []byte(securityKey)); err != nil {
-		return ErrSecurityKeyInvalid
+		return nil, ErrSecurityKeyInvalid
 	}
 
 	newHash, err := bcrypt.GenerateFromPassword([]byte(newPass), 10)
 	if err != nil {
-		return err
+		return nil, err
+	}
+
+	newKey := utils.GenerateSecurityKey()
+	newKeyHash, err := bcrypt.GenerateFromPassword([]byte(newKey), 10)
+	if err != nil {
+		return nil, err
 	}
 
 	user.PasswordHash = string(newHash)
+	user.SecurityKey = string(newKeyHash)
 	if err := a.userRepo.Update(c, user); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	newKeyHashString := string(newKeyHash)
+	return &newKeyHashString, nil
 }

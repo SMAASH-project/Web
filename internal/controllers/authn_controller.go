@@ -154,7 +154,8 @@ func (a AuthnController) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	if err := a.authService.ChangePassword(c.Request.Context(), id.(uint), body.NewPassword, body.SecurityKey); err != nil {
+	newKey, err := a.authService.ChangePassword(c.Request.Context(), id.(uint), body.NewPassword, body.SecurityKey)
+	if err != nil {
 		if errors.Is(err, services.ErrSecurityKeyInvalid) {
 			c.JSON(http.StatusUnauthorized, dtos.NewErrResp(err.Error(), path))
 			return
@@ -167,7 +168,9 @@ func (a AuthnController) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusOK, gin.H{
+		"new_key": newKey,
+	})
 }
 
 func (a AuthnController) MountRoutes(apiGroup *gin.RouterGroup) {
