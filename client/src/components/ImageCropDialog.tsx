@@ -20,7 +20,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Loader2, ZoomIn, ZoomOut, X } from "lucide-react";
 import { useSettings } from "@/pages/settings/SettingsContext";
@@ -261,38 +261,53 @@ export function ImageCropDialog({
         if (!o) onCancel();
       }}
     >
+      {/*
+       * forceMount only on Portal so the portal target stays alive during the
+       * exit animation. Overlay and Content are conditionally rendered inside
+       * AnimatePresence — this ensures Radix's DismissableLayer (and its global
+       * event listeners) unmounts as soon as the dialog closes, preventing the
+       * page from freezing.
+       */}
       <DialogPrimitive.Portal forceMount>
-        {/* Backdrop */}
-        <DialogPrimitive.Overlay asChild forceMount>
-          <motion.div
-            className="fixed inset-0 z-[9999] bg-black/65 backdrop-blur-sm"
-            animate={{ opacity: open ? 1 : 0 }}
-            style={{ pointerEvents: open ? "auto" : "none" }}
-            transition={{ duration: 0.18 }}
-          />
-        </DialogPrimitive.Overlay>
+        <AnimatePresence>
+          {open && (
+            <>
+              {/* Backdrop */}
+              <DialogPrimitive.Overlay asChild>
+                <motion.div
+                  key="icd-overlay"
+                  className="fixed inset-0 z-9999 bg-black/65 backdrop-blur-sm"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.18 }}
+                />
+              </DialogPrimitive.Overlay>
 
-        {/* Cropper content — Radix owns focus trap and Escape key */}
-        <DialogPrimitive.Content
-          asChild
-          forceMount
-          aria-label="Crop image"
-          onPointerDownOutside={(e) => e.preventDefault()}
-          onInteractOutside={(e) => e.preventDefault()}
-        >
-          <motion.div
-            className="fixed inset-0 z-[10000] flex items-center justify-center p-4 select-none"
-            animate={{ opacity: open ? 1 : 0 }}
-            style={{ pointerEvents: open ? "auto" : "none" }}
-            transition={{ duration: 0.18 }}
-          >
-            {/* Card */}
-            <motion.div
-              className={`relative flex w-full flex-col gap-5 rounded-2xl p-6 ${dialogClass} ${textShadow}`}
-              style={{ maxWidth: CONTAINER_W + 48 }}
-              animate={open ? { scale: 1, y: 0 } : { scale: 0.96, y: 8 }}
-              transition={{ type: "spring", stiffness: 380, damping: 28 }}
-            >
+              {/* Cropper content — Radix owns focus trap and Escape key */}
+              <DialogPrimitive.Content
+                asChild
+                aria-label="Crop image"
+                onPointerDownOutside={(e) => e.preventDefault()}
+                onInteractOutside={(e) => e.preventDefault()}
+              >
+                <motion.div
+                  key="icd-content"
+                  className="fixed inset-0 z-10000 flex items-center justify-center p-4 select-none"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.18 }}
+                >
+                  {/* Card */}
+                  <motion.div
+                    className={`relative flex w-full flex-col gap-5 rounded-2xl p-6 ${dialogClass} ${textShadow}`}
+                    style={{ maxWidth: CONTAINER_W + 48 }}
+                    initial={{ scale: 0.96, y: 8 }}
+                    animate={{ scale: 1, y: 0 }}
+                    exit={{ scale: 0.96, y: 8 }}
+                    transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                  >
               {/* Header */}
               <div className="flex items-center justify-between">
                 <h2 className={`text-base font-semibold ${textColor}`}>Crop Image</h2>
@@ -507,9 +522,12 @@ export function ImageCropDialog({
                   )}
                 </Button>
               </div>
-            </motion.div>
-          </motion.div>
-        </DialogPrimitive.Content>
+                  </motion.div>
+                </motion.div>
+              </DialogPrimitive.Content>
+            </>
+          )}
+        </AnimatePresence>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
   );
