@@ -86,7 +86,7 @@ func (sra StatsRepositoryActions) ReadFavouriteCharactersOfPlayer(c context.Cont
 		Model(&models.Character{}).
 		Select("characters.*, COUNT(match_participations.character_id) AS count_of_plays").
 		Joins("JOIN match_participations ON match_participations.character_id = characters.id").
-		Joins("JOIN player_profiles ON match_participation.player_profile_id = player_profiles.id").
+		Joins("JOIN player_profiles ON match_participations.player_profile_id = player_profiles.id").
 		Where("match_participations.player_profile_id = ?", id).
 		Group("characters.id").
 		Order("count_of_plays").

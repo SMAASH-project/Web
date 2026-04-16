@@ -6,6 +6,7 @@ import (
 	dtos "smaash-web/internal/DTOs"
 	"smaash-web/internal/repository"
 	"smaash-web/internal/utils"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -66,8 +67,14 @@ func (sc StatsController) ReadMostPopularCharacters(c *gin.Context) {
 // @router /profiles/{id}/favourite [get]
 func (sc StatsController) ReadFavouriteCharactersOfPlayer(c *gin.Context) {
 	path := c.Request.URL.Path
-	id, _ := c.Get("id")
-	res, err := sc.statsRepo.ReadFavouriteCharactersOfPlayer(c.Request.Context(), id.(uint))
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dtos.NewErrResp("Invalid profile id", path))
+		return
+	}
+
+	res, err := sc.statsRepo.ReadFavouriteCharactersOfPlayer(c.Request.Context(), uint(id))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Player with given id not found", path))
