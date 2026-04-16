@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	dtos "smaash-web/internal/DTOs"
+	"smaash-web/internal/middlewares"
 	"smaash-web/internal/repository"
 	"smaash-web/internal/services"
 
@@ -47,8 +48,9 @@ func (a AuthnController) SignUp(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
 	}
 
-	if err := a.authService.SignUp(c.Request.Context(), newUser); err != nil {
-		if errors.Is(err, gorm.ErrDuplicatedKey) { // gorm returns this error when a unique constraint is violated
+	securityKey, err := a.authService.SignUp(c.Request.Context(), newUser)
+	if err != nil {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			c.JSON(http.StatusConflict, dtos.NewErrResp("User already exists", path))
 			return
 		}
@@ -56,7 +58,7 @@ func (a AuthnController) SignUp(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, dtos.UserToDTO(*newUser))
+	c.JSON(http.StatusCreated, dtos.UserToSignupRespDTO(*newUser, *securityKey))
 }
 
 // @description Logs in a user
@@ -84,7 +86,7 @@ func (a AuthnController) Login(c *gin.Context) {
 		case errors.Is(err, gorm.ErrRecordNotFound):
 			c.JSON(http.StatusUnauthorized, dtos.NewErrResp("User doesn't exist", c.Request.URL.Path))
 			return
-		case errors.Is(err, services.ErrPasswordComparisonFailed):
+		case errors.Is(err, services.ErrPasswordIncorrect):
 			c.JSON(http.StatusUnauthorized, dtos.NewErrResp("Incorrect password", c.Request.URL.Path))
 			return
 		case errors.Is(err, services.ErrUserBanned):
@@ -137,9 +139,41 @@ func (a AuthnController) Logout(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+func (a AuthnController) ChangePassword(c *gin.Context) {
+	path := c.Request.URL.Path
+	id, _ := c.Get("id")
+
+	var body dtos.PasswordChangeDTO
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	if id.(uint) != body.ID {
+		c.JSON(http.StatusBadRequest, dtos.NewErrResp("ID from url doesn't match ID from request body", path))
+		return
+	}
+
+	if err := a.authService.ChangePassword(c.Request.Context(), id.(uint), body.NewPassword, body.SecurityKey); err != nil {
+		if errors.Is(err, services.ErrSecurityKeyInvalid) {
+			c.JSON(http.StatusUnauthorized, dtos.NewErrResp(err.Error(), path))
+			return
+		}
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("Profile with given id not found", path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
 func (a AuthnController) MountRoutes(apiGroup *gin.RouterGroup) {
 	auth := apiGroup.Group("/auth")
 	auth.POST("/signup", a.SignUp)
 	auth.POST("/login", a.Login)
 	auth.POST("/logout", a.Logout)
+	auth.PUT("/change-password", middlewares.Authorize(middlewares.ANY), a.ChangePassword)
 }

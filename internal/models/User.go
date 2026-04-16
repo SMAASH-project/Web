@@ -15,6 +15,7 @@ type User struct {
 	IsBanned       bool `gorm:"not null"`
 	BannedUntil    *time.Time
 	LastLogin      time.Time `gorm:"not null"`
+	SecurityKey    string    `gorm:"not null"`
 	PlayerProfiles []PlayerProfile
 }
 

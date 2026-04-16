@@ -42,6 +42,18 @@ type UserPromoteDTO struct {
 	TargetRole string `json:"target_role" binding:"required,oneof=admin support"`
 }
 
+type UserSignupRespDTO struct {
+	ID          uint   `json:"id"`
+	Email       string `json:"email"`
+	SecurityKey string `json:"security_key"`
+}
+
+type PasswordChangeDTO struct {
+	ID          uint   `json:"id"`
+	NewPassword string `json:"new_password"`
+	SecurityKey string `json:"security_key"`
+}
+
 func UserToDTO(user models.User) UserReadDTO {
 	dto := UserReadDTO{
 		ID:        user.ID,
@@ -83,5 +95,13 @@ func UpdateDTOToUser(dto UserUpdateDTO) models.User {
 		Model:  gorm.Model{ID: dto.ID},
 		Email:  dto.Email,
 		RoleID: dto.RoleID,
+	}
+}
+
+func UserToSignupRespDTO(user models.User, rawKey string) UserSignupRespDTO {
+	return UserSignupRespDTO{
+		ID:          user.ID,
+		Email:       user.Email,
+		SecurityKey: rawKey,
 	}
 }
