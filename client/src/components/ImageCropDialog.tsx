@@ -1,9 +1,11 @@
 /**
  * ImageCropDialog
  *
- * A canvas-based image cropper rendered as a full-screen portal overlay so it
- * is never clipped by a parent dialog or container. The user can drag the image
- * to reposition it and use the zoom slider (or scroll wheel) to zoom in/out.
+ * A canvas-based image cropper rendered as a Radix Dialog portal so it always
+ * sits at the top of the Radix dialog stack, properly owning the focus trap and
+ * Escape key. The user can drag the image to reposition it and use the zoom
+ * slider (or scroll wheel) to zoom in/out. The area outside the crop frame is
+ * visible but dimmed via an SVG mask so the user can see what will be cut off.
  * Clicking "Apply" exports a cropped JPEG via the Canvas API and hands it back
  * via onApply.
  *
@@ -17,8 +19,8 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "motion/react";
+import { Dialog as DialogPrimitive } from "radix-ui";
+import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Loader2, ZoomIn, ZoomOut, X } from "lucide-react";
 import { useSettings } from "@/pages/settings/SettingsContext";
@@ -29,6 +31,10 @@ import {
   getTextColor,
   getSubtextColor,
 } from "@/lib/utils";
+
+// Margin around the crop frame so the user can see what can still be panned to
+const MARGIN_X = 32;
+const MARGIN_Y = 24;
 
 interface ImageCropDialogProps {
   open: boolean;
@@ -49,10 +55,16 @@ export function ImageCropDialog({
 }: ImageCropDialogProps) {
   const { settings } = useSettings();
 
-  // Crop frame dimensions — computed once on mount so they stay stable for the
-  // lifetime of the component instance (viewport-responsive, never clipped).
-  const [CROP_W] = useState(() => Math.min(Math.max(window.innerWidth - 80, 280), 520));
+  // Crop frame dimensions — computed once on mount (viewport-responsive).
+  // Subtract margins so the full container comfortably fits on screen.
+  const [CROP_W] = useState(() =>
+    Math.min(Math.max(window.innerWidth - 80 - MARGIN_X * 2, 220), 480),
+  );
   const CROP_H = Math.round(CROP_W / aspectRatio);
+
+  // Container includes the crop frame plus context margins on each side
+  const CONTAINER_W = CROP_W + MARGIN_X * 2;
+  const CONTAINER_H = CROP_H + MARGIN_Y * 2;
 
   // ── image state ────────────────────────────────────────────────────────────
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -64,23 +76,22 @@ export function ImageCropDialog({
 
   // ── refs ───────────────────────────────────────────────────────────────────
   const imgRef = useRef<HTMLImageElement>(null);
-  const cropFrameRef = useRef<HTMLDivElement>(null);
+  const cropContainerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
   const lastPtr = useRef({ x: 0, y: 0 });
   // Kept in sync each render so the non-React wheel handler reads latest values
   const natSizeRef = useRef(natSize);
   const baseScaleRef = useRef(baseScale);
   const zoomRef = useRef(zoom);
-  const panRef = useRef(pan);
   natSizeRef.current = natSize;
   baseScaleRef.current = baseScale;
   zoomRef.current = zoom;
-  panRef.current = pan;
 
   // ── helpers ────────────────────────────────────────────────────────────────
 
   const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
+  // Pan bounds keep the image fully covering the crop frame (not the container)
   const constrainPan = useCallback(
     (px: number, py: number, z: number, ns: { w: number; h: number }, bs: number) => {
       const rw = ns.w * bs * z;
@@ -124,14 +135,14 @@ export function ImageCropDialog({
     setNatSize(ns);
     setBaseScale(bs);
     setZoom(1);
+    // Centre the image within the crop frame
     setPan({ x: (CROP_W - rw) / 2, y: (CROP_H - rh) / 2 });
   };
 
   // ── drag interaction ───────────────────────────────────────────────────────
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    // Prevent the browser from starting a text-selection drag, which would
-    // select content in underlying dialogs regardless of z-index.
+    // Prevent text-selection drag from reaching elements behind the overlay
     e.preventDefault();
     e.currentTarget.setPointerCapture(e.pointerId);
     isDragging.current = true;
@@ -165,7 +176,8 @@ export function ImageCropDialog({
 
   // Non-passive wheel listener so we can call preventDefault()
   useEffect(() => {
-    const el = cropFrameRef.current;
+    if (!open) return;
+    const el = cropContainerRef.current;
     if (!el) return;
     const handler = (e: WheelEvent) => {
       e.preventDefault();
@@ -187,7 +199,7 @@ export function ImageCropDialog({
     };
     el.addEventListener("wheel", handler, { passive: false });
     return () => el.removeEventListener("wheel", handler);
-  }, [CROP_W, CROP_H]);
+  }, [open, CROP_W, CROP_H]);
 
   // ── canvas export ──────────────────────────────────────────────────────────
 
@@ -198,6 +210,7 @@ export function ImageCropDialog({
       const rw = natSize.w * baseScale * zoom;
       const rh = natSize.h * baseScale * zoom;
 
+      // Compute the source rectangle in natural-image coordinates
       const srcX = Math.max(0, (-pan.x / rw) * natSize.w);
       const srcY = Math.max(0, (-pan.y / rh) * natSize.h);
       const srcW = Math.min(natSize.w - srcX, (CROP_W / rw) * natSize.w);
@@ -234,204 +247,270 @@ export function ImageCropDialog({
   const renderW = natSize ? natSize.w * baseScale * zoom : 0;
   const renderH = natSize ? natSize.h * baseScale * zoom : 0;
 
+  // Circle geometry (centred on the crop frame within the container)
+  const circleR = Math.min(CROP_W, CROP_H) / 2;
+  const circleCX = MARGIN_X + CROP_W / 2;
+  const circleCY = MARGIN_Y + CROP_H / 2;
+
   // ── render ─────────────────────────────────────────────────────────────────
 
-  return createPortal(
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 select-none"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.18 }}
-        >
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/65 backdrop-blur-sm" />
-
-          {/* Cropper card */}
+  return (
+    <DialogPrimitive.Root
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) onCancel();
+      }}
+    >
+      <DialogPrimitive.Portal forceMount>
+        {/* Backdrop */}
+        <DialogPrimitive.Overlay asChild forceMount>
           <motion.div
-            className={`relative z-10 flex w-full flex-col gap-5 rounded-2xl p-6 ${dialogClass} ${textShadow}`}
-            style={{ maxWidth: CROP_W + 48 }}
-            initial={{ scale: 0.96, opacity: 0, y: 8 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.96, opacity: 0, y: 8 }}
-            transition={{ type: "spring", stiffness: 380, damping: 28 }}
+            className="fixed inset-0 z-[9999] bg-black/65 backdrop-blur-sm"
+            animate={{ opacity: open ? 1 : 0 }}
+            style={{ pointerEvents: open ? "auto" : "none" }}
+            transition={{ duration: 0.18 }}
+          />
+        </DialogPrimitive.Overlay>
+
+        {/* Cropper content — Radix owns focus trap and Escape key */}
+        <DialogPrimitive.Content
+          asChild
+          forceMount
+          aria-label="Crop image"
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
+        >
+          <motion.div
+            className="fixed inset-0 z-[10000] flex items-center justify-center p-4 select-none"
+            animate={{ opacity: open ? 1 : 0 }}
+            style={{ pointerEvents: open ? "auto" : "none" }}
+            transition={{ duration: 0.18 }}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <h2 className={`text-base font-semibold ${textColor}`}>Crop Image</h2>
-              <button
-                type="button"
-                onClick={onCancel}
-                className={`flex h-7 w-7 cursor-pointer items-center justify-center rounded-full transition-opacity hover:opacity-100 ${subtextColor} opacity-60`}
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
+            {/* Card */}
+            <motion.div
+              className={`relative flex w-full flex-col gap-5 rounded-2xl p-6 ${dialogClass} ${textShadow}`}
+              style={{ maxWidth: CONTAINER_W + 48 }}
+              animate={open ? { scale: 1, y: 0 } : { scale: 0.96, y: 8 }}
+              transition={{ type: "spring", stiffness: 380, damping: 28 }}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between">
+                <h2 className={`text-base font-semibold ${textColor}`}>Crop Image</h2>
+                <button
+                  type="button"
+                  onClick={onCancel}
+                  className={`flex h-7 w-7 cursor-pointer items-center justify-center rounded-full transition-opacity hover:opacity-100 ${subtextColor} opacity-60`}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
 
-            {/* Crop frame */}
-            <div className="flex flex-col items-center gap-4">
-              <div
-                ref={cropFrameRef}
-                className="relative cursor-grab touch-none overflow-hidden rounded-lg active:cursor-grabbing"
-                style={{ width: CROP_W, height: CROP_H }}
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-                onPointerLeave={handlePointerUp}
-              >
-                {/* Image */}
-                {imageUrl && (
-                  <img
-                    ref={imgRef}
-                    src={imageUrl}
-                    onLoad={handleImageLoad}
-                    draggable={false}
-                    className="pointer-events-none absolute select-none"
-                    style={{
-                      left: pan.x,
-                      top: pan.y,
-                      width: renderW || undefined,
-                      height: renderH || undefined,
-                      display: natSize ? "block" : "none",
-                    }}
-                    alt="crop"
-                  />
-                )}
+              {/* Crop area */}
+              <div className="flex flex-col items-center gap-4">
+                <div
+                  ref={cropContainerRef}
+                  className="relative cursor-grab touch-none overflow-hidden rounded-lg active:cursor-grabbing"
+                  style={{ width: CONTAINER_W, height: CONTAINER_H }}
+                  onPointerDown={handlePointerDown}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  onPointerLeave={handlePointerUp}
+                >
+                  {/* Dark base visible in the margin area behind the image */}
+                  <div className="absolute inset-0 bg-black/30" />
 
-                {/* Loading state */}
-                {imageUrl && !natSize && (
-                  <div className="flex h-full w-full items-center justify-center bg-black/40">
-                    <Loader2 className="h-6 w-6 animate-spin text-white/60" />
-                  </div>
-                )}
+                  {/* Image — offset by margins so pan=(0,0) aligns image to crop-frame top-left */}
+                  {imageUrl && (
+                    <img
+                      ref={imgRef}
+                      src={imageUrl}
+                      onLoad={handleImageLoad}
+                      draggable={false}
+                      className="pointer-events-none absolute select-none"
+                      style={{
+                        left: MARGIN_X + pan.x,
+                        top: MARGIN_Y + pan.y,
+                        width: renderW || undefined,
+                        height: renderH || undefined,
+                        display: natSize ? "block" : "none",
+                      }}
+                      alt="crop"
+                    />
+                  )}
 
-                {/* Rule-of-thirds grid */}
-                {natSize && (
-                  <div className="pointer-events-none absolute inset-0">
-                    <div
-                      className="absolute top-0 bottom-0 w-px bg-white/25"
-                      style={{ left: "33.333%" }}
-                    />
-                    <div
-                      className="absolute top-0 bottom-0 w-px bg-white/25"
-                      style={{ left: "66.667%" }}
-                    />
-                    <div
-                      className="absolute right-0 left-0 h-px bg-white/25"
-                      style={{ top: "33.333%" }}
-                    />
-                    <div
-                      className="absolute right-0 left-0 h-px bg-white/25"
-                      style={{ top: "66.667%" }}
-                    />
-                  </div>
-                )}
+                  {/* Loading state */}
+                  {imageUrl && !natSize && (
+                    <div className="flex h-full w-full items-center justify-center bg-black/40">
+                      <Loader2 className="h-6 w-6 animate-spin text-white/60" />
+                    </div>
+                  )}
 
-                {/* Circular mask overlay */}
-                {circular && natSize && (
-                  <svg
-                    className="pointer-events-none absolute inset-0"
-                    width={CROP_W}
-                    height={CROP_H}
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <defs>
-                      <mask id="crop-circle-mask">
-                        <rect width={CROP_W} height={CROP_H} fill="white" />
+                  {/* SVG overlay: dims outside the crop frame, rule-of-thirds, border */}
+                  {natSize && (
+                    <svg
+                      className="pointer-events-none absolute inset-0"
+                      width={CONTAINER_W}
+                      height={CONTAINER_H}
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <defs>
+                        <mask id="icd-dim-mask">
+                          {/* White = dim; black = clear (the crop frame) */}
+                          <rect width={CONTAINER_W} height={CONTAINER_H} fill="white" />
+                          {circular ? (
+                            <circle cx={circleCX} cy={circleCY} r={circleR} fill="black" />
+                          ) : (
+                            <rect
+                              x={MARGIN_X}
+                              y={MARGIN_Y}
+                              width={CROP_W}
+                              height={CROP_H}
+                              fill="black"
+                            />
+                          )}
+                        </mask>
+                      </defs>
+
+                      {/* Dimming layer outside crop frame */}
+                      <rect
+                        width={CONTAINER_W}
+                        height={CONTAINER_H}
+                        fill="black"
+                        fillOpacity={0.55}
+                        mask="url(#icd-dim-mask)"
+                      />
+
+                      {/* Rule-of-thirds grid (rectangular mode only) */}
+                      {!circular && (
+                        <>
+                          <line
+                            x1={MARGIN_X + CROP_W / 3}
+                            y1={MARGIN_Y}
+                            x2={MARGIN_X + CROP_W / 3}
+                            y2={MARGIN_Y + CROP_H}
+                            stroke="white"
+                            strokeOpacity={0.25}
+                            strokeWidth={1}
+                          />
+                          <line
+                            x1={MARGIN_X + (CROP_W * 2) / 3}
+                            y1={MARGIN_Y}
+                            x2={MARGIN_X + (CROP_W * 2) / 3}
+                            y2={MARGIN_Y + CROP_H}
+                            stroke="white"
+                            strokeOpacity={0.25}
+                            strokeWidth={1}
+                          />
+                          <line
+                            x1={MARGIN_X}
+                            y1={MARGIN_Y + CROP_H / 3}
+                            x2={MARGIN_X + CROP_W}
+                            y2={MARGIN_Y + CROP_H / 3}
+                            stroke="white"
+                            strokeOpacity={0.25}
+                            strokeWidth={1}
+                          />
+                          <line
+                            x1={MARGIN_X}
+                            y1={MARGIN_Y + (CROP_H * 2) / 3}
+                            x2={MARGIN_X + CROP_W}
+                            y2={MARGIN_Y + (CROP_H * 2) / 3}
+                            stroke="white"
+                            strokeOpacity={0.25}
+                            strokeWidth={1}
+                          />
+                        </>
+                      )}
+
+                      {/* Crop frame border */}
+                      {circular ? (
                         <circle
-                          cx={CROP_W / 2}
-                          cy={CROP_H / 2}
-                          r={Math.min(CROP_W, CROP_H) / 2 - 2}
-                          fill="black"
+                          cx={circleCX}
+                          cy={circleCY}
+                          r={circleR}
+                          fill="none"
+                          stroke="white"
+                          strokeWidth={1.5}
+                          strokeOpacity={0.55}
                         />
-                      </mask>
-                    </defs>
-                    <rect
-                      width={CROP_W}
-                      height={CROP_H}
-                      fill="black"
-                      fillOpacity={0.45}
-                      mask="url(#crop-circle-mask)"
-                    />
-                    <circle
-                      cx={CROP_W / 2}
-                      cy={CROP_H / 2}
-                      r={Math.min(CROP_W, CROP_H) / 2 - 2}
-                      fill="none"
-                      stroke="white"
-                      strokeWidth={1.5}
-                      strokeOpacity={0.55}
-                    />
-                  </svg>
-                )}
+                      ) : (
+                        <rect
+                          x={MARGIN_X}
+                          y={MARGIN_Y}
+                          width={CROP_W}
+                          height={CROP_H}
+                          fill="none"
+                          stroke="white"
+                          strokeWidth={1}
+                          strokeOpacity={0.45}
+                          rx={4}
+                        />
+                      )}
+                    </svg>
+                  )}
+                </div>
 
-                {/* Frame border */}
-                <div className="pointer-events-none absolute inset-0 rounded-lg border border-white/30" />
+                {/* Zoom control */}
+                <div className="flex w-full items-center gap-3" style={{ maxWidth: CONTAINER_W }}>
+                  <button
+                    type="button"
+                    onClick={() => applyZoom(zoom - 0.15)}
+                    className={`shrink-0 transition-opacity ${subtextColor} hover:opacity-100 disabled:opacity-30`}
+                    disabled={zoom <= 1}
+                  >
+                    <ZoomOut className="h-4 w-4" />
+                  </button>
+                  <input
+                    type="range"
+                    min={1}
+                    max={3}
+                    step={0.01}
+                    value={zoom}
+                    onChange={(e) => applyZoom(parseFloat(e.target.value))}
+                    disabled={!natSize}
+                    className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-white disabled:cursor-not-allowed disabled:opacity-40"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => applyZoom(zoom + 0.15)}
+                    className={`shrink-0 transition-opacity ${subtextColor} hover:opacity-100 disabled:opacity-30`}
+                    disabled={zoom >= 3}
+                  >
+                    <ZoomIn className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <p className={`text-xs ${subtextColor}`}>Drag to reposition · Scroll to zoom</p>
               </div>
 
-              {/* Zoom control */}
-              <div className="flex w-full items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => applyZoom(zoom - 0.15)}
-                  className={`shrink-0 transition-opacity ${subtextColor} hover:opacity-100 disabled:opacity-30`}
-                  disabled={zoom <= 1}
+              {/* Footer */}
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={onCancel}
+                  className={`cursor-pointer ${buttonClass} ${textShadow}`}
                 >
-                  <ZoomOut className="h-4 w-4" />
-                </button>
-                <input
-                  type="range"
-                  min={1}
-                  max={3}
-                  step={0.01}
-                  value={zoom}
-                  onChange={(e) => applyZoom(parseFloat(e.target.value))}
-                  disabled={!natSize}
-                  className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-white disabled:cursor-not-allowed disabled:opacity-40"
-                />
-                <button
-                  type="button"
-                  onClick={() => applyZoom(zoom + 0.15)}
-                  className={`shrink-0 transition-opacity ${subtextColor} hover:opacity-100 disabled:opacity-30`}
-                  disabled={zoom >= 3}
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleApply}
+                  disabled={!natSize || isApplying}
+                  className={`cursor-pointer ${buttonClass} ${textShadow}`}
                 >
-                  <ZoomIn className="h-4 w-4" />
-                </button>
+                  {isApplying ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Applying…
+                    </>
+                  ) : (
+                    "Apply"
+                  )}
+                </Button>
               </div>
-
-              <p className={`text-xs ${subtextColor}`}>Drag to reposition · Scroll to zoom</p>
-            </div>
-
-            {/* Footer */}
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={onCancel}
-                className={`cursor-pointer ${buttonClass} ${textShadow}`}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleApply}
-                disabled={!natSize || isApplying}
-                className={`cursor-pointer ${buttonClass} ${textShadow}`}
-              >
-                {isApplying ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Applying…
-                  </>
-                ) : (
-                  "Apply"
-                )}
-              </Button>
-            </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>,
-    document.body,
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }
