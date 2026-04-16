@@ -1,45 +1,34 @@
 /**
  * ImageCropDialog
  *
- * A canvas-based image cropper that opens as a modal when the caller supplies
- * a raw File. The user can drag the image to reposition it and use the zoom
- * slider (or scroll wheel) to zoom in/out. Clicking "Apply" exports a cropped
- * JPEG via the Canvas API and hands it back via onApply.
+ * A canvas-based image cropper rendered as a full-screen portal overlay so it
+ * is never clipped by a parent dialog or container. The user can drag the image
+ * to reposition it and use the zoom slider (or scroll wheel) to zoom in/out.
+ * Clicking "Apply" exports a cropped JPEG via the Canvas API and hands it back
+ * via onApply.
  *
  * Props:
- *   open        – controls dialog visibility
+ *   open        – controls visibility
  *   file        – the raw File selected by the user (null = not yet chosen)
  *   aspectRatio – target aspect ratio (width / height); e.g. 16/9 or 1
- *   circular    – when true an optional circular mask overlay is shown
- *                 (useful for profile picture crops that display as avatars)
+ *   circular    – when true a circular mask overlay is shown (profile pictures)
  *   onApply     – called with the cropped File when the user confirms
  *   onCancel    – called when the user dismisses without applying
  */
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
-import { Loader2, ZoomIn, ZoomOut } from "lucide-react";
+import { Loader2, ZoomIn, ZoomOut, X } from "lucide-react";
 import { useSettings } from "@/pages/settings/SettingsContext";
 import {
   getButtonClasses,
   getDialogClasses,
-  getDialogFooterClasses,
   getTextShadow,
   getTextColor,
   getSubtextColor,
 } from "@/lib/utils";
-
-// The crop frame is rendered at this fixed pixel width inside the dialog.
-// On viewports narrower than ~500 px the dialog will scroll horizontally,
-// but this is an admin/upload-oriented feature used mainly on desktop.
-const CROP_W = 440;
 
 interface ImageCropDialogProps {
   open: boolean;
@@ -59,12 +48,15 @@ export function ImageCropDialog({
   onCancel,
 }: ImageCropDialogProps) {
   const { settings } = useSettings();
+
+  // Crop frame dimensions — computed once on mount so they stay stable for the
+  // lifetime of the component instance (viewport-responsive, never clipped).
+  const [CROP_W] = useState(() => Math.min(Math.max(window.innerWidth - 80, 280), 520));
   const CROP_H = Math.round(CROP_W / aspectRatio);
 
   // ── image state ────────────────────────────────────────────────────────────
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [natSize, setNatSize] = useState<{ w: number; h: number } | null>(null);
-  // baseScale: the scale at zoom=1 that makes the image just cover the crop frame
   const [baseScale, setBaseScale] = useState(1);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -75,7 +67,7 @@ export function ImageCropDialog({
   const cropFrameRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
   const lastPtr = useRef({ x: 0, y: 0 });
-  // Kept in sync each render so the non-React wheel handler can read latest values
+  // Kept in sync each render so the non-React wheel handler reads latest values
   const natSizeRef = useRef(natSize);
   const baseScaleRef = useRef(baseScale);
   const zoomRef = useRef(zoom);
@@ -87,22 +79,10 @@ export function ImageCropDialog({
 
   // ── helpers ────────────────────────────────────────────────────────────────
 
-  const clamp = (value: number, min: number, max: number) =>
-    Math.min(max, Math.max(min, value));
+  const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
-  /**
-   * Constrain pan so the image always covers the entire crop frame.
-   * Image top-left is at (panX, panY). The rendered image dimensions are
-   * natW * bs * z × natH * bs * z. The crop frame spans [0, CROP_W] × [0, CROP_H].
-   */
   const constrainPan = useCallback(
-    (
-      px: number,
-      py: number,
-      z: number,
-      ns: { w: number; h: number },
-      bs: number,
-    ) => {
+    (px: number, py: number, z: number, ns: { w: number; h: number }, bs: number) => {
       const rw = ns.w * bs * z;
       const rh = ns.h * bs * z;
       return {
@@ -110,12 +90,11 @@ export function ImageCropDialog({
         y: clamp(py, CROP_H - rh, 0),
       };
     },
-    [CROP_H],
+    [CROP_W, CROP_H],
   );
 
   // ── image lifecycle ────────────────────────────────────────────────────────
 
-  // Create / revoke object URL when the file prop changes
   useEffect(() => {
     if (!file) {
       setImageUrl(null);
@@ -126,7 +105,6 @@ export function ImageCropDialog({
     return () => URL.revokeObjectURL(url);
   }, [file]);
 
-  // Reset all crop state when the dialog closes
   useEffect(() => {
     if (!open) {
       setNatSize(null);
@@ -206,7 +184,7 @@ export function ImageCropDialog({
     };
     el.addEventListener("wheel", handler, { passive: false });
     return () => el.removeEventListener("wheel", handler);
-  }, [CROP_H]); // CROP_H is stable for the life of the dialog instance
+  }, [CROP_W, CROP_H]);
 
   // ── canvas export ──────────────────────────────────────────────────────────
 
@@ -217,13 +195,11 @@ export function ImageCropDialog({
       const rw = natSize.w * baseScale * zoom;
       const rh = natSize.h * baseScale * zoom;
 
-      // Source rectangle in the original image's pixel space
       const srcX = Math.max(0, (-pan.x / rw) * natSize.w);
       const srcY = Math.max(0, (-pan.y / rh) * natSize.h);
       const srcW = Math.min(natSize.w - srcX, (CROP_W / rw) * natSize.w);
       const srcH = Math.min(natSize.h - srcY, (CROP_H / rh) * natSize.h);
 
-      // Output resolution
       const outW = circular ? 400 : 960;
       const outH = circular ? 400 : Math.round(960 / aspectRatio);
 
@@ -234,9 +210,7 @@ export function ImageCropDialog({
       if (!ctx) return;
       ctx.drawImage(imgRef.current, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
 
-      const blob = await new Promise<Blob | null>((res) =>
-        canvas.toBlob(res, "image/jpeg", 0.92),
-      );
+      const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.92));
       if (!blob) return;
 
       const basename = file.name.replace(/\.[^.]+$/, "");
@@ -249,7 +223,6 @@ export function ImageCropDialog({
   // ── styling ────────────────────────────────────────────────────────────────
 
   const dialogClass = getDialogClasses(settings.useLiquidGlass, settings.useDarkMode);
-  const footerClass = getDialogFooterClasses(settings.useLiquidGlass, settings.useDarkMode);
   const buttonClass = getButtonClasses(settings.useLiquidGlass, settings.useDarkMode);
   const textShadow = getTextShadow(settings.useLiquidGlass, settings.useDarkMode);
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
@@ -260,179 +233,202 @@ export function ImageCropDialog({
 
   // ── render ─────────────────────────────────────────────────────────────────
 
-  return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) onCancel(); }}>
-      <DialogContent
-        className={`${dialogClass} ${textShadow} max-w-[500px]`}
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-      >
-        <DialogHeader>
-          <DialogTitle className={textColor}>Crop Image</DialogTitle>
-        </DialogHeader>
+  return createPortal(
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
+        >
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/65 backdrop-blur-sm" />
 
-        <div className="flex flex-col items-center gap-4">
-          {/* ── crop frame ─────────────────────────────────────────────────── */}
-          <div
-            ref={cropFrameRef}
-            className="relative touch-none cursor-grab overflow-hidden rounded-lg active:cursor-grabbing"
-            style={{ width: CROP_W, height: CROP_H }}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            onPointerLeave={handlePointerUp}
+          {/* Cropper card */}
+          <motion.div
+            className={`relative z-10 flex w-full flex-col gap-5 rounded-2xl p-6 ${dialogClass} ${textShadow}`}
+            style={{ maxWidth: CROP_W + 48 }}
+            initial={{ scale: 0.96, opacity: 0, y: 8 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.96, opacity: 0, y: 8 }}
+            transition={{ type: "spring", stiffness: 380, damping: 28 }}
           >
-            {/* Image */}
-            {imageUrl && (
-              <img
-                ref={imgRef}
-                src={imageUrl}
-                onLoad={handleImageLoad}
-                draggable={false}
-                className="pointer-events-none absolute select-none"
-                style={{
-                  left: pan.x,
-                  top: pan.y,
-                  width: renderW || undefined,
-                  height: renderH || undefined,
-                  display: natSize ? "block" : "none",
-                }}
-                alt="crop"
-              />
-            )}
-
-            {/* Loading state */}
-            {imageUrl && !natSize && (
-              <div className="flex h-full w-full items-center justify-center bg-black/40">
-                <Loader2 className="h-6 w-6 animate-spin text-white/60" />
-              </div>
-            )}
-
-            {/* Rule-of-thirds grid */}
-            {natSize && (
-              <div className="pointer-events-none absolute inset-0">
-                <div
-                  className="absolute top-0 bottom-0 w-px bg-white/25"
-                  style={{ left: "33.333%" }}
-                />
-                <div
-                  className="absolute top-0 bottom-0 w-px bg-white/25"
-                  style={{ left: "66.667%" }}
-                />
-                <div
-                  className="absolute left-0 right-0 h-px bg-white/25"
-                  style={{ top: "33.333%" }}
-                />
-                <div
-                  className="absolute left-0 right-0 h-px bg-white/25"
-                  style={{ top: "66.667%" }}
-                />
-              </div>
-            )}
-
-            {/* Circular mask overlay (for profile picture crops) */}
-            {circular && natSize && (
-              <svg
-                className="pointer-events-none absolute inset-0"
-                width={CROP_W}
-                height={CROP_H}
-                xmlns="http://www.w3.org/2000/svg"
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <h2 className={`text-base font-semibold ${textColor}`}>Crop Image</h2>
+              <button
+                type="button"
+                onClick={onCancel}
+                className={`flex h-7 w-7 cursor-pointer items-center justify-center rounded-full transition-opacity hover:opacity-100 ${subtextColor} opacity-60`}
               >
-                <defs>
-                  <mask id="crop-circle-mask">
-                    <rect width={CROP_W} height={CROP_H} fill="white" />
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Crop frame */}
+            <div className="flex flex-col items-center gap-4">
+              <div
+                ref={cropFrameRef}
+                className="relative cursor-grab touch-none overflow-hidden rounded-lg active:cursor-grabbing"
+                style={{ width: CROP_W, height: CROP_H }}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerLeave={handlePointerUp}
+              >
+                {/* Image */}
+                {imageUrl && (
+                  <img
+                    ref={imgRef}
+                    src={imageUrl}
+                    onLoad={handleImageLoad}
+                    draggable={false}
+                    className="pointer-events-none absolute select-none"
+                    style={{
+                      left: pan.x,
+                      top: pan.y,
+                      width: renderW || undefined,
+                      height: renderH || undefined,
+                      display: natSize ? "block" : "none",
+                    }}
+                    alt="crop"
+                  />
+                )}
+
+                {/* Loading state */}
+                {imageUrl && !natSize && (
+                  <div className="flex h-full w-full items-center justify-center bg-black/40">
+                    <Loader2 className="h-6 w-6 animate-spin text-white/60" />
+                  </div>
+                )}
+
+                {/* Rule-of-thirds grid */}
+                {natSize && (
+                  <div className="pointer-events-none absolute inset-0">
+                    <div
+                      className="absolute top-0 bottom-0 w-px bg-white/25"
+                      style={{ left: "33.333%" }}
+                    />
+                    <div
+                      className="absolute top-0 bottom-0 w-px bg-white/25"
+                      style={{ left: "66.667%" }}
+                    />
+                    <div
+                      className="absolute right-0 left-0 h-px bg-white/25"
+                      style={{ top: "33.333%" }}
+                    />
+                    <div
+                      className="absolute right-0 left-0 h-px bg-white/25"
+                      style={{ top: "66.667%" }}
+                    />
+                  </div>
+                )}
+
+                {/* Circular mask overlay */}
+                {circular && natSize && (
+                  <svg
+                    className="pointer-events-none absolute inset-0"
+                    width={CROP_W}
+                    height={CROP_H}
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <defs>
+                      <mask id="crop-circle-mask">
+                        <rect width={CROP_W} height={CROP_H} fill="white" />
+                        <circle
+                          cx={CROP_W / 2}
+                          cy={CROP_H / 2}
+                          r={Math.min(CROP_W, CROP_H) / 2 - 2}
+                          fill="black"
+                        />
+                      </mask>
+                    </defs>
+                    <rect
+                      width={CROP_W}
+                      height={CROP_H}
+                      fill="black"
+                      fillOpacity={0.45}
+                      mask="url(#crop-circle-mask)"
+                    />
                     <circle
                       cx={CROP_W / 2}
                       cy={CROP_H / 2}
                       r={Math.min(CROP_W, CROP_H) / 2 - 2}
-                      fill="black"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth={1.5}
+                      strokeOpacity={0.55}
                     />
-                  </mask>
-                </defs>
-                {/* Darken outside circle */}
-                <rect
-                  width={CROP_W}
-                  height={CROP_H}
-                  fill="black"
-                  fillOpacity={0.45}
-                  mask="url(#crop-circle-mask)"
+                  </svg>
+                )}
+
+                {/* Frame border */}
+                <div className="pointer-events-none absolute inset-0 rounded-lg border border-white/30" />
+              </div>
+
+              {/* Zoom control */}
+              <div className="flex w-full items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => applyZoom(zoom - 0.15)}
+                  className={`shrink-0 transition-opacity ${subtextColor} hover:opacity-100 disabled:opacity-30`}
+                  disabled={zoom <= 1}
+                >
+                  <ZoomOut className="h-4 w-4" />
+                </button>
+                <input
+                  type="range"
+                  min={1}
+                  max={3}
+                  step={0.01}
+                  value={zoom}
+                  onChange={(e) => applyZoom(parseFloat(e.target.value))}
+                  disabled={!natSize}
+                  className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-white disabled:cursor-not-allowed disabled:opacity-40"
                 />
-                {/* Circle border */}
-                <circle
-                  cx={CROP_W / 2}
-                  cy={CROP_H / 2}
-                  r={Math.min(CROP_W, CROP_H) / 2 - 2}
-                  fill="none"
-                  stroke="white"
-                  strokeWidth={1.5}
-                  strokeOpacity={0.55}
-                />
-              </svg>
-            )}
+                <button
+                  type="button"
+                  onClick={() => applyZoom(zoom + 0.15)}
+                  className={`shrink-0 transition-opacity ${subtextColor} hover:opacity-100 disabled:opacity-30`}
+                  disabled={zoom >= 3}
+                >
+                  <ZoomIn className="h-4 w-4" />
+                </button>
+              </div>
 
-            {/* Crop frame border */}
-            <div className="pointer-events-none absolute inset-0 rounded-lg border border-white/30" />
-          </div>
+              <p className={`text-xs ${subtextColor}`}>Drag to reposition · Scroll to zoom</p>
+            </div>
 
-          {/* ── zoom control ───────────────────────────────────────────────── */}
-          <div className="flex w-full max-w-[440px] items-center gap-3">
-            <button
-              type="button"
-              onClick={() => applyZoom(zoom - 0.15)}
-              className={`shrink-0 transition-opacity ${subtextColor} hover:opacity-100 disabled:opacity-30`}
-              disabled={zoom <= 1}
-            >
-              <ZoomOut className="h-4 w-4" />
-            </button>
-            <input
-              type="range"
-              min={1}
-              max={3}
-              step={0.01}
-              value={zoom}
-              onChange={(e) => applyZoom(parseFloat(e.target.value))}
-              disabled={!natSize}
-              className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-white disabled:cursor-not-allowed disabled:opacity-40"
-            />
-            <button
-              type="button"
-              onClick={() => applyZoom(zoom + 0.15)}
-              className={`shrink-0 transition-opacity ${subtextColor} hover:opacity-100 disabled:opacity-30`}
-              disabled={zoom >= 3}
-            >
-              <ZoomIn className="h-4 w-4" />
-            </button>
-          </div>
-
-          <p className={`text-xs ${subtextColor}`}>
-            Drag to reposition · Scroll wheel to zoom
-          </p>
-        </div>
-
-        <DialogFooter className={footerClass}>
-          <Button
-            variant="outline"
-            onClick={onCancel}
-            className={`cursor-pointer ${buttonClass} ${textShadow}`}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleApply}
-            disabled={!natSize || isApplying}
-            className={`cursor-pointer ${buttonClass} ${textShadow}`}
-          >
-            {isApplying ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Applying…
-              </>
-            ) : (
-              "Apply"
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            {/* Footer */}
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={onCancel}
+                className={`cursor-pointer ${buttonClass} ${textShadow}`}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleApply}
+                disabled={!natSize || isApplying}
+                className={`cursor-pointer ${buttonClass} ${textShadow}`}
+              >
+                {isApplying ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Applying…
+                  </>
+                ) : (
+                  "Apply"
+                )}
+              </Button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>,
+    document.body,
   );
 }

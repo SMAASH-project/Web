@@ -1,9 +1,10 @@
 import { useContext } from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { AuthContext } from "@/context/AuthContext";
 
 export function RequireAuth() {
   const { isLoggedIn, isInitializing } = useContext(AuthContext);
+  const location = useLocation();
 
   if (isInitializing) {
     return (
@@ -13,5 +14,9 @@ export function RequireAuth() {
     );
   }
 
-  return isLoggedIn ? <Outlet /> : <Navigate to="/app/login" replace />;
+  return isLoggedIn ? (
+    <Outlet />
+  ) : (
+    <Navigate to="/app/login" replace state={{ from: location.pathname + location.search }} />
+  );
 }

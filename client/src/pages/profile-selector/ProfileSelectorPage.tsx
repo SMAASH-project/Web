@@ -98,7 +98,7 @@ export function ProfileSelectorPage() {
     if (location.state?.change) return;
     if (!userId) return;
     const stored = localStorage.getItem(`selected_profile_${String(userId)}`);
-    if (stored) navigate("/app/releases", { replace: true });
+    if (stored) navigate(location.state?.from ?? "/app/releases", { replace: true });
   }, [userId, location.state, navigate]);
 
   const handleLogout = async () => {
@@ -125,9 +125,9 @@ export function ProfileSelectorPage() {
         return;
       }
       selectProfile(name);
-      navigate("/app/releases");
+      navigate(location.state?.from ?? "/app/releases");
     },
-    [isManaging, removeProfile, selectProfile, navigate],
+    [isManaging, removeProfile, selectProfile, navigate, location.state],
   );
 
   const wrap = (content: React.ReactNode) =>
