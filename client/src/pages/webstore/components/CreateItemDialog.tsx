@@ -142,6 +142,7 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
     name.trim() !== "" && description.trim() !== "" && price !== "" && Number(price) > 0;
 
   return (
+    <>
     <Dialog
       open={open}
       onOpenChange={(v) => {
@@ -320,5 +321,6 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
       onApply={handleCropApply}
       onCancel={handleCropCancel}
     />
+    </>
   );
 }

@@ -152,6 +152,7 @@ export function EditItemDialog({ item, onUpdate, isLoading = false }: EditItemDi
     name.trim() !== "" && description.trim() !== "" && price !== "" && Number(price) > 0;
 
   return (
+    <>
     <Dialog
       open={open}
       onOpenChange={(v) => {
@@ -362,5 +363,6 @@ export function EditItemDialog({ item, onUpdate, isLoading = false }: EditItemDi
       onApply={handleCropApply}
       onCancel={handleCropCancel}
     />
+    </>
   );
 }
