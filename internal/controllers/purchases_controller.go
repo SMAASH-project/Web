@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	dtos "smaash-web/internal/DTOs"
 	"smaash-web/internal/middlewares"
@@ -50,6 +51,9 @@ func (pc PurchasesController) Create(c *gin.Context) {
 	case errors.Is(err, gorm.ErrDuplicatedKey):
 		c.JSON(http.StatusConflict, dtos.NewErrResp(err.Error(), path))
 		return
+	case errors.Is(err, repository.ErrNotEnoughCoins):
+		c.JSON(http.StatusForbidden, dtos.NewErrResp(err.Error(), path))
+		return
 	case err != nil:
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
 		return
@@ -67,6 +71,7 @@ func (pc PurchasesController) Create(c *gin.Context) {
 // @failure 500 {object} dtos.ErrResp "internal server error"
 // @router /purchases [get]
 func (pc PurchasesController) ReadAll(c *gin.Context) {
+	log.Println("Purchase controller: ", pc)
 	purchases, err := pc.purchasesRepo.ReadAll(c.Request.Context(), "Character", "PlayerProfile")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), c.Request.URL.Path))

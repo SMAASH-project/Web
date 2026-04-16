@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"smaash-web/internal/models"
 
 	"gorm.io/gorm"
@@ -18,8 +19,10 @@ type PurchasesRepositoryActions struct {
 }
 
 func NewPurchasesRepositoryActions(conn *gorm.DB) PurchasesRepository {
-	return PurchasesRepositoryActions{conn: conn}
+	return PurchasesRepositoryActions{BaseRepository: NewBaseRepositoryActions[models.Purchase](conn), conn: conn}
 }
+
+var ErrNotEnoughCoins = errors.New("Player doesn't have enough coins to purchase this character")
 
 func (pra PurchasesRepositoryActions) MakePurchase(c context.Context, purchase models.Purchase) (*models.Purchase, error) {
 	var result models.Purchase
@@ -44,8 +47,14 @@ func (pra PurchasesRepositoryActions) MakePurchase(c context.Context, purchase m
 			return err
 		}
 
+		if result.Character.Price > uint(player.Coins) {
+			return ErrNotEnoughCoins
+		}
+
 		player.Coins -= int64(result.Character.Price)
-		if _, err := gorm.G[models.PlayerProfile](tx).Where("id = ?", player.ID).Updates(c, player); err != nil {
+		if err := tx.Model(&models.PlayerProfile{}).
+			Where("id = ?", player.ID).
+			Updates(map[string]any{"coins": player.Coins}).Error; err != nil {
 			return err
 		}
 
