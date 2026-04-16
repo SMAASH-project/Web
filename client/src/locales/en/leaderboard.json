@@ -6,13 +6,13 @@
     "wins": "Wins",
     "active": "Active",
     "levels": "Levels",
-    "items": "Items"
+    "items": "Characters"
   },
   "panels": {
     "winLeaderboard": "Win Leaderboard",
     "mostActivePlayers": "Most Active Players",
     "mostPlayedLevels": "Most Played Levels",
-    "mostPurchasedItems": "Most Purchased Items"
+    "mostPurchasedItems": "Most Purchased Characters"
   },
   "podium": {
     "runnersUp": "Runners Up",

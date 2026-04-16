@@ -191,7 +191,7 @@ export function useItems() {
       return created;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.items.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.characters.all });
       toast.success(t("toast.created"));
     },
     onError: (err) => {
@@ -206,9 +206,9 @@ export function useItems() {
       await apiClient.delete(`/characters/${itemId}`);
     },
     onMutate: async (itemId) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.items.all });
-      const previousItems = queryClient.getQueryData<WebstoreItem[]>(queryKeys.items.all);
-      queryClient.setQueryData<WebstoreItem[]>(queryKeys.items.all, (old) =>
+      await queryClient.cancelQueries({ queryKey: queryKeys.characters.all });
+      const previousItems = queryClient.getQueryData<WebstoreItem[]>(queryKeys.characters.all);
+      queryClient.setQueryData<WebstoreItem[]>(queryKeys.characters.all, (old) =>
         (old ?? []).filter((item) => item.id !== itemId),
       );
       return { previousItems };
@@ -216,12 +216,12 @@ export function useItems() {
     onError: (_err, _itemId, context) => {
       const ctx = context as { previousItems?: WebstoreItem[] } | undefined;
       if (ctx?.previousItems !== undefined) {
-        queryClient.setQueryData(queryKeys.items.all, ctx.previousItems);
+        queryClient.setQueryData(queryKeys.characters.all, ctx.previousItems);
       }
       toast.error(t("toast.deleteFailed"));
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.items.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.characters.all });
       toast.success(t("toast.deleted"));
     },
   });

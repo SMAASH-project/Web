@@ -1,8 +1,8 @@
 {
   "title": "Webáruház",
   "subtitle": "Karakterek feloldása",
-  "searchPlaceholder": "Keresés tárgy neve alapján…",
-  "noResults": "Nem található tárgy.",
+  "searchPlaceholder": "Keresés karakter neve alapján…",
+  "noResults": "Nem található karakter.",
   "filters": {
     "type": "Típus",
     "rarity": "Ritkaság",
@@ -28,31 +28,31 @@
     "owned": "Megvan"
   },
   "create": {
-    "triggerButton": "Tárgy létrehozása",
-    "title": "Új tárgy létrehozása",
-    "description": "Adj hozzá egy új tárgyat a webáruházhoz.",
+    "triggerButton": "Karakter létrehozása",
+    "title": "Új karakter létrehozása",
+    "description": "Adj hozzá egy új karaktert a webáruházhoz.",
     "name": "Név",
-    "namePlaceholder": "Tárgy neve",
+    "namePlaceholder": "Karakter neve",
     "rarity": "Ritkaság",
     "combatType": "Harc típusa",
     "descriptionLabel": "Leírás",
-    "descriptionPlaceholder": "Tárgy leírása",
+    "descriptionPlaceholder": "Karakter leírása",
     "price": "Ár",
     "image": "Karakter képe",
     "imagePlaceholder": "Kattints a feltöltéshez (JPEG, PNG, WebP, GIF)",
     "cancel": "Mégse",
-    "submit": "Tárgy létrehozása",
+    "submit": "Karakter létrehozása",
     "creating": "Létrehozás…"
   },
   "toast": {
-    "unlocked": "Tárgy feloldva!",
-    "created": "Tárgy létrehozva.",
-    "deleted": "Tárgy törölve.",
-    "deleteFailed": "Nem sikerült törölni a tárgyat."
+    "unlocked": "Karakter feloldva!",
+    "created": "Karakter létrehozva.",
+    "deleted": "Karakter törölve.",
+    "deleteFailed": "Nem sikerült törölni a karaktert."
   },
   "delete": {
     "confirm": "Törlés megerősítése",
-    "description": "Biztosan törölni szeretnéd ezt a tárgyat? Ez a művelet nem vonható vissza.",
+    "description": "Biztosan törölni szeretnéd ezt a karaktert? Ez a művelet nem vonható vissza.",
     "cancel": "Mégse",
     "confirm_action": "Megerősítés"
   }

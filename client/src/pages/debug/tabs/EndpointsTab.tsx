@@ -19,11 +19,6 @@ const QUICK_ROUTES = [
   { label: "Who Am I", method: "GET" as Method, path: "/users/whoami" },
   { label: "All Users", method: "GET" as Method, path: "/users" },
   {
-    label: "All Items",
-    method: "GET" as Method,
-    path: "/items?page=1&page_size=10",
-  },
-  {
     label: "All Posts",
     method: "GET" as Method,
     path: "/posts?page=1&page_size=10",
@@ -36,7 +31,7 @@ const QUICK_ROUTES = [
   { label: "Top Players", method: "GET" as Method, path: "/stats/top/players" },
   { label: "Leaderboard", method: "GET" as Method, path: "/stats/leaderboard" },
   { label: "Top Levels", method: "GET" as Method, path: "/stats/top/levels" },
-  { label: "Top Items", method: "GET" as Method, path: "/stats/top/items" },
+  { label: "Top Characters", method: "GET" as Method, path: "/stats/top/items" },
 ];
 
 export function EndpointsTab({
