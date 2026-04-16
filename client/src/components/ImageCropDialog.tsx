@@ -130,6 +130,9 @@ export function ImageCropDialog({
   // ── drag interaction ───────────────────────────────────────────────────────
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    // Prevent the browser from starting a text-selection drag, which would
+    // select content in underlying dialogs regardless of z-index.
+    e.preventDefault();
     e.currentTarget.setPointerCapture(e.pointerId);
     isDragging.current = true;
     lastPtr.current = { x: e.clientX, y: e.clientY };
@@ -237,7 +240,7 @@ export function ImageCropDialog({
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 select-none"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
