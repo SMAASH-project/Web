@@ -29,6 +29,7 @@ import {
 } from "@/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 import type { WebstoreItem } from "@/types/PageTypes";
+import { ImageCropDialog } from "@/components/ImageCropDialog";
 
 const RARITIES = ["Common", "Uncommon", "Rare", "Epic", "Legendary"] as const;
 const COMBAT_TYPES = ["Melee", "Ranged"] as const;
@@ -75,6 +76,8 @@ export function EditItemDialog({ item, onUpdate, isLoading = false }: EditItemDi
   const [newImageFile, setNewImageFile] = useState<File | null>(null);
   const [newImagePreview, setNewImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropOpen, setCropOpen] = useState(false);
 
   const buttonClass = getButtonClasses(settings.useLiquidGlass, settings.useDarkMode);
   const inputClass = getInputClasses(settings.useLiquidGlass, settings.useDarkMode);
@@ -93,9 +96,23 @@ export function EditItemDialog({ item, onUpdate, isLoading = false }: EditItemDi
     const file = e.target.files?.[0];
     if (!file) return;
     if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) return;
-    setNewImageFile(file);
-    const url = URL.createObjectURL(file);
-    setNewImagePreview(url);
+    setCropFile(file);
+    setCropOpen(true);
+    // Reset so the same file can be re-selected after cancel
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleCropApply = (croppedFile: File) => {
+    setCropOpen(false);
+    setCropFile(null);
+    if (newImagePreview) URL.revokeObjectURL(newImagePreview);
+    setNewImageFile(croppedFile);
+    setNewImagePreview(URL.createObjectURL(croppedFile));
+  };
+
+  const handleCropCancel = () => {
+    setCropOpen(false);
+    setCropFile(null);
   };
 
   const clearNewImage = () => {
@@ -104,6 +121,8 @@ export function EditItemDialog({ item, onUpdate, isLoading = false }: EditItemDi
       URL.revokeObjectURL(newImagePreview);
       setNewImagePreview(null);
     }
+    setCropFile(null);
+    setCropOpen(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -335,5 +354,13 @@ export function EditItemDialog({ item, onUpdate, isLoading = false }: EditItemDi
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <ImageCropDialog
+      open={cropOpen}
+      file={cropFile}
+      aspectRatio={16 / 9}
+      onApply={handleCropApply}
+      onCancel={handleCropCancel}
+    />
   );
 }

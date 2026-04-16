@@ -28,6 +28,7 @@ import {
   getBackgroundClasses,
 } from "@/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
+import { ImageCropDialog } from "@/components/ImageCropDialog";
 
 const RARITIES = ["Common", "Uncommon", "Rare", "Epic", "Legendary"] as const;
 const COMBAT_TYPES = ["Melee", "Ranged"] as const;
@@ -67,6 +68,8 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropOpen, setCropOpen] = useState(false);
 
   const { t } = useTranslation("webstore");
   const buttonClass = getButtonClasses(settings.useLiquidGlass, settings.useDarkMode);
@@ -82,9 +85,23 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
     const file = e.target.files?.[0];
     if (!file) return;
     if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) return;
-    setImageFile(file);
-    const url = URL.createObjectURL(file);
-    setImagePreview(url);
+    setCropFile(file);
+    setCropOpen(true);
+    // Reset so the same file can be re-selected after cancel
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleCropApply = (croppedFile: File) => {
+    setCropOpen(false);
+    setCropFile(null);
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImageFile(croppedFile);
+    setImagePreview(URL.createObjectURL(croppedFile));
+  };
+
+  const handleCropCancel = () => {
+    setCropOpen(false);
+    setCropFile(null);
   };
 
   const clearImage = () => {
@@ -93,6 +110,8 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
       URL.revokeObjectURL(imagePreview);
       setImagePreview(null);
     }
+    setCropFile(null);
+    setCropOpen(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -293,5 +312,13 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <ImageCropDialog
+      open={cropOpen}
+      file={cropFile}
+      aspectRatio={16 / 9}
+      onApply={handleCropApply}
+      onCancel={handleCropCancel}
+    />
   );
 }

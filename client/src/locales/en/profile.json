@@ -47,6 +47,7 @@
     "description": "Add a new profile to your account. Click save when you're done.",
     "username": "Username",
     "profilePicture": "Profile Picture",
+    "uploadPicture": "Click to upload (JPEG, PNG, WebP)",
     "saving": "Saving...",
     "save": "Save changes",
     "cancel": "Cancel",

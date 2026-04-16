@@ -32,8 +32,18 @@ interface OstTrack {
 
 const OST_TRACKS: OstTrack[] = [
   // ── Add your tracks here ─────────────────────────────────────────────────
-  // { id: 1, title: "Main Theme", artist: "SMAASH OST", src: "/assets/music/main-theme.mp3" },
-  // { id: 2, title: "Battle Arena", artist: "SMAASH OST", src: "/assets/music/battle-arena.mp3" },
+  {
+    id: 1,
+    title: "Mi vagyunk Magyar Péter",
+    artist: "SMAASH OST",
+    src: "/assets/ostTracks/mi-vagyunk-magyar-peter.mp3",
+  },
+  {
+    id: 2,
+    title: "Tip Tip",
+    artist: "Desh x Young Fly x Azahriah",
+    src: "/assets/ostTracks/tip-tip.mp3",
+  },
 ];
 
 type Tab = "characters" | "ost";

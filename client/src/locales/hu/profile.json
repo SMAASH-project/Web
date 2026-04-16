@@ -47,6 +47,7 @@
     "description": "Adj hozzá egy új profilt a fiókodhozód. Kattints a mentésre, ha kész vagy.",
     "username": "Felhasználónév",
     "profilePicture": "Profilkép",
+    "uploadPicture": "Kattints a feltöltéshez (JPEG, PNG, WebP)",
     "saving": "Mentés...",
     "save": "Módosítások mentése",
     "cancel": "Mégse",

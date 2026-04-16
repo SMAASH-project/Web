@@ -63,9 +63,6 @@ export function Item({
   // Coin check — undefined means no profile loaded yet (treat as affordable)
   const canAfford = userCoins === undefined || userCoins >= item.price;
 
-  const hasAdminButtons = isAdmin && (onDelete || onEdit);
-  const hasBothAdminButtons = isAdmin && onDelete && onEdit;
-
   const handleUnlock = () => {
     onUnlock?.(item.id);
   };
@@ -81,8 +78,8 @@ export function Item({
           : undefined
       }
     >
-      {/* Admin buttons: edit + delete */}
-      {hasAdminButtons && (
+      {/* Admin buttons: edit + delete — positioned within the image area, not text */}
+      {isAdmin && (onDelete || onEdit) && (
         <div className="absolute top-2 right-2 z-10 flex items-center gap-0.5">
           {onEdit && (
             <EditItemDialog
@@ -125,12 +122,8 @@ export function Item({
       </div>
 
       <div className="flex h-full flex-col gap-3 p-5 pt-2">
-        {/* Header: name + rarity badge */}
-        <div
-          className={`flex items-start justify-between gap-2 ${
-            hasBothAdminButtons ? "pr-16" : hasAdminButtons ? "pr-8" : ""
-          }`}
-        >
+        {/* Header: name + rarity badge — badge always anchored right */}
+        <div className="flex items-start justify-between gap-2">
           <h3 className={`text-sm font-semibold ${textColor} leading-tight ${textShadow}`}>
             {item.name}
           </h3>
