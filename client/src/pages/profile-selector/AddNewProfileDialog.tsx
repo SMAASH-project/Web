@@ -187,109 +187,111 @@ export function AddNewProfileDialog({ open, onOpenChange }: AddNewProfileProps) 
 
   return (
     <>
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`sm:max-w-sm ${dialogClass} ${textShadow}`}>
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle className={`${textColor} ${textShadow}`}>
-              {t("addProfile.title")}
-            </DialogTitle>
-            <DialogDescription className={subtextColor}>
-              {t("addProfile.description")}
-            </DialogDescription>
-          </DialogHeader>
-          <FieldGroup>
-            <Field>
-              <Label htmlFor="username-1" className={textColor}>
-                {t("addProfile.username")}
-              </Label>
-              <Input
-                type="text"
-                id="username-1"
-                name="username"
-                value={username}
-                maxLength={20}
-                className={inputClass}
-                onChange={(e) => {
-                  setUsername(e.target.value);
-                  if (error) setError(null);
-                }}
-              />
-            </Field>
-            <Field>
-              <Label className={textColor}>{t("addProfile.profilePicture")}</Label>
-              <input
-                ref={profilePictureInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
-                className="hidden"
-                onChange={handleProfilePictureChange}
-              />
-              {profilePicturePreview ? (
-                <div className="relative h-24 w-24 self-center overflow-hidden rounded-full">
-                  <img
-                    src={profilePicturePreview}
-                    alt="profile preview"
-                    className="h-full w-full object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={clearProfilePicture}
-                    className="absolute top-0.5 right-0.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className={`sm:max-w-sm ${dialogClass} ${textShadow}`}>
+          <form onSubmit={handleSubmit}>
+            <DialogHeader>
+              <DialogTitle className={`${textColor} ${textShadow}`}>
+                {t("addProfile.title")}
+              </DialogTitle>
+              <DialogDescription className={subtextColor}>
+                {t("addProfile.description")}
+              </DialogDescription>
+            </DialogHeader>
+            <FieldGroup>
+              <Field>
+                <Label htmlFor="username-1" className={textColor}>
+                  {t("addProfile.username")}
+                </Label>
+                <Input
+                  type="text"
+                  id="username-1"
+                  name="username"
+                  value={username}
+                  maxLength={20}
+                  className={inputClass}
+                  onChange={(e) => {
+                    setUsername(e.target.value);
+                    if (error) setError(null);
+                  }}
+                />
+              </Field>
+              <Field>
+                <Label className={textColor}>{t("addProfile.profilePicture")}</Label>
+                <input
+                  ref={profilePictureInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="hidden"
+                  onChange={handleProfilePictureChange}
+                />
+                {profilePicturePreview ? (
+                  <div className="relative h-24 w-24 self-center overflow-hidden rounded-full">
+                    <img
+                      src={profilePicturePreview}
+                      alt="profile preview"
+                      className="h-full w-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={clearProfilePicture}
+                      className="absolute top-0.5 right-0.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => profilePictureInputRef.current?.click()}
+                      className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-0.5 rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100"
+                    >
+                      <Upload className="h-4 w-4 text-white" />
+                    </button>
+                  </div>
+                ) : (
                   <button
                     type="button"
                     onClick={() => profilePictureInputRef.current?.click()}
-                    className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-0.5 rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100"
+                    className={`flex h-20 w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed transition-colors ${inputClass}`}
                   >
-                    <Upload className="h-4 w-4 text-white" />
+                    <Upload className={`h-4 w-4 opacity-50`} />
+                    <span className={`text-xs ${subtextColor}`}>
+                      {t("addProfile.uploadPicture")}
+                    </span>
                   </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => profilePictureInputRef.current?.click()}
-                  className={`flex h-20 w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed transition-colors ${inputClass}`}
+                )}
+              </Field>
+              {error && <FormAlert variant="error" message={error} />}
+            </FieldGroup>
+            <DialogFooter className={footerClass}>
+              <DialogClose asChild>
+                <Button
+                  variant="outline"
+                  disabled={isSubmitting}
+                  className={`cursor-pointer ${btnClass} ${textShadow}`}
                 >
-                  <Upload className={`h-4 w-4 opacity-50`} />
-                  <span className={`text-xs ${subtextColor}`}>{t("addProfile.uploadPicture")}</span>
-                </button>
-              )}
-            </Field>
-            {error && <FormAlert variant="error" message={error} />}
-          </FieldGroup>
-          <DialogFooter className={footerClass}>
-            <DialogClose asChild>
+                  {t("addProfile.cancel")}
+                </Button>
+              </DialogClose>
               <Button
-                variant="outline"
+                type="submit"
                 disabled={isSubmitting}
                 className={`cursor-pointer ${btnClass} ${textShadow}`}
               >
-                {t("addProfile.cancel")}
+                {isSubmitting ? t("addProfile.saving") : t("addProfile.save")}
               </Button>
-            </DialogClose>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className={`cursor-pointer ${btnClass} ${textShadow}`}
-            >
-              {isSubmitting ? t("addProfile.saving") : t("addProfile.save")}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-    <ImageCropDialog
-      open={cropOpen}
-      file={cropFile}
-      aspectRatio={1}
-      circular
-      onApply={handleCropApply}
-      onCancel={handleCropCancel}
-    />
+      <ImageCropDialog
+        open={cropOpen}
+        file={cropFile}
+        aspectRatio={1}
+        circular
+        onApply={handleCropApply}
+        onCancel={handleCropCancel}
+      />
     </>
   );
 }

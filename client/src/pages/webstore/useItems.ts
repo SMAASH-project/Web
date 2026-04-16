@@ -87,10 +87,7 @@ export function useItems() {
   });
 
   // Build a set of owned character IDs
-  const ownedIds = useMemo(
-    () => new Set(ownedCharacters.map((c) => c.id)),
-    [ownedCharacters],
-  );
+  const ownedIds = useMemo(() => new Set(ownedCharacters.map((c) => c.id)), [ownedCharacters]);
 
   // Merge ownership into items
   const allItems = useMemo(

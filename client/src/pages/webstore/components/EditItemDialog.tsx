@@ -153,216 +153,224 @@ export function EditItemDialog({ item, onUpdate, isLoading = false }: EditItemDi
 
   return (
     <>
-    <Dialog
-      open={open}
-      onOpenChange={(v) => {
-        setOpen(v);
-        if (v) resetToItem();
-        else clearNewImage();
-      }}
-    >
-      <DialogTrigger asChild>
-        <Button
-          size="sm"
-          variant="ghost"
-          className={`h-8 w-8 cursor-pointer p-0 ${glass ? textColor : subtextColor} hover:text-blue-400 ${
-            glass ? "hover:bg-blue-500/15" : "hover:bg-blue-900/30"
-          }`}
-        >
-          <SquarePen className="h-4 w-4" />
-        </Button>
-      </DialogTrigger>
-
-      <DialogContent
-        className={`${dialogClass} ${textShadow}`}
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
+      <Dialog
+        open={open}
+        onOpenChange={(v) => {
+          setOpen(v);
+          if (v) resetToItem();
+          else clearNewImage();
+        }}
       >
-        <DialogHeader>
-          <DialogTitle className={textColor}>{t("edit.title")}</DialogTitle>
-          <DialogDescription className={subtextColor}>{t("edit.description")}</DialogDescription>
-        </DialogHeader>
-
-        <FieldGroup>
-          {/* Name */}
-          <Field>
-            <Label className={textColor}>{t("create.name")}</Label>
-            <Input
-              value={name}
-              onChange={(e) => setName((e.target as HTMLInputElement).value)}
-              placeholder={t("create.namePlaceholder")}
-              maxLength={20}
-              className={inputClass}
-            />
-          </Field>
-
-          {/* Rarity + Combat Type row */}
-          <div className="grid grid-cols-2 gap-3">
-            <Field>
-              <Label className={textColor}>{t("create.rarity")}</Label>
-              <StyledSelect
-                value={rarity}
-                options={RARITIES}
-                onChange={setRarity}
-                inputClass={inputClass}
-                textColor={textColor}
-                bgClass={bgClass}
-                renderOption={(r) => (
-                  <>
-                    <span
-                      className="inline-block h-2 w-2 shrink-0 rounded-full"
-                      style={{ backgroundColor: RARITY_COLORS[r] }}
-                    />
-                    {t(`rarity.${r.toLowerCase()}`)}
-                  </>
-                )}
-              />
-            </Field>
-            <Field>
-              <Label className={textColor}>{t("create.combatType")}</Label>
-              <StyledSelect
-                value={combatType}
-                options={COMBAT_TYPES}
-                onChange={setCombatType}
-                inputClass={inputClass}
-                textColor={textColor}
-                bgClass={bgClass}
-                renderOption={(c) => t(`filters.${c.toLowerCase()}`)}
-              />
-            </Field>
-          </div>
-
-          {/* Description */}
-          <Field>
-            <Label className={textColor}>{t("create.descriptionLabel")}</Label>
-            <Input
-              value={description}
-              onChange={(e) => setDescription((e.target as HTMLInputElement).value)}
-              placeholder={t("create.descriptionPlaceholder")}
-              maxLength={70}
-              className={inputClass}
-            />
-          </Field>
-
-          {/* Price */}
-          <Field>
-            <Label className={textColor}>{t("create.price")}</Label>
-            <Input
-              type="number"
-              min={1}
-              value={price}
-              onChange={(e) => setPrice((e.target as HTMLInputElement).value)}
-              placeholder="0"
-              className={inputClass}
-            />
-          </Field>
-
-          {/* Image section */}
-          <Field>
-            <Label className={textColor}>{t("create.image")}</Label>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept={ACCEPTED_IMAGE_TYPES.join(",")}
-              className="hidden"
-              onChange={handleImageChange}
-            />
-            <AnimatePresence mode="wait">
-              {newImagePreview ? (
-                /* New file chosen — show preview with clear button */
-                <motion.div
-                  key="new-preview"
-                  initial={{ opacity: 0, scale: 0.97 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.97 }}
-                  transition={{ duration: 0.2 }}
-                  className="relative h-32 w-full overflow-hidden rounded-lg"
-                >
-                  <img src={newImagePreview} alt="new preview" className="h-full w-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={clearNewImage}
-                    className="absolute top-1.5 right-1.5 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </motion.div>
-              ) : showCurrentImage ? (
-                /* Existing server image — show it with a replace button */
-                <motion.div
-                  key="current-image"
-                  initial={{ opacity: 0, scale: 0.97 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.97 }}
-                  transition={{ duration: 0.2 }}
-                  className="relative h-32 w-full overflow-hidden rounded-lg"
-                >
-                  <img
-                    src={`/api/characters/${item.id}/img`}
-                    alt={item.name}
-                    className="h-full w-full object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-1 bg-black/40 opacity-0 transition-opacity hover:opacity-100"
-                  >
-                    <Upload className="h-5 w-5 text-white" />
-                    <span className="text-xs font-medium text-white">{t("edit.replaceImage")}</span>
-                  </button>
-                </motion.div>
-              ) : (
-                /* No image at all — show upload area */
-                <motion.button
-                  key="upload"
-                  type="button"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.15 }}
-                  onClick={() => fileInputRef.current?.click()}
-                  className={`flex h-20 w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed transition-colors ${inputClass}`}
-                >
-                  <ImageOff className={`h-5 w-5 ${subtextColor} opacity-50`} />
-                  <span className={`text-xs ${subtextColor}`}>{t("create.imagePlaceholder")}</span>
-                  <Upload className={`h-3.5 w-3.5 ${subtextColor} opacity-50`} />
-                </motion.button>
-              )}
-            </AnimatePresence>
-          </Field>
-        </FieldGroup>
-
-        <DialogFooter className={footerClass}>
-          <DialogClose asChild>
-            <Button variant="outline" className={`cursor-pointer ${buttonClass} ${textShadow}`}>
-              {t("create.cancel")}
-            </Button>
-          </DialogClose>
+        <DialogTrigger asChild>
           <Button
-            onClick={handleSubmit}
-            disabled={!isFormValid || isLoading}
-            className={`cursor-pointer ${buttonClass} ${textShadow}`}
+            size="sm"
+            variant="ghost"
+            className={`h-8 w-8 cursor-pointer p-0 ${glass ? textColor : subtextColor} hover:text-blue-400 ${
+              glass ? "hover:bg-blue-500/15" : "hover:bg-blue-900/30"
+            }`}
           >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                {t("edit.saving")}
-              </>
-            ) : (
-              t("edit.submit")
-            )}
+            <SquarePen className="h-4 w-4" />
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </DialogTrigger>
 
-    <ImageCropDialog
-      open={cropOpen}
-      file={cropFile}
-      aspectRatio={16 / 9}
-      onApply={handleCropApply}
-      onCancel={handleCropCancel}
-    />
+        <DialogContent
+          className={`${dialogClass} ${textShadow}`}
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
+        >
+          <DialogHeader>
+            <DialogTitle className={textColor}>{t("edit.title")}</DialogTitle>
+            <DialogDescription className={subtextColor}>{t("edit.description")}</DialogDescription>
+          </DialogHeader>
+
+          <FieldGroup>
+            {/* Name */}
+            <Field>
+              <Label className={textColor}>{t("create.name")}</Label>
+              <Input
+                value={name}
+                onChange={(e) => setName((e.target as HTMLInputElement).value)}
+                placeholder={t("create.namePlaceholder")}
+                maxLength={20}
+                className={inputClass}
+              />
+            </Field>
+
+            {/* Rarity + Combat Type row */}
+            <div className="grid grid-cols-2 gap-3">
+              <Field>
+                <Label className={textColor}>{t("create.rarity")}</Label>
+                <StyledSelect
+                  value={rarity}
+                  options={RARITIES}
+                  onChange={setRarity}
+                  inputClass={inputClass}
+                  textColor={textColor}
+                  bgClass={bgClass}
+                  renderOption={(r) => (
+                    <>
+                      <span
+                        className="inline-block h-2 w-2 shrink-0 rounded-full"
+                        style={{ backgroundColor: RARITY_COLORS[r] }}
+                      />
+                      {t(`rarity.${r.toLowerCase()}`)}
+                    </>
+                  )}
+                />
+              </Field>
+              <Field>
+                <Label className={textColor}>{t("create.combatType")}</Label>
+                <StyledSelect
+                  value={combatType}
+                  options={COMBAT_TYPES}
+                  onChange={setCombatType}
+                  inputClass={inputClass}
+                  textColor={textColor}
+                  bgClass={bgClass}
+                  renderOption={(c) => t(`filters.${c.toLowerCase()}`)}
+                />
+              </Field>
+            </div>
+
+            {/* Description */}
+            <Field>
+              <Label className={textColor}>{t("create.descriptionLabel")}</Label>
+              <Input
+                value={description}
+                onChange={(e) => setDescription((e.target as HTMLInputElement).value)}
+                placeholder={t("create.descriptionPlaceholder")}
+                maxLength={70}
+                className={inputClass}
+              />
+            </Field>
+
+            {/* Price */}
+            <Field>
+              <Label className={textColor}>{t("create.price")}</Label>
+              <Input
+                type="number"
+                min={1}
+                value={price}
+                onChange={(e) => setPrice((e.target as HTMLInputElement).value)}
+                placeholder="0"
+                className={inputClass}
+              />
+            </Field>
+
+            {/* Image section */}
+            <Field>
+              <Label className={textColor}>{t("create.image")}</Label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept={ACCEPTED_IMAGE_TYPES.join(",")}
+                className="hidden"
+                onChange={handleImageChange}
+              />
+              <AnimatePresence mode="wait">
+                {newImagePreview ? (
+                  /* New file chosen — show preview with clear button */
+                  <motion.div
+                    key="new-preview"
+                    initial={{ opacity: 0, scale: 0.97 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.97 }}
+                    transition={{ duration: 0.2 }}
+                    className="relative h-32 w-full overflow-hidden rounded-lg"
+                  >
+                    <img
+                      src={newImagePreview}
+                      alt="new preview"
+                      className="h-full w-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={clearNewImage}
+                      className="absolute top-1.5 right-1.5 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </motion.div>
+                ) : showCurrentImage ? (
+                  /* Existing server image — show it with a replace button */
+                  <motion.div
+                    key="current-image"
+                    initial={{ opacity: 0, scale: 0.97 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.97 }}
+                    transition={{ duration: 0.2 }}
+                    className="relative h-32 w-full overflow-hidden rounded-lg"
+                  >
+                    <img
+                      src={`/api/characters/${item.id}/img`}
+                      alt={item.name}
+                      className="h-full w-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-1 bg-black/40 opacity-0 transition-opacity hover:opacity-100"
+                    >
+                      <Upload className="h-5 w-5 text-white" />
+                      <span className="text-xs font-medium text-white">
+                        {t("edit.replaceImage")}
+                      </span>
+                    </button>
+                  </motion.div>
+                ) : (
+                  /* No image at all — show upload area */
+                  <motion.button
+                    key="upload"
+                    type="button"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`flex h-20 w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed transition-colors ${inputClass}`}
+                  >
+                    <ImageOff className={`h-5 w-5 ${subtextColor} opacity-50`} />
+                    <span className={`text-xs ${subtextColor}`}>
+                      {t("create.imagePlaceholder")}
+                    </span>
+                    <Upload className={`h-3.5 w-3.5 ${subtextColor} opacity-50`} />
+                  </motion.button>
+                )}
+              </AnimatePresence>
+            </Field>
+          </FieldGroup>
+
+          <DialogFooter className={footerClass}>
+            <DialogClose asChild>
+              <Button variant="outline" className={`cursor-pointer ${buttonClass} ${textShadow}`}>
+                {t("create.cancel")}
+              </Button>
+            </DialogClose>
+            <Button
+              onClick={handleSubmit}
+              disabled={!isFormValid || isLoading}
+              className={`cursor-pointer ${buttonClass} ${textShadow}`}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t("edit.saving")}
+                </>
+              ) : (
+                t("edit.submit")
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <ImageCropDialog
+        open={cropOpen}
+        file={cropFile}
+        aspectRatio={16 / 9}
+        onApply={handleCropApply}
+        onCancel={handleCropCancel}
+      />
     </>
   );
 }
