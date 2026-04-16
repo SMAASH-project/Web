@@ -42,11 +42,14 @@ export function WebstorePage() {
     handleOwnershipChange,
     unlockItem,
     handleCreateItem,
+    handleUpdateItem,
     handleDeleteItem,
     isCreating,
+    isUpdating,
     isDeleting,
     isPurchasing,
     createError,
+    updateError,
     deleteError,
     purchaseError,
   } = useItems();
@@ -87,9 +90,9 @@ export function WebstorePage() {
           </div>
 
           {/* Error banners */}
-          {(createError || deleteError || purchaseError) && (
+          {(createError || updateError || deleteError || purchaseError) && (
             <div className="w-full rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-2 text-sm text-red-400">
-              {createError ?? deleteError ?? purchaseError}
+              {createError ?? updateError ?? deleteError ?? purchaseError}
             </div>
           )}
 
@@ -177,8 +180,11 @@ export function WebstorePage() {
                       item={item}
                       onDelete={isAdmin ? handleDeleteItem : undefined}
                       onUnlock={unlockItem}
+                      onEdit={isAdmin ? handleUpdateItem : undefined}
                       isDeleting={isDeleting}
                       isPurchasing={isPurchasing}
+                      isUpdating={isUpdating}
+                      userCoins={userCoins}
                     />
                   </LoadPost>
                 ) : (
@@ -187,8 +193,11 @@ export function WebstorePage() {
                       item={item}
                       onDelete={isAdmin ? handleDeleteItem : undefined}
                       onUnlock={unlockItem}
+                      onEdit={isAdmin ? handleUpdateItem : undefined}
                       isDeleting={isDeleting}
                       isPurchasing={isPurchasing}
+                      isUpdating={isUpdating}
+                      userCoins={userCoins}
                     />
                   </div>
                 ),

@@ -25,7 +25,8 @@
   "item": {
     "unlock": "Unlock",
     "unlocking": "Unlocking…",
-    "owned": "Owned"
+    "owned": "Owned",
+    "cantAfford": "Not enough coins"
   },
   "create": {
     "triggerButton": "Create Character",
@@ -44,9 +45,17 @@
     "submit": "Create Character",
     "creating": "Creating…"
   },
+  "edit": {
+    "title": "Edit Character",
+    "description": "Update the character's details.",
+    "replaceImage": "Replace image",
+    "submit": "Save changes",
+    "saving": "Saving…"
+  },
   "toast": {
     "unlocked": "Character unlocked!",
     "created": "Character created.",
+    "updated": "Character updated.",
     "deleted": "Character deleted.",
     "deleteFailed": "Failed to delete character."
   },

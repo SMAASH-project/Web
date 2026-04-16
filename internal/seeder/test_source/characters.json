@@ -6,10 +6,7 @@
     "Price": 0,
     "Implemented": true,
     "ImgURI": "/characters/samurai.png",
-    "Categories": [
-      "Character",
-      "Melee"
-    ]
+    "Categories": ["Melee"]
   },
   {
     "Name": "Slime",
@@ -18,9 +15,6 @@
     "Price": 0,
     "Implemented": true,
     "ImgURI": "/characters/slime.png",
-    "Categories": [
-      "Character",
-      "Ranged"
-    ]
+    "Categories": ["Ranged"]
   }
 ]

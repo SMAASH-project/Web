@@ -13,6 +13,7 @@ export const queryKeys = {
   },
   characters: {
     all: ["characters"],
+    ownedByProfileId: (profileId: number) => ["characters", "owned", profileId],
   },
   purchases: {
     byProfileId: (profileId: number) => ["purchases", "byProfileId", profileId],

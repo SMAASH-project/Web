@@ -26,18 +26,9 @@ interface ItemReadDTO {
   img_uri: string;
 }
 
-// Go's PurchaseReadDTO json tags are snake_case
-interface PurchaseReadDTO {
-  id: number;
-  character: string; // character name (unique, used to match ownership)
-  total: number;
-  profile: string;
-  date: string;
-}
-
 // ─── Mapping helpers ──────────────────────────────────────────────────────────
 
-function itemDTOToWebstoreItem(dto: ItemReadDTO): WebstoreItem {
+function mapItemDTO(dto: ItemReadDTO): WebstoreItem {
   const combatType: WebstoreItem["combatType"] = dto.categories.includes("Melee")
     ? "Melee"
     : dto.categories.includes("Ranged")
@@ -52,20 +43,10 @@ function itemDTOToWebstoreItem(dto: ItemReadDTO): WebstoreItem {
     rarity: dto.rarity as Rarity,
     kind: "Character",
     combatType,
-    owned: false, // will be overridden via ownedNames merge below
+    owned: false,
     createdAt: DateTime.now(),
     imgUri: dto.img_uri,
   };
-}
-
-/**
- * Returns today's date as YYYY-MM-DD.
- * The backend's PurchaseCreateDTO.Date field parses with Go's "2006-01-02" layout.
- */
-function nowDateString(): string {
-  const d = new Date();
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
@@ -82,36 +63,43 @@ export function useItems() {
     queryKey: queryKeys.characters.all,
     queryFn: async () => {
       const { data } = await apiClient.get<ItemReadDTO[]>("/characters");
-      return data.map(itemDTOToWebstoreItem);
+      return data.map(mapItemDTO);
     },
     staleTime: 5 * 60 * 1000,
   });
 
-  // ── Fetch purchases for the selected profile ─────────────────────────────
-  const { data: purchases = [] } = useQuery<PurchaseReadDTO[]>({
-    queryKey: queryKeys.purchases.byProfileId(profileId ?? 0),
+  // ── Fetch owned characters for the selected profile ──────────────────────
+  // Uses GET /profiles/:id/characters which reads the profile_character many2many
+  // association — the authoritative ownership source (populated on purchase).
+  // Previously this used GET /profiles/:id/purchases but that endpoint does not
+  // preload the nested Character, so p.Character.Name was always "" and ownership
+  // never matched any item.
+  const { data: ownedCharacters = [] } = useQuery<ItemReadDTO[]>({
+    queryKey: queryKeys.characters.ownedByProfileId(profileId ?? 0),
     queryFn: async () => {
-      const { data } = await apiClient.get<PurchaseReadDTO[] | null>(
-        `/profiles/${profileId}/purchases`,
+      const { data } = await apiClient.get<ItemReadDTO[] | null>(
+        `/profiles/${profileId}/characters`,
       );
-      // Backend may return null instead of [] when there are no purchases
       return data ?? [];
     },
     enabled: profileId !== null,
     staleTime: 2 * 60 * 1000,
   });
 
-  // Build a set of owned character names from purchase history
-  const ownedNames = useMemo(() => new Set((purchases ?? []).map((p) => p.character)), [purchases]);
+  // Build a set of owned character IDs
+  const ownedIds = useMemo(
+    () => new Set(ownedCharacters.map((c) => c.id)),
+    [ownedCharacters],
+  );
 
   // Merge ownership into items
   const allItems = useMemo(
     () =>
       fetchedItems.map((item) => ({
         ...item,
-        owned: ownedNames.has(item.name),
+        owned: ownedIds.has(Number(item.id)),
       })),
-    [fetchedItems, ownedNames],
+    [fetchedItems, ownedIds],
   );
 
   // ── Unlock (purchase) mutation ───────────────────────────────────────────
@@ -124,14 +112,11 @@ export function useItems() {
       });
     },
     onSuccess: () => {
-      // Refetch purchases so owned state updates immediately
+      // Refetch owned characters so owned state updates immediately
       queryClient.invalidateQueries({
-        queryKey: queryKeys.purchases.byProfileId(profileId ?? 0),
+        queryKey: queryKeys.characters.ownedByProfileId(profileId ?? 0),
       });
-      // Refetch profile so coin balance updates after purchase.
-      // Note: Number(bigint) loses precision for IDs > 2^53-1; acceptable here
-      // because queryKeys.profiles.byUserId requires a number and sequential DB
-      // IDs never reach that magnitude. If the ID strategy changes, update this.
+      // Refetch profile so coin balance updates after purchase
       if (userId !== null) {
         queryClient.invalidateQueries({
           queryKey: queryKeys.profiles.byUserId(Number(userId)),
@@ -159,12 +144,10 @@ export function useItems() {
     }
   >({
     mutationFn: async (data) => {
-      // Resolve rarity name → rarity_id
       const { data: rarities } = await apiClient.get<{ id: number; name: string }[]>("/rarities");
       const rarity = rarities.find((r) => r.name === data.rarity);
       if (!rarity) throw new Error(`Rarity "${data.rarity}" not found`);
 
-      // Resolve category names → category_ids
       const { data: categories } =
         await apiClient.get<{ id: number; name: string }[]>("/categories");
       const categoryNames = ["Character"];
@@ -181,7 +164,6 @@ export function useItems() {
         category_ids: categoryIds,
       });
 
-      // Upload image if provided
       if (data.imageFile) {
         const form = new FormData();
         form.append("CharacterImage", data.imageFile);
@@ -196,6 +178,58 @@ export function useItems() {
     },
     onError: (err) => {
       const msg = (err as any)?.response?.data?.error ?? err?.message ?? "Failed to create item.";
+      toast.error(msg);
+    },
+  });
+
+  // ── Admin: update item mutation ──────────────────────────────────────────
+  const updateMutation = useMutation<
+    void,
+    Error,
+    {
+      id: number;
+      name: string;
+      combatType?: string;
+      rarity: string;
+      description: string;
+      price: number;
+      imageFile?: File;
+    }
+  >({
+    mutationFn: async (data) => {
+      const { data: rarities } = await apiClient.get<{ id: number; name: string }[]>("/rarities");
+      const rarity = rarities.find((r) => r.name === data.rarity);
+      if (!rarity) throw new Error(`Rarity "${data.rarity}" not found`);
+
+      const { data: categories } =
+        await apiClient.get<{ id: number; name: string }[]>("/categories");
+      const categoryNames = ["Character"];
+      if (data.combatType) categoryNames.push(data.combatType);
+      const categoryIds = categoryNames
+        .map((name) => categories.find((c) => c.name === name)?.id)
+        .filter((id): id is number => id !== undefined);
+
+      await apiClient.put(`/characters/${data.id}`, {
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        rarity_id: rarity.id,
+        category_ids: categoryIds,
+      });
+
+      if (data.imageFile) {
+        const form = new FormData();
+        form.append("CharacterImage", data.imageFile);
+        await apiClient.post(`/characters/${data.id}/img`, form);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.characters.all });
+      toast.success(t("toast.updated"));
+    },
+    onError: (err) => {
+      const msg = (err as any)?.response?.data?.error ?? err?.message ?? "Failed to update item.";
       toast.error(msg);
     },
   });
@@ -335,6 +369,20 @@ export function useItems() {
     createMutation.mutate(data);
   }
 
+  function handleUpdateItem(
+    id: string,
+    data: {
+      name: string;
+      combatType?: string;
+      rarity: string;
+      description: string;
+      price: number;
+      imageFile?: File;
+    },
+  ) {
+    updateMutation.mutate({ id: Number(id), ...data });
+  }
+
   function handleDeleteItem(itemId: string) {
     deleteMutation.mutate(itemId);
   }
@@ -358,13 +406,17 @@ export function useItems() {
     handleOwnershipChange,
     unlockItem,
     handleCreateItem,
+    handleUpdateItem,
     handleDeleteItem,
     // Mutation states for UI feedback
     isCreating: createMutation.isPending,
+    isUpdating: updateMutation.isPending,
     isDeleting: deleteMutation.isPending,
     isPurchasing: purchaseMutation.isPending,
     createError:
       (createMutation.error as any)?.response?.data?.error ?? createMutation.error?.message ?? null,
+    updateError:
+      (updateMutation.error as any)?.response?.data?.error ?? updateMutation.error?.message ?? null,
     deleteError:
       (deleteMutation.error as any)?.response?.data?.error ?? deleteMutation.error?.message ?? null,
     purchaseError:

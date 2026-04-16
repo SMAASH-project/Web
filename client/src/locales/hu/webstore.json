@@ -25,7 +25,8 @@
   "item": {
     "unlock": "Feloldás",
     "unlocking": "Feloldás…",
-    "owned": "Megvan"
+    "owned": "Megvan",
+    "cantAfford": "Nincs elég érmé"
   },
   "create": {
     "triggerButton": "Karakter létrehozása",
@@ -44,9 +45,17 @@
     "submit": "Karakter létrehozása",
     "creating": "Létrehozás…"
   },
+  "edit": {
+    "title": "Karakter szerkesztése",
+    "description": "Frissítsd a karakter adatait.",
+    "replaceImage": "Kép cseréje",
+    "submit": "Mentés",
+    "saving": "Mentés…"
+  },
   "toast": {
     "unlocked": "Karakter feloldva!",
     "created": "Karakter létrehozva.",
+    "updated": "Karakter frissítve.",
     "deleted": "Karakter törölve.",
     "deleteFailed": "Nem sikerült törölni a karaktert."
   },

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Coins, Unlock, CheckCircle, Swords, Crosshair, Loader2, ImageOff } from "lucide-react";
 import { RemoveItemButton } from "./RemoveItemButton";
+import { EditItemDialog } from "./EditItemDialog";
 import { getBackgroundClasses, getTextColor, getTextShadow, getSubtextColor } from "@/lib/utils";
 import { useContext } from "react";
 import { AuthContext } from "@/context/AuthContext";
@@ -19,20 +20,35 @@ const RARITY_COLORS: Record<string, string> = {
   Legendary: "#f59e0b",
 };
 
+type UpdateData = {
+  name: string;
+  combatType?: string;
+  rarity: string;
+  description: string;
+  price: number;
+  imageFile?: File;
+};
+
 interface ItemProps {
   item: WebstoreItem;
   onDelete?: (id: string) => void;
   onUnlock?: (id: string) => void;
+  onEdit?: (id: string, data: UpdateData) => void;
   isDeleting?: boolean;
   isPurchasing?: boolean;
+  isUpdating?: boolean;
+  userCoins?: number;
 }
 
 export function Item({
   item,
   onDelete,
   onUnlock,
+  onEdit,
   isDeleting = false,
   isPurchasing = false,
+  isUpdating = false,
+  userCoins,
 }: ItemProps) {
   const { settings } = useSettings();
   const { t } = useTranslation("webstore");
@@ -43,6 +59,12 @@ export function Item({
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
   const textShadow = getTextShadow(settings.useLiquidGlass, settings.useDarkMode);
   const subtextColor = getSubtextColor(settings.useLiquidGlass, settings.useDarkMode);
+
+  // Coin check — undefined means no profile loaded yet (treat as affordable)
+  const canAfford = userCoins === undefined || userCoins >= item.price;
+
+  const hasAdminButtons = isAdmin && (onDelete || onEdit);
+  const hasBothAdminButtons = isAdmin && onDelete && onEdit;
 
   const handleUnlock = () => {
     onUnlock?.(item.id);
@@ -59,10 +81,19 @@ export function Item({
           : undefined
       }
     >
-      {/* Admin delete button */}
-      {isAdmin && onDelete && (
-        <div className="absolute top-2 right-2 z-10">
-          <RemoveItemButton onConfirm={() => onDelete(item.id)} isDeleting={isDeleting} />
+      {/* Admin buttons: edit + delete */}
+      {hasAdminButtons && (
+        <div className="absolute top-2 right-2 z-10 flex items-center gap-0.5">
+          {onEdit && (
+            <EditItemDialog
+              item={item}
+              onUpdate={(data) => onEdit(item.id, data)}
+              isLoading={isUpdating}
+            />
+          )}
+          {onDelete && (
+            <RemoveItemButton onConfirm={() => onDelete(item.id)} isDeleting={isDeleting} />
+          )}
         </div>
       )}
 
@@ -96,7 +127,9 @@ export function Item({
       <div className="flex h-full flex-col gap-3 p-5 pt-2">
         {/* Header: name + rarity badge */}
         <div
-          className={`flex items-start justify-between gap-2 ${isAdmin && onDelete ? "pr-8" : ""}`}
+          className={`flex items-start justify-between gap-2 ${
+            hasBothAdminButtons ? "pr-16" : hasAdminButtons ? "pr-8" : ""
+          }`}
         >
           <h3 className={`text-sm font-semibold ${textColor} leading-tight ${textShadow}`}>
             {item.name}
@@ -140,9 +173,14 @@ export function Item({
               {item.combatType ? t(`filters.${item.combatType.toLowerCase()}`) : item.combatType}
             </span>
           </div>
+          {/* Price — turns red when user can't afford the item */}
           <div className="flex items-center gap-1">
-            <Coins className="h-3.5 w-3.5 text-amber-400/80" />
-            <span className={`text-sm font-bold text-amber-400 ${textShadow}`}>
+            <Coins
+              className={`h-3.5 w-3.5 transition-colors ${canAfford ? "text-amber-400/80" : "text-red-400/80"}`}
+            />
+            <span
+              className={`text-sm font-bold transition-colors ${textShadow} ${canAfford ? "text-amber-400" : "text-red-400"}`}
+            >
               {item.price.toLocaleString()}
             </span>
           </div>
@@ -167,14 +205,18 @@ export function Item({
               size="sm"
               className="h-7 w-full cursor-pointer gap-1.5 bg-amber-500/90 text-xs font-semibold text-black transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
               onClick={handleUnlock}
-              disabled={isPurchasing}
+              disabled={isPurchasing || !canAfford}
             >
               {isPurchasing ? (
                 <Loader2 className="h-3 w-3 animate-spin" />
               ) : (
                 <Unlock className="h-3 w-3" />
               )}
-              {isPurchasing ? t("item.unlocking") : t("item.unlock")}
+              {isPurchasing
+                ? t("item.unlocking")
+                : !canAfford
+                  ? t("item.cantAfford")
+                  : t("item.unlock")}
             </Button>
           )}
         </div>
