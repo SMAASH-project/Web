@@ -16,33 +16,29 @@ import {
   VolumeX,
 } from "lucide-react";
 import { LoadPost } from "@/animations/LoadPost";
-
-// ─── OST track list ───────────────────────────────────────────────────────────
-// Place audio files in your Go server's static build directory:
-//   build/client/assets/music/<filename>
-// Then add entries below.  The `src` is resolved relative to the served origin.
+import miVagyunkUrl from "@/assets/ostTracks/mi-vagyunk-magyar-peter.mp3?url";
+import tipTipUrl from "@/assets/ostTracks/tip-tip.mp3?url";
 
 interface OstTrack {
   id: number;
   title: string;
   artist: string;
-  src: string; // e.g. "/assets/music/main-theme.mp3"
-  durationLabel?: string; // optional static label shown before audio loads
+  src: string;
+  durationLabel?: string;
 }
 
 const OST_TRACKS: OstTrack[] = [
-  // ── Add your tracks here ─────────────────────────────────────────────────
   {
     id: 1,
     title: "Mi vagyunk Magyar Péter",
     artist: "SMAASH OST",
-    src: "/assets/ostTracks/mi-vagyunk-magyar-peter.mp3",
+    src: miVagyunkUrl,
   },
   {
     id: 2,
     title: "Tip Tip",
     artist: "Desh x Young Fly x Azahriah",
-    src: "/assets/ostTracks/tip-tip.mp3",
+    src: tipTipUrl,
   },
 ];
 
@@ -155,6 +151,42 @@ function OstPlayer({
     setCurrentTime(val);
   }, []);
 
+  const getPct = (e: React.PointerEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    return Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  };
+
+  const handleScrubberDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setIsDragging(true);
+    seekTo(getPct(e) * (duration || 0));
+  };
+  const handleScrubberMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!e.currentTarget.hasPointerCapture(e.pointerId)) return;
+    seekTo(getPct(e) * (duration || 0));
+  };
+  const handleScrubberUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!e.currentTarget.hasPointerCapture(e.pointerId)) return;
+    setIsDragging(false);
+    seekTo(getPct(e) * (duration || 0));
+  };
+
+  const handleVolumeDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setVolume(getPct(e));
+    setMuted(false);
+  };
+  const handleVolumeMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!e.currentTarget.hasPointerCapture(e.pointerId)) return;
+    setVolume(getPct(e));
+    setMuted(false);
+  };
+  const handleVolumeUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!e.currentTarget.hasPointerCapture(e.pointerId)) return;
+    setVolume(getPct(e));
+    setMuted(false);
+  };
+
   const scrubberBg = useLiquidGlass
     ? useDarkMode
       ? "bg-white/15"
@@ -227,16 +259,12 @@ function OstPlayer({
         <div className="flex flex-col gap-1">
           <div
             className={`relative h-1.5 cursor-pointer rounded-full ${scrubberBg}`}
-            onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const pct = (e.clientX - rect.left) / rect.width;
-              seekTo(pct * (duration || 0));
-            }}
-            onMouseDown={() => setIsDragging(true)}
-            onMouseUp={() => setIsDragging(false)}
+            onPointerDown={handleScrubberDown}
+            onPointerMove={handleScrubberMove}
+            onPointerUp={handleScrubberUp}
           >
             <div
-              className="absolute top-0 left-0 h-full rounded-full bg-amber-400 transition-all"
+              className={`absolute top-0 left-0 h-full rounded-full bg-amber-400 ${isDragging ? "" : "transition-all"}`}
               style={{
                 width: `${duration ? (currentTime / duration) * 100 : 0}%`,
               }}
@@ -282,14 +310,12 @@ function OstPlayer({
           </button>
           <div
             className={`relative h-1 flex-1 cursor-pointer rounded-full ${scrubberBg}`}
-            onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              setVolume(Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)));
-              setMuted(false);
-            }}
+            onPointerDown={handleVolumeDown}
+            onPointerMove={handleVolumeMove}
+            onPointerUp={handleVolumeUp}
           >
             <div
-              className="absolute top-0 left-0 h-full rounded-full bg-amber-400"
+              className="absolute top-0 left-0 h-full rounded-full bg-amber-400 transition-all"
               style={{ width: `${(muted ? 0 : volume) * 100}%` }}
             />
           </div>

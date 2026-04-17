@@ -308,220 +308,225 @@ export function ImageCropDialog({
                     exit={{ scale: 0.96, y: 8 }}
                     transition={{ type: "spring", stiffness: 380, damping: 28 }}
                   >
-              {/* Header */}
-              <div className="flex items-center justify-between">
-                <h2 className={`text-base font-semibold ${textColor}`}>Crop Image</h2>
-                <button
-                  type="button"
-                  onClick={onCancel}
-                  className={`flex h-7 w-7 cursor-pointer items-center justify-center rounded-full transition-opacity hover:opacity-100 ${subtextColor} opacity-60`}
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-
-              {/* Crop area */}
-              <div className="flex flex-col items-center gap-4">
-                <div
-                  ref={cropContainerRef}
-                  className="relative cursor-grab touch-none overflow-hidden rounded-lg active:cursor-grabbing"
-                  style={{ width: CONTAINER_W, height: CONTAINER_H }}
-                  onPointerDown={handlePointerDown}
-                  onPointerMove={handlePointerMove}
-                  onPointerUp={handlePointerUp}
-                  onPointerLeave={handlePointerUp}
-                >
-                  {/* Dark base visible in the margin area behind the image */}
-                  <div className="absolute inset-0 bg-black/30" />
-
-                  {/* Image — offset by margins so pan=(0,0) aligns image to crop-frame top-left */}
-                  {imageUrl && (
-                    <img
-                      ref={imgRef}
-                      src={imageUrl}
-                      onLoad={handleImageLoad}
-                      draggable={false}
-                      className="pointer-events-none absolute select-none"
-                      style={{
-                        left: MARGIN_X + pan.x,
-                        top: MARGIN_Y + pan.y,
-                        width: renderW || undefined,
-                        height: renderH || undefined,
-                        display: natSize ? "block" : "none",
-                      }}
-                      alt="crop"
-                    />
-                  )}
-
-                  {/* Loading state */}
-                  {imageUrl && !natSize && (
-                    <div className="flex h-full w-full items-center justify-center bg-black/40">
-                      <Loader2 className="h-6 w-6 animate-spin text-white/60" />
+                    {/* Header */}
+                    <div className="flex items-center justify-between">
+                      <h2 className={`text-base font-semibold ${textColor}`}>Crop Image</h2>
+                      <button
+                        type="button"
+                        onClick={onCancel}
+                        className={`flex h-7 w-7 cursor-pointer items-center justify-center rounded-full transition-opacity hover:opacity-100 ${subtextColor} opacity-60`}
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
                     </div>
-                  )}
 
-                  {/* SVG overlay: dims outside the crop frame, rule-of-thirds, border */}
-                  {natSize && (
-                    <svg
-                      className="pointer-events-none absolute inset-0"
-                      width={CONTAINER_W}
-                      height={CONTAINER_H}
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <defs>
-                        <mask id="icd-dim-mask">
-                          {/* White = dim; black = clear (the crop frame) */}
-                          <rect width={CONTAINER_W} height={CONTAINER_H} fill="white" />
-                          {circular ? (
-                            <circle cx={circleCX} cy={circleCY} r={circleR} fill="black" />
-                          ) : (
+                    {/* Crop area */}
+                    <div className="flex flex-col items-center gap-4">
+                      <div
+                        ref={cropContainerRef}
+                        className="relative cursor-grab touch-none overflow-hidden rounded-lg active:cursor-grabbing"
+                        style={{ width: CONTAINER_W, height: CONTAINER_H }}
+                        onPointerDown={handlePointerDown}
+                        onPointerMove={handlePointerMove}
+                        onPointerUp={handlePointerUp}
+                        onPointerLeave={handlePointerUp}
+                      >
+                        {/* Dark base visible in the margin area behind the image */}
+                        <div className="absolute inset-0 bg-black/30" />
+
+                        {/* Image — offset by margins so pan=(0,0) aligns image to crop-frame top-left */}
+                        {imageUrl && (
+                          <img
+                            ref={imgRef}
+                            src={imageUrl}
+                            onLoad={handleImageLoad}
+                            draggable={false}
+                            className="pointer-events-none absolute select-none"
+                            style={{
+                              left: MARGIN_X + pan.x,
+                              top: MARGIN_Y + pan.y,
+                              width: renderW || undefined,
+                              height: renderH || undefined,
+                              display: natSize ? "block" : "none",
+                            }}
+                            alt="crop"
+                          />
+                        )}
+
+                        {/* Loading state */}
+                        {imageUrl && !natSize && (
+                          <div className="flex h-full w-full items-center justify-center bg-black/40">
+                            <Loader2 className="h-6 w-6 animate-spin text-white/60" />
+                          </div>
+                        )}
+
+                        {/* SVG overlay: dims outside the crop frame, rule-of-thirds, border */}
+                        {natSize && (
+                          <svg
+                            className="pointer-events-none absolute inset-0"
+                            width={CONTAINER_W}
+                            height={CONTAINER_H}
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <defs>
+                              <mask id="icd-dim-mask">
+                                {/* White = dim; black = clear (the crop frame) */}
+                                <rect width={CONTAINER_W} height={CONTAINER_H} fill="white" />
+                                {circular ? (
+                                  <circle cx={circleCX} cy={circleCY} r={circleR} fill="black" />
+                                ) : (
+                                  <rect
+                                    x={MARGIN_X}
+                                    y={MARGIN_Y}
+                                    width={CROP_W}
+                                    height={CROP_H}
+                                    fill="black"
+                                  />
+                                )}
+                              </mask>
+                            </defs>
+
+                            {/* Dimming layer outside crop frame */}
                             <rect
-                              x={MARGIN_X}
-                              y={MARGIN_Y}
-                              width={CROP_W}
-                              height={CROP_H}
+                              width={CONTAINER_W}
+                              height={CONTAINER_H}
                               fill="black"
+                              fillOpacity={0.55}
+                              mask="url(#icd-dim-mask)"
                             />
-                          )}
-                        </mask>
-                      </defs>
 
-                      {/* Dimming layer outside crop frame */}
-                      <rect
-                        width={CONTAINER_W}
-                        height={CONTAINER_H}
-                        fill="black"
-                        fillOpacity={0.55}
-                        mask="url(#icd-dim-mask)"
-                      />
+                            {/* Rule-of-thirds grid (rectangular mode only) */}
+                            {!circular && (
+                              <>
+                                <line
+                                  x1={MARGIN_X + CROP_W / 3}
+                                  y1={MARGIN_Y}
+                                  x2={MARGIN_X + CROP_W / 3}
+                                  y2={MARGIN_Y + CROP_H}
+                                  stroke="white"
+                                  strokeOpacity={0.25}
+                                  strokeWidth={1}
+                                />
+                                <line
+                                  x1={MARGIN_X + (CROP_W * 2) / 3}
+                                  y1={MARGIN_Y}
+                                  x2={MARGIN_X + (CROP_W * 2) / 3}
+                                  y2={MARGIN_Y + CROP_H}
+                                  stroke="white"
+                                  strokeOpacity={0.25}
+                                  strokeWidth={1}
+                                />
+                                <line
+                                  x1={MARGIN_X}
+                                  y1={MARGIN_Y + CROP_H / 3}
+                                  x2={MARGIN_X + CROP_W}
+                                  y2={MARGIN_Y + CROP_H / 3}
+                                  stroke="white"
+                                  strokeOpacity={0.25}
+                                  strokeWidth={1}
+                                />
+                                <line
+                                  x1={MARGIN_X}
+                                  y1={MARGIN_Y + (CROP_H * 2) / 3}
+                                  x2={MARGIN_X + CROP_W}
+                                  y2={MARGIN_Y + (CROP_H * 2) / 3}
+                                  stroke="white"
+                                  strokeOpacity={0.25}
+                                  strokeWidth={1}
+                                />
+                              </>
+                            )}
 
-                      {/* Rule-of-thirds grid (rectangular mode only) */}
-                      {!circular && (
-                        <>
-                          <line
-                            x1={MARGIN_X + CROP_W / 3}
-                            y1={MARGIN_Y}
-                            x2={MARGIN_X + CROP_W / 3}
-                            y2={MARGIN_Y + CROP_H}
-                            stroke="white"
-                            strokeOpacity={0.25}
-                            strokeWidth={1}
-                          />
-                          <line
-                            x1={MARGIN_X + (CROP_W * 2) / 3}
-                            y1={MARGIN_Y}
-                            x2={MARGIN_X + (CROP_W * 2) / 3}
-                            y2={MARGIN_Y + CROP_H}
-                            stroke="white"
-                            strokeOpacity={0.25}
-                            strokeWidth={1}
-                          />
-                          <line
-                            x1={MARGIN_X}
-                            y1={MARGIN_Y + CROP_H / 3}
-                            x2={MARGIN_X + CROP_W}
-                            y2={MARGIN_Y + CROP_H / 3}
-                            stroke="white"
-                            strokeOpacity={0.25}
-                            strokeWidth={1}
-                          />
-                          <line
-                            x1={MARGIN_X}
-                            y1={MARGIN_Y + (CROP_H * 2) / 3}
-                            x2={MARGIN_X + CROP_W}
-                            y2={MARGIN_Y + (CROP_H * 2) / 3}
-                            stroke="white"
-                            strokeOpacity={0.25}
-                            strokeWidth={1}
-                          />
-                        </>
-                      )}
+                            {/* Crop frame border */}
+                            {circular ? (
+                              <circle
+                                cx={circleCX}
+                                cy={circleCY}
+                                r={circleR}
+                                fill="none"
+                                stroke="white"
+                                strokeWidth={1.5}
+                                strokeOpacity={0.55}
+                              />
+                            ) : (
+                              <rect
+                                x={MARGIN_X}
+                                y={MARGIN_Y}
+                                width={CROP_W}
+                                height={CROP_H}
+                                fill="none"
+                                stroke="white"
+                                strokeWidth={1}
+                                strokeOpacity={0.45}
+                                rx={4}
+                              />
+                            )}
+                          </svg>
+                        )}
+                      </div>
 
-                      {/* Crop frame border */}
-                      {circular ? (
-                        <circle
-                          cx={circleCX}
-                          cy={circleCY}
-                          r={circleR}
-                          fill="none"
-                          stroke="white"
-                          strokeWidth={1.5}
-                          strokeOpacity={0.55}
+                      {/* Zoom control */}
+                      <div
+                        className="flex w-full items-center gap-3"
+                        style={{ maxWidth: CONTAINER_W }}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => applyZoom(zoom - 0.15)}
+                          className={`shrink-0 transition-opacity ${subtextColor} hover:opacity-100 disabled:opacity-30`}
+                          disabled={zoom <= 1}
+                        >
+                          <ZoomOut className="h-4 w-4" />
+                        </button>
+                        <input
+                          type="range"
+                          min={1}
+                          max={3}
+                          step={0.01}
+                          value={zoom}
+                          onChange={(e) => applyZoom(parseFloat(e.target.value))}
+                          disabled={!natSize}
+                          className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-white disabled:cursor-not-allowed disabled:opacity-40"
                         />
-                      ) : (
-                        <rect
-                          x={MARGIN_X}
-                          y={MARGIN_Y}
-                          width={CROP_W}
-                          height={CROP_H}
-                          fill="none"
-                          stroke="white"
-                          strokeWidth={1}
-                          strokeOpacity={0.45}
-                          rx={4}
-                        />
-                      )}
-                    </svg>
-                  )}
-                </div>
+                        <button
+                          type="button"
+                          onClick={() => applyZoom(zoom + 0.15)}
+                          className={`shrink-0 transition-opacity ${subtextColor} hover:opacity-100 disabled:opacity-30`}
+                          disabled={zoom >= 3}
+                        >
+                          <ZoomIn className="h-4 w-4" />
+                        </button>
+                      </div>
 
-                {/* Zoom control */}
-                <div className="flex w-full items-center gap-3" style={{ maxWidth: CONTAINER_W }}>
-                  <button
-                    type="button"
-                    onClick={() => applyZoom(zoom - 0.15)}
-                    className={`shrink-0 transition-opacity ${subtextColor} hover:opacity-100 disabled:opacity-30`}
-                    disabled={zoom <= 1}
-                  >
-                    <ZoomOut className="h-4 w-4" />
-                  </button>
-                  <input
-                    type="range"
-                    min={1}
-                    max={3}
-                    step={0.01}
-                    value={zoom}
-                    onChange={(e) => applyZoom(parseFloat(e.target.value))}
-                    disabled={!natSize}
-                    className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-white disabled:cursor-not-allowed disabled:opacity-40"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => applyZoom(zoom + 0.15)}
-                    className={`shrink-0 transition-opacity ${subtextColor} hover:opacity-100 disabled:opacity-30`}
-                    disabled={zoom >= 3}
-                  >
-                    <ZoomIn className="h-4 w-4" />
-                  </button>
-                </div>
+                      <p className={`text-xs ${subtextColor}`}>
+                        Drag to reposition · Scroll to zoom
+                      </p>
+                    </div>
 
-                <p className={`text-xs ${subtextColor}`}>Drag to reposition · Scroll to zoom</p>
-              </div>
-
-              {/* Footer */}
-              <div className="flex justify-end gap-2">
-                <Button
-                  variant="outline"
-                  onClick={onCancel}
-                  className={`cursor-pointer ${buttonClass} ${textShadow}`}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleApply}
-                  disabled={!natSize || isApplying}
-                  className={`cursor-pointer ${buttonClass} ${textShadow}`}
-                >
-                  {isApplying ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Applying…
-                    </>
-                  ) : (
-                    "Apply"
-                  )}
-                </Button>
-              </div>
+                    {/* Footer */}
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={onCancel}
+                        className={`cursor-pointer ${buttonClass} ${textShadow}`}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleApply}
+                        disabled={!natSize || isApplying}
+                        className={`cursor-pointer ${buttonClass} ${textShadow}`}
+                      >
+                        {isApplying ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Applying…
+                          </>
+                        ) : (
+                          "Apply"
+                        )}
+                      </Button>
+                    </div>
                   </motion.div>
                 </motion.div>
               </DialogPrimitive.Content>
