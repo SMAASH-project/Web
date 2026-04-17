@@ -33,6 +33,7 @@ func main() {
 		seeder.WithSeeder(seeder.NewRoleSeeder()),
 		seeder.WithSeeder(seeder.NewUserSeeder()),
 		seeder.WithSeeder(seeder.NewCharacterSeeder(), seeder.NewCategorySeeder(), seeder.NewRaritySeeder()),
+		seeder.WithSeeder(seeder.NewLevelSeeder()),
 	)
 
 	go func() {

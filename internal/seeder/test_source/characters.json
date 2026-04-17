@@ -22,5 +22,29 @@
       "Character",
       "Ranged"
     ]
+  },
+  {
+    "Name": "Knight",
+    "Description": "A ranged character with simple starter stats.",
+    "RarityID": 3,
+    "Price": 50,
+    "Implemented": false,
+    "ImgURI": "/characters/knight.png",
+    "Categories": [
+      "Character",
+      "Melee"
+    ]
+  },
+  {
+    "Name": "Bandit",
+    "Description": "A ranged character with simple starter stats.",
+    "RarityID": 4,
+    "Price": 100,
+    "Implemented": false,
+    "ImgURI": "/characters/bandit.png",
+    "Categories": [
+      "Character",
+      "Melee"
+    ]
   }
 ]

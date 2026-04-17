@@ -17,7 +17,7 @@ export const queryKeys = {
     all: ["items"],
   },
   characters: {
-    all: ["characters"]
+    all: ["characters"],
   },
   purchases: {
     byProfileId: (profileId: number) => ["purchases", "byProfileId", profileId],

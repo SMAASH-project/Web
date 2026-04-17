@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"errors"
 	"mime/multipart"
 	"os"
@@ -65,4 +67,10 @@ func SaveFileToDisc(c *gin.Context, file *multipart.FileHeader, kind FileUploadK
 	}
 
 	return &uri, nil
+}
+
+func GenerateSecurityKey() string {
+	keyBuffer := make([]byte, 32)
+	rand.Read(keyBuffer)
+	return base64.StdEncoding.EncodeToString(keyBuffer)
 }

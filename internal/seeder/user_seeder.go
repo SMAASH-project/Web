@@ -30,9 +30,10 @@ func (us UserSeeder) AppendChildren(children ...Seeder) {
 }
 
 type UserDataFormat struct {
-	Email    string
-	Password string
-	RoleID   int
+	Email       string
+	Password    string
+	RoleID      int
+	SecurityKey string
 }
 
 func (us UserSeeder) Seed(c context.Context, data_root_path string, db *gorm.DB, errStream chan error, logger logger.Interface) {
@@ -53,12 +54,17 @@ func (us UserSeeder) Seed(c context.Context, data_root_path string, db *gorm.DB,
 		if err != nil {
 			errStream <- err
 		}
+		keyHash, err := bcrypt.GenerateFromPassword([]byte(val.SecurityKey), 10)
+		if err != nil {
+			errStream <- err
+		}
 		if err = gorm.G[models.User](db).Create(c, &models.User{
 			Email:        val.Email,
 			PasswordHash: string(passHash),
 			RoleID:       uint(val.RoleID),
 			IsBanned:     false,
 			LastLogin:    time.Now(),
+			SecurityKey:  string(keyHash),
 		}); err != nil {
 			if !errors.Is(err, gorm.ErrDuplicatedKey) {
 				errStream <- err
