@@ -54,7 +54,7 @@ A **Profile** oldalon megtehetod:
 
 - **Megjelenési nevet változtatni** — így látnak téged más játékosok a ranglistákon és meccsekben
 - **Email-cím frissítése** — fiók-visszaállításhoz használt
-- **Statisztikák megtekintése** — győzelmek, lejátszott meccsek és más adatok (teljes meccs-előzmény hamarosan jön)
+- **Statisztikák megtekintése** — győzelmek, lejátszott meccsek és más adatok
 
 ---
 
@@ -168,32 +168,6 @@ Válts **angol** és **magyar** között. A változás azonnal érvénybe lép a
 
 ---
 
-## Hibaelhárítás
-
-### Kijelentkeztetett az alkalmazás
-
-A session-ök inaktivitás után lejárnak. Jelentkezz be újra — az adataid, a profilod és a vásárlásaid mind szerver-oldalon tárolódnak és teljesen biztonságban vannak.
-
-### A ranglistán lévő számok elavultnak tűnnek
-
-A leaderboard statisztikák a szerveren időszakosan számítódnak, nem valós időben. Próbáld meg:
-1. Az oldal frissítését (`Ctrl + R` vagy `Cmd + R`)
-2. Egy kis várakozást és újabb frissítést
-3. Ha a probléma fennmarad, lépj kapcsolatba a supporttal
-
-### A rossz profil coinját látom
-
-Minden játékkarakternek saját, különálló coin-egyenlege van. Győződj meg róla, hogy a megfelelő profilt választottad a **Profile Selector**-ban. Az aktív profil a navigációs sávban is látható.
-
-### Valami meghibásodott, de nem tudom miért
-
-1. Frissítsd az oldalt — a legtöbb átmeneti probléma azonnal megoldódik
-2. Ellenőrizd az internetkapcsolatod
-3. Jelentkezz ki és vissza
-4. Ha továbbra is előfordul, lépj kapcsolatba a supporttal, és írd le, mit csináltál, amikor a hiba bekövetkezett
-
----
-
 ## Tippek a legtöbb kihozásához a SMAASH-ból
 
 1. **Töltsd el pár percet a Settings-ben** — egy számodra tetszetős szín téma és háttéreffektus kiválasztása minden oldalt jobbá tesz
@@ -230,12 +204,3 @@ Az admin panel teljes felhasználókezelési lehetőséget biztosít:
 - **Diagnostics** — akadálymentesítési kontraszt ellenőrző, render számok, z-index inspector
 - **Database** — az összes platform erőforrás böngészése és szerkesztése egyetlen adatböngésző felületen (felhasználók, profilok, tárgyak, karakterek, pályák, kategóriák, ritkaságok, vásárlások, szerepkörök, posztok, statisztikák)
 
-Egyes adatbázis műveletek esetleg nem elérhetők, ha a backend endpoint még nincs implementálva — ezek meg vannak jelölve a felületen.
-
----
-
-## Segítségre van szükséged?
-
-- **Valami nem működik?** Először frissítsd az oldalt — ez a legtöbb átmeneti problémát megoldja. Ha az nem segít, lépj kapcsolatba az adminisztrátoroddal vagy a support csapattal.
-- **Hibát találtál vagy visszajelzésed van?** Jelentsd a supportnak vagy az admin csapatnak, lehetőleg rövid leírással arról, mit csináltál és mi történt.
-- **Teljesítményprobléma az eszközödön?** Próbáld ki az animációk letiltását a Settings-ben — ez jelentősen csökkenti a CPU és GPU terhelést, különösen mobileszközökön és régebbi hardveren.

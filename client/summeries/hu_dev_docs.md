@@ -27,6 +27,8 @@ A kliens egy **React 19 + TypeScript** single-page application, amely hitelesít
 - `src/pages/*` — feature modulok (auth, játék, admin, debug stb.)
 - `src/hooks/*` — adatfetching logika React Query hook-okon keresztül
 - `src/lib/utils/*` — közös téma, szín, dátum és string helperek
+- `src/lib/constants/*` — közös domain konstansok (tárgy ritkaságok, harcstílusok, elfogadott képtípusok)
+- `src/backgrounds/*` — canvas és CSS alapú animált háttér komponensek
 
 ---
 
@@ -199,11 +201,45 @@ Amikor az animáció megváltozik, az új háttér bele-fade-el, miközben a ré
 </AnimatePresence>
 ```
 
+### Háttér architektúra
+
+Minden háttér-animációhoz tartozó CSS `@keyframes` (lava blob-ok, sakura szirmok, felhő sodródás) az `src/index.css`-ben él. A háttér komponens fájlok ezekre a keyframe-ekre Tailwind tetszőleges animáció osztályokon keresztül hivatkoznak (pl. `animate-[lava-blob-1_11s_ease-in-out_infinite]`) vagy inline `style={{ animation: "sakura-fall ..." }}` szintaxissal — nem injektálnak `<style>` tageket.
+
+Canvas alapú háttérkomponensek (`DeepSpace`, `Fishtank`, `ParticleWeb`, `Storm` stb.) közös segédprogramokat importálnak az `src/lib/utils`-ból:
+
+- `hexToRgbTuple(hex)` → `[r, g, b]` — hex színt RGB tuple-ra alakít canvas műveletekhez
+- `lerp(a, b, t)` → szám — lineáris interpoláció canvas animációkban lévő sima átmenetekhez
+
 ### Teljesítmény megjegyzések
 
 - A háttérképek **halasztottak** a nehéz kártyás oldalakon: ~500ms után fade-elnek be, hogy az oldal elsődleges tartalma először renderelődjön és festődjön, elkerülve a jank-ot
 - Amikor `useAnimations` false, a mozgás az utolsó renderelt frame-en marad — nincs villogás vagy újraelrendezés, egyszerűen megáll
 - A `CompositeBackground` lustán csatolja az egyes al-effekt canvas rétegeket; a kikapcsolt rétegek tisztán lecsatolódnak
+
+---
+
+## Közös konstansok
+
+### Tárgy konstansok (`src/lib/constants/itemConstants.ts`)
+
+A webstore tárgy konfiguráció egyszer van definiálva és mindenhol importálható:
+
+```typescript
+export const RARITIES = ["Common", "Uncommon", "Rare", "Epic", "Legendary"] as const;
+export const COMBAT_TYPES = ["Melee", "Ranged"] as const;
+
+export const RARITY_COLORS: Record<string, string> = {
+  Common: "#9ca3af",
+  Uncommon: "#10b981",
+  Rare: "#3b82f6",
+  Epic: "#8b5cf6",
+  Legendary: "#f59e0b",
+};
+
+export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+```
+
+Használja: `CreateItemDialog`, `EditItemDialog`, és minden ritkaság jelvényt vagy harcstílus szelektor megjelenítő komponens.
 
 ---
 
@@ -306,13 +342,11 @@ A Navbar `position: fixed`, vagyis **nincs a dokumentum folyamban**. A `y=0`-ná
 
 A kulcs felismerés: a tartalom wrapperén lévő `min-h-full flex-1` azt biztosítja, hogy mindig kitöltse a scroll container-t, ami azt jelenti, hogy a `py-4/py-5` padding mindig az egyetlen tér a viewport széle és a kártya között — tökéletesen egyenlő felső és alsó margókat adva, függetlenül attól, mennyi tartalom van az oldalon.
 
-**Ellenőrzött oldalak:** Gallery, Leaderboard, Webstore, News, Releases, Admin, Debug, Settings, Profile.
-
 ---
 
 ## A pill-container tab választó
 
-Ez a szabványos tab szelektor, amelyet a Gallery, Leaderboard, Webstore (ItemFilters) és Releases (SelectOs) használ. Liquid Glass módban csúszó kiemelés követi az egeret.
+Ez a szabványos tab szelektor, amelyet a Gallery, Leaderboard, Webstore (ItemFilters) és Releases (SelectOs) oldalak használnak. Liquid Glass módban csúszó kiemelés követi az egeret.
 
 ### Algoritmus
 
@@ -323,23 +357,19 @@ const [highlightPos, setHighlightPos] = useState({ left: 0, width: 0 });
 const [isHovering, setIsHovering] = useState(false);
 
 // 2. Bármely tab gomb mouse-enter eseményén:
-function handleTabMouseEnter(tabId: string) {
-  const container = containerRef.current;
-  const btn = container?.querySelector(`[data-tab="${tabId}"]`);
-  if (!container || !btn) return;
-
-  const cRect = container.getBoundingClientRect();
-  const bRect = btn.getBoundingClientRect();
-
-  setHighlightPos({
-    left: bRect.left - cRect.left,
-    width: bRect.width,
-  });
+function handleTabMouseEnter(e: React.MouseEvent<HTMLButtonElement>) {
+  if (!useLiquidGlass) return;
   setIsHovering(true);
+  const rect = e.currentTarget.getBoundingClientRect();
+  if (containerRef.current) {
+    const parentRect = containerRef.current.getBoundingClientRect();
+    setHighlightPos({ left: rect.left - parentRect.left, width: rect.width });
+  }
 }
 
 // 3. A container mouse-leave eseményén:
 function handleContainerMouseLeave() {
+  if (!useLiquidGlass) return;
   setIsHovering(false);
   // Kiemelés visszacsúszik a jelenleg kiválasztott tabhoz
   const btn = containerRef.current?.querySelector(`[data-tab="${activeTab}"]`);
@@ -353,15 +383,14 @@ function handleContainerMouseLeave() {
 // 4. Renderelés
 <div
   ref={containerRef}
-  className={`relative flex gap-1 rounded-lg p-1 ${panelBg}`}
+  className={`relative flex gap-1 rounded-2xl p-1 ${panelBg}`}
   onMouseLeave={handleContainerMouseLeave}
 >
   {/* Csúszó kiemelés — csak LG (Liquid Glass) módban */}
   {useLiquidGlass && (
-    <motion.div
-      className="absolute top-1 bottom-1 rounded-md bg-white/15"
-      animate={{ left: highlightPos.left, width: highlightPos.width }}
-      transition={{ type: "spring", stiffness: 400, damping: 35 }}
+    <div
+      className="pointer-events-none absolute rounded-lg transition-all duration-300 ease-out bg-black/25"
+      style={{ left: highlightPos.left, width: highlightPos.width, top: 4, bottom: 4 }}
     />
   )}
 
@@ -369,12 +398,8 @@ function handleContainerMouseLeave() {
     <button
       key={tab.id}
       data-tab={tab.id}
-      onMouseEnter={() => handleTabMouseEnter(tab.id)}
+      onMouseEnter={handleTabMouseEnter}
       onClick={() => setActiveTab(tab.id)}
-      className={activeTab === tab.id
-        ? "bg-gray-700 shadow-md"   // nem-LG aktív
-        : "hover:bg-gray-700"       // nem-LG inaktív hover
-      }
     >
       {tab.label}
     </button>
@@ -382,9 +407,9 @@ function handleContainerMouseLeave() {
 </div>
 ```
 
-A `data-tab` attribútum köti a gomb DOM elemet a kiemelés pozíció számításhoz — elkerüli az index-alapú keresést, és rugalmas feltételes tab renderelés esetén.
+A `data-tab` attribútum köti a gomb DOM elemet a kiemelés pozíció számításhoz — elkerüli az index-alapú keresést, és rugalmas feltételes tab renderelés esetén is megbízható.
 
-**Az aktív állapot osztályoknak kezelniük kell az LG és a nem-LG módot egyaránt.** LG módban a gombok átlátszók (`bg-transparent`), és a csúszó kiemelés biztosítja az aktív vizuált. Nem-LG módban az aktív gomb `bg-gray-700 shadow-md` (sötét) / `bg-gray-200 shadow-md` (világos) osztályokat kap. Soha ne használj `bg-white/15` vagy hardkódolt `bg-white` értéket aktív állapothoz — ezek nem kezelik megfelelően az LG módot.
+**Az aktív állapot osztályoknak kezelniük kell az LG és a nem-LG módot egyaránt.** LG módban a gombok átlátszók, és a csúszó kiemelés biztosítja az aktív vizuált. Nem-LG módban az aktív gomb `bg-gray-700 shadow-md` (sötét) / `bg-gray-200 shadow-md` (világos) osztályokat kap.
 
 ---
 
@@ -397,45 +422,22 @@ A debug emuláció tab kényszerítheti a böngészőt, hogy úgy viselkedjen, m
 A standard `window.innerWidth` csak olvasható tulajdonság, tehát nem lehet egyszerűen hozzárendelni. Az override `Object.defineProperty`-t használ a getter lecseréléséhez:
 
 ```typescript
-// Eredeti értékek tárolása a cleanup-hoz
-const origDescriptors = {
-  innerWidth: Object.getOwnPropertyDescriptor(window, "innerWidth"),
-  innerHeight: Object.getOwnPropertyDescriptor(window, "innerHeight"),
-  // ... outerWidth, outerHeight
-};
-
-const origMatchMedia = window.matchMedia.bind(window);
-
-// Méretek patch-elése
 Object.defineProperty(window, "innerWidth",  { get: () => forcedWidth,  configurable: true });
 Object.defineProperty(window, "innerHeight", { get: () => forcedHeight, configurable: true });
 
-// matchMedia patch-elése — CSS query-k kiértékelése a kényszerített méretekhez
 window.matchMedia = (query: string): MediaQueryList => {
   const match = evaluateCSSMediaQuery(query, forcedWidth, forcedHeight);
-  return {
-    matches: match,
-    media: query,
-    onchange: null,
-    addListener: () => {},
-    removeListener: () => {},
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    dispatchEvent: () => false,
-  };
+  return { matches: match, media: query, /* stub-ok */ };
 };
 
-// Hook-ok és komponensek jelzése az újraértékeléshez
 window.dispatchEvent(new CustomEvent("viewport-override", {
   detail: { width: forcedWidth, height: forcedHeight }
 }));
 ```
 
-A `src/components/nav/navLogic/useMediaQuery.ts`-ben lévő `useMediaQuery` hook figyeli a `"viewport-override"` egyéni eseményt, és kényszerít újrarenderelést, amint az elsül, így a reszponzív layout változások azonnal érvénybe lépnek a JS-vezérelt kódban.
+A `useMediaQuery` hook figyeli a `"viewport-override"` egyéni eseményt, és kényszerít újrarenderelést, amint az elsül, így a reszponzív layout változások azonnal érvénybe lépnek a JS-vezérelt kódban.
 
-### Fontos korlát
-
-A Tailwind CSS breakpointok (`sm:`, `md:`, `lg:`, `xl:`) build időben CSS `@media` query-kre fordítódnak. A patch-elt `window.matchMedia` csak a JavaScript hívókat érinti — a Tailwind CSS szabályait a böngésző saját CSS engine-je értékeli ki az aktuális fizikai viewport ellen, amely nem érintett. Az override hasznos `useMediaQuery` hook-ok, navbar breakpointok és JS-vezérelt layout logika teszteléséhez.
+A Tailwind CSS breakpointok build időben CSS `@media` query-kre fordítódnak, és a böngésző CSS engine értékeli ki a fizikai viewport ellen — a patch-elt `window.matchMedia` nem érinti őket.
 
 ---
 
@@ -452,7 +454,6 @@ interface RankedEntry {
   sub?: string;      // opcionális alcím (pl. játékos neve egy pálya bejegyzésnél)
 }
 
-// Példa: a győzelmek dataset normalizálása
 const winsEntries: RankedEntry[] = leaderboardData.map((entry) => ({
   id: entry.player_id,
   name: entry.username,
@@ -461,10 +462,7 @@ const winsEntries: RankedEntry[] = leaderboardData.map((entry) => ({
 }));
 ```
 
-Ez a minta a `PodiumSlot`-ot és a `CategoryView`-t teljesen generikussá teszi — soha nem importálnak backend response típusokat. Új leaderboard kategória hozzáadása csak a következőket igényli:
-1. Egy új query hook
-2. Egy normalizáló leképezés `RankedEntry[]`-ra
-3. Egy új `TabId` bejegyzés
+Ez a minta a `PodiumSlot`-ot és a `CategoryView`-t teljesen generikussá teszi — soha nem importálnak backend response típusokat. Új leaderboard kategória hozzáadása csak egy új query hook-ot, egy `RankedEntry[]`-re való normalizáló leképezést, és egy új `TabId` bejegyzést igényel.
 
 A `CategoryView`-ban lévő keresési szűrő a normalizált adaton fut, és az eredeti rangszámokat megőrzi a szűrésen keresztül azáltal, hogy a rangot az index mellett külön mezőként követi.
 
@@ -476,7 +474,7 @@ A `CategoryView`-ban lévő keresési szűrő a normalizált adaton fut, és az 
 
 Az admin panel `xl` breakpointnál három oszlopra bontódik (`xl:flex-row`), mindegyiket saját komponens kezeli:
 
-- `UserList` — kereshető felhasználólista kliens-oldali szűréssel; a backend paginálás jövőbeli fejlesztés
+- `UserList` — kereshető felhasználólista kliens-oldali szűréssel
 - `UserDetail` — kiválasztott felhasználó teljes profilja, akcióbillentyűk (tiltás/feloldás, előléptetés/lefokozás)
 - `ProfilesPanel` — a kiválasztott felhasználó játékprofiljai és statisztikái
 - `BanDialog` — időtartam-választó dialógus a tiltások alkalmazásához (preset chipek + egyéni tartomány + szabad szöveges ok)
@@ -493,54 +491,31 @@ Csak adminoknak elérhető diagnosztikai és műveleti dashboard. Nyolc tab:
 | Endpoints | Kézi HTTP request tesztelő |
 | Cache | React Query cache vizsgálat és invalidáció |
 | Game Data | CRUD munkafolyamatok karakterekhez, pályákhoz, tárgyakhoz és felhasználókezeléshez |
-| Visual | UI hibakeresési eszközök (lásd lentebb) |
+| Visual | UI hibakeresési eszközök |
 | Emulation | Reszponzív tesztelés és hálózat szimuláció |
 | Diagnostics | A11y, render számok, z-index, kattintási célok |
 | Database | Általános REST-alapú adatböngésző minden erőforráshoz |
 
-**Visual tab képességek:**
-- Animáció sebesség szorzó
-- Navbar override (kényszer megjelenítés / kényszer elrejtés — hasznos a scroll-hidden navbar viselkedés teszteléséhez)
-- Backdrop blur kapcsoló
-- Layout keret kiemelések (minden DOM elemet kontúroz térköz hibakereséshez)
-- Elem inspector (DOM csomópontok fölé vive mutatja a kiszámított box model-t)
-- Overlay vezérlők: FPS számláló, scroll pozíció jelző, Tailwind breakpoint badge
-- Toast teszt gomb
-- CSS változó felfedező élő szín swatches-szel
-
-**Emulation tab képességek:**
-- Csökkentett mozgás kapcsoló
-- Kompakt sűrűség mód (tömörebb betűméret és térköz)
-- Safe-area körvonalak bevágásos/szigetes eszköz teszteléséhez
-- JS Viewport kényszerítés (lásd a Viewport Override részt fentebb)
-  - Presetek: Desktop 1920, Desktop 1280, Tablet 768, Mobile 390, Mobile 360
-  - Egyéni szél + magasság bevitel
-- Hálózati késleltetés szimuláció (mesterséges latencia + jitter milliszekundumban)
-
-**Database tab:**
-- Erőforrások: Users, Profiles, Items, Characters, Levels, Categories, Rarities, Purchases, Roles, Posts, Stats
-- Sor-szintű CRUD létrehozás/szerkesztés dialógusokkal és törlési megerősítéssel (ahol backend endpoint létezik)
-- Hardkódolt séma/reference nézet Go/GORM modellekből levezetve — inline dokumentációként funkcionál
-- Inline felhasználó moderáció: Tiltás (időtartam-választóval), Feloldás, Előléptetés, Lefokozás
-- Session-only akciónapló (memóriában lévő ring buffer, max 20 bejegyzéssel)
-- Danger Zone szekció kaszkád figyelmeztetésekkel a Users és Profiles destruktív műveleteihez
-- Ismert hiányok: nincs seed/reset endpoint bekötve, post törlés nem elérhető, képfeltöltés kizárva a CRUD dialógusokból
-
 ### Gallery (`/app/gallery`)
 
-Két tapos oldal: Karakterek rács és OST zenelejátszó.
+Négy fájlra osztva:
 
-- **Karakterek tab:** `useDebugCharactersQuery`-n keresztül tölt (admin szerepkör szükséges — lásd `docs/problems.md` a `GET /characters` auth réshez). Minden karaktert `CharacterCard` jelenít meg, amely `GET /api/characters/:id/img`-et tölt, és hibánál `Swords` placeholder-re esik vissza. `LoadPost`-tal animálva, ha `useAnimations` engedélyezett.
+- `GalleryPage.tsx` — oldal keret, tab navigáció logika és a pill-container tab választó
+- `OstPlayer.tsx` — teljes audiojátszó komponens (lejátszás/szünet, seekbar, hangerő, tracklista)
+- `CharacterCard.tsx` — egyedi karakterkártya képbetöltéssel és fallback-kel
+- `ostTracks.ts` — statikus `OstTrack[]` tömb hangfájl URL importokkal
 
-- **OST tab:** Statikus `OstTrack[]` tömb a fájl tetején definiálva. Trackek hozzáadása az `OST_TRACKS` szerkesztésével. Teljes audiojátszó seekbar-ral, hangerő vezérlővel és track lista panellel.
+**Új OST track hozzáadása:** importáld a hangfájlt `?url` suffix-szel az `ostTracks.ts`-ben, és adj hozzá egy bejegyzést az `OST_TRACKS`-hez. A `?url` suffix kötelező, hogy a Vite a dev és produkciós kiszolgáláshoz egyaránt a helyes alap-prefix-es URL-t oldja fel.
+
+**Karakterek tab:** `useDebugCharactersQuery`-n keresztül tölt. Minden karaktert `CharacterCard` jelenít meg, amely `GET /api/characters/:id/img`-et tölt, és hibánál `Swords` placeholder-re esik vissza. `LoadPost`-tal animálva, ha `useAnimations` engedélyezett.
 
 ### Leaderboard (`/app/leaderboard`)
 
 Tab-alapú ranglista. Tabok: `all`, `wins`, `active`, `levels`, `items`.
 
-- **All tab:** Stat sáv (négy chip, kategóriánként az #1-et mutatva) + 2×2-es rács top-5 panelekkel. Minden panel saját skeletonnel tölt.
-- **Kategória tabok:** `PodiumSlot` komponensek az 1–3. helyeknek fizikai dobogó sorrendben `[2. | 1. | 3.]`, lépcsőzött `motion.div` animációval (0 / 0,15 / 0,30s késleltetések). Runners-up (4–5. hely) alattuk. Teljes görgethető rangsor kereséssel.
-- Mind a négy query párhuzamosan indul. Tab váltás `AnimatePresence mode="wait"`-tel, 0,18s opacity/y fade-del. A `CategoryView` wrapperén lévő `key={activeTab}` minden tab váltáskor visszaállítja a keresési állapotot.
+- **All tab:** Stat sáv (négy chip, kategóriánként az #1-est mutatva) + 2×2-es rács top-5 panelekkel
+- **Kategória tabok:** `PodiumSlot` komponensek az 1–3. helyeknek fizikai dobogó sorrendben `[2. | 1. | 3.]`, lépcsőzött `motion.div` késleltetésekkel. Runners-up (4–5. hely) alattuk. Teljes görgethető rangsor kereséssel
+- Mind a négy query párhuzamosan indul. A `CategoryView` wrapperén lévő `key={activeTab}` minden tab váltáskor visszaállítja a keresési állapotot
 
 ### Webstore (`/app/webstore`)
 
@@ -551,10 +526,6 @@ Tab-alapú ranglista. Tabok: `all`, `wins`, `active`, `levels`, `items`.
 5. Vásárlásnál: coin levonása az aktív profil kontextusából, hozzáadás a vásárlási listához, releváns query-k invalidálása
 
 Az egyenleg az aktív profil kontextusából jön, nem egy globális pénztárcából. Profil váltás megváltoztatja az elérhető egyenleget.
-
-### Profile (`/app/profile`)
-
-Jelenleg implementált: megjelenési név szerkesztés, email szerkesztés. Még nem bekötve: jelszócsere (backend endpoint hiányzik), teljes meccs-előzmény / részletes statisztikák.
 
 ---
 
@@ -567,13 +538,6 @@ Jelenleg implementált: megjelenési név szerkesztés, email szerkesztés. Még
 - **Reszponzív vízszintes padding:** `px-3 sm:px-6 lg:px-10`
 - **Másodlagos tartalom rejtése mobilon:** `hidden sm:block` oldalsávokhoz stb.
 
-### Debug panel mobilon
-
-A debug panel oldalsávja `md` breakpoint alatt összecsukódik:
-
-- **Mobil:** hamburger ikon → sheet drawer tab pill-ekkel; a drawer automatikusan bezáródik tab kiválasztás után, így a tartalom terület teljes széles
-- **Desktop:** fix bal oldalsáv, mindig látható
-
 ### Dialógusok mobilon
 
 Minden dialógusnak a következőket kell használnia:
@@ -584,10 +548,7 @@ Minden dialógusnak a következőket kell használnia:
 
 - `max-h-[90svh]` + `overflow-y-auto`: a dialógus belülről scrollozható, soha nem nyírja ki a viewportot
 - `max-w-[calc(100%-2rem)]`: 1rem oldalsó margót tart mobilon
-- **Soha ne** használj `max-w-full`-t mobilon — teljesen eltávolítja a margót
-- **Soha ne** adj `overflow-visible`-t a `DialogContent`-hez — felülírja az `overflow-y-auto`-t és tartalom kilógást okoz a dialógus keretéből a görgethetőség helyett
-
-A News dialógusok (Hozzáadás és Szerkesztés) mobilon függőlegesen egymás alá rendezik a képbeállítások szekciót `flex flex-col gap-4 sm:flex-row sm:items-start`-tal.
+- Soha ne adj `overflow-visible`-t a `DialogContent`-hez — felülírja az `overflow-y-auto`-t és tartalom kilógást okoz
 
 ---
 
@@ -603,17 +564,13 @@ import { StyledSelect } from "@/components/ui/styled-select";
 <StyledSelect
   value={selectedValue}
   onChange={setSelectedValue}
-  options={[
-    { value: "en", label: "English" },
-    { value: "hu", label: "Hungarian" },
-  ]}
+  options={["Option A", "Option B"]}
   inputClass={inputClass}
   textColor={textColor}
   bgClass={bgClass}
+  renderOption={(o) => o}
 />
 ```
-
-Használja: HTTP metódus szelektor (Endpoints tab), viewport preset választó (Emulation tab), tárgy ritkaság/típus szűrők (Webstore).
 
 ### Skeleton
 
@@ -622,11 +579,9 @@ Pulzáló betöltési placeholder. Mindig részesítsd előnyben a skeleton-t a 
 ```tsx
 import { Skeleton } from "@/components/ui/skeleton";
 
-// A valódi tartalom alakját utánozd
 <div className="flex flex-col gap-3">
   <Skeleton className="h-10 w-full rounded-lg" />
   <Skeleton className="h-10 w-3/4 rounded-lg" />
-  <Skeleton className="h-10 w-1/2 rounded-lg" />
 </div>
 ```
 
@@ -652,9 +607,7 @@ A locale fájlok helye:
 - `src/locales/en/` — angol szövegek
 - `src/locales/hu/` — magyar szövegek
 
-A névterek megegyeznek az oldalakkal vagy feature-ökkel (pl. `admin`, `nav`, `leaderboard`). Mindig add hozzá a kulcsokat **mindkét** locale fájlhoz egyszerre. Ha egy kulcs hiányzik az egyik nyelvből, az i18next maga a kulcsnevet adja vissza — ez a produkción töröttnek néz ki.
-
-Használd az `useTranslation("névtér")` hook-ot a komponensekben:
+A névterek megegyeznek az oldalakkal vagy feature-ökkel (pl. `admin`, `nav`, `leaderboard`). Mindig add hozzá a kulcsokat **mindkét** locale fájlhoz egyszerre. Használd az `useTranslation("névtér")` hook-ot a komponensekben:
 
 ```tsx
 const { t } = useTranslation("admin");
@@ -669,56 +622,32 @@ return <p>{t("detail.bannedPermanent")}</p>;
 
 - **Téma helpereket használj.** `getBackgroundClasses()`, `getTextColor()`, `getInputClasses()` — ezek a szerződés. Az inline ternary-k töredezik a témarendszert.
 - **`StyledSelect` használata** minden legördülőhöz. A natív `<select>` nem stílusozható konzisztensen.
+- **`hexToRgbTuple` importálása `@/lib/utils`-ból** canvas háttérkomponensekben helyi implementáció helyett.
+- **Audio/asset fájlok importálása `?url` suffix-szel**, hogy a Vite a helyes alap-prefix-es, haselt URL-t oldja fel.
+- **Közös domain konstansokat `src/lib/constants/`-ba tedd**, ne duplikáld őket komponensek között.
+- **`@keyframes`-t `index.css`-ben tartsd**, ne injektálj `<style>` tageket komponensekben.
 - **Típusozd a React Query válaszokat.** Biztosítsd, hogy a `queryFn` visszatérési típusa és a response interfész egyezzen.
 - **Szerepkör ellenőrzéseket az oldal határán tartsd.** Soha ne ásd el a jogosultság logikát mélyen egymásba ágyazott komponensben.
 - **Minden felhasználónak szóló szöveget fordítsd le.** Egyszerre add hozzá mindkét `en` és `hu` locale fájlhoz.
-- **Mobilon is tesztelj.** Használd a debug panel Force Viewport-ját vagy a böngésző DevTools eszköz módját.
-- **Kövesd a pill-container tab választó mintát** minden új tab szelektor esetén. Referencia implementáció: Gallery és Leaderboard.
+- **Kövesd a pill-container tab választó mintát** minden új tab szelektor esetén.
 
 ### Nem
 
 - Inline ternary témaláncolatok, mint `useDarkMode ? useLiquidGlass ? "..." : "..." : "..."`
 - Natív `<select>` elemek
+- Helyi `hexToRgb` / `lerp` implementációk háttér fájlokban — importálj `@/lib/utils`-ból
+- `<style>` tag injektálás a komponens render outputban
 - Hardkódolt hex színek vagy Tailwind szín osztályok, amelyek megkerülik a téma helpereket
 - Navbar clearance kihagyása új teljes oldalas layoutokon
-- `camelCase` és `snake_case` keverése localStorage kulcsokban
 - `overflow-visible` a `DialogContent`-en
-- Tab aktív állapotok, amelyek csak az LG / nem-LG mód egyikét kezelik
-
----
-
-## Ismert backend függőségek
-
-| Feature | Állapot |
-|---|---|
-| Profil meccs-előzmény endpoint | Hiányzik — statisztikák/meccs rekordok nem elérhetők |
-| Jelszócsere endpoint | Hiányzik — profil oldal csere form nincs bekötve |
-| Admin felhasználó keresés / paginálás | Jelenleg csak kliens-oldali |
-| `GET /characters` admin nélkül | Auth rés — gallery karakterek admin szerepkört igényelnek |
+- Nem-komponens értékek exportálása komponens fájlokból (megszakítja a React Fast Refresh-t)
 
 ---
 
 ## Optimalizálás állapota
 
-### Már megvan
-
 - Route-szintű lazy loading `React.lazy` + `Suspense` fallback-kel
 - Kézi vendor chunk felosztás (Vite konfig)
 - Leaderboard skeleton betöltés (spinner helyett, tartalom alakot mutat)
 - Lépcsőzött panel belépési animáció az olvasható betöltésért
-- Build bundle vizualizáció támogatás
-
-### Érdemes megfontolni
-
-- WebP/AVIF képformátum adoptálás `<picture>` fallback-kel
-- Virtuális lista renderelés nagy adattáblákhoz (react-window)
-- Route-hover prefetching leaderboard query-khez
-- Opcionális PWA / offline réteg, ha a kapcsolat nélküli hozzáférés követelmény lesz
-
----
-
-## Segítség kérése
-
-1. **Ellenőrizd a debug panelt** (`/app/debug`) rendszerállapotért, cache vizsgálatért és renderelt query számokért
-2. **Nézz meg egy hasonló meglévő oldalt** — szinte mindig van már kialakult minta
-3. **Frissítsd ezt a dokumentumot**, ha valami nem nyilvánvalót tanulsz
+- Build bundle vizualizáció támogatás (`rollup-plugin-visualizer`)

@@ -54,7 +54,7 @@ From the **Profile** page you can:
 
 - **Change your display name** — this is how other players see you in rankings and matches
 - **Update your email address** — used for account recovery
-- **View your stats** — wins, matches played, and more (full match history is coming)
+- **View your stats** — wins, matches played, and more
 
 ---
 
@@ -168,32 +168,6 @@ Switch between **English** and **Hungarian**. The change takes effect immediatel
 
 ---
 
-## Troubleshooting
-
-### I got logged out
-
-Sessions expire after a period of inactivity. Log back in — your data, profile, and purchases are all stored server-side and are completely safe.
-
-### Numbers on the leaderboard look old
-
-Leaderboard stats are calculated on the server periodically, not in real time. Try:
-1. Refreshing the page (`Ctrl + R` or `Cmd + R`)
-2. Waiting a moment and refreshing again
-3. If the issue persists, contact support
-
-### I am looking at the wrong profile's coins
-
-Each game character has its own separate coin balance. Make sure you have selected the correct profile in the **Profile Selector**. The active profile is shown in the navigation bar.
-
-### Something failed and I do not know why
-
-1. Refresh the page — most transient issues clear up immediately
-2. Check your internet connection
-3. Log out and back in
-4. If it keeps happening, contact support and describe what you were doing when it failed
-
----
-
 ## Tips for Getting the Most out of SMAASH
 
 1. **Spend a few minutes in Settings** — picking a color theme and background effect that you like makes every page feel better
@@ -230,12 +204,3 @@ A comprehensive internal toolbox for diagnosing issues and managing platform dat
 - **Diagnostics** — accessibility contrast checker, render counts, z-index inspector
 - **Database** — browse and edit all platform resources (users, profiles, items, characters, levels, categories, rarities, purchases, roles, posts, stats) from a single data browser interface
 
-Some database operations may not be available yet if the backend endpoint has not been implemented — these are marked in the interface.
-
----
-
-## Need Help?
-
-- **Something is not working?** Try refreshing the page first — it clears the majority of transient issues. If that does not help, contact your admin or support team.
-- **Found a bug or have feedback?** Report it to support or the admin team, ideally with a short description of what you did and what happened.
-- **Performance issues?** Try disabling animations in Settings. This significantly reduces CPU and GPU usage, especially on mobile devices and older hardware.
