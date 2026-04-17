@@ -9,6 +9,7 @@ import (
 	"smaash-web/internal/models"
 	"smaash-web/internal/repository"
 	"smaash-web/internal/utils"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -178,6 +179,11 @@ func (lc *LevelsController) Delete(c *gin.Context) {
 func (lc LevelsController) UploadImg(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
+	cropped := c.Query("cropped")
+	croppedBool, err := strconv.ParseBool(cropped)
+	if err != nil {
+		croppedBool = false
+	}
 
 	file, err := c.FormFile("LevelImage")
 	if err != nil {
@@ -195,6 +201,12 @@ func (lc LevelsController) UploadImg(c *gin.Context) {
 		return
 	}
 
+	if croppedBool {
+		if err := lc.levelsBaseRepo.UpdateOne(c.Request.Context(), id.(uint), "cropped_img_uri", uri); err != nil {
+			c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+			return
+		}
+	}
 	if err := lc.levelsBaseRepo.UpdateOne(c.Request.Context(), id.(uint), "img_uri", uri); err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
 		return
@@ -214,6 +226,11 @@ func (lc LevelsController) UploadImg(c *gin.Context) {
 func (lc LevelsController) ReadImg(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
+	cropped := c.Query("cropped")
+	croppedBool, err := strconv.ParseBool(cropped)
+	if err != nil {
+		croppedBool = false
+	}
 
 	level, err := lc.levelsBaseRepo.ReadByID(c.Request.Context(), id.(uint))
 	if err != nil {
@@ -222,6 +239,25 @@ func (lc LevelsController) ReadImg(c *gin.Context) {
 			return
 		}
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	if croppedBool {
+		if level.CroppedImgURI == "" {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("Given level has no uploaded cropped image", path))
+			return
+		}
+
+		if _, err := os.Stat(level.CroppedImgURI); err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				c.JSON(http.StatusNotFound, dtos.NewErrResp("Cropped image of given level cannot be found", path))
+				return
+			}
+			c.JSON(http.StatusInternalServerError, dtos.NewErrResp("File is corrupt: "+err.Error(), path))
+			return
+		}
+
+		c.File(level.CroppedImgURI)
 		return
 	}
 

@@ -29,9 +29,9 @@ interface ItemReadDTO {
 // ─── Mapping helpers ──────────────────────────────────────────────────────────
 
 function mapItemDTO(dto: ItemReadDTO): WebstoreItem {
-  const combatType: WebstoreItem["combatType"] = dto.categories.includes("Melee")
+  const combatType: WebstoreItem["combatType"] = dto.categories?.includes("Melee")
     ? "Melee"
-    : dto.categories.includes("Ranged")
+    : dto.categories?.includes("Ranged")
       ? "Ranged"
       : undefined;
 
@@ -63,7 +63,15 @@ export function useItems() {
     queryKey: queryKeys.characters.all,
     queryFn: async () => {
       const { data } = await apiClient.get<ItemReadDTO[]>("/characters");
-      return data.map(mapItemDTO);
+      console.log("data: ", data);
+      try {
+        const result = data.map(mapItemDTO);
+        console.log("mapped: ", result);
+        return result;
+      } catch (err) {
+        console.error(err);
+        return [];
+      }
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -88,6 +96,8 @@ export function useItems() {
 
   // Build a set of owned character IDs
   const ownedIds = useMemo(() => new Set(ownedCharacters.map((c) => c.id)), [ownedCharacters]);
+
+  console.log("fetched items: ", fetchedItems)
 
   // Merge ownership into items
   const allItems = useMemo(
@@ -272,6 +282,8 @@ export function useItems() {
   const combatTypes: string[] = ["All", "Melee", "Ranged"];
   const ownershipOptions: string[] = ["All", "Owned", "Unowned"];
 
+  console.log("all items: ", allItems);
+
   const filteredItems = useMemo(() => {
     return allItems.filter((item) => {
       const matchesRarity = selectedRarity === "All" || item.rarity === selectedRarity;
@@ -284,6 +296,8 @@ export function useItems() {
       return matchesRarity && matchesCombatType && matchesOwnership;
     });
   }, [allItems, selectedRarity, selectedCombatType, selectedOwnership]);
+
+  console.log("filetered items: ", filteredItems);
 
   const hasMore = useMemo(() => {
     if (searchQuery) return false;
@@ -298,6 +312,8 @@ export function useItems() {
     }
     return items.slice(0, page * PAGE_SIZE);
   }, [filteredItems, page, searchQuery]);
+
+  console.log("visible items: ", visibleItems);
 
   const loadMore = useCallback(() => {
     if (searchQuery || isLoading) return;

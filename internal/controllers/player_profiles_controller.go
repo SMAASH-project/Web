@@ -214,6 +214,11 @@ func (pc PlayerProfileController) Delete(c *gin.Context) {
 func (pc PlayerProfileController) UploadPFP(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
+	cropped := c.Query("cropped")
+	croppedBool, err := strconv.ParseBool(cropped)
+	if err != nil {
+		croppedBool = false
+	}
 
 	file, err := c.FormFile("profilePicture")
 	if err != nil {
@@ -231,6 +236,12 @@ func (pc PlayerProfileController) UploadPFP(c *gin.Context) {
 		return
 	}
 
+	if croppedBool {
+		if err := pc.profilesRepo.UpdateOne(c.Request.Context(), id.(uint), "cropped_pfp_uri", uri); err != nil {
+			c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+			return
+		}
+	}
 	if err := pc.profilesRepo.UpdateOne(c.Request.Context(), id.(uint), "pfp_uri", uri); err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
 		return
@@ -250,6 +261,8 @@ func (pc PlayerProfileController) UploadPFP(c *gin.Context) {
 func (pc PlayerProfileController) GetPFP(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
+	cropped := c.Query("cropped")
+	croppedBool, err := strconv.ParseBool(cropped)
 
 	profile, err := pc.profilesRepo.ReadByID(c.Request.Context(), id.(uint))
 	if err != nil {
@@ -261,12 +274,30 @@ func (pc PlayerProfileController) GetPFP(c *gin.Context) {
 		return
 	}
 
-	if profile.PfpUri == "" {
+	if croppedBool {
+		if profile.CroppedPfpURI == "" {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("Given profile has no uploaded cropped profile picture", path))
+			return
+		}
+
+		if _, err := os.Stat(profile.CroppedPfpURI); err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				c.JSON(http.StatusNotFound, dtos.NewErrResp("Cropped profile picture of given profile cannot be found", path))
+				return
+			}
+			c.JSON(http.StatusInternalServerError, dtos.NewErrResp("File is corrupt: "+err.Error(), path))
+			return
+		}
+
+		c.File(profile.CroppedPfpURI)
+	}
+
+	if profile.PfpURI == "" {
 		c.JSON(http.StatusNotFound, dtos.NewErrResp("Given profile has no uploaded profile picture", path))
 		return
 	}
 
-	if _, err := os.Stat(profile.PfpUri); err != nil {
+	if _, err := os.Stat(profile.PfpURI); err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			c.JSON(http.StatusNotFound, dtos.NewErrResp("Profile picture of given profile cannot be found", path))
 			return
@@ -275,7 +306,7 @@ func (pc PlayerProfileController) GetPFP(c *gin.Context) {
 		return
 	}
 
-	c.File(profile.PfpUri)
+	c.File(profile.PfpURI)
 }
 
 // @description Reads all purchases of given profile
