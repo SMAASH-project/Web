@@ -22,7 +22,7 @@ type CharacterCreateDTO struct {
 	Description string `json:"description" binding:"required,max=70"`
 	Price       uint   `json:"price" binding:"required"`
 	RarityID    uint   `json:"rarity_id" binding:"required"`
-	CategoryIDs []uint `json:"category_ids"`
+	CategoryIDs []uint `json:"category_ids" binding:"required"`
 }
 
 type CharacterUpdateDTO struct {
