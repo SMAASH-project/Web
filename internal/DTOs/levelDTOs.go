@@ -7,9 +7,9 @@ import (
 )
 
 type LevelReadDTO struct {
-	ID     uint   `json:"id"`
-	Name   string `json:"name"`
-	ImgURI string `json:"img_uri"`
+	ID     uint       `json:"id"`
+	Name   string     `json:"name"`
+	Images ImagesResp `json:"images"`
 }
 
 type LevelCreateDTO struct {
@@ -27,7 +27,7 @@ func LevelToDTO(level models.Level) LevelReadDTO {
 	return LevelReadDTO{
 		ID:     level.ID,
 		Name:   level.Name,
-		ImgURI: level.ImgURI,
+		Images: ImagesResp{FullImgURI: level.ImgURI, CroppedImgURI: level.CroppedImgURI},
 	}
 }
 

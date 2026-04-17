@@ -8,6 +8,7 @@ import (
 	"smaash-web/internal/middlewares"
 	"smaash-web/internal/repository"
 	"smaash-web/internal/utils"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -200,6 +201,11 @@ func (cc CharactersController) Delete(c *gin.Context) {
 func (cc CharactersController) UploadImg(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
+	cropped := c.Query("cropped")
+	croppedBool, err := strconv.ParseBool(cropped)
+	if err != nil {
+		croppedBool = false
+	}
 
 	file, err := c.FormFile("CharacterImage")
 	if err != nil {
@@ -217,6 +223,12 @@ func (cc CharactersController) UploadImg(c *gin.Context) {
 		return
 	}
 
+	if croppedBool {
+		if err := cc.charactersRepo.UpdateOne(c.Request.Context(), id.(uint), "cropped_img_uri", uri); err != nil {
+			c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+			return
+		}
+	}
 	if err := cc.charactersRepo.UpdateOne(c.Request.Context(), id.(uint), "img_uri", uri); err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
 		return
@@ -236,6 +248,11 @@ func (cc CharactersController) UploadImg(c *gin.Context) {
 func (cc CharactersController) ReadImg(c *gin.Context) {
 	path := c.Request.URL.Path
 	id, _ := c.Get("id")
+	cropped := c.Query("cropped")
+	croppedBool, err := strconv.ParseBool(cropped)
+	if err != nil {
+		croppedBool = false
+	}
 
 	character, err := cc.charactersRepo.ReadByID(c.Request.Context(), id.(uint))
 	if err != nil {
@@ -247,6 +264,24 @@ func (cc CharactersController) ReadImg(c *gin.Context) {
 		return
 	}
 
+	if croppedBool {
+		if character.ImgURI == "" {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("Given character has no uploaded image", path))
+			return
+		}
+
+		if _, err := os.Stat(character.CroppedImgURI); err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				c.JSON(http.StatusNotFound, dtos.NewErrResp("Cropped image of given character cannot be found", path))
+				return
+			}
+			c.JSON(http.StatusInternalServerError, dtos.NewErrResp("File is corrupt: "+err.Error(), path))
+			return
+		}
+
+		c.File(character.CroppedImgURI)
+		return
+	}
 	if character.ImgURI == "" {
 		c.JSON(http.StatusNotFound, dtos.NewErrResp("Given character has no uploaded image", path))
 		return

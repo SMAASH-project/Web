@@ -8,13 +8,13 @@ import (
 )
 
 type CharacterReadDTO struct {
-	ID          uint     `json:"id"`
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	Price       uint     `json:"price"`
-	Rarity      string   `json:"rarity"`
-	Categories  []string `json:"categories"`
-	ImgURI      string   `json:"img_uri"`
+	ID          uint       `json:"id"`
+	Name        string     `json:"name"`
+	Description string     `json:"description"`
+	Price       uint       `json:"price"`
+	Rarity      string     `json:"rarity"`
+	Categories  []string   `json:"categories"`
+	Images      ImagesResp `json:"images"`
 }
 
 type CharacterCreateDTO struct {
@@ -42,7 +42,7 @@ func CharacterToDTO(c models.Character) CharacterReadDTO {
 		Price:       c.Price,
 		Rarity:      c.Rarity.Name,
 		Categories:  utils.Map(c.Categories, func(c *models.Category) string { return c.Name }),
-		ImgURI:      c.ImgURI,
+		Images:      ImagesResp{FullImgURI: c.ImgURI, CroppedImgURI: c.CroppedImgURI},
 	}
 }
 

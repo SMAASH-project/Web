@@ -7,9 +7,10 @@ import (
 )
 
 type PlayerProfileReadDTO struct {
-	ID          uint   `json:"id"`
-	DisplayName string `json:"display_name"`
-	Coins       int64  `json:"coins"`
+	ID          uint       `json:"id"`
+	DisplayName string     `json:"display_name"`
+	Coins       int64      `json:"coins"`
+	Images      ImagesResp `json:"images"`
 }
 
 type PlayerProfileCreateDTO struct {
@@ -32,6 +33,7 @@ func PlayerProfileToReadDTO(profile models.PlayerProfile) PlayerProfileReadDTO {
 		ID:          profile.ID,
 		DisplayName: profile.DisplayName,
 		Coins:       profile.Coins,
+		Images:      ImagesResp{FullImgURI: profile.PfpURI, CroppedImgURI: profile.CroppedPfpURI},
 	}
 }
 

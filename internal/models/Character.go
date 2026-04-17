@@ -11,6 +11,7 @@ type Character struct {
 	Price             uint                 `gorm:"not null"`
 	Implemented       bool                 `gorm:"not null"`
 	ImgURI            string               `gorm:"not null"`
+	CroppedImgURI     string               `gorm:"not null"`
 	MatchParticipants []MatchParticipation `gorm:"foreignKey:CharacterID;constraint:OnDelete:RESTRICT"`
 	Categories        []*Category          `gorm:"many2many:character_category"`
 }
