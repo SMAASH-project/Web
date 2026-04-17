@@ -145,15 +145,30 @@ export function useItems() {
       const rarity = rarities.find((r) => r.name === data.rarity);
       if (!rarity) throw new Error(`Rarity "${data.rarity}" not found`);
 
-      const { data: categories } =
+      const { data: allCategories } =
         await apiClient.get<{ id: number; name: string }[]>("/categories");
-      const categoryNames = ["Character"];
-      if (data.combatType) categoryNames.push(data.combatType);
-      const categoryIds = categoryNames
-        .map((name) => categories.find((c) => c.name === name)?.id)
-        .filter((id): id is number => id !== undefined);
+
+      const characterCat = allCategories.find((c) => c.name === "Character");
+      if (!characterCat) throw new Error('Category "Character" not found');
+
+      const combatCat = data.combatType
+        ? allCategories.find((c) => c.name === data.combatType)
+        : null;
+      if (data.combatType && !combatCat)
+        throw new Error(`Category "${data.combatType}" not found`);
+
+      const categoryIds = [characterCat.id, ...(combatCat ? [combatCat.id] : [])];
 
       const { data: created } = await apiClient.post<{ id: number }>("/characters", {
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        rarity_id: rarity.id,
+        category_ids: categoryIds,
+      });
+
+      await apiClient.put(`/characters/${created.id}`, {
+        id: created.id,
         name: data.name,
         description: data.description,
         price: data.price,
@@ -198,13 +213,19 @@ export function useItems() {
       const rarity = rarities.find((r) => r.name === data.rarity);
       if (!rarity) throw new Error(`Rarity "${data.rarity}" not found`);
 
-      const { data: categories } =
+      const { data: allCategories } =
         await apiClient.get<{ id: number; name: string }[]>("/categories");
-      const categoryNames = ["Character"];
-      if (data.combatType) categoryNames.push(data.combatType);
-      const categoryIds = categoryNames
-        .map((name) => categories.find((c) => c.name === name)?.id)
-        .filter((id): id is number => id !== undefined);
+
+      const characterCat = allCategories.find((c) => c.name === "Character");
+      if (!characterCat) throw new Error('Category "Character" not found');
+
+      const combatCat = data.combatType
+        ? allCategories.find((c) => c.name === data.combatType)
+        : null;
+      if (data.combatType && !combatCat)
+        throw new Error(`Category "${data.combatType}" not found`);
+
+      const categoryIds = [characterCat.id, ...(combatCat ? [combatCat.id] : [])];
 
       await apiClient.put(`/characters/${data.id}`, {
         id: data.id,

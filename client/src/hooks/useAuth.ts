@@ -82,6 +82,29 @@ export function useLogoutMutation() {
   });
 }
 
+export interface ChangePasswordPayload {
+  id: number;
+  securityKey: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordResponse {
+  new_key: string;
+}
+
+export function useChangePasswordMutation() {
+  return useMutation<ChangePasswordResponse, AxiosError, ChangePasswordPayload>({
+    mutationFn: async ({ id, securityKey, newPassword }) => {
+      const { data } = await apiClient.put<ChangePasswordResponse>("/auth/change-password", {
+        id,
+        security_key: securityKey,
+        new_password: newPassword,
+      });
+      return data;
+    },
+  });
+}
+
 /**
  * Update the logged-in user's email address.
  *
