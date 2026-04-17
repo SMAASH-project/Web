@@ -1,65 +1,154 @@
-import { Label } from "@radix-ui/react-dropdown-menu";
-import { AuthContext } from "../../context/AuthContext";
-import React, { useEffect, useState } from "react";
-import { useSettings } from "../pages/profileDependents/settings/settingsLogic/SettingsContext";
+import { useContext } from "react";
+import { useSettings } from "@/pages/settings/SettingsContext";
+import { motion } from "motion/react";
+import { useScrollDirection } from "@/hooks/useScrollDirection";
+import { useDebugSettings } from "@/hooks/useDebugSettings";
 import { NavMenu } from "./NavMenu";
 import AccountMenu from "./AccountMenu";
+import { MobileNavMenu } from "./MobileNavMenu";
+import { useProfiles } from "@/pages/profile-selector/useProfiles";
+import { Link, useNavigate } from "react-router-dom";
+import { useMediaQuery } from "./navLogic/useMediaQuery";
+import { useLogoutMutation } from "@/hooks/useQueryHooks";
+import { AuthContext } from "@/context/AuthContext";
+import { ShieldAlert, Bug } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import {
+  getBackgroundClasses,
+  getButtonClasses,
+  getSubtextColor,
+  getTextColor,
+  getTextShadow,
+} from "@/lib/utils";
 
 const Navbar = () => {
-  const { userId } = React.useContext(AuthContext);
   const { settings } = useSettings();
-  const [username, setUsername] = useState("");
+  const scrollHidden = useScrollDirection();
+  const { settings: dbg } = useDebugSettings();
+  const hidden =
+    dbg.navbarOverride === "show" ? false : dbg.navbarOverride === "hide" ? true : scrollHidden;
+  const { selectedProfile } = useProfiles();
+  const username = selectedProfile?.name ?? "PlaceholderUserName";
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const navigate = useNavigate();
+  const { userId, setIsLoggedIn, setUserId, setIsAdmin, setIsSupport, isAdmin, isSupport } =
+    useContext(AuthContext);
+  const logoutMutation = useLogoutMutation();
+  const { t } = useTranslation("nav");
+  const navBackground = getBackgroundClasses(
+    settings.useLiquidGlass,
+    settings.useDarkMode,
+    "light",
+  );
+  const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const subtextColor = getSubtextColor(settings.useLiquidGlass, settings.useDarkMode);
+  const textShadow = getTextShadow(settings.useLiquidGlass, settings.useDarkMode);
 
-  useEffect(() => {
-    const fetchUsername = async () => {
-      if (!userId) return;
+  const handleLogout = async () => {
+    try {
+      if (userId) localStorage.removeItem(`selected_profile_${String(userId)}`);
+      await logoutMutation.mutateAsync();
+      setIsLoggedIn(false);
+      setUserId(null);
+      setIsAdmin(false);
+      setIsSupport(false);
+      navigate("/app/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
-      try {
-        const response = await fetch(
-          `http://localhost:8080/api/users/${userId}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          },
-        );
-
-        if (!response.ok) {
-          console.error("Failed to fetch username");
-          return;
-        }
-
-        const data = await response.json();
-        setUsername(data.email);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    fetchUsername();
-  });
-  return (
+  const navContent = (
     <nav
-      className={`absolute top-0 left-0 right-0 flex justify-between items-center p-4 max-w-full w-full border-b-2 ${
-        settings.useLiquidGlass
-          ? "bg-white/30 backdrop-blur-lg border-white/30 shadow-sm shadow-white/20"
-          : "bg-linear-to-b from-gray-700 to-gray-500 [border-image:linear-gradient(to_right,var(--color-green-400),var(--color-green-600))_1]"
-      }`}
+      className={`flex w-full max-w-full items-center justify-between border-b border-transparent p-4 ${navBackground}`}
+      style={{
+        borderBottomColor: "var(--theme-nav-border)",
+        boxShadow: "0 8px 18px -14px var(--theme-nav-shadow)",
+      }}
     >
-      <div className="navbar-left"></div>
-      <div className="navbar-center">
-        <NavMenu useLiquidGlass={settings.useLiquidGlass} />
-      </div>
-      <div className="flex items-center gap-4">
-        <Label
-          className={`text-white ${settings.useLiquidGlass ? "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]" : ""}`}
-        >
-          Logged in as {username}
-        </Label>
-        <AccountMenu />
-      </div>
+      {isDesktop ? (
+        <>
+          {/* Desktop layout — grid with equal side columns keeps center always centered */}
+          <div className="grid w-full grid-cols-[1fr_auto_1fr] items-center">
+            {/* Left: admin / debug buttons */}
+            <div className="flex shrink-0 items-center gap-2">
+              {isAdmin && (
+                <Link
+                  to="/app/admin"
+                  className={`flex shrink-0 flex-col items-center gap-0.5 rounded-lg px-2 py-1 text-[10px] font-medium no-underline transition-all duration-200 ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "secondary")} ${textColor}`}
+                  title={t("account.adminPanel")}
+                >
+                  <ShieldAlert size={13} />
+                  <span className="hidden max-w-11 text-center leading-tight lg:block">
+                    {t("account.adminPanel")}
+                  </span>
+                </Link>
+              )}
+              {(isAdmin || isSupport) && (
+                <Link
+                  to="/app/debug"
+                  className={`flex shrink-0 flex-col items-center gap-0.5 rounded-lg px-2 py-1 text-[10px] font-medium no-underline transition-all duration-200 ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "secondary")} ${textColor}`}
+                  title={t("account.debugPanel")}
+                >
+                  <Bug size={13} />
+                  <span className="hidden max-w-11 text-center leading-tight lg:block">
+                    {t("account.debugPanel")}
+                  </span>
+                </Link>
+              )}
+            </div>
+            {/* Center: main nav */}
+            <div>
+              <NavMenu
+                useLiquidGlass={settings.useLiquidGlass}
+                useDarkMode={settings.useDarkMode}
+              />
+            </div>
+            {/* Right: username + account menu */}
+            <div className="flex items-center justify-end gap-2 overflow-hidden lg:gap-4">
+              <span className={`truncate whitespace-nowrap ${textColor} ${textShadow}`}>
+                <span className={`hidden xl:inline ${subtextColor}`}>{t("loggedInAs")} </span>
+                <Link to="/app/profile/" className="hidden lg:inline">
+                  {username}
+                </Link>
+              </span>
+              <div className="shrink-0">
+                <AccountMenu />
+              </div>
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Mobile layout */}
+          <MobileNavMenu
+            useLiquidGlass={settings.useLiquidGlass}
+            useDarkMode={settings.useDarkMode}
+            username={username}
+            onLogout={handleLogout}
+            isAdmin={isAdmin}
+            isSupport={isSupport}
+          />
+          <span className={`max-w-[50vw] truncate text-sm ${textColor} ${textShadow}`}>
+            <Link to="/app/profile/">{username}</Link>
+          </span>
+          {/* Account options are in the mobile drawer */}
+          <div />
+        </>
+      )}
     </nav>
+  );
+
+  return settings.useAnimations ? (
+    <motion.div
+      className="fixed top-0 right-0 left-0 z-50"
+      animate={{ y: hidden ? -80 : 0 }}
+      transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
+    >
+      {navContent}
+    </motion.div>
+  ) : (
+    <div className="fixed top-0 right-0 left-0 z-50">{navContent}</div>
   );
 };
 

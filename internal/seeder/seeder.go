@@ -8,13 +8,15 @@ import (
 	"sync"
 	"time"
 
-	"gorm.io/driver/sqlite"
+	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
 type Seeder interface {
-	Seed(ctx context.Context, seed_data_root string, db_url string, errStream chan error, logger logger.Interface)
+	Seed(ctx context.Context, seed_data_root string, conn *gorm.DB, errStream chan error, logger logger.Interface)
+	GetChildren() []Seeder
+	AppendChildren(...Seeder)
 }
 
 type SeederManager struct {
@@ -48,8 +50,9 @@ func NewSeedManager(seed_data_root string, dbUrl string, errStream chan error, o
 	return seederManager
 }
 
-func WithSeeder(seeder Seeder) SeederOpt {
+func WithSeeder(seeder Seeder, children ...Seeder) SeederOpt {
 	return func(sm *SeederManager) {
+		seeder.AppendChildren(children...)
 		sm.seeders = append(sm.seeders, seeder)
 	}
 }
@@ -64,7 +67,10 @@ func (sm *SeederManager) Seed() {
 	if os.Getenv("SQLITE_MODE") == "memory" {
 		sm.db_url = "file::memory:?cache=shared"
 	}
-	conn, err := gorm.Open(sqlite.Open(sm.db_url))
+	if os.Getenv(sm.db_url) == "" {
+		sm.db_url = "test.db"
+	}
+	conn, err := gorm.Open(sqlite.Open(sm.db_url), &gorm.Config{Logger: sm.logger, TranslateError: true})
 	if err != nil {
 		log.Panicf("Could not connect to db. Error: %v", err)
 	}
@@ -79,7 +85,11 @@ func (sm *SeederManager) Seed() {
 
 	for _, seeder := range sm.seeders {
 		wg.Go(func() {
-			seeder.Seed(sm.ctx, sm.seed_data_root, sm.db_url, sm.errStream, sm.logger)
+			log.Println(seeder)
+			for _, child := range seeder.GetChildren() {
+				child.Seed(sm.ctx, sm.seed_data_root, conn, sm.errStream, sm.logger)
+			}
+			seeder.Seed(sm.ctx, sm.seed_data_root, conn, sm.errStream, sm.logger)
 		})
 	}
 

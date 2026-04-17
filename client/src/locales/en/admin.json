@@ -1,0 +1,91 @@
+{
+  "users": {
+    "title": "Users",
+    "searchPlaceholder": "Search by name or email…",
+    "noResults": "No users found",
+    "noSelected": "No user selected",
+    "selectPrompt": "Select a user to view details"
+  },
+  "profiles": {
+    "title": "Profiles",
+    "noSelected": "No user selected",
+    "noProfiles": "No profiles",
+    "coinsTitle": "Coins",
+    "saved": "Saved",
+    "setCoins": "Set Coins"
+  },
+  "detail": {
+    "accountDetails": "Account Details",
+    "userId": "User ID",
+    "lastLogin": "Last Login",
+    "never": "Never",
+    "role": "Role",
+    "status": "Status",
+    "active": "Active",
+    "banned": "Banned",
+    "bannedUntil": "Banned until {{date}}",
+    "bannedPermanent": "Banned (permanent)",
+    "banUser": "Ban User",
+    "unban": "Unban",
+    "unbanning": "Unbanning…"
+  },
+  "roles": {
+    "admin": "Admin",
+    "support": "Support",
+    "user": "User"
+  },
+  "toast": {
+    "bannedSuccess": "User banned successfully.",
+    "banFailed": "Failed to ban user. Please try again.",
+    "unbannedSuccess": "User unbanned.",
+    "unbanFailed": "Failed to unban user.",
+    "promotedTo": "User promoted to {{role}}.",
+    "promoteFailed": "Failed to promote user.",
+    "demotedSuccess": "User demoted.",
+    "demoteFailed": "Failed to demote user.",
+    "coinsUpdated": "Coins updated.",
+    "coinsFailed": "Failed to update coins."
+  },
+  "ban": {
+    "title": "Ban User — {{name}}",
+    "description": "Select a preset ban length or configure a custom date range below.",
+    "permanent": "Permanent",
+    "permanentLabel": "Permanent Ban",
+    "permanentDescription": "No expiry — manual unban required",
+    "timeouts": "Timeouts",
+    "timedBans": "Timed Bans",
+    "customRange": "Custom Range",
+    "reason": "Reason",
+    "reasonOptional": "(optional)",
+    "customMessage": "Custom message",
+    "customMessagePlaceholder": "Optional — describe the reason for this ban…",
+    "presetReasons": {
+      "cheating": "Cheating / Hacking",
+      "harassment": "Harassment",
+      "hateSpeech": "Hate Speech",
+      "spam": "Spam",
+      "exploiting": "Exploiting Bugs",
+      "toxic": "Toxic Behaviour",
+      "impersonation": "Impersonation",
+      "nsfw": "NSFW Content"
+    },
+    "starts": "Starts",
+    "ends": "Ends",
+    "endPlaceholder": "Click a date on the calendar to set the end",
+    "startTime": "Start time",
+    "endTime": "End time",
+    "preview": "Preview",
+    "banActiveUntil": "Ban active until",
+    "cancel": "Cancel",
+    "confirm": "Confirm Ban",
+    "confirming": "Applying…",
+    "presets": {
+      "1h": "1 hour",
+      "12h": "12 hours",
+      "24h": "24 hours",
+      "7d": "7 days",
+      "31d": "31 days",
+      "365d": "1 year"
+    }
+  }
+}

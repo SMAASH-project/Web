@@ -6,29 +6,33 @@ import (
 	"errors"
 	"log"
 	"os"
+	"slices"
 	"smaash-web/internal/models"
 
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-type RoleSeeder struct{}
+type RoleSeeder struct{ children []Seeder }
 
-func NewRoleSeeder() *RoleSeeder {
+func NewRoleSeeder() Seeder {
 	return &RoleSeeder{}
+}
+
+func (rs RoleSeeder) GetChildren() []Seeder {
+	return rs.children
+}
+
+func (rs RoleSeeder) AppendChildren(children ...Seeder) {
+	rs.children = slices.Concat(rs.children, children)
 }
 
 type RoleDataFormat struct {
 	Name string
 }
 
-func (rs RoleSeeder) Seed(c context.Context, data_root_path string, db_url string, errStream chan error, logger logger.Interface) {
+func (rs RoleSeeder) Seed(c context.Context, data_root_path string, db *gorm.DB, errStream chan error, logger logger.Interface) {
 	log.Println("Starting roles seeder")
-	db, err := gorm.Open(sqlite.Open(db_url), &gorm.Config{TranslateError: true, Logger: logger})
-	if err != nil {
-		errStream <- err
-	}
 
 	raw, err := os.ReadFile(data_root_path + "/roles.json")
 	if err != nil {

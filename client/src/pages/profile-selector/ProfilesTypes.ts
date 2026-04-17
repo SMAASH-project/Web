@@ -1,0 +1,16 @@
+export interface Profile {
+  id?: number;
+  name: string;
+  avatar: string;
+  avatarFile?: File | null;
+  coins?: number;
+  last_login?: string;
+}
+
+export interface ProfileContextType {
+  profiles: Profile[];
+  addProfile: (profile: Profile) => Promise<void>;
+  removeProfile: (name: string) => Promise<void>;
+  selectedProfile: Profile | null;
+  selectProfile: (name: string) => void;
+}

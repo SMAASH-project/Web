@@ -1,0 +1,18 @@
+{
+  "notFound": {
+    "title": "404 - Page Not Found",
+    "description": "Sorry, the page you are looking for does not exist.",
+    "back": "Return to Previous Page"
+  },
+  "common": {
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "close": "Close",
+    "search": "Search",
+    "loading": "Loading...",
+    "coins": "coins"
+  }
+}

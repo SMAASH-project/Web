@@ -1,0 +1,40 @@
+{
+  "visual": {
+    "title": "Visual",
+    "animations": {
+      "title": "Use animations",
+      "description": "Choose to enable or disable animations in the app. Disabling animations may improve performance on older devices."
+    },
+    "liquidGlass": {
+      "title": "Enable \"Liquid Glass\"",
+      "description": "Toggle the \"Liquid Glass\" effect, which adds a glossy, translucent layer to the interface for a sleek, modern look. This may impact performance on some devices."
+    },
+    "darkMode": {
+      "title": "Toggle Dark Mode",
+      "description": "Enable a dark theme for the interface, which may be easier on the eyes in low-light environments."
+    }
+  },
+  "themes": {
+    "title": "Themes"
+  },
+  "effect": {
+    "title": "Effect",
+    "default": "Default",
+    "none": "None",
+    "custom": "Custom"
+  },
+  "customTheme": "Custom Theme",
+  "applyChanges": "Apply changes",
+  "mixEffects": {
+    "triggerButton": "Mix Effects",
+    "title": "Mix Effects",
+    "description": "Toggle animation layers and preview the combined result.",
+    "clear": "Clear",
+    "apply": "Apply"
+  },
+  "language": {
+    "title": "Language",
+    "en": "English",
+    "hu": "Magyar"
+  }
+}

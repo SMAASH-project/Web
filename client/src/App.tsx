@@ -1,22 +1,21 @@
-import './App.css'
-import './index.css'
-import { Navigate } from 'react-router-dom';
-import React from 'react';
-import { AuthContext } from './context/AuthContext';
+import "./App.css";
+import "./index.css";
+import { Navigate } from "react-router-dom";
+import React from "react";
+import { AuthContext } from "./context/AuthContext";
 
 function App() {
-  const { isLoggedIn } = React.useContext(AuthContext);
-  return (
-    <>
-      {isLoggedIn ? (
-        <>
-          <Navigate to="/app/releases" />
-        </>
-      ) : (
-        <Navigate to="/app/login" />
-      )}
-    </>
-  )
+  const { isLoggedIn, isInitializing } = React.useContext(AuthContext);
+
+  if (isInitializing) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-white" />
+      </div>
+    );
+  }
+
+  return <>{isLoggedIn ? <Navigate to="/app/releases" /> : <Navigate to="/app/login" />}</>;
 }
 
-export default App
+export default App;

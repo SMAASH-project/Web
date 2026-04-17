@@ -1,34 +1,37 @@
-import { Label } from "@radix-ui/react-dropdown-menu";
+import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
+import { navItems } from "./navLogic/navItems";
+import {
+  getBackgroundClasses,
+  getLiquidGlassNavHighlight,
+  getSubtextColor,
+  getTextColor,
+  getTextShadow,
+} from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface NavMenuProps {
   useLiquidGlass: boolean;
+  useDarkMode?: boolean;
 }
 
-const navItems = [
-  { label: "About Us", path: "/app/about" },
-  { label: "Gallery", path: "/app/gallery" },
-  { label: "Releases", path: "/app/releases" },
-  { label: "Webstore", path: "/app/webstore" },
-  { label: "News", path: "/app/news" },
-];
-
-export function NavMenu({ useLiquidGlass }: NavMenuProps) {
+export function NavMenu({ useLiquidGlass, useDarkMode = false }: NavMenuProps) {
   const location = useLocation();
+  const { t } = useTranslation("nav");
   const [highlightPos, setHighlightPos] = useState({ left: 0, width: 0 });
   const [isHovering, setIsHovering] = useState(false);
   const ulRef = useRef<HTMLUListElement>(null);
+  const textColor = getTextColor(useLiquidGlass, useDarkMode);
+  const subtextColor = getSubtextColor(useLiquidGlass, useDarkMode);
+  const textShadow = getTextShadow(useLiquidGlass, useDarkMode);
+  const navBackground = getBackgroundClasses(useLiquidGlass, useDarkMode, "light");
 
   useEffect(() => {
     // Find the matching nav item based on current route
-    const currentItem = navItems.find(
-      (item) => item.path === location.pathname,
-    );
+    const currentItem = navItems.find((item) => item.path === location.pathname);
     if (currentItem && ulRef.current) {
-      const liElement = ulRef.current
-        .querySelector(`a[href="${currentItem.path}"]`)
-        ?.closest("li");
+      const liElement = ulRef.current.querySelector(`a[href="${currentItem.path}"]`)?.closest("li");
       if (liElement) {
         const rect = liElement.getBoundingClientRect();
         const parentRect = ulRef.current.getBoundingClientRect();
@@ -60,9 +63,7 @@ export function NavMenu({ useLiquidGlass }: NavMenuProps) {
     if (useLiquidGlass) {
       setIsHovering(false);
       // Reset to current page highlight
-      const currentItem = navItems.find(
-        (item) => item.path === location.pathname,
-      );
+      const currentItem = navItems.find((item) => item.path === location.pathname);
       if (currentItem && ulRef.current) {
         const liElement = ulRef.current
           .querySelector(`a[href="${currentItem.path}"]`)
@@ -83,12 +84,12 @@ export function NavMenu({ useLiquidGlass }: NavMenuProps) {
   return (
     <ul
       ref={ulRef}
-      className={`nav-links list-none flex m-0 p-0 gap-10 relative ${useLiquidGlass ? "rounded-lg bg-white/10" : ""}`}
+      className={`nav-links relative m-0 flex list-none gap-1 rounded-lg p-0 whitespace-nowrap lg:gap-4 xl:gap-8 ${navBackground}`}
       onMouseLeave={handleMouseLeave}
     >
       {useLiquidGlass && isHovering && (
         <div
-          className="absolute bg-white/20 rounded-sm transition-all duration-300 ease-out pointer-events-none"
+          className={`pointer-events-none absolute rounded-sm transition-all duration-300 ease-out ${getLiquidGlassNavHighlight(useLiquidGlass, useDarkMode)}`}
           style={{
             left: `${highlightPos.left}px`,
             width: `${highlightPos.width}px`,
@@ -100,17 +101,19 @@ export function NavMenu({ useLiquidGlass }: NavMenuProps) {
       {navItems.map((item) => (
         <li
           key={item.path}
-          className={`m-4 p-0.5 relative z-10 ${
-            useLiquidGlass ? "cursor-pointer" : "hover:text-green-400"
-          } ${
-            !useLiquidGlass && item.path === location.pathname
-              ? "text-green-600 font-bold"
-              : "[text-shadow:0_2px_4px_rgba(163,163,163,0.8)]"
-          } transition-colors duration-300`}
+          className={`relative z-10 m-1 cursor-pointer p-0.5 transition-colors duration-300 lg:m-2 ${
+            !useLiquidGlass
+              ? item.path === location.pathname
+                ? "font-bold text-(--theme-accent)"
+                : `${subtextColor} hover:text-(--theme-accent-hover)`
+              : `${textColor} ${textShadow}`
+          }`}
           onMouseEnter={handleMouseEnter}
         >
           <Link to={item.path}>
-            <Label>{item.label}</Label>
+            <DropdownMenuPrimitive.Label className="px-1 lg:px-2">
+              {t(item.labelKey)}
+            </DropdownMenuPrimitive.Label>
           </Link>
         </li>
       ))}

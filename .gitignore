@@ -16,6 +16,7 @@
 coverage.*
 *.coverprofile
 profile.cov
+/uploads
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
@@ -31,7 +32,15 @@ go.work.sum
 # .idea/
 # .vscode/
 
-/build/*
 build/
 *.db
 /internal/seeder/source/*
+
+.DS_Store
+**/.DS_Store
+
+# Claude Code — settings, memory, active worktrees (matches at root and inside worktrees)
+.claude/
+
+uploads/
+logs/

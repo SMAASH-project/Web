@@ -1,0 +1,60 @@
+{
+  "page": {
+    "stats": "Stats",
+    "matchHistory": "Match History",
+    "noMatches": "No matches yet",
+    "noMatchesSubtext": "Match history will appear here once available"
+  },
+  "stats": {
+    "coins": "Coins",
+    "lastSeen": "Last Seen",
+    "profileId": "Profile ID",
+    "wins": "Wins",
+    "losses": "Losses",
+    "winRate": "Win Rate",
+    "matches": "Matches"
+  },
+  "sheet": {
+    "title": "Edit profile",
+    "description": "Changes are saved immediately. Email changes affect your login.",
+    "displayName": "Display Name",
+    "displayNameHint": "Max 20 characters. Shown on your profile and in-game.",
+    "displayNamePlaceholder": "Your display name",
+    "email": "Email Address",
+    "emailHint": "Max 30 characters. Used to log in.",
+    "emailPlaceholder": "your@email.com",
+    "password": "Password",
+    "passwordPlaceholder": "Password change coming soon",
+    "passwordHint": "Password changes are not yet available.",
+    "passwordReset": "Contact an administrator to reset your password.",
+    "saved": "Saved successfully!",
+    "cancel": "Cancel",
+    "save": "Save changes",
+    "saving": "Saving…",
+    "error": "Something went wrong. Please try again."
+  },
+  "selector": {
+    "title": "Select a Profile",
+    "addNew": "Add New",
+    "manage": "Manage Profiles",
+    "done": "Done",
+    "logout": "Logout",
+    "profilesAvailable_one": "{{count}} profile available",
+    "profilesAvailable_other": "{{count}} profiles available"
+  },
+  "addProfile": {
+    "title": "Create New Profile",
+    "description": "Add a new profile to your account. Click save when you're done.",
+    "username": "Username",
+    "profilePicture": "Profile Picture",
+    "uploadPicture": "Click to upload (JPEG, PNG, WebP)",
+    "saving": "Saving...",
+    "save": "Save changes",
+    "cancel": "Cancel",
+    "errorUsernameRequired": "Username is required.",
+    "errorUsernameTooLong": "Username must be 20 characters or less.",
+    "errorUsernameTaken": "That username is already taken. Please choose a different one.",
+    "errorMaxProfiles": "You already have the maximum number of profiles.",
+    "errorSaveFailed": "Failed to save profile. Please try again."
+  }
+}

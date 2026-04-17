@@ -16,28 +16,36 @@ import (
 )
 
 type Server struct {
-	srv                *http.Server
-	gracePeriod        time.Duration
-	userController     *controllers.UsersController
-	authnController    *controllers.AuthnController
-	gameAuthController *controllers.GameAuthController
-	levelsController   *controllers.LevelsController
+	srv         *http.Server
+	gracePeriod time.Duration
+	controllers []controllers.Controller
 }
 
-func NewServer(uc *controllers.UsersController, ac *controllers.AuthnController, gc *controllers.GameAuthController, lc *controllers.LevelsController) *Server {
+func NewServer() *Server {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
 	return &Server{
-		gracePeriod: 10 * time.Second,
+		gracePeriod: 5 * time.Second,
 		srv: &http.Server{
-			Addr:              fmt.Sprintf(":%v", os.Getenv("PORT")),
+			Addr:              fmt.Sprintf(":%v", port),
 			IdleTimeout:       time.Minute,
 			ReadHeaderTimeout: 10 * time.Second,
 			WriteTimeout:      30 * time.Second,
 		},
-		userController:     uc,
-		authnController:    ac,
-		levelsController:   lc,
-		gameAuthController: gc,
 	}
+}
+
+func (s *Server) AddController(c controllers.Controller) *Server {
+	s.controllers = append(s.controllers, c)
+	return s
+}
+
+func (s *Server) SetGracePeriod(gracePeriod time.Duration) *Server {
+	s.gracePeriod = gracePeriod
+	return s
 }
 
 func (s *Server) Run(c context.Context) error {
@@ -50,6 +58,7 @@ func (s *Server) Run(c context.Context) error {
 		}
 		close(srvErrStream)
 	}()
+	log.Println("API server started successfully")
 
 	signal.Notify(quitStream, syscall.SIGINT, syscall.SIGTERM)
 

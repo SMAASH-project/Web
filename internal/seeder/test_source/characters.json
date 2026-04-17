@@ -1,0 +1,47 @@
+[
+  {
+    "Name": "Samurai",
+    "Description": "A balanced melee character for new profiles.",
+    "RarityID": 1,
+    "Price": 0,
+    "Implemented": true,
+    "ImgURI": "/characters/samurai.png",
+    "Categories": ["Melee"]
+  },
+  {
+    "Name": "Slime",
+    "Description": "A ranged character with simple starter stats.",
+    "RarityID": 1,
+    "Price": 0,
+    "Implemented": true,
+    "ImgURI": "/characters/slime.png",
+    "Categories": [
+      "Character",
+      "Ranged"
+    ]
+  },
+  {
+    "Name": "Knight",
+    "Description": "A ranged character with simple starter stats.",
+    "RarityID": 3,
+    "Price": 50,
+    "Implemented": false,
+    "ImgURI": "/characters/knight.png",
+    "Categories": [
+      "Character",
+      "Melee"
+    ]
+  },
+  {
+    "Name": "Bandit",
+    "Description": "A ranged character with simple starter stats.",
+    "RarityID": 4,
+    "Price": 100,
+    "Implemented": false,
+    "ImgURI": "/characters/bandit.png",
+    "Categories": [
+      "Character",
+      "Melee"
+    ]
+  }
+]

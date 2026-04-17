@@ -1,14 +1,17 @@
 package models
 
 import (
-	"time"
-
 	"gorm.io/gorm"
 )
 
 type Purchase struct {
 	gorm.Model
-	PlayerProfileID uint      `gorm:"not null"`
-	Date            time.Time `gorm:"not null"`
-	Items           []*Item   `gorm:"many2many:purchase_items"`
+	PlayerProfileID uint `gorm:"not null"`
+	PlayerProfile   PlayerProfile
+	CharacterID     uint `gorm:"not null"`
+	Character       Character
+}
+
+func (p Purchase) GetID() uint {
+	return p.ID
 }

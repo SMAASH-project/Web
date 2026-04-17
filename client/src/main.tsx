@@ -1,58 +1,106 @@
-import { StrictMode } from "react";
+import React, { StrictMode, lazy } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
+import "@/lib/i18n.ts";
 import App from "./App.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { AuthProvider } from "./context/AuthProvider";
-import { SettingsProvider } from "./components/pages/profileDependents/settings/settingsLogic/SettingsContext.tsx";
-import { NavbarProvider } from "./context/NavbarContext";
-import { ColorProvider } from "./components/pages/profileDependents/settings/settingsLogic/color/ColorProvider.tsx";
-import { PasswordResetForm } from "./components/forms/PasswordResetForm.tsx";
-import { ReleasesPage } from "./components/pages/mainPages/ReleasesPage.tsx";
-import { AboutPage } from "./components/pages/mainPages/AboutPage.tsx";
-import { GalleryPage } from "./components/pages/mainPages/GalleryPage.tsx";
-import { WebstorePage } from "./components/pages/mainPages/WebstorePage.tsx";
-import { NewsPage } from "./components/pages/mainPages/NewsPage.tsx";
-import { NotFoundPage } from "./components/pages/mainPages/NotFoundPage.tsx";
-import { ProfilePage } from "./components/pages/profileDependents/profile/ProfilePage.tsx";
-import { ProfileSelectorForm } from "./components/forms/ProfileSelectorForm.tsx";
+import { RootLayout } from "./RootLayout.tsx";
+import { ErrorBoundary } from "./components/ErrorBoundary.tsx";
+import { RequireAuth } from "./components/RequireAuth.tsx";
 
-import { Wrapper } from "./Wrapper.tsx";
-import { LoginForm } from "./components/forms/LoginForm.tsx";
-import { SignupForm } from "./components/forms/SignUpForm.tsx";
-import { SettingsPage } from "./components/pages/profileDependents/settings/SettingsPage.tsx";
+// Eager load auth forms for better UX
+import { LoginPage } from "./pages/auth/LoginPage.tsx";
+import { SignUpPage } from "./pages/auth/SignUpPage.tsx";
+import { PasswordResetPage } from "./pages/auth/PasswordResetPage.tsx";
+
+// Lazy load heavy pages
+const ReleasesPage = lazy(() =>
+  import("./pages/releases/ReleasesPage.tsx").then((m) => ({
+    default: m.ReleasesPage,
+  })),
+);
+const LeaderboardPage = lazy(() =>
+  import("./pages/leaderboard/LeaderboardPage.tsx").then((m) => ({
+    default: m.LeaderboardPage,
+  })),
+);
+const GalleryPage = lazy(() =>
+  import("./pages/gallery/GalleryPage.tsx").then((m) => ({
+    default: m.GalleryPage,
+  })),
+);
+const WebstorePage = lazy(() =>
+  import("./pages/webstore/WebstorePage.tsx").then((m) => ({
+    default: m.WebstorePage,
+  })),
+);
+const NewsPage = lazy(() =>
+  import("./pages/news/NewsPage.tsx").then((m) => ({
+    default: m.NewsPage,
+  })),
+);
+const NotFoundPage = lazy(() =>
+  import("./pages/NotFoundPage.tsx").then((m) => ({
+    default: m.NotFoundPage,
+  })),
+);
+const ProfilePage = lazy(() =>
+  import("./pages/profile/ProfilePage.tsx").then((m) => ({ default: m.ProfilePage })),
+);
+const ProfileSelectorPage = lazy(() =>
+  import("./pages/profile-selector/ProfileSelectorPage.tsx").then((m) => ({
+    default: m.ProfileSelectorPage,
+  })),
+);
+const SettingsPage = lazy(() =>
+  import("./pages/settings/SettingsPage.tsx").then((m) => ({ default: m.SettingsPage })),
+);
+const AdminPage = lazy(() =>
+  import("./pages/admin/AdminPage.tsx").then((m) => ({
+    default: m.AdminPage,
+  })),
+);
+
+const DebugPage = lazy(() =>
+  import("./pages/debug/DebugPage.tsx").then((m) => ({
+    default: m.DebugPage,
+  })),
+);
+
+function withBoundary(element: React.ReactNode) {
+  return <ErrorBoundary>{element}</ErrorBoundary>;
+}
 
 const router = createBrowserRouter([
-  { path: "/app", element: <App /> },
-  { path: "/app/login", element: <LoginForm className="w-100" /> },
-  { path: "/app/signup", element: <SignupForm className="w-100" /> },
   {
-    path: "/app/reset-password",
-    element: <PasswordResetForm className="w-100" />,
+    element: <RootLayout />,
+    children: [
+      { path: "/app", element: <App /> },
+      { path: "/app/login", element: <LoginPage /> },
+      { path: "/app/signup", element: <SignUpPage /> },
+      { path: "/app/reset-password", element: <PasswordResetPage /> },
+      {
+        element: <RequireAuth />,
+        children: [
+          { path: "/app/leaderboard", element: withBoundary(<LeaderboardPage />) },
+          { path: "/app/gallery", element: withBoundary(<GalleryPage />) },
+          { path: "/app/releases", element: withBoundary(<ReleasesPage />) },
+          { path: "/app/webstore", element: withBoundary(<WebstorePage />) },
+          { path: "/app/news", element: withBoundary(<NewsPage />) },
+          { path: "/app/profile", element: withBoundary(<ProfilePage />) },
+          { path: "/app/settings", element: withBoundary(<SettingsPage />) },
+          { path: "/app/profile-selector", element: withBoundary(<ProfileSelectorPage />) },
+          { path: "/app/admin", element: withBoundary(<AdminPage />) },
+          { path: "/app/debug", element: withBoundary(<DebugPage />) },
+        ],
+      },
+      { path: "*", element: <NotFoundPage /> },
+    ],
   },
-  { path: "/app/about", element: <AboutPage /> },
-  { path: "/app/gallery", element: <GalleryPage /> },
-  { path: "/app/releases", element: <ReleasesPage /> },
-  { path: "/app/webstore", element: <WebstorePage /> },
-  { path: "/app/news", element: <NewsPage /> },
-  { path: "*", element: <NotFoundPage /> },
-  { path: "/app/profile", element: <ProfilePage /> },
-  { path: "/app/settings", element: <SettingsPage /> },
-  { path: "/app/profile-selector", element: <ProfileSelectorForm /> },
 ]);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <AuthProvider>
-      <SettingsProvider>
-        <NavbarProvider>
-          <ColorProvider>
-            <Wrapper>
-              <RouterProvider router={router} />
-            </Wrapper>
-          </ColorProvider>
-        </NavbarProvider>
-      </SettingsProvider>
-    </AuthProvider>
+    <RouterProvider router={router} />
   </StrictMode>,
 );

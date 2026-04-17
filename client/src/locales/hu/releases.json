@@ -1,0 +1,13 @@
+{
+  "title": "Kiadások",
+  "subtitle": "Töltsd le a legújabb verziókat a GitHubról",
+  "searchPlaceholder": "Keresés verzió alapján…",
+  "noResults": "Nem található kiadás.",
+  "noResultsForOs": "Nem található kiadás ehhez: {{os}}.",
+  "fetchError": "Nem sikerült betölteni a kiadásokat a GitHubról",
+  "download": "Letöltés",
+  "os": {
+    "ios": "iOS",
+    "android": "Android"
+  }
+}

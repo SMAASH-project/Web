@@ -1,0 +1,21 @@
+{
+  "items": {
+    "leaderboard": "Ranglétra",
+    "gallery": "Galéria",
+    "releases": "Kiadások",
+    "webstore": "Webáruház",
+    "news": "Hírek"
+  },
+  "loggedInAs": "Bejelentkezve:",
+  "menu": "Menü",
+  "account": {
+    "title": "Fiókom",
+    "profile": "Profil",
+    "settings": "Beállítások",
+    "support": "Támogatás",
+    "changeProfile": "Profil váltása",
+    "adminPanel": "Admin felület",
+    "debugPanel": "Debug felület",
+    "logout": "Kijelentkezés"
+  }
+}

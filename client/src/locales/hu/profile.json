@@ -1,0 +1,60 @@
+{
+  "page": {
+    "stats": "Statisztikák",
+    "matchHistory": "Meccs előzmények",
+    "noMatches": "Még nincsenek meccsek",
+    "noMatchesSubtext": "A meccs előzmények itt fognak megjelenni, ha elérhetők lesznek"
+  },
+  "stats": {
+    "coins": "Érmék",
+    "lastSeen": "Utoljára aktív",
+    "profileId": "Profil azonosító",
+    "wins": "Győzelmek",
+    "losses": "Vereségek",
+    "winRate": "Győzelmi arány",
+    "matches": "Meccsek"
+  },
+  "sheet": {
+    "title": "Profil szerkesztése",
+    "description": "A változtatások azonnal mentésre kerülnek. Az email változtatás hatással van a bejelentkezésre.",
+    "displayName": "Megjelenített név",
+    "displayNameHint": "Maximum 20 karakter. A profilodon és a játékban jelenik meg.",
+    "displayNamePlaceholder": "A megjelenített neved",
+    "email": "Email cím",
+    "emailHint": "Maximum 30 karakter. A bejelentkezéshez szükséges.",
+    "emailPlaceholder": "te@email.com",
+    "password": "Jelszó",
+    "passwordPlaceholder": "Jelszóváltoztatás hamarosan",
+    "passwordHint": "A jelszóváltoztatás még nem elérhető.",
+    "passwordReset": "Jelszó-visszaállításhoz lépj kapcsolatba egy adminisztrátorral.",
+    "saved": "Sikeresen mentve!",
+    "cancel": "Mégse",
+    "save": "Módosítások mentése",
+    "saving": "Mentés…",
+    "error": "Valami hiba történt. Kérem próbálja újra."
+  },
+  "selector": {
+    "title": "Válassz profilt",
+    "addNew": "Új hozzáadása",
+    "manage": "Profilok kezelése",
+    "done": "Kész",
+    "logout": "Kijelentkezés",
+    "profilesAvailable_one": "{{count}} profil elérhető",
+    "profilesAvailable_other": "{{count}} profil elérhető"
+  },
+  "addProfile": {
+    "title": "Új profil létrehozása",
+    "description": "Adj hozzá egy új profilt a fiókodhozód. Kattints a mentésre, ha kész vagy.",
+    "username": "Felhasználónév",
+    "profilePicture": "Profilkép",
+    "uploadPicture": "Kattints a feltöltéshez (JPEG, PNG, WebP)",
+    "saving": "Mentés...",
+    "save": "Módosítások mentése",
+    "cancel": "Mégse",
+    "errorUsernameRequired": "A felhasználónév megadása kötelező.",
+    "errorUsernameTooLong": "A felhasználónév legfeljebb 20 karakter lehet.",
+    "errorUsernameTaken": "Ez a felhasználónév már foglalt. Kérjük, válassz másikat.",
+    "errorMaxProfiles": "Már elérted a profilok maximális számát.",
+    "errorSaveFailed": "A profil mentése sikertelen. Kérjük, próbáld újra."
+  }
+}

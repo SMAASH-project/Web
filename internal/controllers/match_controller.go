@@ -1,0 +1,139 @@
+package controllers
+
+import (
+	"errors"
+	"net/http"
+	dtos "smaash-web/internal/DTOs"
+	"smaash-web/internal/middlewares"
+	"smaash-web/internal/models"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+)
+
+type MatchController struct {
+	conn *gorm.DB
+}
+
+func NewMatchController(conn *gorm.DB) *MatchController {
+	return &MatchController{conn: conn}
+}
+
+// @description Creates a new match
+// @tags matches
+// @accept json
+// @produce json
+// @param match_create_dto body dtos.MatchCreateDTO true "dto for creating a new match"
+// @success 201 {object} dtos.MatchReadDTO "returns newly created match"
+// @failure 401 {object} dtos.ErrResp "unauthorized"
+// @failure 409 {object} dtos.ErrResp "unique key violation"
+// @failure 422 {object} dtos.ErrResp "request body in wrong format"
+// @failure 500 {object} dtos.ErrResp "internal server error"
+// @router /matches [post]
+func (mc *MatchController) Create(c *gin.Context) {
+	path := c.Request.URL.Path
+
+	var body dtos.MatchCreateDTO
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	startedAt, endedAt, err := dtos.ParseMatchCreateTimes(body)
+	if errors.Is(err, dtos.ErrDateFormatIncorrect) {
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	if endedAt.Before(startedAt) {
+		c.JSON(http.StatusUnprocessableEntity, dtos.NewErrResp("ended_at cannot be earlier than started_at", path))
+		return
+	}
+
+	var createdMatch models.Match
+
+	err = mc.conn.Transaction(func(tx *gorm.DB) error {
+		createdMatch = models.Match{
+			SessionID: body.SessionID,
+			StartedAt: startedAt,
+			EndedAt:   endedAt,
+			LevelID:   body.LevelID,
+		}
+		if err := tx.Where(models.Match{SessionID: body.SessionID}).Attrs(models.Match{StartedAt: startedAt, EndedAt: endedAt, LevelID: body.LevelID}).FirstOrCreate(&createdMatch).Error; err != nil {
+			return err
+		}
+
+		if err := tx.Model(&models.Match{}).
+			Where("id = ?", createdMatch.ID).
+			Updates(map[string]any{"started_at": startedAt, "ended_at": endedAt, "level_id": body.LevelID}).Error; err != nil {
+			return err
+		}
+
+		participation := body.Participation
+		var previousParticipation models.MatchParticipation
+		previousCoinsAwarded := int64(0)
+		if err := tx.Where("match_id = ? AND player_profile_id = ?", createdMatch.ID, participation.PlayerID).First(&previousParticipation).Error; err != nil {
+			if !errors.Is(err, gorm.ErrRecordNotFound) {
+				return err
+			}
+		} else {
+			previousCoinsAwarded = previousParticipation.CoinsAwarded
+		}
+
+		newParticipation := models.MatchParticipation{
+			MatchID:         createdMatch.ID,
+			PlayerProfileID: participation.PlayerID,
+			CharacterID:     participation.CharacterID,
+			Result:          participation.Result,
+			NetworkStatus:   participation.NetworkStatus,
+			CoinsAwarded:    participation.CoinsAwarded,
+		}
+
+		if err := tx.Clauses(clause.OnConflict{
+			Columns: []clause.Column{{Name: "match_id"}, {Name: "player_profile_id"}},
+			DoUpdates: clause.Assignments(map[string]any{
+				"character_id":   newParticipation.CharacterID,
+				"result":         newParticipation.Result,
+				"network_status": newParticipation.NetworkStatus,
+				"coins_awarded":  newParticipation.CoinsAwarded,
+			}),
+		}).Create(&newParticipation).Error; err != nil {
+			return err
+		}
+
+		coinDelta := newParticipation.CoinsAwarded - previousCoinsAwarded
+		if coinDelta != 0 {
+			result := tx.Model(&models.PlayerProfile{}).
+				Where("id = ?", participation.PlayerID).
+				Update("coins", gorm.Expr("coins + ?", coinDelta))
+			if result.Error != nil {
+				return result.Error
+			}
+			if result.RowsAffected == 0 {
+				return gorm.ErrRecordNotFound
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, dtos.NewErrResp("Player profile with given id not found", path))
+			return
+		}
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			c.JSON(http.StatusConflict, dtos.NewErrResp(err.Error(), path))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dtos.NewErrResp(err.Error(), path))
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"match_id": createdMatch.ID})
+}
+
+func (mc MatchController) MountRoutes(apiGroup *gin.RouterGroup) {
+	matches := apiGroup.Group("/matches")
+	matches.POST("", middlewares.Authorize(middlewares.ANY), mc.Create)
+}

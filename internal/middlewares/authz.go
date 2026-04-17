@@ -4,42 +4,78 @@ import (
 	"net/http"
 	"os"
 	dtos "smaash-web/internal/DTOs"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func Authorize(c *gin.Context) {
-	rawToken, err := c.Cookie("Authorization")
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, dtos.NewErrResp("No authorization token provided", c.Request.URL.Path))
-		c.Abort()
-		return
-	}
+type AuthLevel string
 
-	token, err := jwt.Parse(rawToken, func(token *jwt.Token) (any, error) {
-		return []byte(os.Getenv("SECRET_KEY")), nil
-	}, jwt.WithValidMethods([]string{"HS256"}))
+const (
+	ADMIN AuthLevel = "admin"
+	USER  AuthLevel = "user"
+	ANY   AuthLevel = "any"
+)
 
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, dtos.NewErrResp("Invalid token", c.Request.URL.Path))
-		c.Abort()
-		return
-	}
+func Authorize(level AuthLevel) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var rawToken string
+		path := c.Request.URL.Path
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		if float64(time.Now().Unix()) > claims["exp"].(float64) {
-			c.JSON(http.StatusUnauthorized, dtos.NewErrResp("Authorization token expired", c.Request.URL.Path))
+		// Check if token is sent in cookie, and prioritize it's handling over header
+		rawToken, err := c.Cookie("Authorization")
+		if err != nil {
+			// Check authorization header, if no authorization cookie found
+			authHeader := c.GetHeader("Authorization")
+			if authHeader == "" {
+				// Neither cookie, nor auth header found
+				c.JSON(http.StatusUnauthorized, dtos.NewErrResp("No authorization token provided", path))
+				c.Abort()
+				return
+			}
+			rawToken = strings.TrimPrefix(authHeader, "Bearer ")
+			if authHeader == rawToken {
+				c.JSON(http.StatusUnauthorized, dtos.NewErrResp("Authorization header is in wrong format - Bearer prefix is required", path))
+				c.Abort()
+				return
+			}
+		}
+
+		key := os.Getenv("SECRET_KEY")
+		if key == "" {
+			key = "super_secret_key"
+		}
+		token, err := jwt.Parse(rawToken, func(token *jwt.Token) (any, error) {
+			return []byte(key), nil
+		}, jwt.WithValidMethods([]string{"HS256"}))
+
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, dtos.NewErrResp("Invalid token", c.Request.URL.Path))
 			c.Abort()
 			return
 		}
 
-		c.Set("id", uint(claims["sub"].(float64))) // ugghh go type system
-		c.Next()
-	} else {
-		c.JSON(http.StatusUnauthorized, dtos.NewErrResp("Invalid token claims", c.Request.URL.Path))
-		c.Abort()
-		return
+		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+			if float64(time.Now().Unix()) > claims["exp"].(float64) {
+				c.JSON(http.StatusUnauthorized, dtos.NewErrResp("Authorization token expired", c.Request.URL.Path))
+				c.Abort()
+				return
+			}
+
+			if level != "any" && claims["role"].(string) != string(level) {
+				c.JSON(http.StatusUnauthorized, dtos.NewErrResp("You don't have privilige to complete this action", path))
+				c.Abort()
+				return
+			}
+
+			c.Set("caller_id", uint(claims["sub"].(float64))) // ugghh go type system
+			c.Next()
+		} else {
+			c.JSON(http.StatusUnauthorized, dtos.NewErrResp("Invalid token claims", c.Request.URL.Path))
+			c.Abort()
+			return
+		}
 	}
 }

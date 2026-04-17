@@ -1,0 +1,73 @@
+import { useState, useEffect } from "react";
+
+export interface DebugSettings {
+  animationSpeed: number; // 0.25 | 0.5 | 1 | 2 | 4
+  forceReducedMotion: boolean;
+  compactDensity: boolean;
+  safeAreaOutlines: boolean;
+  forceViewportEnabled: boolean;
+  forceViewportPreset: string;
+  forceViewportWidth: number;
+  forceViewportHeight: number;
+  noBackdropBlur: boolean;
+  layoutBorders: boolean;
+  navbarOverride: "auto" | "show" | "hide";
+  networkDelayMs: number;
+  networkJitterMs: number;
+  showFps: boolean;
+  showScrollPos: boolean;
+  showBreakpointBadge: boolean;
+  clickTargetChecker: boolean;
+  zIndexInspector: boolean;
+  elementInspector: boolean;
+}
+
+const KEY = "debug-settings";
+const DEFAULTS: DebugSettings = {
+  animationSpeed: 1,
+  forceReducedMotion: false,
+  compactDensity: false,
+  safeAreaOutlines: false,
+  forceViewportEnabled: false,
+  forceViewportPreset: "desktop-1280",
+  forceViewportWidth: 1280,
+  forceViewportHeight: 720,
+  noBackdropBlur: false,
+  layoutBorders: false,
+  navbarOverride: "auto",
+  networkDelayMs: 0,
+  networkJitterMs: 0,
+  showFps: false,
+  showScrollPos: false,
+  showBreakpointBadge: false,
+  clickTargetChecker: false,
+  zIndexInspector: false,
+  elementInspector: false,
+};
+
+export function getDebugSettings(): DebugSettings {
+  try {
+    return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) ?? "{}") };
+  } catch {
+    return { ...DEFAULTS };
+  }
+}
+
+export function useDebugSettings() {
+  const [settings, setSettings] = useState<DebugSettings>(getDebugSettings);
+
+  const update = (patch: Partial<DebugSettings>) => {
+    const next = { ...settings, ...patch };
+    setSettings(next);
+    localStorage.setItem(KEY, JSON.stringify(next));
+    window.dispatchEvent(new CustomEvent("debug-settings", { detail: next }));
+  };
+
+  useEffect(() => {
+    const h = (e: Event) => setSettings((e as CustomEvent<DebugSettings>).detail);
+    window.addEventListener("debug-settings", h);
+    return () => window.removeEventListener("debug-settings", h);
+  }, []);
+
+  return { settings, update };
+}

@@ -6,33 +6,38 @@ import (
 	"errors"
 	"log"
 	"os"
+	"slices"
 	"smaash-web/internal/models"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-type UserSeeder struct{}
+type UserSeeder struct{ children []Seeder }
 
-func NewUserSeeder() *UserSeeder {
+func NewUserSeeder() Seeder {
 	return &UserSeeder{}
 }
 
-type UserDataFormat struct {
-	Email    string
-	Password string
-	RoleID   int
+func (us UserSeeder) GetChildren() []Seeder {
+	return us.children
 }
 
-func (us UserSeeder) Seed(c context.Context, data_root_path string, db_url string, errStream chan error, logger logger.Interface) {
+func (us UserSeeder) AppendChildren(children ...Seeder) {
+	us.children = slices.Concat(us.children, children)
+}
+
+type UserDataFormat struct {
+	Email       string
+	Password    string
+	RoleID      int
+	SecurityKey string
+}
+
+func (us UserSeeder) Seed(c context.Context, data_root_path string, db *gorm.DB, errStream chan error, logger logger.Interface) {
 	log.Println("Starting user seeder")
-	db, err := gorm.Open(sqlite.Open(db_url), &gorm.Config{TranslateError: true, Logger: logger})
-	if err != nil {
-		errStream <- err
-	}
 
 	raw, err := os.ReadFile(data_root_path + "/users.json")
 	if err != nil {
@@ -49,12 +54,17 @@ func (us UserSeeder) Seed(c context.Context, data_root_path string, db_url strin
 		if err != nil {
 			errStream <- err
 		}
+		keyHash, err := bcrypt.GenerateFromPassword([]byte(val.SecurityKey), 10)
+		if err != nil {
+			errStream <- err
+		}
 		if err = gorm.G[models.User](db).Create(c, &models.User{
 			Email:        val.Email,
 			PasswordHash: string(passHash),
 			RoleID:       uint(val.RoleID),
 			IsBanned:     false,
 			LastLogin:    time.Now(),
+			SecurityKey:  string(keyHash),
 		}); err != nil {
 			if !errors.Is(err, gorm.ErrDuplicatedKey) {
 				errStream <- err

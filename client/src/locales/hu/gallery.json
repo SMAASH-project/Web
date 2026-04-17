@@ -1,0 +1,11 @@
+{
+  "title": "Galéria",
+  "subtitle": "Karakterek és eredeti zenei anyag",
+  "tabs": {
+    "characters": "Karakterek",
+    "ost": "OST"
+  },
+  "noCharacters": "Még nincsenek karakterek",
+  "noTracks": "Még nincsenek számok",
+  "tracklist": "Számlista"
+}

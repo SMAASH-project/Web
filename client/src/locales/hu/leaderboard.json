@@ -1,0 +1,35 @@
+{
+  "title": "Ranglétra",
+  "subtitle": "Közösségi statisztikák és legjobb teljesítők",
+  "tabs": {
+    "all": "Összes",
+    "wins": "Győzelmek",
+    "active": "Aktív",
+    "levels": "Pályák",
+    "items": "Karakterek"
+  },
+  "panels": {
+    "winLeaderboard": "Győzelmi ranglétra",
+    "mostActivePlayers": "Legaktívabb játékosok",
+    "mostPlayedLevels": "Legtöbbet játszott pályák",
+    "mostPurchasedItems": "Legtöbbet vásárolt karakterek"
+  },
+  "podium": {
+    "runnersUp": "Továbbjutók",
+    "fullRankings": "Teljes rangsor"
+  },
+  "statBar": {
+    "topWinner": "Legjobb győztes",
+    "mostActive": "Legaktívabb",
+    "hottestLevel": "Legnépszerűbb pálya",
+    "bestSeller": "Legkelendőbb"
+  },
+  "search": "Keresés...",
+  "noData": "Még nincs adat",
+  "stats": {
+    "wins": "Gy",
+    "matches": "meccs",
+    "plays": "játék",
+    "sales": "eladás"
+  }
+}

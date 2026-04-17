@@ -1,39 +1,55 @@
 package database
 
 import (
+	"io"
 	"log"
 	"os"
 	"smaash-web/internal/models"
 
-	"gorm.io/driver/sqlite"
+	"github.com/glebarez/sqlite"
+	"gopkg.in/natefinch/lumberjack.v2"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 
 	_ "github.com/joho/godotenv/autoload"
 )
 
-type GormDBConn struct {
-	db *gorm.DB
-}
+func NewGormDBConn() *gorm.DB {
+	db_url := os.Getenv("DB_URL")
+	if db_url == "" {
+		db_url = "test.db"
+	}
 
-func NewGormDBConn() *GormDBConn {
-	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_URL")), &gorm.Config{TranslateError: true})
+	logger := logger.New(
+		log.New(io.MultiWriter(&lumberjack.Logger{
+			Filename:   "./logs/gorm.log",
+			MaxSize:    100,
+			MaxAge:     30,
+			MaxBackups: 10,
+		}, os.Stdout), "/r/n", log.LstdFlags),
+		logger.Config{
+			LogLevel: logger.Info,
+		},
+	)
+
+	db, err := gorm.Open(sqlite.Open(db_url), &gorm.Config{
+		TranslateError: true,
+		Logger:         logger,
+	})
 	if err != nil {
 		log.Panicf("Failed to connect to database: %v", err)
 	}
 
-	return &GormDBConn{db: db}
-}
-
-func (g *GormDBConn) Init() *gorm.DB {
-	err := g.db.SetupJoinTable(&models.Match{}, "Players", &models.MatchParticipation{})
+	err = db.SetupJoinTable(&models.Match{}, "Players", &models.MatchParticipation{})
 	if err != nil {
 		log.Panicf("Failed to create many to many connection in database: %v", err)
 	}
-	err = g.db.SetupJoinTable(&models.PlayerProfile{}, "Matches", &models.MatchParticipation{})
+	err = db.SetupJoinTable(&models.PlayerProfile{}, "Matches", &models.MatchParticipation{})
 	if err != nil {
 		log.Panicf("Failed to create many to many connection in database: %v", err)
 	}
 
-	AutoMigrate(g.db)
-	return g.db
+	AutoMigrate(db)
+
+	return db
 }
