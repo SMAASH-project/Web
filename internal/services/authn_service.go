@@ -128,6 +128,5 @@ func (a AuthenticationService) ChangePassword(c context.Context, userID uint, ne
 		return nil, err
 	}
 
-	newKeyHashString := string(newKeyHash)
-	return &newKeyHashString, nil
+	return &newKey, nil
 }

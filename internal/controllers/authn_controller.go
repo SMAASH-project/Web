@@ -141,7 +141,6 @@ func (a AuthnController) Logout(c *gin.Context) {
 
 func (a AuthnController) ChangePassword(c *gin.Context) {
 	path := c.Request.URL.Path
-	id, _ := c.Get("id")
 
 	var body dtos.PasswordChangeDTO
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -149,12 +148,7 @@ func (a AuthnController) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	if id.(uint) != body.ID {
-		c.JSON(http.StatusBadRequest, dtos.NewErrResp("ID from url doesn't match ID from request body", path))
-		return
-	}
-
-	newKey, err := a.authService.ChangePassword(c.Request.Context(), id.(uint), body.NewPassword, body.SecurityKey)
+	newKey, err := a.authService.ChangePassword(c.Request.Context(), body.ID, body.NewPassword, body.SecurityKey)
 	if err != nil {
 		if errors.Is(err, services.ErrSecurityKeyInvalid) {
 			c.JSON(http.StatusUnauthorized, dtos.NewErrResp(err.Error(), path))
