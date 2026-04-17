@@ -10,21 +10,6 @@ interface Props {
   showBokeh?: boolean;
 }
 
-const KEYFRAMES = `
-@keyframes sakura-fall {
-  0%   { transform: translateY(-60px) translateX(0px) rotate(0deg) scale(1); opacity: 0; }
-  5%   { opacity: 1; }
-  90%  { opacity: 0.85; }
-  100% { transform: translateY(110vh) translateX(var(--drift)) rotate(var(--rot-end)) scale(0.7); opacity: 0; }
-}
-@keyframes sakura-sway {
-  0%   { margin-left: 0px; }
-  25%  { margin-left: var(--sway); }
-  75%  { margin-left: calc(var(--sway) * -0.6); }
-  100% { margin-left: 0px; }
-}
-`;
-
 const PETAL_SHAPES = [
   "60% 40% 55% 45% / 50% 60% 40% 50%",
   "50% 50% 30% 70% / 60% 40% 60% 40%",
@@ -67,53 +52,49 @@ export const SakuraBackground = memo(function SakuraBackground({
   );
 
   return (
-    <>
-      <style>{KEYFRAMES}</style>
+    <div
+      className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 overflow-hidden`}
+    >
+      {showPetals &&
+        petals.map((p, i) => (
+          <div
+            key={i}
+            className="absolute -top-15 blur-[0.4px] will-change-[transform,opacity]"
+            style={{
+              left: `${p.left}vw`,
+              width: `${p.size}px`,
+              height: `${p.size * 0.85}px`,
+              background: p.color,
+              borderRadius: p.borderRadius,
+              opacity: p.opacity,
+              transform: `rotate(${p.rotate}deg)`,
+              ["--drift" as string]: `${p.drift}px`,
+              ["--rot-end" as string]: `${p.rotEnd}deg`,
+              ["--sway" as string]: `${p.sway}px`,
+              animation:
+                `sakura-fall ${p.duration}s ${p.delay}s linear infinite, ` +
+                `sakura-sway ${p.duration * 0.6}s ${p.delay}s ease-in-out infinite`,
+              animationPlayState: paused ? "paused" : "running",
+            }}
+          />
+        ))}
 
-      <div
-        className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 overflow-hidden`}
-      >
-        {showPetals &&
-          petals.map((p, i) => (
-            <div
-              key={i}
-              className="absolute -top-15 blur-[0.4px] will-change-[transform,opacity]"
-              style={{
-                left: `${p.left}vw`,
-                width: `${p.size}px`,
-                height: `${p.size * 0.85}px`,
-                background: p.color,
-                borderRadius: p.borderRadius,
-                opacity: p.opacity,
-                transform: `rotate(${p.rotate}deg)`,
-                ["--drift" as string]: `${p.drift}px`,
-                ["--rot-end" as string]: `${p.rotEnd}deg`,
-                ["--sway" as string]: `${p.sway}px`,
-                animation:
-                  `sakura-fall ${p.duration}s ${p.delay}s linear infinite, ` +
-                  `sakura-sway ${p.duration * 0.6}s ${p.delay}s ease-in-out infinite`,
-                animationPlayState: paused ? "paused" : "running",
-              }}
-            />
-          ))}
-
-        {/* Bokeh circles */}
-        {showBokeh &&
-          Array.from({ length: 12 }, (_, i) => (
-            <div
-              key={`bokeh-${i}`}
-              className="absolute rounded-full blur-[18px]"
-              style={{
-                top: `${(i * 43 + 15) % 90}%`,
-                left: `${(i * 67 + 8) % 95}%`,
-                width: `${20 + (i % 5) * 15}px`,
-                height: `${20 + (i % 5) * 15}px`,
-                background: colors[i % colors.length],
-                opacity: 0.08 + (i % 4) * 0.03,
-              }}
-            />
-          ))}
-      </div>
-    </>
+      {/* Bokeh circles */}
+      {showBokeh &&
+        Array.from({ length: 12 }, (_, i) => (
+          <div
+            key={`bokeh-${i}`}
+            className="absolute rounded-full blur-[18px]"
+            style={{
+              top: `${(i * 43 + 15) % 90}%`,
+              left: `${(i * 67 + 8) % 95}%`,
+              width: `${20 + (i % 5) * 15}px`,
+              height: `${20 + (i % 5) * 15}px`,
+              background: colors[i % colors.length],
+              opacity: 0.08 + (i % 4) * 0.03,
+            }}
+          />
+        ))}
+    </div>
   );
 });

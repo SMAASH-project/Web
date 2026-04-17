@@ -10,49 +10,6 @@ interface Props {
   showHighlight?: boolean;
 }
 
-const KEYFRAMES = `
-@keyframes lava-blob-1 {
-  0%   { transform: translate(0%,   0%)   scale(1);    border-radius: 62% 38% 56% 44% / 52% 62% 38% 48%; }
-  20%  { transform: translate(7%,  -22%)  scale(1.14); border-radius: 38% 62% 44% 56% / 62% 38% 56% 44%; }
-  45%  { transform: translate(-9%,  15%)  scale(0.88); border-radius: 56% 44% 62% 38% / 44% 56% 48% 52%; }
-  70%  { transform: translate(14%, -8%)   scale(1.10); border-radius: 44% 56% 38% 62% / 56% 44% 62% 38%; }
-  100% { transform: translate(0%,   0%)   scale(1);    border-radius: 62% 38% 56% 44% / 52% 62% 38% 48%; }
-}
-@keyframes lava-blob-2 {
-  0%   { transform: translate(0%,   0%)   scale(1);    border-radius: 46% 54% 52% 48% / 62% 38% 52% 48%; }
-  28%  { transform: translate(-12%, 18%)  scale(1.18); border-radius: 62% 38% 44% 56% / 38% 62% 56% 44%; }
-  58%  { transform: translate(9%,  -14%)  scale(0.84); border-radius: 38% 62% 56% 44% / 56% 44% 38% 62%; }
-  100% { transform: translate(0%,   0%)   scale(1);    border-radius: 46% 54% 52% 48% / 62% 38% 52% 48%; }
-}
-@keyframes lava-blob-3 {
-  0%   { transform: translate(0%,   0%)   scale(1);    border-radius: 52% 48% 38% 62% / 46% 56% 62% 38%; }
-  38%  { transform: translate(15%, -24%)  scale(1.24); border-radius: 38% 62% 62% 38% / 62% 38% 38% 62%; }
-  68%  { transform: translate(-11%, 10%)  scale(0.90); border-radius: 62% 38% 38% 62% / 38% 62% 62% 38%; }
-  100% { transform: translate(0%,   0%)   scale(1);    border-radius: 52% 48% 38% 62% / 46% 56% 62% 38%; }
-}
-@keyframes lava-blob-4 {
-  0%   { transform: translate(0%,   0%)   scale(1);    border-radius: 56% 44% 52% 48% / 52% 48% 44% 56%; }
-  33%  { transform: translate(-16%, 12%)  scale(1.13); border-radius: 44% 56% 62% 38% / 62% 38% 56% 44%; }
-  63%  { transform: translate(10%, -18%)  scale(0.83); border-radius: 62% 38% 44% 56% / 38% 62% 52% 48%; }
-  100% { transform: translate(0%,   0%)   scale(1);    border-radius: 56% 44% 52% 48% / 52% 48% 44% 56%; }
-}
-@keyframes lava-blob-5 {
-  0%   { transform: translate(0%,  0%)   scale(1);    border-radius: 52% 48% 56% 44% / 56% 44% 52% 48%; }
-  42%  { transform: translate(7%,  25%)  scale(1.20); border-radius: 44% 56% 46% 54% / 44% 56% 56% 44%; }
-  100% { transform: translate(0%,  0%)   scale(1);    border-radius: 52% 48% 56% 44% / 56% 44% 52% 48%; }
-}
-@keyframes lava-blob-6 {
-  0%   { transform: translate(0%,   0%)   scale(1);    border-radius: 62% 38% 52% 48% / 52% 62% 44% 56%; }
-  48%  { transform: translate(-12%,-22%)  scale(1.26); border-radius: 38% 62% 62% 38% / 62% 38% 56% 44%; }
-  100% { transform: translate(0%,   0%)   scale(1);    border-radius: 62% 38% 52% 48% / 52% 62% 44% 56%; }
-}
-@keyframes highlight-sweep {
-  0%   { opacity: 0.10; transform: translateX(-60%) skewX(-18deg); }
-  40%  { opacity: 0.25; transform: translateX(0%)   skewX(-18deg); }
-  100% { opacity: 0.10; transform: translateX(60%)  skewX(-18deg); }
-}
-`;
-
 const BLOB_CONFIG = [
   {
     pos: "left-[8%]  top-[55%]",
@@ -110,67 +67,63 @@ export const LavaLampBackground = memo(function LavaLampBackground({
   const blobColors = [colorLeft, colorMiddle, colorRight, colorLeft, colorRight, colorMiddle];
 
   return (
-    <>
-      <style>{KEYFRAMES}</style>
-
+    <div
+      className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 overflow-hidden`}
+    >
+      {/* Warm base glow at bottom */}
       <div
-        className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 overflow-hidden`}
-      >
-        {/* Warm base glow at bottom */}
-        <div
-          className="absolute inset-x-0 bottom-0 h-[30%] opacity-35"
-          style={{
-            background: `radial-gradient(ellipse 80% 100% at 50% 100%, ${colorLeft}aa, transparent)`,
-          }}
-        />
+        className="absolute inset-x-0 bottom-0 h-[30%] opacity-35"
+        style={{
+          background: `radial-gradient(ellipse 80% 100% at 50% 100%, ${colorLeft}aa, transparent)`,
+        }}
+      />
 
-        {/* Blobs */}
-        {showBlobs &&
-          BLOB_CONFIG.map((cfg, i) => (
-            <div
-              key={i}
-              className={[
-                "absolute will-change-[transform,border-radius]",
-                cfg.pos,
-                cfg.size,
-                cfg.blur,
-                cfg.opacity,
-                cfg.anim,
-              ].join(" ")}
-              style={{
-                background: blobColors[i],
-                // Outer glow
-                boxShadow: `0 0 80px 30px ${blobColors[i]}88`,
-                animationPlayState: paused ? "paused" : "running",
-              }}
-            >
-              {/* Inner shimmer highlight */}
-              {showHighlight && (
+      {/* Blobs */}
+      {showBlobs &&
+        BLOB_CONFIG.map((cfg, i) => (
+          <div
+            key={i}
+            className={[
+              "absolute will-change-[transform,border-radius]",
+              cfg.pos,
+              cfg.size,
+              cfg.blur,
+              cfg.opacity,
+              cfg.anim,
+            ].join(" ")}
+            style={{
+              background: blobColors[i],
+              // Outer glow
+              boxShadow: `0 0 80px 30px ${blobColors[i]}88`,
+              animationPlayState: paused ? "paused" : "running",
+            }}
+          >
+            {/* Inner shimmer highlight */}
+            {showHighlight && (
+              <div
+                className="absolute inset-0 overflow-hidden rounded-[inherit]"
+                style={{
+                  animation: "highlight-sweep 4s ease-in-out infinite",
+                  animationPlayState: paused ? "paused" : "running",
+                }}
+              >
                 <div
-                  className="absolute inset-0 overflow-hidden rounded-[inherit]"
+                  className="absolute top-[8%] left-[-30%] h-[55%] w-[45%] rounded-full"
                   style={{
-                    animation: "highlight-sweep 4s ease-in-out infinite",
-                    animationPlayState: paused ? "paused" : "running",
+                    background: "rgba(255,255,255,0.28)",
+                    filter: "blur(12px)",
                   }}
-                >
-                  <div
-                    className="absolute top-[8%] left-[-30%] h-[55%] w-[45%] rounded-full"
-                    style={{
-                      background: "rgba(255,255,255,0.28)",
-                      filter: "blur(12px)",
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-          ))}
+                />
+              </div>
+            )}
+          </div>
+        ))}
 
-        {/* Top-center cool highlight — glass-ceiling effect */}
-        <div
-          className="absolute top-0 left-[20%] h-[18%] w-[60%] opacity-20 blur-2xl"
-          style={{ background: "rgba(255,255,255,0.6)" }}
-        />
-      </div>
-    </>
+      {/* Top-center cool highlight — glass-ceiling effect */}
+      <div
+        className="absolute top-0 left-[20%] h-[18%] w-[60%] opacity-20 blur-2xl"
+        style={{ background: "rgba(255,255,255,0.6)" }}
+      />
+    </div>
   );
 });

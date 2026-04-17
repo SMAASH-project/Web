@@ -29,19 +29,12 @@ import {
 } from "@/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 import { ImageCropDialog } from "@/components/ImageCropDialog";
-
-const RARITIES = ["Common", "Uncommon", "Rare", "Epic", "Legendary"] as const;
-const COMBAT_TYPES = ["Melee", "Ranged"] as const;
-
-const RARITY_COLORS: Record<string, string> = {
-  Common: "#9ca3af",
-  Uncommon: "#10b981",
-  Rare: "#3b82f6",
-  Epic: "#8b5cf6",
-  Legendary: "#f59e0b",
-};
-
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+import {
+  RARITIES,
+  COMBAT_TYPES,
+  RARITY_COLORS,
+  ACCEPTED_IMAGE_TYPES,
+} from "@/lib/constants/itemConstants";
 
 interface CreateItemDialogProps {
   onCreate: (data: {

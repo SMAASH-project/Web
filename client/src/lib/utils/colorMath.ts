@@ -82,3 +82,18 @@ export function toRgbaColor(hex: string, alpha = 1): string {
   const { r, g, b } = hexToRgb(hex);
   return `rgba(${r}, ${g}, ${b}, ${safeAlpha})`;
 }
+
+/**
+ * Convert a hex color to an [r, g, b] tuple — used by canvas-based backgrounds.
+ */
+export function hexToRgbTuple(hex: string): [number, number, number] {
+  const { r, g, b } = hexToRgb(hex);
+  return [r, g, b];
+}
+
+/**
+ * Linear interpolation between two numbers.
+ */
+export function lerp(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
+}

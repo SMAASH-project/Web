@@ -1,4 +1,5 @@
 import { memo, useEffect, useRef } from "react";
+import { hexToRgbTuple } from "@/lib/utils";
 
 interface Props {
   colorLeft: string;
@@ -23,11 +24,6 @@ const MAX_RIPPLES = 22;
 const SPAWN_INTERVAL = 280; // ms between new ripple spawns
 
 // Parse a hex color string into [r, g, b]
-function hexToRgb(hex: string): [number, number, number] {
-  const n = parseInt(hex.replace("#", ""), 16);
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-}
-
 export const PuddleRipplesBackground = memo(function PuddleRipplesBackground({
   colorRight,
   paused = false,
@@ -49,7 +45,7 @@ export const PuddleRipplesBackground = memo(function PuddleRipplesBackground({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const [r, g, b] = hexToRgb(colorRight);
+    const [r, g, b] = hexToRgbTuple(colorRight);
 
     // Resize canvas to fill the window
     const resize = () => {

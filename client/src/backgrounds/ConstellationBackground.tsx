@@ -1,4 +1,5 @@
 import { memo, useEffect, useRef } from "react";
+import { hexToRgbTuple } from "@/lib/utils";
 
 interface Props {
   colorLeft: string;
@@ -30,11 +31,6 @@ interface ConstellationLine {
   cycleSpeed: number;
 }
 
-function hexToRgb(hex: string): [number, number, number] {
-  const c = hex.replace("#", "");
-  return [parseInt(c.slice(0, 2), 16), parseInt(c.slice(2, 4), 16), parseInt(c.slice(4, 6), 16)];
-}
-
 const STAR_COUNT = 110;
 const MIN_CONNECT_DIST = 80;
 const MAX_CONNECT_DIST = 190;
@@ -63,9 +59,9 @@ export const ConstellationBackground = memo(function ConstellationBackground({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const [lr, lg, lb] = hexToRgb(colorLeft);
-    const [mr, mg, mb] = hexToRgb(colorMiddle);
-    const [rr, rg, rb] = hexToRgb(colorRight);
+    const [lr, lg, lb] = hexToRgbTuple(colorLeft);
+    const [mr, mg, mb] = hexToRgbTuple(colorMiddle);
+    const [rr, rg, rb] = hexToRgbTuple(colorRight);
 
     let animId: number;
     let lastTime = performance.now();

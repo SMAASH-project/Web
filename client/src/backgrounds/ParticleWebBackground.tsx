@@ -1,4 +1,5 @@
 import { memo, useEffect, useRef } from "react";
+import { hexToRgbTuple, lerp } from "@/lib/utils";
 
 interface Props {
   colorLeft: string;
@@ -8,26 +9,6 @@ interface Props {
   preview?: boolean;
   showParticles?: boolean;
   showConnections?: boolean;
-}
-
-function hexToRgb(hex: string): [number, number, number] {
-  const c = hex.replace("#", "");
-  const full =
-    c.length === 3
-      ? c
-          .split("")
-          .map((x) => x + x)
-          .join("")
-      : c;
-  return [
-    parseInt(full.slice(0, 2), 16),
-    parseInt(full.slice(2, 4), 16),
-    parseInt(full.slice(4, 6), 16),
-  ];
-}
-
-function lerp(a: number, b: number, t: number) {
-  return a + (b - a) * t;
 }
 
 interface Particle {
@@ -62,9 +43,9 @@ export const ParticleWebBackground = memo(function ParticleWebBackground({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const [lr, lg, lb] = hexToRgb(colorLeft);
-    const [mr, mg, mb] = hexToRgb(colorMiddle);
-    const [rr, rg, rb] = hexToRgb(colorRight);
+    const [lr, lg, lb] = hexToRgbTuple(colorLeft);
+    const [mr, mg, mb] = hexToRgbTuple(colorMiddle);
+    const [rr, rg, rb] = hexToRgbTuple(colorRight);
 
     // Interpolate particle color from palette based on index
     function particleColor(i: number, total: number): [number, number, number] {
