@@ -315,7 +315,7 @@ function OstPlayer({
             onPointerUp={handleVolumeUp}
           >
             <div
-              className="absolute top-0 left-0 h-full rounded-full bg-amber-400 transition-all"
+              className="absolute top-0 left-0 h-full rounded-full bg-amber-400"
               style={{ width: `${(muted ? 0 : volume) * 100}%` }}
             />
           </div>
