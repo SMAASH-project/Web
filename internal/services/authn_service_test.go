@@ -14,6 +14,7 @@ import (
 	"github.com/glebarez/sqlite"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -36,13 +37,17 @@ func TestSignup(t *testing.T) {
 	database.AutoMigrate(mockDBConn)
 	pass := "test1234"
 	newUser := &models.User{Email: "test@example.com", PasswordHash: pass, RoleID: 2}
-	err := authService.SignUp(context.Background(), newUser)
+	key, err := authService.SignUp(context.Background(), newUser)
 
 	assert.Nil(t, err, "Signup shouldn't return an error")
 	assert.NotEqual(t, newUser.ID, uint(0), "Signed up user should have a non-zero id")
 	assert.NotEqual(t, pass, newUser.PasswordHash, "Signed up user should have a hashed password")
 
-	err = authService.SignUp(context.Background(), newUser)
+	err = bcrypt.CompareHashAndPassword([]byte(newUser.SecurityKey), []byte(*key))
+
+	assert.Nil(t, err, "Signed up user should have a correctly encrypted security key")
+
+	_, err = authService.SignUp(context.Background(), newUser)
 	assert.NotNil(t, err, "Signing up existing user should return an error")
 }
 
@@ -60,7 +65,7 @@ func TestLogin(t *testing.T) {
 
 	correctPass := "password1234"
 	correctUser := &models.User{Email: "test@test.com", PasswordHash: correctPass, RoleID: 2}
-	err = authService.SignUp(context.Background(), correctUser)
+	_, err = authService.SignUp(context.Background(), correctUser)
 
 	// Wrong password
 	token, user, err = authService.Login(context.Background(), &models.User{Email: correctUser.Email, PasswordHash: "wrongpass1234"})

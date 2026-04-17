@@ -6,6 +6,7 @@ import (
 	"os"
 	"smaash-web/internal/models"
 	"smaash-web/internal/repository"
+	"smaash-web/internal/utils"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -13,8 +14,9 @@ import (
 )
 
 type Authentication interface {
-	SignUp(context.Context, *models.User) error
+	SignUp(context.Context, *models.User) (*string, error)
 	Login(context.Context, *models.User) (*string, *models.User, error)
+	ChangePassword(context.Context, uint, string, string) (*string, error)
 }
 
 type AuthenticationService struct {
@@ -26,21 +28,30 @@ func NewAuthenticationService(userRepo repository.UserRepository) Authentication
 }
 
 var (
-	ErrPasswordComparisonFailed = errors.New("Password incorrect")
-	ErrUserBanned               = errors.New("User is banned")
+	ErrPasswordIncorrect  = errors.New("Password incorrect")
+	ErrUserBanned         = errors.New("User is banned")
+	ErrSecurityKeyInvalid = errors.New("Provided security key is invalid")
 )
 
-func (a AuthenticationService) SignUp(c context.Context, u *models.User) error {
+func (a AuthenticationService) SignUp(c context.Context, u *models.User) (*string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(u.PasswordHash), 10)
 	if err != nil {
-		return err
+		return nil, err
 	}
+
+	rawKey := utils.GenerateSecurityKey()
+	hashedKey, err := bcrypt.GenerateFromPassword([]byte(rawKey), 10)
+	if err != nil {
+		return nil, err
+	}
+
 	u.PasswordHash = string(hash)
+	u.SecurityKey = string(hashedKey)
 	err = a.userRepo.Create(c, u)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return &rawKey, nil
 }
 
 func (a AuthenticationService) Login(c context.Context, u *models.User) (*string, *models.User, error) {
@@ -65,7 +76,7 @@ func (a AuthenticationService) Login(c context.Context, u *models.User) (*string
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(u.PasswordHash))
 	if err != nil {
-		return nil, nil, ErrPasswordComparisonFailed
+		return nil, nil, ErrPasswordIncorrect
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -88,4 +99,34 @@ func (a AuthenticationService) Login(c context.Context, u *models.User) (*string
 	}
 
 	return &tokenString, &user, nil
+}
+
+func (a AuthenticationService) ChangePassword(c context.Context, userID uint, newPass string, securityKey string) (*string, error) {
+	user, err := a.userRepo.ReadByID(c, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.SecurityKey), []byte(securityKey)); err != nil {
+		return nil, ErrSecurityKeyInvalid
+	}
+
+	newHash, err := bcrypt.GenerateFromPassword([]byte(newPass), 10)
+	if err != nil {
+		return nil, err
+	}
+
+	newKey := utils.GenerateSecurityKey()
+	newKeyHash, err := bcrypt.GenerateFromPassword([]byte(newKey), 10)
+	if err != nil {
+		return nil, err
+	}
+
+	user.PasswordHash = string(newHash)
+	user.SecurityKey = string(newKeyHash)
+	if err := a.userRepo.Update(c, user); err != nil {
+		return nil, err
+	}
+
+	return &newKey, nil
 }
