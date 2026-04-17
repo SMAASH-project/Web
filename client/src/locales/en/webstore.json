@@ -1,8 +1,8 @@
 {
   "title": "Webstore",
   "subtitle": "Unlock characters",
-  "searchPlaceholder": "Search by item name…",
-  "noResults": "No items found.",
+  "searchPlaceholder": "Search by character name…",
+  "noResults": "No characters found.",
   "filters": {
     "type": "Type",
     "rarity": "Rarity",
@@ -25,34 +25,43 @@
   "item": {
     "unlock": "Unlock",
     "unlocking": "Unlocking…",
-    "owned": "Owned"
+    "owned": "Owned",
+    "cantAfford": "Not enough coins"
   },
   "create": {
-    "triggerButton": "Create Item",
-    "title": "Create New Item",
-    "description": "Add a new item to the webstore.",
+    "triggerButton": "Create Character",
+    "title": "Create New Character",
+    "description": "Add a new character to the webstore.",
     "name": "Name",
-    "namePlaceholder": "Item name",
+    "namePlaceholder": "Character name",
     "rarity": "Rarity",
     "combatType": "Combat Type",
     "descriptionLabel": "Description",
-    "descriptionPlaceholder": "Item description",
+    "descriptionPlaceholder": "Character description",
     "price": "Price",
     "image": "Character Image",
     "imagePlaceholder": "Click to upload (JPEG, PNG, WebP, GIF)",
     "cancel": "Cancel",
-    "submit": "Create Item",
+    "submit": "Create Character",
     "creating": "Creating…"
   },
+  "edit": {
+    "title": "Edit Character",
+    "description": "Update the character's details.",
+    "replaceImage": "Replace image",
+    "submit": "Save changes",
+    "saving": "Saving…"
+  },
   "toast": {
-    "unlocked": "Item unlocked!",
-    "created": "Item created.",
-    "deleted": "Item deleted.",
-    "deleteFailed": "Failed to delete item."
+    "unlocked": "Character unlocked!",
+    "created": "Character created.",
+    "updated": "Character updated.",
+    "deleted": "Character deleted.",
+    "deleteFailed": "Failed to delete character."
   },
   "delete": {
     "confirm": "Confirm Deletion",
-    "description": "Are you sure you want to delete this item? This action cannot be undone.",
+    "description": "Are you sure you want to delete this character? This action cannot be undone.",
     "cancel": "Cancel",
     "confirm_action": "Confirm"
   }

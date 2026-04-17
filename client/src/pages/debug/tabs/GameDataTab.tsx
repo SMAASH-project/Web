@@ -1,18 +1,12 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSettings } from "@/pages/settings/SettingsContext";
-import {
-  getDialogClasses,
-  getDialogFooterClasses,
-  getTextShadow,
-  getBackgroundClasses,
-} from "@/lib/utils";
-import { StyledSelect } from "@/components/ui/styled-select";
+import { getDialogClasses, getDialogFooterClasses, getTextShadow } from "@/lib/utils";
 import {
   Loader2,
+  Search,
   Sword,
   Layers,
-  ShoppingBag,
   Plus,
   Pencil,
   Trash2,
@@ -23,7 +17,6 @@ import {
   ShieldBan,
   ArrowUpCircle,
   ArrowDownCircle,
-  Search,
 } from "lucide-react";
 import {
   Dialog,
@@ -36,18 +29,12 @@ import {
 import {
   useDebugCharactersQuery,
   useDebugLevelsQuery,
-  useDebugItemsQuery,
-  useCategoriesQuery,
-  useRaritiesQuery,
   useCreateCharacterMutation,
   useUpdateCharacterMutation,
   useDeleteCharacterMutation,
   useCreateLevelMutation,
   useUpdateLevelMutation,
   useDeleteLevelMutation,
-  useCreateItemMutation,
-  useUpdateItemMutation,
-  useDeleteItemMutation,
 } from "@/hooks/useDebug";
 import {
   useAdminUsersQuery,
@@ -91,7 +78,6 @@ export function GameDataTab({
   const dialogClass = getDialogClasses(useLiquidGlass, useDarkMode);
   const footerClass = getDialogFooterClasses(useLiquidGlass, useDarkMode);
   const textShadow = getTextShadow(useLiquidGlass, useDarkMode);
-  const bgClass = getBackgroundClasses(useLiquidGlass, useDarkMode, "strong");
   // ── Queries ──────────────────────────────────────────────────────────────
   const {
     data: characters = [],
@@ -103,9 +89,6 @@ export function GameDataTab({
     isLoading: levelsLoading,
     isError: levelsError,
   } = useDebugLevelsQuery();
-  const { data: items = [], isLoading: itemsLoading, isError: itemsError } = useDebugItemsQuery();
-  const { data: categories = [] } = useCategoriesQuery();
-  const { data: rarities = [] } = useRaritiesQuery();
   const { data: users = [], isLoading: usersLoading, isError: usersError } = useAdminUsersQuery();
 
   // ── Mutations ─────────────────────────────────────────────────────────────
@@ -117,28 +100,19 @@ export function GameDataTab({
   const updateLevel = useUpdateLevelMutation();
   const deleteLevel = useDeleteLevelMutation();
 
-  const createItem = useCreateItemMutation();
-  const updateItem = useUpdateItemMutation();
-  const deleteItem = useDeleteItemMutation();
-
   const banUser = useBanUserMutation();
   const unbanUser = useUnbanUserMutation();
   const promoteUser = usePromoteUserMutation();
   const demoteUser = useDemoteUserMutation();
 
   // ── Local state ───────────────────────────────────────────────────────────
-  const [itemSearch, setItemSearch] = useState("");
   const [userSearch, setUserSearch] = useState("");
 
   // Game content edit/create dialog
-  type Section = "character" | "level" | "item";
+  type Section = "character" | "level";
   const [editSection, setEditSection] = useState<Section | null>(null);
   const [editId, setEditId] = useState<number | null>(null);
   const [formName, setFormName] = useState("");
-  const [formDesc, setFormDesc] = useState("");
-  const [formPrice, setFormPrice] = useState("");
-  const [formRarityId, setFormRarityId] = useState("");
-  const [formCategoryIds, setFormCategoryIds] = useState<number[]>([]);
 
   // Delete confirm
   const [deleteTarget, setDeleteTarget] = useState<{
@@ -165,10 +139,6 @@ export function GameDataTab({
     setEditSection(section);
     setEditId(null);
     setFormName("");
-    setFormDesc("");
-    setFormPrice("");
-    setFormRarityId(rarities[0] ? String(rarities[0].id) : "");
-    setFormCategoryIds([]);
   };
 
   const openEdit = (section: Section, id: number) => {
@@ -180,17 +150,6 @@ export function GameDataTab({
     } else if (section === "level") {
       const l = levels.find((x) => x.id === id);
       setFormName(l?.name ?? "");
-    } else if (section === "item") {
-      const item = items.find((x) => x.id === id);
-      setFormName(item?.name ?? "");
-      setFormDesc(item?.description ?? "");
-      setFormPrice(String(item?.price ?? ""));
-      const rid = rarities.find((r) => r.name === item?.rarity)?.id;
-      setFormRarityId(rid ? String(rid) : "");
-      const catIds = (item?.categories ?? [])
-        .map((n) => categories.find((c) => c.name === n)?.id)
-        .filter(Boolean) as number[];
-      setFormCategoryIds(catIds);
     }
   };
 
@@ -198,11 +157,6 @@ export function GameDataTab({
     setEditSection(null);
     setEditId(null);
   };
-
-  const toggleCatId = (id: number) =>
-    setFormCategoryIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
 
   // ── Submit ────────────────────────────────────────────────────────────────
 
@@ -224,21 +178,6 @@ export function GameDataTab({
           await createLevel.mutateAsync({ name: formName });
           toast.success(t("toast.levelCreated"));
         }
-      } else if (editSection === "item") {
-        const payload = {
-          name: formName,
-          description: formDesc,
-          price: Number(formPrice) || 0,
-          rarity_id: Number(formRarityId) || 1,
-          category_ids: formCategoryIds,
-        };
-        if (editId !== null) {
-          await updateItem.mutateAsync({ id: editId, ...payload });
-          toast.success(t("toast.itemUpdated"));
-        } else {
-          await createItem.mutateAsync(payload);
-          toast.success(t("toast.itemCreated"));
-        }
       }
       closeDialog();
     } catch {
@@ -253,7 +192,6 @@ export function GameDataTab({
     try {
       if (deleteTarget.section === "character") await deleteChar.mutateAsync(deleteTarget.id);
       else if (deleteTarget.section === "level") await deleteLevel.mutateAsync(deleteTarget.id);
-      else if (deleteTarget.section === "item") await deleteItem.mutateAsync(deleteTarget.id);
       toast.success(t("toast.deleted"));
       setDeleteTarget(null);
     } catch {
@@ -303,10 +241,6 @@ export function GameDataTab({
 
   // ── Filtered data ─────────────────────────────────────────────────────────
 
-  const filteredItems = itemSearch
-    ? items.filter((x) => (x.name ?? "").toLowerCase().includes(itemSearch.toLowerCase()))
-    : items;
-
   const filteredUsers = userSearch
     ? users.filter(
         (u) =>
@@ -319,11 +253,8 @@ export function GameDataTab({
 
   const sectionTitle = (section: Section) => {
     if (section === "character") return "Character";
-    if (section === "level") return "Level";
-    return "Item";
+    return "Level";
   };
-
-  const isEditingItem = editSection === "item";
 
   // ── Sub-components helpers ────────────────────────────────────────────────
 
@@ -466,85 +397,6 @@ export function GameDataTab({
                     <button
                       type="button"
                       onClick={() => setDeleteTarget({ section: "level", id: l.id, label: l.name })}
-                      className="rounded p-0.5 text-red-400 hover:text-red-300"
-                    >
-                      <Trash2 size={9} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* ── Store Items ───────────────────────────────────────────────── */}
-        <div className={`flex flex-col gap-2 rounded-xl p-3 sm:col-span-2 ${panelBg}`}>
-          {cardHeader(
-            t("gameData.storeItems"),
-            <ShoppingBag size={11} />,
-            itemsLoading ? undefined : items.length,
-            () => openCreate("item"),
-          )}
-          {!itemsLoading && items.length > 0 && (
-            <div className="relative">
-              <Search
-                size={10}
-                className={`absolute top-1/2 left-2 -translate-y-1/2 ${subtextColor}`}
-              />
-              <input
-                type="text"
-                placeholder={t("gameData.searchItems")}
-                value={itemSearch}
-                onChange={(e) => setItemSearch(e.target.value)}
-                className={`w-full rounded-lg py-1.5 pr-2 pl-6 text-[10px] ${inputClass}`}
-              />
-            </div>
-          )}
-          {itemsLoading ? (
-            <div className="flex justify-center py-4">
-              <Loader2 size={14} className={`animate-spin ${subtextColor}`} />
-            </div>
-          ) : itemsError ? (
-            <p className="py-3 text-center text-xs text-red-400 opacity-70">{t("gameData.none")}</p>
-          ) : filteredItems.length === 0 ? (
-            <p className={`py-3 text-center text-xs opacity-40 ${subtextColor}`}>
-              {itemSearch ? t("gameData.noMatches") : t("gameData.none")}
-            </p>
-          ) : (
-            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
-              {filteredItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="group flex items-center gap-2 rounded-lg bg-current/5 px-2.5 py-1.5"
-                >
-                  <span className={`font-mono text-[10px] ${subtextColor} shrink-0`}>
-                    #{item.id}
-                  </span>
-                  <span className={`flex-1 truncate text-xs font-medium ${textColor}`}>
-                    {item.name}
-                  </span>
-                  <span
-                    className="shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium"
-                    style={{
-                      color: RARITY_COLORS[item.rarity] ?? "#9ca3af",
-                      backgroundColor: `${RARITY_COLORS[item.rarity] ?? "#9ca3af"}20`,
-                    }}
-                  >
-                    {item.rarity}
-                  </span>
-                  <div className="flex shrink-0 gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-                    <button
-                      type="button"
-                      onClick={() => openEdit("item", item.id)}
-                      className={`rounded p-0.5 ${subtextColor} hover:opacity-80`}
-                    >
-                      <Pencil size={9} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setDeleteTarget({ section: "item", id: item.id, label: item.name })
-                      }
                       className="rounded p-0.5 text-red-400 hover:text-red-300"
                     >
                       <Trash2 size={9} />
@@ -746,89 +598,6 @@ export function GameDataTab({
                 autoFocus
               />
             </div>
-
-            {isEditingItem && (
-              <>
-                <div className="flex flex-col gap-1">
-                  <label className={`text-[10px] ${subtextColor}`}>
-                    {t("gameData.dialogDescription")}
-                  </label>
-                  <input
-                    type="text"
-                    value={formDesc}
-                    onChange={(e) => setFormDesc(e.target.value)}
-                    className={`rounded-lg px-2.5 py-1.5 text-xs ${inputClass}`}
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className={`text-[10px] ${subtextColor}`}>
-                    {t("gameData.dialogPrice")}
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={formPrice}
-                    onChange={(e) => setFormPrice(e.target.value)}
-                    className={`rounded-lg px-2.5 py-1.5 text-xs ${inputClass}`}
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className={`text-[10px] ${subtextColor}`}>
-                    {t("gameData.dialogRarity")}
-                  </label>
-                  <StyledSelect
-                    value={formRarityId}
-                    options={["", ...rarities.map((r) => String(r.id))]}
-                    onChange={setFormRarityId}
-                    inputClass={`py-1.5 text-xs ${inputClass}`}
-                    textColor={textColor}
-                    bgClass={bgClass}
-                    renderOption={(id) => {
-                      if (!id)
-                        return (
-                          <span className="opacity-50">{t("gameData.dialogSelectRarity")}</span>
-                        );
-                      const r = rarities.find((x) => String(x.id) === id);
-                      return r ? (
-                        <>
-                          <span
-                            className="inline-block h-2 w-2 shrink-0 rounded-full"
-                            style={{ backgroundColor: RARITY_COLORS[r.name] ?? "#9ca3af" }}
-                          />
-                          {r.name}
-                        </>
-                      ) : (
-                        id
-                      );
-                    }}
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className={`text-[10px] ${subtextColor}`}>
-                    {t("gameData.dialogCategories")}
-                  </label>
-                  <div className="flex flex-wrap gap-1">
-                    {categories.map((c) => {
-                      const active = formCategoryIds.includes(c.id);
-                      return (
-                        <button
-                          key={c.id}
-                          type="button"
-                          onClick={() => toggleCatId(c.id)}
-                          className={`rounded-full px-2 py-0.5 text-[10px] font-medium transition-colors ${
-                            active
-                              ? "bg-violet-500/30 text-violet-300"
-                              : `bg-current/10 ${subtextColor} hover:bg-current/20`
-                          }`}
-                        >
-                          {c.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </>
-            )}
           </div>
           <DialogFooter className={footerClass}>
             <button

@@ -1,4 +1,5 @@
 import { memo, useEffect, useRef, useState } from "react";
+import { hexToRgbTuple } from "@/lib/utils";
 
 interface Props {
   colorLeft: string;
@@ -10,40 +11,6 @@ interface Props {
   showLightning?: boolean;
   showClouds?: boolean;
   showGroundShimmer?: boolean;
-}
-
-const CLOUD_CSS = `
-@keyframes cloud-drift-1 {
-  0%   { transform: translateX(-4%); }
-  50%  { transform: translateX(4%);  }
-  100% { transform: translateX(-4%); }
-}
-@keyframes cloud-drift-2 {
-  0%   { transform: translateX(5%);  }
-  50%  { transform: translateX(-3%); }
-  100% { transform: translateX(5%);  }
-}
-@keyframes cloud-drift-3 {
-  0%   { transform: translateX(-2%); }
-  50%  { transform: translateX(6%);  }
-  100% { transform: translateX(-2%); }
-}
-`;
-
-function hexToRgb(hex: string): [number, number, number] {
-  const c = hex.replace("#", "");
-  const full =
-    c.length === 3
-      ? c
-          .split("")
-          .map((x) => x + x)
-          .join("")
-      : c;
-  return [
-    parseInt(full.slice(0, 2), 16),
-    parseInt(full.slice(2, 4), 16),
-    parseInt(full.slice(4, 6), 16),
-  ];
 }
 
 interface RainDrop {
@@ -91,9 +58,9 @@ export const StormBackground = memo(function StormBackground({
   const boltRef = useRef<BoltSegment[] | null>(null);
   const boltAlphaRef = useRef(0);
 
-  const [lr, lg, lb] = hexToRgb(colorLeft);
-  const [mr, mg, mb] = hexToRgb(colorMiddle);
-  const [rr, rg, rb] = hexToRgb(colorRight);
+  const [lr, lg, lb] = hexToRgbTuple(colorLeft);
+  const [mr, mg, mb] = hexToRgbTuple(colorMiddle);
+  const [rr, rg, rb] = hexToRgbTuple(colorRight);
 
   // ── Rain canvas ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -255,71 +222,67 @@ export const StormBackground = memo(function StormBackground({
   }, [preview, showLightning]);
 
   return (
-    <>
-      <style>{CLOUD_CSS}</style>
+    <div
+      className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 overflow-hidden`}
+    >
+      {/* Dark storm atmosphere */}
+      <div className="absolute inset-0 bg-[rgba(2,4,12,0.45)]" />
 
-      <div
-        className={`${preview ? "absolute" : "fixed"} pointer-events-none inset-0 z-0 overflow-hidden`}
-      >
-        {/* Dark storm atmosphere */}
-        <div className="absolute inset-0 bg-[rgba(2,4,12,0.45)]" />
-
-        {/* Cloud layers */}
-        {showClouds && (
-          <>
-            {/* Cloud layer 1 — wide, low */}
-            <div
-              className="absolute top-[-10%] left-[-18%] h-[48%] w-[85%] animate-[cloud-drift-1_26s_ease-in-out_infinite] blur-[35px]"
-              style={{
-                background: `radial-gradient(ellipse 100% 75% at 35% 45%, rgba(${lr},${lg},${lb},0.62) 0%, transparent 70%)`,
-              }}
-            />
-            {/* Cloud layer 2 */}
-            <div
-              className="absolute top-[-6%] left-[28%] h-[50%] w-[95%] animate-[cloud-drift-2_33s_ease-in-out_infinite] blur-[42px]"
-              style={{
-                background: `radial-gradient(ellipse 100% 85% at 55% 40%, rgba(${mr},${mg},${mb},0.52) 0%, transparent 70%)`,
-              }}
-            />
-            {/* Cloud layer 3 — lighter, further back */}
-            <div
-              className="absolute top-[0%] left-[45%] h-[40%] w-[75%] animate-[cloud-drift-3_40s_ease-in-out_infinite] blur-[28px]"
-              style={{
-                background: `radial-gradient(ellipse 90% 70% at 50% 50%, rgba(${rr},${rg},${rb},0.40) 0%, transparent 70%)`,
-              }}
-            />
-            {/* Underbelly darkening */}
-            <div
-              className="absolute inset-x-0 top-[25%] h-[20%] opacity-60 blur-[50px]"
-              style={{ background: "rgba(0,0,5,0.7)" }}
-            />
-          </>
-        )}
-
-        {/* Rain canvas */}
-        <canvas ref={rainCanvasRef} className="absolute inset-0 h-full w-full" />
-
-        {/* Lightning bolt canvas */}
-        <canvas ref={boltCanvasRef} className="absolute inset-0 h-full w-full" />
-
-        {/* Screen flash */}
-        {showLightning && flashAlpha > 0 && (
+      {/* Cloud layers */}
+      {showClouds && (
+        <>
+          {/* Cloud layer 1 — wide, low */}
           <div
-            className="absolute inset-0"
-            style={{ background: `rgba(210,225,255,${flashAlpha})` }}
-          />
-        )}
-
-        {/* Ground puddle shimmer */}
-        {showGroundShimmer && (
-          <div
-            className="absolute inset-x-0 bottom-0 h-[8%]"
+            className="absolute top-[-10%] left-[-18%] h-[48%] w-[85%] animate-[cloud-drift-1_26s_ease-in-out_infinite] blur-[35px]"
             style={{
-              background: `linear-gradient(to top, rgba(${mr},${mg},${mb},0.18), transparent)`,
+              background: `radial-gradient(ellipse 100% 75% at 35% 45%, rgba(${lr},${lg},${lb},0.62) 0%, transparent 70%)`,
             }}
           />
-        )}
-      </div>
-    </>
+          {/* Cloud layer 2 */}
+          <div
+            className="absolute top-[-6%] left-[28%] h-[50%] w-[95%] animate-[cloud-drift-2_33s_ease-in-out_infinite] blur-[42px]"
+            style={{
+              background: `radial-gradient(ellipse 100% 85% at 55% 40%, rgba(${mr},${mg},${mb},0.52) 0%, transparent 70%)`,
+            }}
+          />
+          {/* Cloud layer 3 — lighter, further back */}
+          <div
+            className="absolute top-[0%] left-[45%] h-[40%] w-[75%] animate-[cloud-drift-3_40s_ease-in-out_infinite] blur-[28px]"
+            style={{
+              background: `radial-gradient(ellipse 90% 70% at 50% 50%, rgba(${rr},${rg},${rb},0.40) 0%, transparent 70%)`,
+            }}
+          />
+          {/* Underbelly darkening */}
+          <div
+            className="absolute inset-x-0 top-[25%] h-[20%] opacity-60 blur-[50px]"
+            style={{ background: "rgba(0,0,5,0.7)" }}
+          />
+        </>
+      )}
+
+      {/* Rain canvas */}
+      <canvas ref={rainCanvasRef} className="absolute inset-0 h-full w-full" />
+
+      {/* Lightning bolt canvas */}
+      <canvas ref={boltCanvasRef} className="absolute inset-0 h-full w-full" />
+
+      {/* Screen flash */}
+      {showLightning && flashAlpha > 0 && (
+        <div
+          className="absolute inset-0"
+          style={{ background: `rgba(210,225,255,${flashAlpha})` }}
+        />
+      )}
+
+      {/* Ground puddle shimmer */}
+      {showGroundShimmer && (
+        <div
+          className="absolute inset-x-0 bottom-0 h-[8%]"
+          style={{
+            background: `linear-gradient(to top, rgba(${mr},${mg},${mb},0.18), transparent)`,
+          }}
+        />
+      )}
+    </div>
   );
 });

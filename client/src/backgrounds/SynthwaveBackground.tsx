@@ -1,4 +1,5 @@
 import { memo, useEffect, useRef } from "react";
+import { hexToRgbTuple } from "@/lib/utils";
 
 interface Props {
   colorLeft: string;
@@ -10,22 +11,6 @@ interface Props {
   showSun?: boolean;
   showGrid?: boolean;
   showScanlines?: boolean;
-}
-
-function hexToRgb(hex: string): [number, number, number] {
-  const c = hex.replace("#", "");
-  const full =
-    c.length === 3
-      ? c
-          .split("")
-          .map((x) => x + x)
-          .join("")
-      : c;
-  return [
-    parseInt(full.slice(0, 2), 16),
-    parseInt(full.slice(2, 4), 16),
-    parseInt(full.slice(4, 6), 16),
-  ];
 }
 
 function lighten([r, g, b]: [number, number, number], amt: number): [number, number, number] {
@@ -61,9 +46,9 @@ export const SynthwaveBackground = memo(function SynthwaveBackground({
     resize();
     if (!preview) window.addEventListener("resize", resize);
 
-    const cL = hexToRgb(colorLeft);
-    const cM = hexToRgb(colorMiddle);
-    const cR = hexToRgb(colorRight);
+    const cL = hexToRgbTuple(colorLeft);
+    const cM = hexToRgbTuple(colorMiddle);
+    const cR = hexToRgbTuple(colorRight);
     const bright = lighten(cM, 80);
 
     function draw() {

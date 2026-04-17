@@ -1,4 +1,5 @@
 import { memo, useEffect, useRef } from "react";
+import { hexToRgbTuple } from "@/lib/utils";
 
 interface Props {
   colorLeft: string;
@@ -10,22 +11,6 @@ interface Props {
   showMilkyWay?: boolean;
   showNebulae?: boolean;
   showShootingStars?: boolean;
-}
-
-function hexToRgb(hex: string): [number, number, number] {
-  const c = hex.replace("#", "");
-  const full =
-    c.length === 3
-      ? c
-          .split("")
-          .map((x) => x + x)
-          .join("")
-      : c;
-  return [
-    parseInt(full.slice(0, 2), 16),
-    parseInt(full.slice(2, 4), 16),
-    parseInt(full.slice(4, 6), 16),
-  ];
 }
 
 interface Star {
@@ -93,9 +78,9 @@ export const DeepSpaceBackground = memo(function DeepSpaceBackground({
     resize();
     if (!preview) window.addEventListener("resize", resize);
 
-    const [lr, lg, lb] = hexToRgb(colorLeft);
-    const [mr, mg, mb] = hexToRgb(colorMiddle);
-    const [rr, rg, rb] = hexToRgb(colorRight);
+    const [lr, lg, lb] = hexToRgbTuple(colorLeft);
+    const [mr, mg, mb] = hexToRgbTuple(colorMiddle);
+    const [rr, rg, rb] = hexToRgbTuple(colorRight);
 
     // Stars — 85% white, 8% blue, 5% orange, 2% red
     const TYPE_WEIGHTS = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 3]; // index into STAR_COLORS

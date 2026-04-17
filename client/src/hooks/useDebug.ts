@@ -51,15 +51,6 @@ export interface DebugLevelDTO {
   img_uri: string;
 }
 
-export interface DebugItemDTO {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  rarity: string;
-  categories: string[];
-}
-
 export interface AdminProfileDTO {
   id: number;
   display_name: string;
@@ -105,7 +96,6 @@ export const debugQueryKeys = {
   leaderboard: ["debug", "stats", "leaderboard"] as const,
   characters: ["debug", "game", "characters"] as const,
   levels: ["debug", "game", "levels"] as const,
-  items: ["debug", "game", "items"] as const,
   // db panel
   profiles: ["debug", "db", "profiles"] as const,
   purchases: ["debug", "db", "purchases"] as const,
@@ -179,17 +169,6 @@ export function useDebugLevelsQuery() {
     queryKey: debugQueryKeys.levels,
     queryFn: async () => {
       const { data } = await apiClient.get<DebugLevelDTO[]>("/levels");
-      return data ?? [];
-    },
-    staleTime: 2 * 60 * 1000,
-  });
-}
-
-export function useDebugItemsQuery() {
-  return useQuery<DebugItemDTO[], AxiosError>({
-    queryKey: debugQueryKeys.items,
-    queryFn: async () => {
-      const { data } = await apiClient.get<DebugItemDTO[]>("/characters");
       return data ?? [];
     },
     staleTime: 2 * 60 * 1000,
@@ -301,74 +280,6 @@ export function useDeleteLevelMutation() {
       await apiClient.delete(`/levels/${id}`);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: debugQueryKeys.levels }),
-  });
-}
-
-/**
- * Create a new store item (admin only).
- *
- * Route:   POST /api/characters
- * Auth:    Requires admin role
- * Body:    { name, description, price, rarity_id, category_ids? }
- * Returns: 201 Created
- */
-export function useCreateItemMutation() {
-  const qc = useQueryClient();
-  return useMutation<
-    void,
-    AxiosError,
-    { name: string; description: string; price: number; rarity_id: number; category_ids?: number[] }
-  >({
-    mutationFn: async (body) => {
-      await apiClient.post("/characters", body);
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: debugQueryKeys.items }),
-  });
-}
-
-/**
- * Update an existing store item (admin only).
- *
- * Route:   PUT /api/characters/:id
- * Auth:    Requires admin role
- * Body:    { name, description, price, rarity_id, category_ids? }
- * Returns: 204 No Content
- */
-export function useUpdateItemMutation() {
-  const qc = useQueryClient();
-  return useMutation<
-    void,
-    AxiosError,
-    {
-      id: number;
-      name: string;
-      description: string;
-      price: number;
-      rarity_id: number;
-      category_ids?: number[];
-    }
-  >({
-    mutationFn: async ({ id, ...body }) => {
-      await apiClient.put(`/characters/${id}`, body);
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: debugQueryKeys.items }),
-  });
-}
-
-/**
- * Delete a store item by ID (admin only).
- *
- * Route:   DELETE /api/characters/:id
- * Auth:    Requires admin role
- * Returns: 204 No Content
- */
-export function useDeleteItemMutation() {
-  const qc = useQueryClient();
-  return useMutation<void, AxiosError, number>({
-    mutationFn: async (id) => {
-      await apiClient.delete(`/characters/${id}`);
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: debugQueryKeys.items }),
   });
 }
 

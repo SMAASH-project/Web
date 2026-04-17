@@ -1,13 +1,7 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useSettings } from "@/pages/settings/SettingsContext";
-import {
-  getDialogClasses,
-  getDialogFooterClasses,
-  getTextShadow,
-  getBackgroundClasses,
-} from "@/lib/utils";
-import { StyledSelect } from "@/components/ui/styled-select";
+import { getDialogClasses, getDialogFooterClasses, getTextShadow } from "@/lib/utils";
 import {
   Users,
   UserCircle,
@@ -56,7 +50,6 @@ import {
 import {
   useDebugCharactersQuery,
   useDebugLevelsQuery,
-  useDebugItemsQuery,
   useAdminProfilesQuery,
   useAdminPurchasesQuery,
   useRolesQuery,
@@ -73,9 +66,6 @@ import {
   useCreateLevelMutation,
   useUpdateLevelMutation,
   useDeleteLevelMutation,
-  useCreateItemMutation,
-  useUpdateItemMutation,
-  useDeleteItemMutation,
   useCreateCategoryMutation,
   useUpdateCategoryMutation,
   useDeleteCategoryMutation,
@@ -99,7 +89,6 @@ import {
 type ResourceId =
   | "users"
   | "profiles"
-  | "items"
   | "characters"
   | "levels"
   | "categories"
@@ -154,15 +143,6 @@ const RESOURCES: ResourceMeta[] = [
     canDelete: true,
     isDangerDelete: true,
     dangerNote: "Deletes all purchases associated with this profile.",
-  },
-  {
-    id: "items",
-    label: "Items",
-    icon: <ShoppingBag size={11} />,
-    columns: ["id", "name", "price", "rarity"],
-    canCreate: true,
-    canUpdate: true,
-    canDelete: true,
   },
   {
     id: "characters",
@@ -259,14 +239,6 @@ const SCHEMAS: Record<string, Array<{ field: string; type: string; notes?: strin
     { field: "coins", type: "uint" },
     { field: "pfp_uri", type: "string" },
   ],
-  items: [
-    { field: "id", type: "uint" },
-    { field: "name", type: "string unique" },
-    { field: "description", type: "text" },
-    { field: "rarity_id", type: "uint → rarities.id", notes: "FK" },
-    { field: "price", type: "uint" },
-    { field: "img_uri", type: "string" },
-  ],
   characters: [
     { field: "id", type: "uint" },
     { field: "name", type: "string unique" },
@@ -288,7 +260,7 @@ const SCHEMAS: Record<string, Array<{ field: string; type: string; notes?: strin
   purchases: [
     { field: "id", type: "uint" },
     { field: "player_profile_id", type: "uint → profiles.id", notes: "FK" },
-    { field: "character_id", type: "uint → items.id", notes: "FK" },
+    { field: "character_id", type: "uint → characters.id", notes: "FK" },
     { field: "count", type: "uint" },
   ],
   roles: [
@@ -321,7 +293,6 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
   const dialogClass = getDialogClasses(useLiquidGlass, useDarkMode);
   const footerClass = getDialogFooterClasses(useLiquidGlass, useDarkMode);
   const textShadow = getTextShadow(useLiquidGlass, useDarkMode);
-  const bgClass = getBackgroundClasses(useLiquidGlass, useDarkMode, "strong");
   // ── UI state ──────────────────────────────────────────────────────────────
   const [selected, setSelected] = useState<ResourceId>("users");
   const [filter, setFilter] = useState("");
@@ -348,7 +319,6 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
 
   // ── Form state ────────────────────────────────────────────────────────────
   const [form, setForm] = useState<Record<string, string>>({});
-  const [formCategoryIds, setFormCategoryIds] = useState<number[]>([]);
   const [banMinutes, setBanMinutes] = useState("1440");
   const [isPermanentBan, setIsPermanentBan] = useState(false);
   const [promoteTarget, setPromoteTarget] = useState<"admin" | "support">("support");
@@ -356,7 +326,6 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
   // ── Queries ───────────────────────────────────────────────────────────────
   const { data: users = [], isLoading: usersLoading } = useAdminUsersQuery();
   const { data: profiles = [], isLoading: profilesLoading } = useAdminProfilesQuery();
-  const { data: items = [], isLoading: itemsLoading } = useDebugItemsQuery();
   const { data: characters = [], isLoading: charsLoading } = useDebugCharactersQuery();
   const { data: levels = [], isLoading: levelsLoading } = useDebugLevelsQuery();
   const { data: categories = [], isLoading: catsLoading } = useCategoriesQuery();
@@ -384,10 +353,6 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
   const createLevel = useCreateLevelMutation();
   const updateLevel = useUpdateLevelMutation();
   const deleteLevel = useDeleteLevelMutation();
-
-  const createItem = useCreateItemMutation();
-  const updateItem = useUpdateItemMutation();
-  const deleteItem = useDeleteItemMutation();
 
   const createCat = useCreateCategoryMutation();
   const updateCat = useUpdateCategoryMutation();
@@ -419,7 +384,6 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
     const map: Record<ResourceId, unknown[]> = {
       users,
       profiles,
-      items,
       characters,
       levels,
       categories,
@@ -434,7 +398,6 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
     selected,
     users,
     profiles,
-    items,
     characters,
     levels,
     categories,
@@ -448,7 +411,6 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
     const map: Record<ResourceId, boolean> = {
       users: usersLoading,
       profiles: profilesLoading,
-      items: itemsLoading,
       characters: charsLoading,
       levels: levelsLoading,
       categories: catsLoading,
@@ -463,7 +425,6 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
     selected,
     usersLoading,
     profilesLoading,
-    itemsLoading,
     charsLoading,
     levelsLoading,
     catsLoading,
@@ -492,14 +453,6 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
     for (const [k, v] of Object.entries(row)) {
       fd[k] = String(v ?? "");
     }
-    if (selected === "items") {
-      const itemCats = (row.categories as string[]) ?? [];
-      setFormCategoryIds(
-        itemCats.map((n) => categories.find((c) => c.name === n)?.id).filter(Boolean) as number[],
-      );
-      const rarityId = rarities.find((r) => r.name === row.rarity)?.id;
-      if (rarityId) fd.rarity_id = String(rarityId);
-    }
     setForm(fd);
     setEditTarget(row);
     setIsCreating(false);
@@ -507,7 +460,6 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
 
   const openCreate = () => {
     setForm({});
-    setFormCategoryIds([]);
     setEditTarget(null);
     setIsCreating(true);
   };
@@ -518,11 +470,6 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
   };
 
   const setField = (key: string, value: string) => setForm((prev) => ({ ...prev, [key]: value }));
-
-  const toggleCategoryId = (id: number) =>
-    setFormCategoryIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
 
   // ── Submit handlers ───────────────────────────────────────────────────────
 
@@ -539,17 +486,6 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
             await createLevel.mutateAsync({ name: form.name });
             addHistory(`Created level "${form.name}"`, true);
             toast.success(t("toast.levelCreated"));
-            break;
-          case "items":
-            await createItem.mutateAsync({
-              name: form.name,
-              description: form.description ?? "",
-              price: Number(form.price) || 0,
-              rarity_id: Number(form.rarity_id) || 1,
-              category_ids: formCategoryIds,
-            });
-            addHistory(`Created item "${form.name}"`, true);
-            toast.success(t("toast.itemCreated"));
             break;
           case "categories":
             await createCat.mutateAsync({ name: form.name });
@@ -602,18 +538,6 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
             addHistory(`Updated level #${id} → "${form.name}"`, true);
             toast.success(t("toast.levelUpdated"));
             break;
-          case "items":
-            await updateItem.mutateAsync({
-              id,
-              name: form.name,
-              description: form.description ?? "",
-              price: Number(form.price) || 0,
-              rarity_id: Number(form.rarity_id) || 1,
-              category_ids: formCategoryIds,
-            });
-            addHistory(`Updated item #${id}`, true);
-            toast.success(t("toast.itemUpdated"));
-            break;
           case "categories":
             await updateCat.mutateAsync({ id, name: form.name });
             addHistory(`Updated category #${id}`, true);
@@ -657,9 +581,6 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
           break;
         case "profiles":
           await deleteProfile.mutateAsync(id);
-          break;
-        case "items":
-          await deleteItem.mutateAsync(id);
           break;
         case "characters":
           await deleteChar.mutateAsync(id);
@@ -804,54 +725,8 @@ export function DatabaseTab({ textColor, subtextColor, panelBg, inputClass }: Da
         return (
           <>
             {inp("player_profile_id", "Profile ID", "number")}
-            {inp("character_id", "Item ID", "number")}
+            {inp("character_id", "Character ID", "number")}
             {inp("count", "Count", "number")}
-          </>
-        );
-      case "items":
-        return (
-          <>
-            {inp("name", "Name")}
-            {inp("description", "Description")}
-            {inp("price", "Price", "number")}
-            <div className="flex flex-col gap-1">
-              <label className={`text-[10px] ${subtextColor}`}>Rarity</label>
-              <StyledSelect
-                value={String(form.rarity_id ?? "")}
-                options={["", ...rarities.map((r) => String(r.id))]}
-                onChange={(val) => setField("rarity_id", val)}
-                inputClass={`py-1.5 text-xs ${inputClass}`}
-                textColor={textColor}
-                bgClass={bgClass}
-                renderOption={(id) => {
-                  if (!id) return <span className="opacity-50">— select —</span>;
-                  const r = rarities.find((x) => String(x.id) === id);
-                  return r ? r.name : id;
-                }}
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className={`text-[10px] ${subtextColor}`}>Categories</label>
-              <div className="flex flex-wrap gap-1">
-                {categories.map((c) => {
-                  const active = formCategoryIds.includes(c.id);
-                  return (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => toggleCategoryId(c.id)}
-                      className={`rounded-full px-2 py-0.5 text-[10px] font-medium transition-colors ${
-                        active
-                          ? "bg-violet-500/30 text-violet-300"
-                          : `bg-current/10 ${subtextColor} hover:bg-current/20`
-                      }`}
-                    >
-                      {c.name}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
           </>
         );
       default:

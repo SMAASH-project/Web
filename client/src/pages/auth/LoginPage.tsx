@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { FormAlert } from "@/components/ui/form-alert";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import React, { useEffect, useRef, useState } from "react";
 import { AuthContext } from "@/context/AuthContext";
 import { useLoginMutation } from "@/hooks/useQueryHooks";
@@ -55,6 +55,8 @@ export function LoginPage({ className, ...props }: React.ComponentProps<"div">) 
   const isLockedOut = lockedUntil !== null && Date.now() < lockedUntil;
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as { from?: string } | null)?.from;
   const loginMutation = useLoginMutation();
   const { t } = useTranslation("auth");
   const { settings, updateSetting } = useSettings();
@@ -78,6 +80,9 @@ export function LoginPage({ className, ...props }: React.ComponentProps<"div">) 
     e.preventDefault();
     if (isLockedOut) return;
 
+    // Clear any error from a previous attempt so the UI is fresh.
+    loginMutation.reset();
+
     setIsLoggedIn(false);
     setUserId(null);
     setIsAdmin(false);
@@ -90,9 +95,11 @@ export function LoginPage({ className, ...props }: React.ComponentProps<"div">) 
       setUserId(parsedUserId);
       setIsAdmin(response?.role === "admin");
       setIsLoggedIn(true);
-    } catch {
-      // Count credential failures (401s that are not a ban response)
-      const err = loginMutation.error as AxiosError | null;
+    } catch (caughtErr) {
+      // Count credential failures (401s that are not a ban response).
+      // Use the thrown error directly — loginMutation.error is React state and
+      // is not yet updated synchronously at this point in the catch block.
+      const err = caughtErr as AxiosError;
       const data = err?.response?.data as Record<string, unknown> | undefined;
       const isBan = data && "banned_until" in data;
       if (!isBan && err?.response?.status === 401) {
@@ -104,8 +111,8 @@ export function LoginPage({ className, ...props }: React.ComponentProps<"div">) 
   };
 
   useEffect(() => {
-    if (isLoggedIn) navigate("/app/profile-selector");
-  }, [navigate, isLoggedIn]);
+    if (isLoggedIn) navigate("/app/profile-selector", { state: { from } });
+  }, [navigate, isLoggedIn, from]);
 
   // Determine the best error message to show.
   // Any 401 that isn't a ban gets a single vague message — never reveal

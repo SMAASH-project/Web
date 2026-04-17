@@ -3,8 +3,6 @@
  * Organized by domain for easy cache invalidation.
  */
 
-import { all } from "axios";
-
 export const queryKeys = {
   profiles: {
     all: ["profiles"],
@@ -13,11 +11,9 @@ export const queryKeys = {
   githubReleases: {
     all: ["githubReleases"],
   },
-  items: {
-    all: ["items"],
-  },
   characters: {
     all: ["characters"],
+    ownedByProfileId: (profileId: number) => ["characters", "owned", profileId],
   },
   purchases: {
     byProfileId: (profileId: number) => ["purchases", "byProfileId", profileId],
