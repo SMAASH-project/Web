@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   RefreshCw,
   CheckCircle2,
@@ -27,6 +27,10 @@ export function CacheTab({
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState("");
   const [, forceUpdate] = useState(0);
+
+  useEffect(() => {
+    return queryClient.getQueryCache().subscribe(() => forceUpdate((n) => n + 1));
+  }, [queryClient]);
 
   const queries = queryClient.getQueryCache().getAll();
   const filtered = useMemo(() => {

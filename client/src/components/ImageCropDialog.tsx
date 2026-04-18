@@ -166,12 +166,20 @@ export function ImageCropDialog({
   const applyZoom = useCallback(
     (newZoom: number) => {
       const z = clamp(newZoom, 1, 3);
+      const oldZ = zoomRef.current;
       setZoom(z);
       const ns = natSizeRef.current;
       const bs = baseScaleRef.current;
-      if (ns) setPan((p) => constrainPan(p.x, p.y, z, ns, bs));
+      if (ns) {
+        const ratio = z / oldZ;
+        setPan((p) => {
+          const cx = p.x * ratio + (CROP_W / 2) * (1 - ratio);
+          const cy = p.y * ratio + (CROP_H / 2) * (1 - ratio);
+          return constrainPan(cx, cy, z, ns, bs);
+        });
+      }
     },
-    [constrainPan],
+    [constrainPan, CROP_W, CROP_H],
   );
 
   // Non-passive wheel listener so we can call preventDefault()
@@ -182,17 +190,21 @@ export function ImageCropDialog({
     const handler = (e: WheelEvent) => {
       e.preventDefault();
       const delta = -e.deltaY * 0.001;
-      const newZoom = clamp(zoomRef.current + delta, 1, 3);
+      const oldZoom = zoomRef.current;
+      const newZoom = clamp(oldZoom + delta, 1, 3);
       setZoom(newZoom);
       const ns = natSizeRef.current;
       const bs = baseScaleRef.current;
       if (ns) {
+        const ratio = newZoom / oldZoom;
         setPan((p) => {
+          const cx = p.x * ratio + (CROP_W / 2) * (1 - ratio);
+          const cy = p.y * ratio + (CROP_H / 2) * (1 - ratio);
           const rw = ns.w * bs * newZoom;
           const rh = ns.h * bs * newZoom;
           return {
-            x: clamp(p.x, CROP_W - rw, 0),
-            y: clamp(p.y, CROP_H - rh, 0),
+            x: clamp(cx, CROP_W - rw, 0),
+            y: clamp(cy, CROP_H - rh, 0),
           };
         });
       }
