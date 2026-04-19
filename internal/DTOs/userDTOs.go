@@ -49,7 +49,7 @@ type UserSignupRespDTO struct {
 }
 
 type PasswordChangeDTO struct {
-	ID          uint   `json:"id"`
+	Email       string `json:"email"`
 	NewPassword string `json:"new_password"`
 	SecurityKey string `json:"security_key"`
 }
