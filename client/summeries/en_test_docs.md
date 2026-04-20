@@ -257,13 +257,3 @@ Open the React Query DevTools (bottom-left button in development mode). After lo
 ### Toast Notifications
 
 Trigger a successful operation (save profile name, for example) and verify a green "success" toast appears and auto-dismisses after approximately 4 seconds. Trigger an error (submit an invalid form to the server) and verify a red "error" toast appears.
-
----
-
-## Adding New Tests
-
-1. Create a file ending in `.test.tsx` next to the component you are testing, or in a `__tests__/` directory alongside it.
-2. Import from `@testing-library/react` (`render`, `screen`, `fireEvent`) and from your component's module.
-3. Mock any module-level dependencies with `vi.mock("path", factory)` at the top of the file.
-4. Inject context providers around the rendered component when the component depends on them.
-5. Assert with `expect(...).toBeInTheDocument()` and other `@testing-library/jest-dom` matchers. These are set up globally via the setup file.
