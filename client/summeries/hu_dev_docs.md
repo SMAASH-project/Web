@@ -1,653 +1,603 @@
-# SMAASH kliens — fejlesztői dokumentáció
+# SMAASH Web Kliens — Fejlesztői Dokumentáció
 
-> Ez az útmutató a SMAASH webes kliens architektúráját, konvencióit, algoritmusait és gyakorlati munkafolyamatait mutatja be. Nem csak azt magyarázza el, *mit* kell használni, hanem azt is, *miért* úgy működik, ahogy.
-
----
-
-## Az egész rendszer dióhéjban
-
-A kliens egy **React 19 + TypeScript** single-page application, amely hitelesített játékosoknak és adminoknak szól. Mobilra optimalizált kialakítással, erős vizuális igényességgel (egyedi animációs rendszer, adaptív témarendszer), valós idejű API állapotkezeléssel (React Query) és konzisztens fejlesztői élménnyel rendelkezik.
-
-**Tech stack:**
+## A stack dióhéjban
 
 | Réteg | Technológia |
 |---|---|
-| Framework | React 19 + TypeScript + Vite |
-| Stílusozás | Tailwind CSS 4 + közös téma helperek |
-| Animáció | `motion/react` (Framer Motion v11) |
-| Adatfetching | React Query v5 + Axios |
-| Internationalizáció | i18next (angol / magyar) |
-| Ikonok | Lucide React |
+| Framework | React 19 + TypeScript 5.9, strict mód |
+| Build eszköz | Vite 7 |
+| Stílusozás | Tailwind CSS 4 |
+| Animáció | motion/react (Framer Motion v11) |
+| Szerver állapot | TanStack Query v5 (React Query) |
+| HTTP kliens | Axios |
+| Séma validáció | Zod |
+| Routing | React Router DOM v7 |
+| Lokalizáció | i18next (angol és magyar) |
+| Tesztelés | Vitest + @testing-library/react |
 
-**Fő belépési pontok:**
-
-- `src/main.tsx` — routing, lazy loading, error boundary-k
-- `src/RootLayout.tsx` — globális provider-ek, React Query beállítás, perzisztencia, globális debug effektusok
-- `src/Wrapper.tsx` — téma gradiens generálás, CSS változó emittálás, animált háttér kiválasztása és layout keret
-- `src/pages/*` — feature modulok (auth, játék, admin, debug stb.)
-- `src/hooks/*` — adatfetching logika React Query hook-okon keresztül
-- `src/lib/utils/*` — közös téma, szín, dátum és string helperek
-- `src/lib/constants/*` — közös domain konstansok (tárgy ritkaságok, harcstílusok, elfogadott képtípusok)
-- `src/backgrounds/*` — canvas és CSS alapú animált háttér komponensek
+Az alkalmazás egy single-page app, amely a `/app/` base path alatt fut. Egy Go backend REST API-val kommunikál a `/api/` útvonalon. A session hitelesítés cookie alapú — a tokenek soha nem kerülnek JavaScript memóriába.
 
 ---
 
-## Hitelesítés és jogosultságkezelés
-
-### Route struktúra
-
-Három route nyilvános, session nélkül is elérhető:
-
-- `/login` — bejelentkezési form, HTTP-only cookie alapú JWT capture
-- `/signup` — fiók létrehozása
-- `/reset-password` — jelszó-visszaállítás
-
-Minden `/app/*` alatti route a `RequireAuth` wrapper komponensen fut keresztül, amely ellenőrzi az `AuthContext.isLoggedIn` értékét, és hiányzó session esetén `/app/login`-ra irányít.
-
-### Szerepkör alapján korlátozott oldalak
-
-| Route | Szükséges szerepkör |
-|---|---|
-| `/app/admin` | `admin` |
-| `/app/debug` | `admin` |
-
-A szerepkör ellenőrzés route szinten történik, és a komponens belépési pontján is megismétlődik védelmi célból. A jogosultságellenőrzést soha ne ágyazd be mélyen egymásba — tartsd az oldal határán, hogy ne lehessen véletlenül privilegizált UI-t renderelni.
-
-### Auth folyamat
+## Projektstruktúra
 
 ```
-1. A felhasználó POST-ol a /auth/login végpontra
-2. A szerver beállít egy HTTP-only session cookie-t
-3. Az AuthProvider mountoláskor meghívja a GET /users/whoami végpontot
-4. A válasz feltölti az AuthContext-et: { userId, isAdmin, isSupport, isLoggedIn }
-5. Az apiClient bármely 401-es válaszára auto-redirect megy a /app/login-ra
+client/
+  src/
+    main.tsx               router definíció, lazy-loadolt route-ok
+    RootLayout.tsx         globális provider-ek, React Query kliens
+    App.tsx                gyökér átirányítás (login vs releases)
+    Wrapper.tsx            háttéranimáció, CSS változó kibocsátás
+    index.css              globális stílusok, CSS animációk @keyframes-ei
+    context/               React context-ek és provider-eik
+    hooks/                 React Query hook-ok (adatlekérés)
+    lib/                   közös segédprogramok, konstansok, sémák, konfig
+    components/            közös UI komponensek és route guard-ok
+    backgrounds/           animált háttér komponensek
+    animations/            motion wrapperek és animációs primitívek
+    pages/                 feature oldalak (oldalanként egy könyvtár)
+    locales/               i18n JSON fájlok (en/, hu/)
+    assets/                statikus fájlok (zászlók, OS logók, hangsávok)
+  summeries/               dokumentációs fájlok (ez a könyvtár)
+  vite.config.ts
+  tsconfig.app.json
 ```
 
-Ez a kialakítás azt jelenti, hogy a kliens soha nem tárol tokent JS memóriában vagy localStorage-ban — a cookie láthatatlan a szkriptek számára, ami kiküszöböl egy egész XSS token-lopás kategóriát.
+---
+
+## Belépési pontok
+
+### `src/main.tsx`
+
+Létrehozza a React Router-t `createBrowserRouter`-rel. Az autentikációs oldalak (login, signup, jelszóvisszaállítás) eager importálva vannak, tehát az első bundle-ben szerepelnek — a felhasználók először ezeket érik el, és soha ne kelljen várniuk rájuk. Az összes többi oldal `React.lazy`-vel van lazy-loadolva:
+
+```typescript
+const ReleasesPage = lazy(() =>
+  import("./pages/releases/ReleasesPage.tsx").then((m) => ({
+    default: m.ReleasesPage,
+  })),
+);
+```
+
+A védett route-ok egy `RequireAuth` outlet-be vannak csomagolva. Minden lazy-loadolt route ezenkívül `withBoundary`-ba van csomagolva, amely egy `ErrorBoundary`-t helyez köré, így az egyik oldalon bekövetkező hiba nem dönti le az egész alkalmazást:
+
+```typescript
+{ path: "/app/releases", element: withBoundary(<ReleasesPage />) }
+```
+
+### `src/RootLayout.tsx`
+
+A React Router által renderelt szülőkomponens az összes route felett. Tartalmazza a React Query klienst, az összes context provider-t és a Suspense fallback-et. A fallback egy közép-igazított CSS spinner, hogy a felhasználók látjanak aktivitást a lazy-load közben.
+
+A React Query kliens konfigurációja:
+
+```typescript
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 2 * 60 * 1000,   // 2 perc, mielőtt háttérbeli újralekérés
+      gcTime: 10 * 60 * 1000,      // 10 perc, mielőtt cache eltávolítás
+      retry: 1,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+    },
+  },
+});
+```
+
+A kliens `PersistQueryClientProvider`-t használ `createSyncStoragePersister`-rel `localStorage` háttérrel. Ez azt jelenti, hogy a query cache túléli a kemény böngészőfrissítést. Az autentikációs query-k (`whoami`) szándékosan ki vannak zárva a perzisztenciából (`gcTime: 0`), hogy egy elavult session soha ne kerüljön kiszolgálásra a cache-ből.
+
+Fejlesztési módban a `ReactQueryDevtools` és négy debug overlay komponens kerül csatolásra a fa végére.
+
+A `MotionWrapper` komponens a `RootLayout`-on belül beolvassa az `animationSpeed` értékét a debug beállításokból, és azt a motion/react átmenet időtartammá alakítja:
+
+```typescript
+const SPEED_TO_MOTION: Record<number, number> = {
+  0.25: 2,    // nagyon lassú
+  0.5:  0.8,
+  1:    0.3,  // alapértelmezett
+  2:    0.1,
+  4:    0.05, // nagyon gyors
+};
+```
+
+Ez teszi lehetővé, hogy az alkalmazás összes motion/react átmenete reagáljon a debug sebességcsúszkára.
 
 ---
 
 ## Provider architektúra
 
-A provider-ek az `RootLayout.tsx`-ben egy meghatározott sorrendben vannak egymásba ágyazva. Minden provider az felette lévőktől függ:
+A provider-ek szándékos sorrendben vannak egymásba ágyazva a `RootLayout.tsx`-ben. Mindegyik az felette lévőktől függ:
 
 ```
-React Query (perzisztált cache)
-  ↓
-AuthProvider          ← identitást old fel; minden más ettől függ
-  ↓
-SettingsProvider      ← téma beállításokat tölt, mielőtt bármely vizuális komponens renderelne
-  ↓
-NavbarProvider        ← settingsre van szüksége a témabarát scroll viselkedéshez
-  ↓
-ColorProvider         ← CSS változókat emit-el a gradiens színekből; a festett UI előtt kell futnia
-  ↓
-ProfileProvider       ← auth-ra van szüksége (userId), hogy a helyes profilt töltse localStorage-ból
-  ↓
-App (route-ok, oldalak)
+PersistQueryClientProvider  ← React Query cache; legkülső kell legyen
+  AuthProvider              ← identitást old fel a /users/whoami-ból
+    SecurityKeyProvider     ← biztonsági kulcs állapot a jelszóvisszaállítási folyamathoz
+      SettingsProvider      ← téma kapcsolókat tölt, mielőtt bármi vizuális renderelne
+        NavbarProvider      ← legördülő nyitott/hover állapot
+          ColorProvider     ← CSS változókat bocsát ki a gradiens színekből
+            ProfileProvider ← userId-re van szüksége (az auth-ból) a kiválasztott profil betöltéséhez
+              MotionWrapper ← globális animációs sebességet alkalmaz
+                Wrapper     ← háttéranimáció és layout keret
+                  Outlet    ← tényleges oldalak tartalma
 ```
 
-A sorrend megváltoztatása csendben elront dolgokat. Például ha a `ColorProvider` a `SettingsProvider` fölé kerülne, CSS változókat bocsátana ki, mielőtt az `useLiquidGlass` / `useDarkMode` ismert lenne, ami látható szín-villanást okozna az első rendereléskor.
-
-### Perzisztált állapotok
-
-Ezek az értékek kemény frissítés után is megmaradnak localStorage-on keresztül:
-
-| Kulcs | Provider | Mit tárol |
-|---|---|---|
-| `settings` | SettingsProvider | Téma kapcsolók, animációs beállítások, nyelv |
-| `color-settings` | ColorProvider | Gradiens színek + animáció override |
-| `selected_profile_<userId>` | ProfileProvider | Melyik karakter aktív éppen |
+A sorrend megfordítása csendben elront dolgokat. A `ColorProvider`-nek a `SettingsProvider` után kell futnia, mert `useLiquidGlass` és `useDarkMode` kapcsolókat olvas ki a CSS változók kibocsátásakor.
 
 ---
 
-## Téma és vizuális rendszer
+## Autentikáció
 
-### Az arany szabály
+### Hogyan működik
 
-Minden téma-érintett UI-t renderelő komponensnek a `src/lib/utils/themeClasses.ts` közös helpereit kell használnia. Soha ne írj inline ternary témaláncolatokat:
+A session kezelése szerver oldalon történik HTTP-only cookie-n keresztül. A kliensnek nincs hozzáférése a token értékéhez — ez kiküszöböl egy egész XSS token-lopás támadásosztályt.
 
-```typescript
-// ✅ Ezt tedd — centralizált, egy helyen kell változtatni
-const bg = getBackgroundClasses(useLiquidGlass, useDarkMode);
-const text = getTextColor(useLiquidGlass, useDarkMode);
-const input = getInputClasses(useLiquidGlass, useDarkMode);
-
-// ❌ Soha ne ezt — törékeny, mindenhol duplikált
-const bg = useDarkMode
-  ? useLiquidGlass ? "bg-white/10 backdrop-blur-md" : "bg-gray-900"
-  : "bg-white";
-```
-
-Ha egy kártya sötét-módos színét módosítani kell, egyetlen függvényt frissítesz, és az alkalmazás minden kártyája automatikusan frissül.
-
-### Fő téma kapcsolók
-
-| Beállítás | Hatás |
-|---|---|
-| `useLiquidGlass` | Glassmorphism: `backdrop-blur` + félig átlátszó háttér |
-| `useDarkMode` | Sötét vs. világos színséma |
-| `useAnimations` | Minden mozgást engedélyez / letilt |
-| `animationOverride` | Egy adott háttér effektet kényszerít (lásd lentebb) |
-
-### CSS változó generálási algoritmus
-
-A `ColorProvider` a felhasználó 3 pontos gradiens kiválasztásából egy teljes CSS egyéni tulajdonság készletet vezet le. Az algoritmus:
+Csatoláskor az `AuthProvider` meghívja a `GET /api/users/whoami` végpontot a React Query `useWhoAmIQuery` hook-on keresztül. A válasz alakja:
 
 ```typescript
-// Adott: accent = "#fff700" (felhasználó által kiválasztott elsődleges szín)
-
-// 1. Az accent kis mértékű világosítása a hover állapothoz
-const accentHover = lightenHex(accent, 0.15); // → "#ffed4e"
-
-// 2. Átlátszó, puha verzió háttérhez/chip-ekhez
-const accentSoft = hexToRgba(accent, 0.15); // → "rgba(255, 247, 0, 0.15)"
-
-// 3. Nagyon alacsony opacity verziók navbar kerethez és árnyékhoz
-const navBorder = hexToRgba(accent, 0.2);
-const navShadow = hexToRgba(accent, 0.1);
-
-// 4. Mindet injektálás a :root-ba
-document.documentElement.style.setProperty("--theme-accent", accent);
-document.documentElement.style.setProperty("--theme-accent-hover", accentHover);
-document.documentElement.style.setProperty("--theme-accent-soft", accentSoft);
-document.documentElement.style.setProperty("--theme-nav-border", navBorder);
-document.documentElement.style.setProperty("--theme-nav-shadow", navShadow);
-```
-
-Az eredmény: minden komponens, amely `var(--theme-accent)`-et használ CSS-ben, automatikusan tükrözi a felhasználó szín-választását — beleértve a Navbar kereteket, gomb ragyogásokat és jelvény háttereket — anélkül, hogy ezen komponensek React újrarenderelődnének.
-
----
-
-## Animáció és háttérrendszer
-
-### Háttér kiválasztási algoritmus
-
-Az animált háttérrendszer négy módot támogat, az `animationOverride` beállítás vezérli:
-
-```
-animationOverride === null       → a téma alapértelmezett animációs kulcsát használja
-animationOverride === "none"     → semmit sem renderel (statikus oldal)
-animationOverride === "aurora"   → egy nevesített effektet kényszerít, a témát figyelmen kívül hagyja
-animationOverride === "custom"   → CompositeBackground renderelése (rétegzett effektek)
-```
-
-A `Wrapper.tsx`-ben lévő kiválasztási logika renderelés előtt oldja fel a helyes háttér komponenst:
-
-```typescript
-function resolveBackground(override: string | null, themeDefault: AnimationKey) {
-  if (override === null) return themeDefault;
-  if (override === "none") return null;
-  if (override === "custom") return "composite";
-  return override as AnimationKey; // validált kulcs
+interface WhoAmIResponse {
+  id: number;
+  email: string;
+  role: string;        // "admin" | "support" | "user"
+  is_banned: boolean;
+  last_login: string;
 }
 ```
 
-### Crossfade váltáskor
+A provider egy kétfázisú inicializálási guard-ot használ. Miután a `whoami` query feloldódik, egy `useEffect` fut és több állapot setter-t hív ugyanabban a React 18 kötegelt renderben. Egy külön `isAuthSettled` boolean csak akkor vált `true`-ra, miután ez az effekt lefutott:
 
-Amikor az animáció megváltozik, az új háttér bele-fade-el, miközben a régi ki-fade-el. Ez elkerüli a durva vágást. A crossfade `AnimatePresence`-szel van meghajtva `mode="wait"` módban, a háttér komponens köré csomagolva, a feloldott animáció neve alapján kulccolva:
+```typescript
+const [isAuthSettled, setIsAuthSettled] = useState(false);
 
-```tsx
-<AnimatePresence mode="wait">
-  <motion.div
-    key={resolvedAnimation}
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    exit={{ opacity: 0 }}
-    transition={{ duration: 0.6 }}
-  >
-    <BackgroundComponent />
-  </motion.div>
-</AnimatePresence>
+useEffect(() => {
+  if (isLoading) return;
+
+  if (data?.id) {
+    setUserId(BigInt(data.id));
+    setIsAdmin(data.role === "admin");
+    setIsSupport(data.role === "support");
+    setIsLoggedIn(true);
+  } else {
+    setIsLoggedIn(false);
+    setUserId(null);
+    setIsAdmin(false);
+    setIsSupport(false);
+  }
+
+  setIsAuthSettled(true);
+}, [data, isLoading]);
 ```
 
-### Háttér architektúra
+Az `isInitializing` értéke `true`, amíg vagy a query tölt, vagy az effekt még nem futott le. A `RequireAuth` spinner-t mutat ebben az ablakban, hogy megakadályozza az idő előtti átirányítást a `/app/login`-ra.
 
-Minden háttér-animációhoz tartozó CSS `@keyframes` (lava blob-ok, sakura szirmok, felhő sodródás) az `src/index.css`-ben él. A háttér komponens fájlok ezekre a keyframe-ekre Tailwind tetszőleges animáció osztályokon keresztül hivatkoznak (pl. `animate-[lava-blob-1_11s_ease-in-out_infinite]`) vagy inline `style={{ animation: "sakura-fall ..." }}` szintaxissal — nem injektálnak `<style>` tageket.
+### Route-védelem
 
-Canvas alapú háttérkomponensek (`DeepSpace`, `Fishtank`, `ParticleWeb`, `Storm` stb.) közös segédprogramokat importálnak az `src/lib/utils`-ból:
+A `RequireAuth` az `isLoggedIn` és `isInitializing` értékeket olvassa az `AuthContext`-ből:
 
-- `hexToRgbTuple(hex)` → `[r, g, b]` — hex színt RGB tuple-ra alakít canvas műveletekhez
-- `lerp(a, b, t)` → szám — lineáris interpoláció canvas animációkban lévő sima átmenetekhez
+- Ha `isInitializing` true: spinner renderelése.
+- Ha `isLoggedIn` false: `<Navigate to="/app/login">` `state.from` értékkel a megkísérelt útvonalra, hogy a felhasználó bejelentkezés után visszairányítható legyen.
+- Ha `isLoggedIn` true: `<Outlet />` renderelése.
 
-### Teljesítmény megjegyzések
+A debug és admin oldalak másodlagos szerepkör-ellenőrzést végeznek a komponens szintjén, miután a route guard átengedi:
 
-- A háttérképek **halasztottak** a nehéz kártyás oldalakon: ~500ms után fade-elnek be, hogy az oldal elsődleges tartalma először renderelődjön és festődjön, elkerülve a jank-ot
-- Amikor `useAnimations` false, a mozgás az utolsó renderelt frame-en marad — nincs villogás vagy újraelrendezés, egyszerűen megáll
-- A `CompositeBackground` lustán csatolja az egyes al-effekt canvas rétegeket; a kikapcsolt rétegek tisztán lecsatolódnak
+```typescript
+if (!isAdmin) return <NotFoundPage />;
+```
+
+### 401-es kezelés az API kliensben
+
+A `src/lib/apiClient.ts` tartalmaz egy response interceptor-t, amely elkapja a 401-es hibákat. Az autentikációs végpontok (`/auth/` és `/users/whoami`) ki vannak zárva az átirányításból, hogy elkerülje az átirányítási hurkot, amikor a felhasználó rossz jelszót ad meg (ami szintén 401-et ad vissza):
+
+```typescript
+const isAuthEndpoint =
+  requestUrl.includes("/auth/") || requestUrl.includes("/users/whoami");
+
+if (error.response.status === 401 && !isAuthEndpoint) {
+  window.location.href = "/app/login";
+  return new Promise(() => {});  // soha nem oldódik fel — megállítja a downstream hibakezelőket
+}
+```
+
+A soha fel nem oldódó promise megakadályozza, hogy bármilyen folyamatban lévő UI hibaállapotot próbáljon renderelni egy oldalon, amelyről éppen navigálnak el.
 
 ---
 
-## Közös konstansok
+## API kliens
 
-### Tárgy konstansok (`src/lib/constants/itemConstants.ts`)
+A `src/lib/apiClient.ts` létrehoz egy megosztott Axios instance-t:
 
-A webstore tárgy konfiguráció egyszer van definiálva és mindenhol importálható:
+```typescript
+const apiClient = axios.create({
+  baseURL: "/api",
+  withCredentials: true,
+});
+```
+
+A request interceptor két dolgot kezel:
+
+1. **Debug hálózati késleltetés**: beolvassa a `networkDelayMs` és `networkJitterMs` értékeket a `localStorage["debug-settings"]`-ből, és a kiszámított időtartamig alszik, mielőtt a kérés folytatódna. Ez lassú hálózatokat szimulál fejlesztés közben.
+
+2. **Content-Type fejléc**: automatikusan `application/json`-t állít be, kivéve, ha a test egy `FormData` objektum, amelynek esetén a `Content-Type` fejlécet törli, hogy a böngésző automatikusan beállíthassa a helyes `multipart/form-data; boundary=...` értéket.
+
+```typescript
+const isFormData = config.data instanceof FormData;
+if (isFormData) {
+  delete config.headers["Content-Type"];  // hagyja a böngészőt beállítani a multipart boundary-t
+  return config;
+}
+config.headers["Content-Type"] = "application/json";
+```
+
+---
+
+## API séma validáció
+
+A `src/lib/apiSchemas.ts` Zod-ot használ runtime sémák definiálásához az ismert API végpontokhoz. A `validateKnownApiResponse` egy HTTP metódust és URL útvonalat illeszt szabályok listájához, és validálja a válasz adatát:
+
+```typescript
+const KNOWN_RESPONSE_SCHEMAS: KnownSchemaRule[] = [
+  { method: "post", path: /^\/auth\/login$/,         schema: loginResponseSchema },
+  { method: "get",  path: /^\/users\/whoami$/,        schema: whoAmIResponseSchema },
+  { method: "get",  path: /^\/users\/\d+\/profiles$/, schema: profileListSchema },
+  { method: "get",  path: /^\/items$/,                schema: itemListSchema },
+  { method: "get",  path: /^\/profiles\/\d+\/purchases$/, schema: purchaseListSchema },
+];
+
+export function validateKnownApiResponse(method, url, data) {
+  const path = normalizePath(url);  // levágja a query stringet, biztosítja a vezető perjelet
+  for (const rule of KNOWN_RESPONSE_SCHEMAS) {
+    if (rule.method !== method || !rule.path.test(path)) continue;
+    const parsed = rule.schema.safeParse(data);
+    if (!parsed.success) throw new Error(`[API schema validation failed] ...`);
+    return { matched: true, data: parsed.data };
+  }
+  return { matched: false, data };  // nincs illeszkedő szabály — változatlanul átengedi
+}
+```
+
+Ha a backend nem a sémának megfelelő alakú adatot küld vissza, a függvény hibát dob, amely felsorolja az összes validációt megbuktató mezőt. Ez fejlesztés közben azonnal felszínre hozza a backend törésváltozásait, ahelyett, hogy csendes runtime hibákat okozna később.
+
+---
+
+## React Query hook-ok
+
+Minden adatlekérés a `src/hooks/` alatt él. A query key struktúra a `src/lib/queryKeys.ts`-ben van centralizálva:
+
+```typescript
+export const queryKeys = {
+  profiles: {
+    all: ["profiles"],
+    byUserId: (userId: number) => ["profiles", "byUserId", userId],
+  },
+  githubReleases: { all: ["githubReleases"] },
+  characters: {
+    all: ["characters"],
+    ownedByProfileId: (profileId: number) => ["characters", "owned", profileId],
+  },
+  purchases: {
+    byProfileId: (profileId: number) => ["purchases", "byProfileId", profileId],
+  },
+};
+```
+
+A factory használata az összes `queryKey` argumentumnál biztosítja, hogy a cache invalidációs célok ne legyenek gépelési hibával érintve. Egy felhasználó összes profil query-jának invalidálása így néz ki:
+
+```typescript
+queryClient.invalidateQueries({ queryKey: queryKeys.profiles.byUserId(userId) });
+```
+
+### Auth hook-ok (`src/hooks/useAuth.ts`)
+
+`useWhoAmIQuery`: `GET /users/whoami`. A `staleTime: 0` és `gcTime: 0` biztosítja, hogy ez a query soha ne szolgáltasson ki elavult adatot a perzisztált cache-ből. A `retry: false` azért van beállítva, hogy egy 401 azonnal hibázzék, ne próbálkozzon újra.
+
+`useLoginMutation`: `POST /auth/login` `{ email, password }` tartalmmal. Visszaadja az `{ id, role }` adatokat.
+
+`useSignupMutation`: `POST /auth/signup` `{ email, password, role_id: 1 }` tartalmmal. Visszaadja az `{ id, email, security_key }` adatokat.
+
+`useLogoutMutation`: `POST /auth/logout`. Siker esetén `queryClient.clear()`-t hív `invalidateQueries` helyett. A különbség lényeges: az `invalidateQueries` újralekérést indítana az összes aktív query-n, amelyek a most már nem érvényes session ellen futnak, és 401-et kapnak vissza, ami az átirányítási interceptor-t indítja el, és versenyzik a React Router puha navigációval. A `clear()` törli a cache-t anélkül, hogy bármilyen újralekérést ütemezne.
+
+`useChangePasswordMutation`: `PUT /auth/change-password` `{ email, security_key, new_password }` tartalmmal. Visszaadja az `{ new_key }` értéket — a hívó felelős az új biztonsági kulcs megjelenítéséért a felhasználónak.
+
+`useUpdateUserEmailMutation`: `PUT /users/:id` `{ id, email, role_id: 0 }` tartalmmal. A `role_id: 0` szándékos — a GORM `Updates()` hívása kihagyja a nulla értékű mezőket, tehát a szerepkör változatlan marad. Siker esetén invalidálja az `["auth", "whoami"]` kulcsot, hogy a navigációs sáv azonnal tükrözze az új e-mail címet.
+
+### Profil hook-ok (`src/hooks/useProfile.ts`)
+
+`useProfilesQuery(userId)`: `GET /users/:id/profiles`. Visszaad egy profil listát `avatar_url`-lel kiegészítve a `getProfilePictureUrl` segítségével. A `staleTime: 0` biztosítja, hogy a mutációk mindig friss lekérést indítsanak.
+
+`useAddProfileMutation`: `POST /users/:id/profiles`. A profil létrehozása után meghívja az `uploadProfilePicture`-t, ha volt kép megadva. A profil létrehozása akkor is sikerül, ha a feltöltés sikertelen. Siker esetén invalidálja és azonnal újra lekéri a profil listát.
+
+`useUploadProfilePictureMutation`: `POST /profiles/:id/pfp` `FormData` tartalmmal. Siker esetén egy verziószámot ír a `sessionStorage`-ba, és frissíti a cached `avatar_url`-t a `queryClient.setQueriesData` segítségével hálózati kérés nélkül:
+
+```typescript
+queryClient.setQueriesData<ProfileResponse[]>(
+  { queryKey: queryKeys.profiles.all },
+  (cached) =>
+    cached?.map((p) =>
+      p.id === profileId
+        ? { ...p, avatar_url: getProfilePictureUrl(profileId) }
+        : p,
+    ),
+);
+```
+
+Az URL-en lévő `?v=timestamp` query paraméter kényszeríti a böngészőt az image újralekérésére, még akkor is, ha az útvonal változatlan.
+
+`useUpdateProfileMutation`: `PUT /profiles/:id`. Támogatja az optimista UI-t — ha az `optimistic` opció nincs explicit `false`-ra állítva, a megjelenített nevet azonnal frissíti a cache-ben, mielőtt a kérés megoldódna. Az `invalidateAfterSuccess` jelző szabályozza, hogy ezután van-e újralekérés.
+
+`useDeleteProfileMutation`: `DELETE /profiles/:id`. Teljes optimista eltávolítást valósít meg: megszakítja a folyamatban lévő query-ket, pillanatfelvételt készít az előző listáról, azonnal eltávolítja a profilt a cache-ből, és hiba esetén visszagörget a pillanatfelvételre.
+
+---
+
+## Profilkép cache-elés
+
+A profilképek a `/api/profiles/:id/pfp` útvonalon vannak kiszolgálva. Mivel az URL útvonal feltöltés után nem változik, egy böngészőcache találat örökké a régi képet mutatná. A kliens egy verziószámlálót tart profil-anként a `sessionStorage`-ban a `pfp_versions` kulcs alatt:
+
+```typescript
+function getProfilePictureUrl(profileId: number): string {
+  const version = pfpVersions.get(profileId);
+  return `/api/profiles/${profileId}/pfp${version ? `?v=${version}` : ""}`;
+}
+```
+
+Sikeres feltöltés után a `Date.now()` értéke kerül be mint új verzió. Mivel a verzió a `sessionStorage`-ban van tárolva, túléli a komponens lecsatolásait ugyanabban a böngészőlapon.
+
+---
+
+## Beállítások rendszer
+
+A `src/pages/settings/SettingsContext.tsx` a beállításokat a `localStorage["settings"]`-ben tárolja. A teljes állapot alakja:
+
+```typescript
+interface SettingsState {
+  useAnimations: boolean;
+  useLiquidGlass: boolean;
+  useDarkMode: boolean;
+  language: "en" | "hu";
+  animationOverride: AnimationKey | "none" | "custom" | null;
+}
+```
+
+Az `animationOverride: null` azt jelenti, hogy az aktív téma alapértelmezett animációját kell használni. A `"none"` letiltja a hátteret. A `"custom"` aktiválja a kompozit réteg rendszert. Bármilyen `AnimationKey` string kényszeríti azt az adott animációt.
+
+A beállítások inicializálása a `useState` inicializáló függvényből szinkron módon, tárolásból történik, ami azt jelenti, hogy nincs alapértelmezett beállítások villanása betöltéskor. Egy `useEffect` minden frissítés után visszamenti a változásokat a tárolóba. Egy külön `useEffect` hívja az `i18n.changeLanguage`-t, amikor a nyelv beállítás megváltozik.
+
+---
+
+## Animációs rendszer
+
+### A 12 animáció
+
+A `src/lib/animationTypes.ts`-ben van definiálva:
+
+```typescript
+type AnimationKey =
+  | "fishtank" | "deepspace" | "aurora" | "lavalamp" | "synthwave"
+  | "sakura" | "storm" | "particleweb" | "puddleripples" | "bioluminescence"
+  | "constellation" | "void";
+```
+
+Minden animációnak van egy `SubEffects` interface-e, amely meghatározza, milyen rétegeket támogat. Például:
+
+```typescript
+interface FishtankSubEffects {
+  showFish: boolean;
+  showBubbles: boolean;
+  showSeaweed: boolean;
+  showCaustics: boolean;
+  showLightShafts: boolean;
+}
+
+interface StormSubEffects {
+  showRain: boolean;
+  showLightning: boolean;
+  showClouds: boolean;
+  showGroundShimmer: boolean;
+}
+```
+
+A `DEFAULT_SUB_EFFECTS` konstans meghatározza minden animáció kezdeti állapotát az összes engedélyezett réteggel.
+
+### Téma-animáció leképezés
+
+A `src/pages/settings/Themes.ts` 18 témát definiál. Mindegyik opcionálisan tartalmaz egy `animationKey`-t. Amikor a felhasználó témát választ és az `animationOverride` értéke `null`, a témából származó animáció kerül használatra. Ha az `animationOverride` bármilyen nem-null értékre van állítva, a téma animációja figyelmen kívül marad.
+
+```typescript
+export const THEMES: Theme[] = [
+  { name: "Midnight", colorLeft: "#232526", colorMiddle: "#414345", colorRight: "#000000", animationKey: "deepspace" },
+  { name: "Ocean",    colorLeft: "#2e3192", colorMiddle: "#1bffff",  colorRight: "#1e9600", animationKey: "fishtank" },
+  // ...
+];
+```
+
+Téma alkalmazása:
+
+```typescript
+export const applyTheme = (theme: Theme, context: ColorContextType) => {
+  context.setColorLeft(theme.colorLeft);
+  context.setColorMiddle(theme.colorMiddle);
+  context.setColorRight(theme.colorRight);
+  context.setAnimationKey(theme.animationKey ?? null);
+};
+```
+
+### Kompozit háttér
+
+Amikor az `animationOverride === "custom"`, a `CompositeBackground` csatolódik. Beolvassa az `EffectLayerConfig`-ot (az `AnimationKey`-ből `SubEffects`-re való részleges leképezést) a szín beállításokból, és minden engedélyezett animációt független rétegként renderel `position: absolute` segítségével. Az engedélyezett aleffektusok nélküli rétegek tisztán lecsatolódnak.
+
+### CSS alapú animációk
+
+Az összes `@keyframes` blokk a `src/index.css`-ben él. A háttér komponensek Tailwind tetszőleges animáció szintaxisán vagy inline style string-eken keresztül hivatkoznak rájuk. Egyetlen `<style>` tag sem kerül injektálásra a komponens render outputban.
+
+---
+
+## Téma szín változók
+
+A `ColorProvider` három felhasználó által kiválasztott hex színt alakít CSS egyéni tulajdonságokká a `document.documentElement`-en. Ez azt jelenti, hogy minden CSS-ben `var(--theme-accent)`-et használó elem automatikusan frissül komponens újrarenderelés nélkül.
+
+A kulcs változó a `colorMiddle`-ból van levezetve. A provider `hexToRgba`-t használ a `src/lib/utils/colorMath.ts`-ből alpha variánsok előállításához, amelyeket keretekhez, árnyékokhoz és puha hátterekhez alkalmaznak:
+
+```typescript
+document.documentElement.style.setProperty("--theme-accent", colorMiddle);
+document.documentElement.style.setProperty("--theme-nav-border", hexToRgba(colorMiddle, 0.2));
+document.documentElement.style.setProperty("--theme-accent-soft", hexToRgba(colorMiddle, 0.15));
+```
+
+---
+
+## Toast rendszer
+
+A `src/lib/toast.ts` egy nulla függőségű pub/sub értesítési rendszer. Egy modul-szintű `ToastItem` objektum tömböt és hallgató callbackek halmazát tartja karban. A `Toaster` komponens a `RootLayout`-ban feliratkozik erre a store-ra és rendereli a toast listát.
+
+```typescript
+toast.success("Profil mentve.");
+toast.error("Feltöltés sikertelen.");
+toast.info("Betöltés...");
+```
+
+A toast-ok alapértelmezés szerint 4000ms után automatikusan eltűnnek. Nincs bevont külső könyvtár.
+
+---
+
+## Debug beállítások
+
+A `src/hooks/useDebugSettings.ts` egy hook-ot és egy kísérő `getDebugSettings()` függvényt biztosít a debug konfiguráció olvasásához a `localStorage["debug-settings"]`-ből.
+
+A teljes beállítások tartalmaznak: `animationSpeed`, `forceReducedMotion`, `compactDensity`, `safeAreaOutlines`, `forceViewportEnabled`, `forceViewportPreset`, `forceViewportWidth`, `forceViewportHeight`, `noBackdropBlur`, `layoutBorders`, `navbarOverride`, `networkDelayMs`, `networkJitterMs`, `showFps`, `showScrollPos`, `showBreakpointBadge`, `clickTargetChecker`, `zIndexInspector`, `elementInspector`.
+
+A beállítások változásai egy egyéni DOM esemény `"debug-settings"` segítségével kerülnek sugárzásra, így a komponensfa különböző részein lévő több hook instance szinkronban marad React context nélkül:
+
+```typescript
+window.dispatchEvent(new CustomEvent("debug-settings", { detail: next }));
+```
+
+---
+
+## Lokalizáció
+
+A `src/lib/i18n.ts` az i18next-et 12 névtérrel konfigurálja nyelvenként: `auth`, `nav`, `settings`, `profile`, `releases`, `news`, `webstore`, `admin`, `common`, `debug`, `gallery`, `leaderboard`. Az összes locale fájl build időben van becsomagolva — nincsenek runtime hálózati kérések fordítási fájlokhoz.
+
+```typescript
+i18n.use(initReactI18next).init({
+  resources: { en: { auth: enAuth, nav: enNav, /* ... */ }, hu: { /* ... */ } },
+  lng: "en",
+  fallbackLng: "en",
+  interpolation: { escapeValue: false },
+});
+```
+
+A kezdeti `lng: "en"` felül lesz írva indításkor, amikor a `SettingsProvider` futtatja az `i18n.changeLanguage(settings.language)` hívást. A komponensek így fogyasztják a fordításokat:
+
+```typescript
+const { t } = useTranslation("webstore");
+return <p>{t("item.purchase")}</p>;
+```
+
+---
+
+## Felhasználónév generátor
+
+A `src/lib/generateUsername.ts` véletlenszerű megjelenítési névjavaslatokat generál két statikus tömbből — 116 melléknévi prefixből (Fluffy, Cosmic, Majestic stb.) és 113 állathang- vagy természet-utótagból (Paws, Thunder, Ember stb.). A regisztrációs vagy profilkészítési folyamatban javasolt névként kerül felhasználásra:
+
+```typescript
+const { prefix, suffix } = generateRandomUsername();
+// Példa eredmény: { prefix: "Cosmic", suffix: "Thunder" }
+```
+
+---
+
+## Tárgy konstansok
+
+A `src/lib/constants/itemConstants.ts` centralizálja a webáruház tárgyainak összes domain konstansát:
 
 ```typescript
 export const RARITIES = ["Common", "Uncommon", "Rare", "Epic", "Legendary"] as const;
 export const COMBAT_TYPES = ["Melee", "Ranged"] as const;
 
 export const RARITY_COLORS: Record<string, string> = {
-  Common: "#9ca3af",
-  Uncommon: "#10b981",
-  Rare: "#3b82f6",
-  Epic: "#8b5cf6",
+  Common:    "#9ca3af",
+  Uncommon:  "#10b981",
+  Rare:      "#3b82f6",
+  Epic:      "#8b5cf6",
   Legendary: "#f59e0b",
 };
 
 export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 ```
 
-Használja: `CreateItemDialog`, `EditItemDialog`, és minden ritkaság jelvényt vagy harcstílus szelektor megjelenítő komponens.
+Az `ACCEPTED_IMAGE_TYPES` a `useProfile.ts`-ben is hivatkozva van, ahol a képfeltöltések a HTTP kérés elkészítése előtt kerülnek validálásra.
 
 ---
 
-## API és adatfetching
+## Error Boundary
 
-### Az API kliens
-
-A `src/lib/apiClient.ts` egy előre konfigurált Axios instance:
+A `src/components/ErrorBoundary.tsx` egy osztálykomponens, amely elkapja a render hibákat bármely gyermek fából. Implementálja a `getDerivedStateFromError`-t, hogy hibaállapotba váltson, és a `componentDidCatch`-et a hiba naplózásához. Az alapértelmezett fallback egy hibakártyát renderel a hibaüzenettel és egy "Próbálja újra" gombbal, amely visszaállítja a hibaállapotot:
 
 ```typescript
-const apiClient = axios.create({
-  baseURL: "/api",
-  withCredentials: true, // elküldi a HTTP-only session cookie-t
-});
-
-// Globális 401 interceptor — bármely nem jogosult válasz login-ra irányít
-apiClient.interceptors.response.use(
-  (res) => res,
-  (err) => {
-    if (err.response?.status === 401) {
-      window.location.href = "/app/login";
-    }
-    return Promise.reject(err);
-  }
-);
-```
-
-### React Query hook minta
-
-Minden adatfetching a `src/hooks/` alatti hook-okban él. A szabványos minta:
-
-```typescript
-// src/hooks/useGetStats.ts
-export function useGetStats(userId: string) {
-  return useQuery({
-    queryKey: queryKeys.stats(userId),
-    queryFn: () => apiClient.get<StatsResponse>(`/stats/${userId}`).then(r => r.data),
-    staleTime: 1000 * 60 * 5, // 5 perc, mielőtt háttérbeli újrafetching
-    enabled: !!userId,         // ne tüzeljen, ha userId üres
-  });
+static getDerivedStateFromError(error: Error): State {
+  return { hasError: true, error };
 }
 ```
 
-Előnyök a nyers `useEffect` + `useState`-hez képest:
-- Automatikus deduplikáció: több, azonos query-t használó komponens egyetlen kérést oszt meg
-- Háttérbeli újrafetching window fókuszáláskor
-- Beépített loading / error állapot
-- Mutációk utáni cache invalidáció konzisztens UI-t tart fenn
+Minden lazy-loadolt route `withBoundary`-ba van csomagolva a `main.tsx`-ben. Ez biztosítja, hogy egy oldal szintű hiba a hibakártyát rendereli az elrendezésen belül, ahelyett, hogy megtörné az egész alkalmazást.
 
-### Query key factory
+---
 
-A query kulcs tömbök mindenhol hardkódolása karbantartási rémálommá teszi a cache invalidációt. Használd a factoryt a `src/lib/queryKeys.ts`-ben:
+## Build konfiguráció
+
+A `vite.config.ts` kézi chunk felosztást konfigurál egy egységes nagy bundle elkerüléséhez:
 
 ```typescript
-// Egyszer definiálva, centrálisan
-export const queryKeys = {
-  stats: (userId: string) => ["stats", userId] as const,
-  leaderboard: () => ["leaderboard"] as const,
-  user: (id: number) => ["user", id] as const,
-};
-
-// Mutáció után precíz invalidáció
-queryClient.invalidateQueries({ queryKey: queryKeys.stats(userId) });
-```
-
-Ez azt jelenti, hogy egy cache kulcs átnevezése csak egy sor megváltoztatását igényli.
-
----
-
-## Oldal layout szerződés
-
-### Fix Navbar feletti clearance
-
-A Navbar `position: fixed`, vagyis **nincs a dokumentum folyamban**. A `y=0`-nál kezdődő tartalom a navbar mögé kerül. A helyes mintát az `AdminPage` használja, és minden teljes oldalas layoutnál követni kell:
-
-```tsx
-<div className="flex h-dvh w-full flex-col">
-
-  {/* Fix navbar — mindent takar, nem folyamban van */}
-  <Navbar />
-
-  {/* Fizikai spacer a navbar magasságának megfelelő méretben. Ez tolja a
-      scroll container-t a navbar alá a layout folyamban. */}
-  <div className="h-24 shrink-0" aria-hidden="true" />
-
-  {/* Scroll container: a maradék viewport magasságot tölti ki.
-      overflow-y-auto azt jelenti, hogy az oldal itt scrolloz, nem a <body>-n. */}
-  <div className="flex flex-1 overflow-y-auto">
-
-    {/* Tartalom wrapper: min-h-full + flex-1 biztosítja, hogy kitöltse a
-        scroll container-t, így a py-4/py-5 egyenlő felső és alsó
-        lélegzési teret teremt, még akkor is, ha a kártya tartalma rövid. */}
-    <div className="flex min-h-full w-full flex-1 flex-col items-center px-3 py-4 sm:px-6 sm:py-5 lg:px-10">
-      <PageContent />
-    </div>
-
-  </div>
-</div>
-```
-
-A kulcs felismerés: a tartalom wrapperén lévő `min-h-full flex-1` azt biztosítja, hogy mindig kitöltse a scroll container-t, ami azt jelenti, hogy a `py-4/py-5` padding mindig az egyetlen tér a viewport széle és a kártya között — tökéletesen egyenlő felső és alsó margókat adva, függetlenül attól, mennyi tartalom van az oldalon.
-
----
-
-## A pill-container tab választó
-
-Ez a szabványos tab szelektor, amelyet a Gallery, Leaderboard, Webstore (ItemFilters) és Releases (SelectOs) oldalak használnak. Liquid Glass módban csúszó kiemelés követi az egeret.
-
-### Algoritmus
-
-```tsx
-// 1. Állapot a container szinten
-const containerRef = useRef<HTMLDivElement>(null);
-const [highlightPos, setHighlightPos] = useState({ left: 0, width: 0 });
-const [isHovering, setIsHovering] = useState(false);
-
-// 2. Bármely tab gomb mouse-enter eseményén:
-function handleTabMouseEnter(e: React.MouseEvent<HTMLButtonElement>) {
-  if (!useLiquidGlass) return;
-  setIsHovering(true);
-  const rect = e.currentTarget.getBoundingClientRect();
-  if (containerRef.current) {
-    const parentRect = containerRef.current.getBoundingClientRect();
-    setHighlightPos({ left: rect.left - parentRect.left, width: rect.width });
-  }
+manualChunks(id) {
+  if (id.includes("@tanstack/react-query"))  return "query-vendor";
+  if (id.includes("motion") || id.includes("lucide-react")) return "ui-vendor";
+  if (id.includes("react-markdown") || id.includes("remark-gfm")) return "markdown-vendor";
+  if (id.includes("luxon"))   return "date-vendor";
+  if (id.includes("/node_modules/react/") || id.includes("/node_modules/react-dom/")) return "react-vendor";
+  if (id.includes("/src/backgrounds/"))  return "backgrounds";
+  if (id.includes("/src/pages/debug/") || id.includes("/src/pages/admin/")) return "ops-pages";
 }
-
-// 3. A container mouse-leave eseményén:
-function handleContainerMouseLeave() {
-  if (!useLiquidGlass) return;
-  setIsHovering(false);
-  // Kiemelés visszacsúszik a jelenleg kiválasztott tabhoz
-  const btn = containerRef.current?.querySelector(`[data-tab="${activeTab}"]`);
-  if (btn && containerRef.current) {
-    const cRect = containerRef.current.getBoundingClientRect();
-    const bRect = btn.getBoundingClientRect();
-    setHighlightPos({ left: bRect.left - cRect.left, width: bRect.width });
-  }
-}
-
-// 4. Renderelés
-<div
-  ref={containerRef}
-  className={`relative flex gap-1 rounded-2xl p-1 ${panelBg}`}
-  onMouseLeave={handleContainerMouseLeave}
->
-  {/* Csúszó kiemelés — csak LG (Liquid Glass) módban */}
-  {useLiquidGlass && (
-    <div
-      className="pointer-events-none absolute rounded-lg transition-all duration-300 ease-out bg-black/25"
-      style={{ left: highlightPos.left, width: highlightPos.width, top: 4, bottom: 4 }}
-    />
-  )}
-
-  {tabs.map((tab) => (
-    <button
-      key={tab.id}
-      data-tab={tab.id}
-      onMouseEnter={handleTabMouseEnter}
-      onClick={() => setActiveTab(tab.id)}
-    >
-      {tab.label}
-    </button>
-  ))}
-</div>
 ```
 
-A `data-tab` attribútum köti a gomb DOM elemet a kiemelés pozíció számításhoz — elkerüli az index-alapú keresést, és rugalmas feltételes tab renderelés esetén is megbízható.
+A `backgrounds` chunk azért van elkülönítve, mert a háttér komponensek nagyok (canvas renderelési kód), és csak akkor töltődnek be, amikor a `Wrapper` rendereli őket. Az `ops-pages` chunk azért tartja ki az admin és debug kódot a fő bundle-ből, mert a legtöbb felhasználó soha nem látogatja meg ezeket az oldalakat.
 
-**Az aktív állapot osztályoknak kezelniük kell az LG és a nem-LG módot egyaránt.** LG módban a gombok átlátszók, és a csúszó kiemelés biztosítja az aktív vizuált. Nem-LG módban az aktív gomb `bg-gray-700 shadow-md` (sötét) / `bg-gray-200 shadow-md` (világos) osztályokat kap.
+A kimenet a `../build/client` könyvtárba kerül. A `rollup-plugin-visualizer` bundle méret riportot generál a `./build/stats.html` fájlba.
+
+A fejlesztői szerver a `/api/*` kéréseket a `http://localhost:8080`-ra proxizálja, hogy a frontend helyi backend ellen fejleszthető legyen CORS konfiguráció nélkül.
+
+Teszt környezet: `jsdom`. Setup fájl: `./src/test-setup.ts`. A globális teszt segédprogramok (`describe`, `it`, `expect`, `vi`) importok nélkül elérhetők.
 
 ---
 
-## A viewport override (debug emuláció)
+## Navbar Context
 
-A debug emuláció tab kényszerítheti a böngészőt, hogy úgy viselkedjen, mintha adott méretekkel rendelkezne, lehetővé téve a JS-alapú reszponzív logika tesztelését anélkül, hogy a fizikai ablakot átméreteznénk.
-
-### Hogyan működik
-
-A standard `window.innerWidth` csak olvasható tulajdonság, tehát nem lehet egyszerűen hozzárendelni. Az override `Object.defineProperty`-t használ a getter lecseréléséhez:
-
-```typescript
-Object.defineProperty(window, "innerWidth",  { get: () => forcedWidth,  configurable: true });
-Object.defineProperty(window, "innerHeight", { get: () => forcedHeight, configurable: true });
-
-window.matchMedia = (query: string): MediaQueryList => {
-  const match = evaluateCSSMediaQuery(query, forcedWidth, forcedHeight);
-  return { matches: match, media: query, /* stub-ok */ };
-};
-
-window.dispatchEvent(new CustomEvent("viewport-override", {
-  detail: { width: forcedWidth, height: forcedHeight }
-}));
-```
-
-A `useMediaQuery` hook figyeli a `"viewport-override"` egyéni eseményt, és kényszerít újrarenderelést, amint az elsül, így a reszponzív layout változások azonnal érvénybe lépnek a JS-vezérelt kódban.
-
-A Tailwind CSS breakpointok build időben CSS `@media` query-kre fordítódnak, és a böngésző CSS engine értékeli ki a fizikai viewport ellen — a patch-elt `window.matchMedia` nem érinti őket.
+A `src/context/NavbarContext.tsx` két boolean-t tárol: `isDropdownHovering` és `isDropdownOpen`. Ezek vezérlik a fiók menü legördülő állapotát. A context-et a `Navbar.tsx` és az `AccountMenu.tsx` fogyasztja.
 
 ---
 
-## Leaderboard adatnormalizáció
+## Security Key Context
 
-Mind a négy leaderboard dataset (győzelmek, aktív játékosok, top pályák, top tárgyak) eltérő alakú a backend-en. Mielőtt a `PodiumSlot` vagy a `CategoryView` megkapná őket, normalizálódnak egy egységes `RankedEntry` típusra:
-
-```typescript
-interface RankedEntry {
-  id: number;
-  name: string;
-  stat: number;
-  statLabel: string; // pl. "Győzelmek", "Lejátszott meccsek"
-  sub?: string;      // opcionális alcím (pl. játékos neve egy pálya bejegyzésnél)
-}
-
-const winsEntries: RankedEntry[] = leaderboardData.map((entry) => ({
-  id: entry.player_id,
-  name: entry.username,
-  stat: entry.count_of_wins,
-  statLabel: t("tabs.wins"),
-}));
-```
-
-Ez a minta a `PodiumSlot`-ot és a `CategoryView`-t teljesen generikussá teszi — soha nem importálnak backend response típusokat. Új leaderboard kategória hozzáadása csak egy új query hook-ot, egy `RankedEntry[]`-re való normalizáló leképezést, és egy új `TabId` bejegyzést igényel.
-
-A `CategoryView`-ban lévő keresési szűrő a normalizált adaton fut, és az eredeti rangszámokat megőrzi a szűrésen keresztül azáltal, hogy a rangot az index mellett külön mezőként követi.
-
----
-
-## Oldalak részletesen
-
-### Admin panel (`/app/admin`)
-
-Az admin panel `xl` breakpointnál három oszlopra bontódik (`xl:flex-row`), mindegyiket saját komponens kezeli:
-
-- `UserList` — kereshető felhasználólista kliens-oldali szűréssel
-- `UserDetail` — kiválasztott felhasználó teljes profilja, akcióbillentyűk (tiltás/feloldás, előléptetés/lefokozás)
-- `ProfilesPanel` — a kiválasztott felhasználó játékprofiljai és statisztikái
-- `BanDialog` — időtartam-választó dialógus a tiltások alkalmazásához (preset chipek + egyéni tartomány + szabad szöveges ok)
-
-A kiválasztott felhasználó az `useAdminPageLogic`-on keresztül áramlik, egy egyetlen hook, amely az összes állapotot és mutációt kezeli a panelhez. A komponensek csak a `logic` objektumot kapják — soha nem rendelkeznek saját mutáció állapottal.
-
-### Debug panel (`/app/debug`)
-
-Csak adminoknak elérhető diagnosztikai és műveleti dashboard. Nyolc tab:
-
-| Tab | Cél |
-|---|---|
-| System | Runtime diagnosztika és rendszerszintű állapot |
-| Endpoints | Kézi HTTP request tesztelő |
-| Cache | React Query cache vizsgálat és invalidáció |
-| Game Data | CRUD munkafolyamatok karakterekhez, pályákhoz, tárgyakhoz és felhasználókezeléshez |
-| Visual | UI hibakeresési eszközök |
-| Emulation | Reszponzív tesztelés és hálózat szimuláció |
-| Diagnostics | A11y, render számok, z-index, kattintási célok |
-| Database | Általános REST-alapú adatböngésző minden erőforráshoz |
-
-### Gallery (`/app/gallery`)
-
-Négy fájlra osztva:
-
-- `GalleryPage.tsx` — oldal keret, tab navigáció logika és a pill-container tab választó
-- `OstPlayer.tsx` — teljes audiojátszó komponens (lejátszás/szünet, seekbar, hangerő, tracklista)
-- `CharacterCard.tsx` — egyedi karakterkártya képbetöltéssel és fallback-kel
-- `ostTracks.ts` — statikus `OstTrack[]` tömb hangfájl URL importokkal
-
-**Új OST track hozzáadása:** importáld a hangfájlt `?url` suffix-szel az `ostTracks.ts`-ben, és adj hozzá egy bejegyzést az `OST_TRACKS`-hez. A `?url` suffix kötelező, hogy a Vite a dev és produkciós kiszolgáláshoz egyaránt a helyes alap-prefix-es URL-t oldja fel.
-
-**Karakterek tab:** `useDebugCharactersQuery`-n keresztül tölt. Minden karaktert `CharacterCard` jelenít meg, amely `GET /api/characters/:id/img`-et tölt, és hibánál `Swords` placeholder-re esik vissza. `LoadPost`-tal animálva, ha `useAnimations` engedélyezett.
-
-### Leaderboard (`/app/leaderboard`)
-
-Tab-alapú ranglista. Tabok: `all`, `wins`, `active`, `levels`, `items`.
-
-- **All tab:** Stat sáv (négy chip, kategóriánként az #1-est mutatva) + 2×2-es rács top-5 panelekkel
-- **Kategória tabok:** `PodiumSlot` komponensek az 1–3. helyeknek fizikai dobogó sorrendben `[2. | 1. | 3.]`, lépcsőzött `motion.div` késleltetésekkel. Runners-up (4–5. hely) alattuk. Teljes görgethető rangsor kereséssel
-- Mind a négy query párhuzamosan indul. A `CategoryView` wrapperén lévő `key={activeTab}` minden tab váltáskor visszaállítja a keresési állapotot
-
-### Webstore (`/app/webstore`)
-
-1. Minden tárgy lekérése a backend-ről
-2. Felhasználó vásárlási előzményeinek lekérése
-3. A "tulajdonolt" állapot kiszámítása tárgy ID-k és vásárlási rekordok metszésével
-4. Vásárlás gomb csak nem-tulajdonolt tárgyaknál jelenik meg
-5. Vásárlásnál: coin levonása az aktív profil kontextusából, hozzáadás a vásárlási listához, releváns query-k invalidálása
-
-Az egyenleg az aktív profil kontextusából jön, nem egy globális pénztárcából. Profil váltás megváltoztatja az elérhető egyenleget.
-
----
-
-## Mobil reszponzivitás
-
-### Elvek
-
-- **Mobile-first:** az alapértelmezett stílusok kis képernyőket céloznak; a breakpointok (`sm:`, `md:`, `lg:`) fokozatosan bővítik
-- **Nem fix szélességek:** `max-w-*` használata `w-full`-lal és `mx-auto`-val
-- **Reszponzív vízszintes padding:** `px-3 sm:px-6 lg:px-10`
-- **Másodlagos tartalom rejtése mobilon:** `hidden sm:block` oldalsávokhoz stb.
-
-### Dialógusok mobilon
-
-Minden dialógusnak a következőket kell használnia:
-
-```tsx
-<DialogContent className="max-h-[90svh] overflow-y-auto max-w-[calc(100%-2rem)] sm:max-w-lg">
-```
-
-- `max-h-[90svh]` + `overflow-y-auto`: a dialógus belülről scrollozható, soha nem nyírja ki a viewportot
-- `max-w-[calc(100%-2rem)]`: 1rem oldalsó margót tart mobilon
-- Soha ne adj `overflow-visible`-t a `DialogContent`-hez — felülírja az `overflow-y-auto`-t és tartalom kilógást okoz
-
----
-
-## Közös UI komponensek
-
-### StyledSelect
-
-Natív `<select>` helyett használandó minden olyan legördülő menühöz, amelynek illeszkednie kell a design rendszerhez:
-
-```tsx
-import { StyledSelect } from "@/components/ui/styled-select";
-
-<StyledSelect
-  value={selectedValue}
-  onChange={setSelectedValue}
-  options={["Option A", "Option B"]}
-  inputClass={inputClass}
-  textColor={textColor}
-  bgClass={bgClass}
-  renderOption={(o) => o}
-/>
-```
-
-### Skeleton
-
-Pulzáló betöltési placeholder. Mindig részesítsd előnyben a skeleton-t a spinner-rel szemben tartalom területeknél:
-
-```tsx
-import { Skeleton } from "@/components/ui/skeleton";
-
-<div className="flex flex-col gap-3">
-  <Skeleton className="h-10 w-full rounded-lg" />
-  <Skeleton className="h-10 w-3/4 rounded-lg" />
-</div>
-```
-
-### AnimatePresence / LoadPost
-
-Lépcsőzött lista belépési animációkhoz használd a `LoadPost`-ot:
-
-```tsx
-{items.map((item, i) => (
-  <LoadPost key={item.id} index={i}>
-    <ItemCard item={item} />
-  </LoadPost>
-))}
-```
-
-A `LoadPost` lépcsőzött `opacity` + `y` belépést alkalmaz, `index` alapján skálázva. Az animációt csak akkor rendereli, ha `useAnimations` engedélyezett.
-
----
-
-## i18n konvenciók
-
-A locale fájlok helye:
-- `src/locales/en/` — angol szövegek
-- `src/locales/hu/` — magyar szövegek
-
-A névterek megegyeznek az oldalakkal vagy feature-ökkel (pl. `admin`, `nav`, `leaderboard`). Mindig add hozzá a kulcsokat **mindkét** locale fájlhoz egyszerre. Használd az `useTranslation("névtér")` hook-ot a komponensekben:
-
-```tsx
-const { t } = useTranslation("admin");
-return <p>{t("detail.bannedPermanent")}</p>;
-```
+A `src/context/SecurityKeyProvider.tsx` tartja a biztonsági kulcs értékét és az első munkamenet jelzőt. Amikor új fiók jön létre, a regisztrációs folyamat ide tárolja el a biztonsági kulcsot. Az `isFirstSession` jelző szabályozza, hogy a "mentsd el a kulcsodat" értesítő látható-e a profiloldalon. A `markKeySeen` elrejti az értesítőt és elmenti az elutasítást, hogy az oldal frissítése után se jelenjen meg újra.
 
 ---
 
 ## Konvenciók
 
-### Igen
+### Téma helperek használata
 
-- **Téma helpereket használj.** `getBackgroundClasses()`, `getTextColor()`, `getInputClasses()` — ezek a szerződés. Az inline ternary-k töredezik a témarendszert.
-- **`StyledSelect` használata** minden legördülőhöz. A natív `<select>` nem stílusozható konzisztensen.
-- **`hexToRgbTuple` importálása `@/lib/utils`-ból** canvas háttérkomponensekben helyi implementáció helyett.
-- **Audio/asset fájlok importálása `?url` suffix-szel**, hogy a Vite a helyes alap-prefix-es, haselt URL-t oldja fel.
-- **Közös domain konstansokat `src/lib/constants/`-ba tedd**, ne duplikáld őket komponensek között.
-- **`@keyframes`-t `index.css`-ben tartsd**, ne injektálj `<style>` tageket komponensekben.
-- **Típusozd a React Query válaszokat.** Biztosítsd, hogy a `queryFn` visszatérési típusa és a response interfész egyezzen.
-- **Szerepkör ellenőrzéseket az oldal határán tartsd.** Soha ne ásd el a jogosultság logikát mélyen egymásba ágyazott komponensben.
-- **Minden felhasználónak szóló szöveget fordítsd le.** Egyszerre add hozzá mindkét `en` és `hu` locale fájlhoz.
-- **Kövesd a pill-container tab választó mintát** minden új tab szelektor esetén.
+Minden témázott UI-t renderelő komponensnek a `src/lib/utils/themeClasses.ts` közös helpereit kell használnia. A függvények elfogadják az `useLiquidGlass` és `useDarkMode` boolean értékeket, és megfelelő Tailwind osztálystring-eket adnak vissza. Az inline ternary láncolatok írása, mint `useDarkMode ? "text-white" : "text-black"`, megkerüli a témarendszert és megnehezíti a jövőbeli témaváltoztatások globális alkalmazását.
 
-### Nem
+### Query key használat
 
-- Inline ternary témaláncolatok, mint `useDarkMode ? useLiquidGlass ? "..." : "..." : "..."`
-- Natív `<select>` elemek
-- Helyi `hexToRgb` / `lerp` implementációk háttér fájlokban — importálj `@/lib/utils`-ból
-- `<style>` tag injektálás a komponens render outputban
-- Hardkódolt hex színek vagy Tailwind szín osztályok, amelyek megkerülik a téma helpereket
-- Navbar clearance kihagyása új teljes oldalas layoutokon
-- `overflow-visible` a `DialogContent`-en
-- Nem-komponens értékek exportálása komponens fájlokból (megszakítja a React Fast Refresh-t)
+Mindig a `queryKeys.*`-t használd a `src/lib/queryKeys.ts`-ből, ne inline string tömböket. Ez megakadályozza a cache kulcs gépelési hibákat és megkönnyíti az összes olyan hely megtalálását, amelyek egy adott query-től függnek.
 
----
+### Locale fájlok
 
-## Optimalizálás állapota
+Minden felhasználónak szóló string-nek szerepelnie kell mind a `src/locales/en/*.json`, mind a `src/locales/hu/*.json` fájlban. Egyszerre add hozzá mindkét fájlhoz. A csak az egyik fájlban szereplő string-ek visszaesnek angolra, ami elfogadható egy leromlott élményhez, de nem szabad véglegesként hagyni.
 
-- Route-szintű lazy loading `React.lazy` + `Suspense` fallback-kel
-- Kézi vendor chunk felosztás (Vite konfig)
-- Leaderboard skeleton betöltés (spinner helyett, tartalom alakot mutat)
-- Lépcsőzött panel belépési animáció az olvasható betöltésért
-- Build bundle vizualizáció támogatás (`rollup-plugin-visualizer`)
+### Nincs style tag a komponensekben
+
+Minden `@keyframes` és animációs keyframe definíció a `src/index.css`-be tartozik. A komponensek nem injektálhatnak `<style>` elemeket. A Tailwind tetszőleges `animate-[...]` szintaxis vagy a globális stylesheet-ben definiált keyframe nevekre hivatkozó inline `style` attribútumok a helyes megközelítés.
+
+### FormData feltöltések
+
+Amikor az `apiClient`-et fájlok feltöltésére használod, adj át egy `FormData` objektumot a kérés testjeként, és ne állítsd be kézzel a `Content-Type` fejlécet. A request interceptor felismeri a `FormData`-t, és törli a fejlécet, hogy a böngésző automatikusan beállíthassa a helyes `multipart/form-data; boundary=...` értéket.

@@ -1,171 +1,269 @@
-# SMAASH — Tesztdokumentáció
+# SMAASH Web Kliens — Tesztdokumentáció
 
-> Ez a dokumentum a SMAASH kliens automatizált tesztjeit és kézi tesztelési forgatókönyveit mutatja be minden funkcionális területen. Az élszetes esetekre, helytelen bemenetekre és határértékekre összpontosít — azokra a helyzetekre, ahol a rendszernek akkor is helyesen kell viselkednie, ha a felhasználó nem a várt módon jár el.
-
----
-
-## Automatizált tesztek futtatása
+## A tesztek futtatása
 
 ```bash
 cd client
-npm run test          # Minden teszt egyszeri futtatása
-npm run test:watch    # Figyelő mód — fájlváltozásnál újrafut
-npm run test:coverage # Lefedettségi riport
+npm run test        # az összes teszt egyszeri futtatása és kilépés
+npm run test:run    # ugyanaz, alias
 ```
 
-A tesztek **Vitest** + **@testing-library/react** alapon futnak. A konfigurációt a `vite.config.ts` fájl `test` kulcsa tartalmazza.
+A test runner a Vitest, a `vite.config.ts` `test` kulcsa alatt konfigurálva:
+
+```typescript
+test: {
+  environment: "jsdom",
+  globals: true,
+  setupFiles: ["./src/test-setup.ts"],
+}
+```
+
+A `globals: true` elérhetővé teszi a `describe`, `it`, `expect` és `vi` segédprogramokat minden tesztfájlban importok nélkül. A `jsdom` környezet teljes DOM implementációt biztosít, így React komponensek renderelhetők és lekérdezhetők a test runnerben.
+
+A tesztfájlok a tesztelt kód mellé vannak elhelyezve. Bármely `.test.tsx` vagy `.test.ts` végű fájl az `src/` bármely pontján automatikusan felismeri a Vitest.
 
 ---
 
-## Automatizált teszt lefedettség
+## Meglévő automatizált tesztek
 
-### `ErrorBoundary.test.tsx`
+### `src/components/ErrorBoundary.test.tsx`
 
-A React error boundary komponenst teszteli (`src/components/ErrorBoundary.tsx`).
+Az `ErrorBoundary`-t teszteli, a `src/components/ErrorBoundary.tsx` osztályalapú React error boundary-t.
 
-| Teszt | Mit ellenőriz |
-|---|---|
-| Fallback UI renderelése, ha a gyerek throw-ol | Ha egy gyerek komponens hibát dob, a boundary elkapja, és megjeleníti a "Something went wrong on this page." szöveget a hibaüzenettel együtt |
-| Egyéni fallback renderelése, ha meg van adva | Ha `fallback` prop van megadva, a boundary azt rendereli az alapértelmezett üzenet helyett |
+A tesztfájl definiál egy `Crash` komponenst, amely feltétel nélkül dob egy `Error("Boom")` kivételt renderelés közben. Ez kerül felhasználásra hibázó gyerekként.
 
-Mindkét teszt elnémítja a `console.error`-t a renderelés alatt, mivel a React alapértelmezés szerint naplózza az elkapott hibákat.
+#### Teszt: fallback UI renderelése, ha a gyerek dob
 
-### `RequireAuth.test.tsx`
+```typescript
+render(
+  <ErrorBoundary>
+    <Crash />
+  </ErrorBoundary>
+);
 
-Az `/app/*` route-okat védő route guard komponenst teszteli (`src/components/RequireAuth.tsx`).
+expect(screen.getByText("Something went wrong on this page.")).toBeInTheDocument();
+expect(screen.getByText("Boom")).toBeInTheDocument();
+```
 
-| Teszt | Mit ellenőriz |
-|---|---|
-| Védett route renderelése hitelesítéskor | Ha `AuthContext.isLoggedIn` értéke `true`, a védett route normálisan renderelődik |
-| Átirányítás loginra hitelesítés nélkül | Ha `isLoggedIn` értéke `false` és `isInitializing` értéke `false`, a védett route-ra navigálás `/app/login`-ra irányít |
-| Betöltési állapot auth inicializálás közben | Ha `isInitializing` értéke `true`, betöltési animáció jelenik meg átirányítás helyett — ez megakadályozza a villanást, mielőtt az auth ellenőrzés befejeződik |
+Amikor egy gyerek dob, a `getDerivedStateFromError` `true`-ra állítja a `hasError`-t és eltárolja az `Error` objektumot. A boundary rendereli az alapértelmezett fallback-et: egy közép-igazított kártyát a statikus "Something went wrong on this page." üzenettel és az `error.message` értékével ("Boom") alatta. Mindkettőnek a dokumentumban kell lennie.
 
-### `ItemFilters.test.tsx`
+A `console.error`-ra kémlelik ki a `vi.spyOn(console, "error").mockImplementation(() => {})` segítségével, hogy elnyomják a React belső hibanaplózását, amely a caught boundary renderelések során történik. A kém `mockRestore()`-ral kerül visszaállításra az assertion után, hogy ne szivárogjon át más tesztekbe.
 
-A Webstore szűrőchip komponensét teszteli (`src/pages/webstore/components/ItemFilters.tsx`).
+#### Teszt: egyéni fallback renderelése, ha meg van adva
 
-| Teszt | Mit ellenőriz |
-|---|---|
-| onSelect meghívása a kattintott opcióval | Szűrő opció kattintásakor az `onSelect` callback az opció pontos string értékével hívódik meg |
+```typescript
+render(
+  <ErrorBoundary fallback={<div>Custom Error</div>}>
+    <Crash />
+  </ErrorBoundary>
+);
 
-Az `useSettings` kontextust rögzített beállítás objektummal mockolják, mivel a teszt csak a callback viselkedést ellenőrzi, nem a témázást.
+expect(screen.getByText("Custom Error")).toBeInTheDocument();
+```
+
+Ha a `fallback` prop meg van adva, a boundary azt az elemet rendereli az alapértelmezett üzenet helyett. A teszt ellenőrzi, hogy a "Custom Error" megjelenik és az alapértelmezett szöveg nem.
+
+Ugyanaz a `console.error` mock minta kerül alkalmazásra.
+
+---
+
+### `src/components/RequireAuth.test.tsx`
+
+A `RequireAuth`-t teszteli, a `src/components/RequireAuth.tsx` route guard komponenst, amely az összes `/app/*` route-ot védi.
+
+A teszt egy `renderProtectedRoute(isLoggedIn, isInitializing?)` helper-t használ, amely a `RequireAuth`-t egy teljes routing context-be csomagolja `MemoryRouter` segítségével. Két route van beállítva: egy nyilvános bejelentkezési oldal és a védett releases oldal. Az `AuthContext.Provider` közvetlenül kerül felhasználásra kontrollált autentikációs állapot injektálásához egy valódi `AuthProvider` nélkül:
+
+```typescript
+function renderProtectedRoute(isLoggedIn: boolean, isInitializing = false) {
+  return render(
+    <AuthContext.Provider
+      value={{
+        isLoggedIn,
+        isInitializing,
+        userId: null,
+        setUserId: () => {},
+        setIsLoggedIn: () => {},
+        isAdmin: false,
+        setIsAdmin: () => {},
+        isSupport: false,
+        setIsSupport: () => {},
+      }}
+    >
+      <MemoryRouter initialEntries={["/app/releases"]}>
+        <Routes>
+          <Route path="/app/login" element={<div>Login Page</div>} />
+          <Route element={<RequireAuth />}>
+            <Route path="/app/releases" element={<div>Releases Page</div>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    </AuthContext.Provider>
+  );
+}
+```
+
+#### Teszt: védett route renderelése hitelesítéskor
+
+```typescript
+renderProtectedRoute(true);
+expect(screen.getByText("Releases Page")).toBeInTheDocument();
+```
+
+Amikor az `isLoggedIn` értéke `true`, a `RequireAuth` rendereli az `<Outlet />`-ot és a releases oldal tartalma láthatóvá válik.
+
+#### Teszt: átirányítás loginra hitelesítés nélkül
+
+```typescript
+renderProtectedRoute(false);
+expect(screen.getByText("Login Page")).toBeInTheDocument();
+```
+
+Amikor az `isLoggedIn` értéke `false` és az `isInitializing` értéke `false`, a `RequireAuth` renderel egy `<Navigate to="/app/login">` elemet. A router követi az átirányítást és a bejelentkezési oldal renderelődik.
+
+#### Teszt: betöltési állapot megjelenítése az autentikáció inicializálásakor
+
+```typescript
+renderProtectedRoute(false, true);
+expect(document.querySelector(".animate-spin")).toBeInTheDocument();
+```
+
+Amikor az `isInitializing` értéke `true`, a `RequireAuth` egy `animate-spin` CSS osztályú spinner div-et renderel az oldalon lévő tartalom vagy az átirányítás helyett. A teszt közvetlenül ellenőrzi ezt az elemet a dokumentumban. Ez az eset a kezdeti render és a `useWhoAmIQuery` feloldódásának pillanata között az ablakot reprezentálja — e nélkül a guard nélkül a router minden oldalfrissítésnél a loginra irányítana át, még a session ellenőrzés befejezése előtt.
+
+---
+
+### `src/pages/webstore/components/ItemFilters.test.tsx`
+
+Az `ItemFilters`-t teszteli, a webáruházban használt szűrőchip sor komponenst.
+
+A `useSettings` context a fájl tetején van mockolva, mert az `ItemFilters` belülről olvas belőle témazáshoz. A mock egy rögzített beállítás objektumot ad vissza `useAnimations: true`, `useLiquidGlass: false`, `useDarkMode: false`, `language: "en"` és `animationOverride: null` értékekkel:
+
+```typescript
+vi.mock("@/pages/settings/SettingsContext", () => ({
+  useSettings: () => ({
+    settings: {
+      useAnimations: true,
+      useLiquidGlass: false,
+      useDarkMode: false,
+      language: "en",
+      animationOverride: null,
+    },
+    updateSetting: vi.fn(),
+  }),
+}));
+```
+
+#### Teszt: onSelect meghívása a kattintott opcióval
+
+```typescript
+const onSelect = vi.fn();
+
+render(
+  <ItemFilters
+    label="Rarity"
+    options={["All", "Rare", "Epic"]}
+    selected="All"
+    onSelect={onSelect}
+  />
+);
+
+fireEvent.click(screen.getByText("Rare"));
+expect(onSelect).toHaveBeenCalledWith("Rare");
+```
+
+A "Rare" chipre kattintva az `onSelect` callback meghívódik a `"Rare"` string argumentummal. A teszt ellenőrzi, hogy a callback a helyes argumentumot kapja. A teszt nem törődik a vizuális állapottal — csak a callback szerződést ellenőrzi.
+
+---
+
+## Tesztelési minták ebben a kódbázisban
+
+### Context injektálása valódi provider nélkül
+
+Amikor egy komponens React context-től függ, injektáld a context értékét közvetlenül a `<ContextName.Provider value={...}>` segítségével a teszt fában. Ez elkerüli a valódi provider szükségességét, amely hálózati kéréseket küldhet vagy tárolóból tölthet be.
+
+Alkalmazott minta: `RequireAuth.test.tsx` (az `AuthContext` injektálása).
+
+### Modul szintű függőségek mockolása
+
+Amikor egy komponens olyan egyéni hook-ot hív, amely tárolóval vagy más állapottal dolgozik, mockold az egész modult a `vi.mock("elérési_út", factory)` segítségével. A factory szinkron módon fut és az összes exportot vissza kell adnia, amelyet a komponens használ.
+
+Alkalmazott minta: `ItemFilters.test.tsx` (a `useSettings` mockolása).
+
+### Várt konzolkimenet elnyomása
+
+A React a console-ra naplózza az error boundary-k által elkapott hibákat. Ez szennyezi a teszt kimenetet. Kémlelj rá a `console.error`-ra a `vi.spyOn` segítségével és mockold az implementációt egy üres függvénnyel. Mindig hívd meg a `mockRestore()`-t ugyanabban a tesztben, hogy elkerüld a mock átszüremlését más tesztekbe.
+
+```typescript
+const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+// ... render és assertion ...
+spy.mockRestore();
+```
+
+Alkalmazott minta: az `ErrorBoundary.test.tsx` mindkét tesztje.
+
+### Routing a tesztekben
+
+Használd a `MemoryRouter`-t a `react-router-dom`-ból `BrowserRouter` helyett. Az `initialEntries`-t add meg a kiinduló URL vezérléséhez. A route-okat a teszten belül definiáld `Routes` és `Route` komponensekkel. Ez teljes kontrollt ad a routing állapot felett anélkül, hogy a `window.location`-re támaszkodnánk.
+
+Alkalmazott minta: `RequireAuth.test.tsx`.
+
+### Esemény szimuláció
+
+Használd a `fireEvent.click(elem)` hívást a `@testing-library/react`-ból a felhasználói kattintások szimulálásához. A `screen.getByText("...")` az elemeket látható szövegtartalmuk alapján keresi meg. Részesítsd előnyben a szöveg alapú kereséseket a szerepkör alapú keresésekkel szemben, amikor callback viselkedést tesztelsz, nem akadálymentesítési szemantikát.
 
 ---
 
 ## Kézi tesztelési forgatókönyvek
 
-### Regisztráció (`/app/signup`)
+### Bejelentkezési oldal
 
-| Forgatókönyv | Bemenet | Várt viselkedés |
-|---|---|---|
-| Üres email mező | Küldés üres email mezővel | HTML5 form validáció megakadályozza a küldést; a böngésző "töltsd ki ezt a mezőt" üzenetet jelenít meg |
-| Érvénytelen email formátum | `"nemememail"` vagy `"felhasznalo@"` | HTML5 `type="email"` validáció megakadályozza a küldést; a böngésző formátum hibát jelez |
-| Üres jelszó | Küldés jelszó nélkül | HTML5 `required` megakadályozza a küldést |
-| Jelszó túl rövid | 1–7 karakter hosszú jelszó | Kliens oldali hiba jelenik meg API hívás előtt: "A jelszó túl rövid" (vagy a megfelelő fordítás); az form nem küldi el |
-| Jelszavak nem egyeznek | Jelszó: `"jelszo123"`, Megerősítés: `"mas"` | Kliens oldali hiba: "A jelszavak nem egyeznek"; a form nem küldi el |
-| Javított jelszó egyezés | A megerősítő jelszó javítása az egyezőre | A hiba azonnal eltűnik a gépeléskor; a form normálisan küldi el |
-| Már foglalt email cím | Már regisztrált email a rendszerben | A szerver hibát ad vissza; az üzenet kinyerve és megjelenítve a form hibajelzőjében |
-| Érvényes regisztráció | Minden mező helyes, egyedi email, jelszó ≥ 8 karakter | Sikeres: átirányítás `/app/login`-ra |
+**Rossz hitelesítő adatok**: adj meg helyes e-mail formátumot rossz jelszóval. A form megmutatja az "Érvénytelen hitelesítő adatok" üzenetet. Négy sikertelen kísérlet után a form letiltódik és a küldés gomb 30 másodperces visszaszámlálót mutat. A visszaszámlálás lejárta után a form újra engedélyezetté válik.
 
-### Bejelentkezés (`/app/login`)
+**Tiltott fiók**: jelentkezz be egy tiltott felhasználó hitelesítő adataival. A hibaüzenet jelzi, hogy a tiltás ideiglenes-e (lejárattal) vagy végleges.
 
-| Forgatókönyv | Bemenet | Várt viselkedés |
-|---|---|---|
-| Üres mezők | Küldés üres email vagy jelszó mezővel | HTML5 `required` megakadályozza a küldést |
-| Érvénytelen email formátum | `"nemememail"` | HTML5 `type="email"` validáció megakadályozza a küldést |
-| Rossz hitelesítő adatok (1–4. kísérlet) | Érvényes email formátum, rossz jelszó | Homályos hiba: "Érvénytelen hitelesítő adatok" (soha nem árulja el, melyik mező rossz); fennmaradó kísérletek száma jelenik meg: "X kísérlet maradt a zárolás előtt" |
-| Rossz hitelesítő adatok (5. kísérlet) | Bármi rossz jelszó 4 kudarcot követően | 30 másodperces kliens oldali zárolás aktiválódik; form mezők és küldés gomb letiltva; a gomb felirata `Locked (30s)` visszaszámlálással |
-| Zárolás alatt | Bármilyen bevitel | A küldés teljesen blokkolva; a visszaszámlálás a gomb feliratán folytatódik |
-| Zárolás lejár | 30 másodperc várakozás | A számláló nullára ér, a form újra engedélyezetté válik, a kísérletszámláló nullázódik |
-| Tiltott fiók (ideiglenes tiltás) | Helyes hitelesítő adatok tiltott felhasználóhoz | Hiba: "Your account is banned until [dátum]." — a tiltás lejárati dátuma megjelenik |
-| Tiltott fiók (végleges tiltás) | Helyes hitelesítő adatok véglegesen tiltott felhasználóhoz | Hiba: "Your account has been permanently banned." |
-| Érvényes hitelesítő adatok | Helyes email és jelszó | Átirányítás `/app/profile-selector`-ra; ha védett oldalról érkeztek, visszairányítás az eredeti céloldalra |
+**Átirányítás megőrzése**: navigálj közvetlenül a `/app/releases` oldalra session nélkül. A bejelentkezési átirányítás az eredeti útvonalat tárolja a `location.state.from`-ban. Bejelentkezés után az alkalmazás visszanavigál a `/app/releases`-re az alapértelmezett helyett.
 
-### Jelszó-visszaállítás (`/app/reset-password`)
+### Regisztrációs oldal
 
-| Forgatókönyv | Bemenet | Várt viselkedés |
-|---|---|---|
-| Érvénytelen email formátum | `"nemememail"` | HTML5 `type="email"` validáció megakadályozza a küldést |
-| Üres email | Küldés email megadása nélkül | HTML5 `required` megakadályozza a küldést |
-| Bármilyen érvényes email elküldve | Bármilyen helyesen formázott email | A form sikeresen elküld; tájékoztató üzenet jelenik meg: a funkció nem elérhető (a jelszó-visszaállítás nincs bekötve backend végponthoz); a form mező és a gomb letiltódnak |
+**Biztonsági kulcs megjelenítése**: sikeres regisztráció után a biztonsági kulcs pontosan egyszer jelenik meg. Navigálj el és vissza — eltűnt. Nincs mód arra, hogy az UI-ból újra lekérjük.
 
-> **Megjegyzés:** A jelszó-visszaállítási folyamat csak UI placeholder. A küldés nem indít el semmilyen emailt vagy backend kérést. A gomb az első küldést követően véglegesen letiltódik, hogy megakadályozza az ismételt kísérleteket.
+**Jelszó validáció**: a form ellenőrzi, hogy mindkét jelszó mező egyezik-e, és hogy a jelszó teljesíti-e a minimális hosszúsági követelményt a küldés előtt. Ha a kliens oldali validáció sikertelen, a szerver nem kerül meghívásra.
 
-### Profil szerkesztése — Edit Sheet (`/app/profile`)
+### Profilkép feltöltése
 
-A profil szerkesztő panel a Profile oldalon a "Profil szerkesztése" gombra kattintva nyílik meg.
+**5 MB feletti fájl**: tölts fel 5 MB-nál nagyobb képet. A kliens visszautasítja a HTTP kérés elkészítése előtt és hibát mutat. A `useProfile.ts` hook a `MAX_PFP_SIZE_BYTES = 5 * 1024 * 1024` értékkel kényszeríti ezt az `uploadProfilePicture` függvényen belül.
 
-| Forgatókönyv | Bemenet | Várt viselkedés |
-|---|---|---|
-| Nincs változtatás | Panel megnyitása, semmi sem módosítva | A Mentés gomb letiltott; kattintás nem tesz semmit |
-| Megjelenési név a határon | Pontosan 20 karakter bevitele | Az input elfogadja a 20. karaktert; a 21. karaktert a `maxLength` visszautasítja hiba nélkül |
-| Megjelenési név a határon túl | Több mint 20 karakter gépelésének kísérlete | Az input csendesen leáll 20 karakternél; nincs hibaüzenet |
-| Email a határon túl | Több mint 30 karakter gépelésének kísérlete | Az input csendesen leáll 30 karakternél; nincs hibaüzenet |
-| Érvénytelen email formátum | `"nemememail"` az email mezőbe | A mező `type="email"` attribútummal rendelkezik — a böngésző érvényesíthet formátumot; a szerver mentéskor visszautasítja, ha a formátum helytelen |
-| Már foglalt email cím | Email módosítása másik fiók által használt email-re | A szerver hibát ad vissza; hibaüzenet jelenik meg a panel piros figyelmeztető területén |
-| Érvényes változtatások | Megjelenési név vagy email módosítása új érvényes értékekre | Mentés gomb engedélyezetté válik; kattintásra mindkét módosított mező párhuzamosan mentődik; rövid sikerindikátor jelenik meg; a panel automatikusan bezárul ~900ms után |
-| Jelszó mező | Gépelési kísérlet a jelszó mezőbe | A mező letiltott és csak olvasható; az alatta lévő link a `/app/reset-password` oldalra navigál |
+**Nem támogatott formátum**: tölts fel `.bmp` vagy `.tiff` fájlt. A kliens ellenőrzi a `file.type`-ot az `ALLOWED_IMAGE_TYPES` listával szemben és visszautasítja.
 
-### Webstore (`/app/webstore`)
-
-| Forgatókönyv | Bemenet | Várt viselkedés |
-|---|---|---|
-| A tárgy többe kerül, mint a felhasználó egyenlege | Tárgyak böngészése ahol `item.price > userCoins` | A Vásárlás gomb "Nem engedheted meg" feliratot mutat és le van tiltva; az ár pirosban jelenik meg; az érmék ikon pirosra vált |
-| A tárgy már a tulajdonban van | Saját tárgy megtekintése | A Vásárlás gomb helyén "Tulajdonolt" jelzés jelenik meg (zöld pipa + "Tulajdonolt" szöveg); vásárlási művelet nem lehetséges |
-| Vásárlás folyamatban | Kattintás vásárlásra megfizethető, nem saját tárgyra | A gomb forgó betöltési animációt és "Feloldás..." szöveget mutat; letiltva amíg a mutáció függőben van |
-| Szűrés ritkaság szerint | "Rare" kiválasztása a ritkaság szűrőből | Csak Rare tárgyak jelennek meg; a többi elrejtve |
-| Szűrés harcstílus szerint | "Melee" kiválasztása | Csak Melee tárgyak jelennek meg |
-| Szűrés nem ad eredményt | Olyan szűrők alkalmazása, amelyek nem illeszkednek semmire | Üres állapot jelenik meg |
-| Keresés név szerint | Szöveg gépelése a keresőmezőbe | A tárgyak valós időben szűrődnek gépelés közben |
-| Admin tárgykezelés admin szerepkör nélkül | Bejelentkezés nem-admin felhasználóként | A szerkesztés és törlés gombok nem renderelődnek a tárgy kártyákon (az `AuthContext` `isAdmin` értéke szabályozza) |
-
-### Admin Panel (`/app/admin`)
-
-Hozzáféréshez admin szerepkör szükséges; nem-admin felhasználók a route szinten irányítódnak el.
-
-| Forgatókönyv | Bemenet | Várt viselkedés |
-|---|---|---|
-| Nem létező felhasználó keresése | Olyan nevet gépelni, amellyel nincs felhasználó | Üres felhasználólista; nincs "nincs találat" hibaüzenet — a lista egyszerűen üres |
-| Tiltás ok megadása nélkül | Tiltás alkalmazása indoklás megadása nélkül | A tiltás engedélyezett; az ok opcionális |
-| Már tiltott felhasználó tiltása | Tiltás alkalmazásának kísérlete már tiltott felhasználóra | A UI az aktuális tiltás lejáratát mutatja a UserDetail panelen; új tiltás alkalmazható, amely felülírja a régit |
-| Felhasználó előléptetése adminná | Kattintás az Előléptetés gombra nem-admin felhasználónál | A felhasználó szerepköre adminra frissül; a szerepkör jelvény frissül a UserDetail panelen |
-| Admin visszasorolása | Kattintás a Visszasorolás gombra admin felhasználónál | A szerepkör frissül; az admin hozzáférés eltávolítódik a következő bejelentkezéstől |
-
-### Gallery — OST lejátszó (`/app/gallery` → OST tab)
-
-| Forgatókönyv | Bemenet | Várt viselkedés |
-|---|---|---|
-| Seekbar húzása az elejére | A lejátszási seekbar teljes mértékű húzása balra | A lejátszási pozíció 0:00-ra ugrik |
-| Seekbar húzása a végére | A lejátszási seekbar teljes mértékű húzása jobbra | A lejátszási pozíció a szám teljes időtartamára ugrik |
-| Seekbar húzása az elemen kívülre | Húzás indítása, majd az egér mozgatása a seekbar sávon kívülre | A `setPointerCapture` fenntartja a húzást; a pozíció frissül az egér elengedéséig |
-| Hangerő nullán | A hangerő csúszka teljes húzása balra | A hangerő 0-ra ér; néma ikon jelenik meg |
-| Hangerő maximumon | A hangerő csúszka teljes húzása jobbra | A hangerő 1.0-ra ér (teljes hangerő) |
-| Némítás kapcsoló | A hangszóró/néma ikonra kattintás | A hang némítódik vagy visszakapcsolódik; az ikon a hangszóró variánsok között vált |
-| Számra kattintás a listában | Bármely szám nevére kattintás | A szám azonnal megváltozik; a lejátszás az új szám elejéről indul |
-| Lejátszás/szünet kapcsoló | Lejátszás gombra kattintás, majd szünet | A hang elindul és megáll helyesen; az ikon vált lejátszás és szünet között |
+**Sikeres feltöltés**: sikeres feltöltés után az új kép azonnal megjelenik az oldalfrissítés nélkül. Az URL-en lévő `?v=<timestamp>` cache-törő paraméter a mechanizmus — ellenőrizd, hogy megjelenik-e a `<img>` tag `src` attribútumában a feltöltés után.
 
 ### Route-védelem
 
-| Forgatókönyv | Feltétel | Várt viselkedés |
-|---|---|---|
-| Védett route elérése session nélkül | Navigálás bármely `/app/*` route-ra bejelentkezés nélkül | Átirányítás `/app/login`-ra; az eredeti URL `location.state.from`-ban tárolódik, hogy bejelentkezés után visszanavigáljanak |
-| Admin route elérése normál felhasználóként | Navigálás `/app/admin`-ra vagy `/app/debug`-ra nem-admin felhasználóként | Elirányítás; az oldal tartalma soha nem renderelődik |
-| Auth ellenőrzés folyamatban | Az oldal betölt, miközben `AuthContext.isInitializing` értéke `true` | Betöltési animáció jelenik meg átirányítás helyett; megakadályozza az idő előtti átirányítást a session megerősítése előtt |
-| Session lejár munkamenet közben | Bármilyen API kérés a session cookie lejárta után | Az `apiClient` 401 interceptora elsül; automatikus átirányítás `/app/login`-ra |
+**Nem hitelesített hozzáférés**: navigálj a `/app/releases` oldalra bejelentkezés nélkül. Várj átirányítást a `/app/login`-ra. Az eredeti URL-nek a `location.state.from`-ban kell megőrződnie.
+
+**Nem-admin hozzáférés az admin oldalhoz**: normál felhasználóként lépj be és navigálj a `/app/admin`-ra. Várd, hogy az oldal ne renderelődjön — a `DebugPage` és az `AdminPage` komponensek ellenőrzik az `isAdmin` értéket az `AuthContext`-ből és `<NotFoundPage />`-t adnak vissza, ha az false.
+
+**Session lejárat munkamenet közben**: hagyd lejárni a session cookie-t, amíg az alkalmazás nyitva van. Indíts el bármilyen API kérést kiváltó navigációt. Az `apiClient.ts` 401 interceptorának azonnal a `/app/login`-ra kell átirányítania.
 
 ### Beállítások megőrzése
 
-| Forgatókönyv | Művelet | Várt viselkedés |
-|---|---|---|
-| Frissítés témaváltás után | Váltás sötét módba, oldal frissítése | A sötét mód megmarad (`localStorage`-ban tárolva a `settings` kulcs alatt) |
-| Frissítés szín módosítása után | Egyéni gradiens színek beállítása, frissítés | A színek megmaradnak (`color-settings` alatt tárolva) |
-| Eszközváltás / localStorage törlése | Bejelentkezés más böngészőből vagy localStorage törlése | A beállítások visszaállnak az alapértelmezettekre; a témát és a színeket újra be kell állítani |
-| Több lap | Az alkalmazás megnyitása két lapon, beállítások megváltoztatása az egyiken | A beállítás változás az adott lap localStorage írására korlátozódik; a másik lap nem frissül valós időben |
+Váltsd a nyelvet magyarra, kapcsold be a sötét módot és válts a Midnight témára, majd zárd be és nyisd újra a böngészőfület. Mindhárom beállításnak meg kell maradnia, mert a `SettingsContext` a `localStorage["settings"]`-be szerializál.
+
+Nyisd meg ugyanazt a fiókot egy második böngészőfülön és változtass egy beállítást ott. Az első fül nem frissül valós időben — a beállítások csak csatoláskor olvasódnak a tárolóból.
+
+### React Query cache
+
+Nyisd meg a React Query DevTools-t (bal alsó gomb fejlesztői módban). A profil lista betöltése után erősítsd meg, hogy a `["profiles", "byUserId", <id>]` cache bejegyzés létezik és nincs elavultnak jelölve. Indíts el egy profil frissítést — a bejegyzést invalidálni kell és újra lekérni. Kijelentkezés után erősítsd meg, hogy a cache üres (a `queryClient.clear()` kerül meghívásra a logout sikerekor).
+
+### Toast értesítések
+
+Válts ki egy sikeres műveletet (például profil névmentés) és ellenőrizd, hogy egy zöld "success" toast megjelenik és körülbelül 4 másodperc után automatikusan eltűnik. Válts ki egy hibát (küldj érvénytelen formot a szervernek) és ellenőrizd, hogy egy piros "error" toast megjelenik.
 
 ---
 
-## Vitest konfiguráció
+## Új tesztek hozzáadása
 
-A tesztek `jsdom`-ot használnak teszt környezetként (a `vite.config.ts`-ben konfigurálva). A globális teszt segédprogramok (`describe`, `it`, `expect`, `vi`) importok nélkül elérhetők. Az `@testing-library/jest-dom` matcherek (pl. `toBeInTheDocument`) a Vitest setup fájljában vannak beállítva.
-
-Új tesztfájl hozzáadásához hozz létre egy `.test.tsx` (vagy `.test.ts`) fájlt az `src/` bármely pontján. A Vitest automatikusan felismeri.
+1. Hozz létre egy `.test.tsx` végű fájlt a tesztelt komponens mellé, vagy egy `__tests__/` könyvtárba mellette.
+2. Importálj a `@testing-library/react`-ból (`render`, `screen`, `fireEvent`) és a komponens moduljából.
+3. Mockold a modul szintű függőségeket a `vi.mock("elérési_út", factory)` segítségével a fájl tetején.
+4. Injektálj context provider-eket a renderelt komponens köré, amikor a komponens tőlük függ.
+5. Assertálj a `expect(...).toBeInTheDocument()` és más `@testing-library/jest-dom` matcherek segítségével. Ezek globálisan elérhetők a setup fájlon keresztül.

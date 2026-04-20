@@ -1,206 +1,201 @@
-# SMAASH — Felhasználói útmutató
+# SMAASH Web Kliens — Felhasználói Útmutató
 
-> Üdvözlünk! Ez az útmutató végigvezet mindenen, amit a SMAASH platform kínál: a profil beállításától a megjelenés testreszabásán és a tárgyak vásárlásán át a ranglistáig és tovább. Olvasd el az egészet, vagy ugorj egyenesen ahhoz, amire szükséged van.
+## Mi ez az alkalmazás
 
----
-
-## Első lépések
-
-### Fiók létrehozása
-
-1. Nyisd meg az alkalmazást és kattints a **Regisztráció** gombra
-2. Add meg az email-címedet és válassz jelszót
-3. Jelentkezz be ezekkel az adatokkal
-4. A News vagy a Releases oldalra fogsz kerülni — onnan fedezd fel a többit
-
-### Visszatérő játékos
-
-Elég csak bejelentkezned. A kiválasztott profilod, a témabeállításaid és a legtöbb preferenciád automatikusan mentve van a böngésződben, szóval minden pontosan úgy fog kinézni, ahogy hagytad.
+A SMAASH egy webes kísérőplatform egy játékhoz. Lehetőséget biztosít a játék letöltéseinek elérésére, a játszható karakterek galériájának böngészésére, a globális ranglista megtekintésére, hírek olvasására, valamint egy játékon belüli tárgybolt használatára. Minden a `/app/` útvonalon érhető el a böngészőben. Az alkalmazás támogatja az angol és a magyar nyelvet, és megjegyzi a megjelenítési beállításokat a munkamenetek között.
 
 ---
 
-## Navigáció
+## Regisztráció
 
-A felső navigáció az alkalmazás fő vezérlőköze. Az alábbiakban láthatod, mit tartalmaz minden szekció és miért érdemes odamenni:
+Menj a `/app/signup` oldalra. Add meg az e-mail címedet és válassz jelszót. Az űrlap elküldése előtt el kell végezned egy reCAPTCHA ellenőrzést is — ez védi a regisztrációs végpontot az automatikus robotok ellen.
 
-| Szekció | Mit találsz itt | Miért mennél oda |
-|---|---|---|
-| **Releases** | A játék verziótörténete és kiadási jegyzetek | A legújabb verzió letöltéséhez vagy a változások megtekintéséhez |
-| **News** | Közösségi posztok és bejelentések | Naprakész maradáshoz a játék frissítéseivel és eseményeivel kapcsolatban |
-| **Webstore** | Tárgyak, kozmetikumok és a battle pass | Coinok elköltéséhez a profilod díszítésére |
-| **Leaderboard** | Globális ranglisták kategóriánként | Annak megtekintéséhez, hol állsz te és más játékosok |
-| **Gallery** | Karakterek bemutatása és a hivatalos OST | Játék illusztrációk böngészéséhez és a zenei tartalom hallgatásához |
-| **Profile** | Fiókadatok és statisztikák | Megjelenési neved, emailed módosításához vagy fejlődésed nyomon követéséhez |
-| **Settings** | Téma, nyelv és animáció beállítások | Az alkalmazás kényelmessé és személyessé tételéhez |
+Amikor a fiókod létrejön, a szerver visszaküld egy biztonsági kulcsot. Ez a kulcs pontosan egyszer jelenik meg, közvetlenül a regisztráció után. Jegyezd fel és őrizd meg biztonságos helyen. Ez az egyetlen módja a jelszó visszaállításának, ha elfelejtennéd. Nincs e-mail alapú helyreállítás — a kulcs nélkül a jelszó nem változtatható meg.
 
-**Adminok** a navigációban látnak hivatkozást az **Admin Panelre** és a **Debug Dashboardra** is.
+A megjelenített nevet nem a regisztrációkor kell beállítani. Ez az első játékprofil létrehozásakor történik.
 
 ---
 
-## A profilod
+## Bejelentkezés
 
-### Játékkarakter kiválasztása
+Menj a `/app/login` oldalra. Add meg az e-mail címedet és a jelszavadat. Sikeres bejelentkezés után az alkalmazás automatikusan átirányít a `/app/releases` oldalra.
 
-Amikor először jelentkezel be, a **Profile Selector** segítségével választasz aktív játékprofilt. Ez az a karakter, amely in-game képvisel téged. A coin-egyenleged, a vásárlásaid és a statisztikáid mind ehhez az aktív profilhoz kötődnek.
-
-**Profil váltáshoz:**
-1. Nyisd meg a **Profile** szekciót a navigációból
-2. Kattints egy másik karakterre
-3. Az alkalmazás azonnal elmenti a választásodat
-
-### Fiókadatok módosítása
-
-A **Profile** oldalon megtehetod:
-
-- **Megjelenési nevet változtatni** — így látnak téged más játékosok a ranglistákon és meccsekben
-- **Email-cím frissítése** — fiók-visszaállításhoz használt
-- **Statisztikák megtekintése** — győzelmek, lejátszott meccsek és más adatok
+Ha helytelen hitelesítési adatokat adsz meg, a szerver egy általános "érvénytelen hitelesítő adatok" üzenetet küld vissza anélkül, hogy megjelölné, melyik mező volt helytelen. Ismételt sikertelen kísérletek után a bejelentkezési form 30 másodpercre zárolja magát. A zárolás alatt a form mezői és a küldés gomb letiltásra kerülnek. A gomb feliratában egy visszaszámláló mutatja a hátralévő másodperceket.
 
 ---
 
-## A Webstore
+## Jelszó visszaállítása
 
-### Tárgyak böngészése
-
-A tárgyak több szempont szerint szűrhetők, így gyorsan megtalálhatod, amit keresel:
-
-- **Típus** — Karakter vagy Skin
-- **Harcstílus** — Melee vagy Ranged (karakterekre vonatkozik)
-- **Ritkaság** — Commontól Legendaryig
-- **Keresőmező** — bármit megtalálhatsz névvel azonnal
-
-### Tárgy vásárlása
-
-1. Tallózz a kívánt tárgyhoz
-2. Kattints a **Vásárlás** gombra
-3. A coin az aktív profilod egyenlegéből kerül levonásra
-4. A tárgy azonnal megjelenik a gyűjteményedben
-
-**A coin-egyenleged az aktív profilodhoz kötődik.** Ha profilt váltasz, az elérhető coinok is változnak. Vásárlás előtt győződj meg róla, hogy a megfelelő profilt választottad.
+Menj a `/app/reset-password` oldalra. Szükséged van a regisztrált e-mail címedre és a regisztrációkor kapott biztonsági kulcsra. Sikeres visszaállítás után a szerver egy teljesen új biztonsági kulcsot állít ki. Mentsd el — a régi azonnal érvénytelenné válik. A meglévő munkamenet is megszűnik, és újra be kell jelentkezned.
 
 ---
 
-## Hírek és bejelentések
+## Profilok
 
-A **News** szekcióban a csapat ezeket teszi közzé:
+Egy SMAASH fiók több játékprofilt is tárolhat. Gondolj rájuk úgy, mint különálló mentési helyekre — mindegyiknek saját megjelenített neve, érme egyenlege és profilképe van. Bejelentkezés után a `/app/profile-selector` oldalra kerülsz, ahol kiválasztod, melyik profillal szeretnél játszani az adott munkamenetben.
 
-- Játékegyensúly-változások és patch notes-ok
-- Közelgő esemény-bejelentések
-- Közösségi kiemelések
-- Általános platform frissítések
+### Profil létrehozása
 
-Kulcsszavakra kereshetsz, vagy böngészheted a teljes feedet időrendben. Ha admin vagy, közvetlenül ebből az oldalból hozhatsz létre és szerkeszthetsz híreket.
+Kattints a hozzáadás gombra a profilválasztó képernyőn. Írj be egy megjelenített nevet. A 20 karakternél hosszabb neveket az alkalmazás automatikusan 20 karakterre vágja le. Ennél a lépésnél opcionálisan feltölthetsz profilképet is.
+
+Az elfogadott képformátumok: JPEG, PNG, WebP és GIF. A fájl mérete kisebb kell legyen 5 MB-nál. Ha a kép feltöltése sikertelen, a profil mégis létrejön kép nélkül — a feltöltést később is megpróbálhatod a profiloldalról.
+
+### Profil váltása
+
+Kattints bármelyik profilkártyára a profilválasztó képernyőn. Az alkalmazás elmenti a kiválasztást, és a munkamenet hátralévő részében ez a profil érvényes az érme egyenlegre, a vásárlásokra és a ranglistán elfoglalt pozícióra.
+
+### Profil szerkesztése
+
+A `/app/profile` oldalon kattints a szerkesztés gombra. Megnyílik egy oldalpanel, ahol módosíthatod a megjelenített nevet és feltölthetsz új profilképet. A névmezőre ugyanaz a 20 karakteres maximum érvényes. A képfeltöltésre ugyanazok a formátum- és méretkorlátozások vonatkoznak.
+
+### Profil törlése
+
+A profiloldalon a törlés kiválasztása azonnal eltávolítja a profilt a listából — a felhasználói felület a szerver megerősítése előtt frissül. Ha a szerver visszautasítja a törlést, a profil automatikusan visszajelenik.
 
 ---
 
-## Releases
+## Releases (Kiadások)
 
-A **Releases** oldal felsorolja a játék kliens minden elérhető verzióját.
+A kiadások oldala a `/app/releases` oldalon érhető el, és felsorolja a játékkliens elérhető letöltéseit. A tetején lévő platformválasztóval operációs rendszer szerint szűrhetsz — Windows, macOS vagy Linux. Egy keresőmező segítségével verziónév vagy tag alapján is kereshetsz. Minden kiadási bejegyzésnél megjelenik a verzió neve, leírása és egy letöltés gomb.
 
-**Mit tudsz itt csinálni:**
+---
 
-- Böngészni a teljes verziótörténetet
-- Platform szerint szűrni a letöltéseket
-- Elolvasni az egyes verziók kiadási megjegyzéseit letöltés előtt
+## Galéria
 
-**A letöltés gomb szürke, ha** az adott verzió még nem elérhető a platformodra, vagy ha nincs letöltési hivatkozás konfigurálva hozzá.
+A galéria a `/app/gallery` oldalon érhető el, és két részre osztható, amelyek között a tetején lévő fülekkel lehet váltani.
+
+A Karakterek fül a játék összes játszható karakterét mutatja. Minden kártyán a karakter grafikája és neve látható. Ehhez nincs szükség semmilyen előrehaladásra vagy feloldásra.
+
+Az OST fül egy teljes audiojátékos a játék eredeti zenéjéhez. Az egyik oldalon a számlista látható, a másikon a lejátszásvezérlők. Lejátszhatod és szüneteltetheted a lejátszást, bármelyik számra ugorhatsz rákattintással, a haladásjelzőt húzással az adott pontra viheted, és beállíthatod a hangerőt. A hangszóró ikon némítógombként is működik.
 
 ---
 
 ## Ranglista
 
-A ranglistánál felül megjelenik egy tab választó. Minden tab egy másik teljesítmény-kategóriára összpontosít.
-
-### Összes tab
-
-Gyors áttekintő minden kategóriáról egyszerre:
-
-- **Stat sáv** — négy kiemelő chip, amely az aktuális #1-est mutatja kategóriánként: legjobb győztes, legaktívabb játékos, legnépszerűbb pálya, legtöbbet vásárolt tárgy
-- **Négy panel** — panelenként top 5 bejegyzés, egymás mellett megjelenítve
-
-### Kategória tabok (Győzelmek / Aktív / Pályák / Tárgyak)
-
-Egy kategória tab kiválasztása a teljes részletes nézetet adja:
-
-1. **Dobogó** — a legjobb 3 klasszikus arany, ezüst és bronz dobogón. Az 1. hely a legmagasabb emelvényen áll középen; a 2. hely balra, a 3. jobbra
-2. **Továbbjutók** — a 4. és 5. hely közvetlenül a dobogó alatt listázva, ha léteznek
-3. **Teljes rangsor** — az összes bejegyzés görgethető listája eredeti rangszámmal. Használd a **keresőmezőt**, hogy adott játékost, pályát vagy tárgyat névvel megtalálj görgetés nélkül
-
-A leaderboard adatok időszakosan frissülnek, ahogy a szerver feldolgozza a meccs eredményeket. Ha az adatok elavultnak tűnnek, várj egy kicsit és frissítsd az oldalt.
+A ranglista a `/app/leaderboard` oldalon érhető el, és megmutatja, hogyan helyezkednek el a játékosok egymáshoz képest globálisan. A tetején lévő fülekkel kategóriák között válthatsz. Az egyes kategóriák legjobb három szereplője egy dobogón jelenik meg — az első hely középen, a második balra, a harmadik jobbra. A dobogó alatt a teljes rangsor kereshető játékosnév szerint.
 
 ---
 
-## Gallery
+## Hírek
 
-A Gallery oldalon két szekció érhető el a felső tab gombokon keresztül:
+A hírek oldala a `/app/news` oldalon érhető el, és bejelentéseket, patch note-okat, valamint közösségi frissítéseket tartalmaz. A bejegyzések kategóriák szerint vannak rendezve. Az oldal egyik oldalán lévő kategóriaszűrővel szűkítheted a hírfolyamot. A keresőmező kulcsszó alapján keres a bejegyzések között.
 
-- **Karakterek** — Az összes játékkarakter rácsban. Minden kártya mutatja a karakter portréját és nevét
-- **OST** — A teljes hivatalos hanganyag. Válassz egy számot, állítsd be a hangerőt, és használd a seekbart a számon belüli navigáláshoz. A jobb oldali számlista lehetővé teszi bármelyik dalra való közvetlen ugrást
-
----
-
-## Megjelenésed testreszabása
-
-### Settings áttekintés
-
-Minden, ami a **Settings**-ben van, a jelenlegi böngésződben mentődik. Ha eszközt váltasz, újra be kell állítanod a preferenciáidat.
-
-#### Nyelv
-
-Válts **angol** és **magyar** között. A változás azonnal érvénybe lép az egész alkalmazásban.
-
-#### Vizuális stílus
-
-- **Dark Mode** — sötétebb háttér világos szöveggel; gyenge fényviszonyok között kíméletesebb a szemnek
-- **Light Mode** — világos háttér magas kontraszttal; erősen megvilágított helyzetekben jobb
-- **Liquid Glass** — frosted-glass blur effektes glassmorphism stílus paneleken és kártyákon; modern böngészőt igényel a helyes megjelenítéshez
-
-#### Animációk
-
-- **Animációk engedélyezése** — gördülékeny belépési effektek, átmenetek és háttéreffektek
-- **Animációk letiltása** — statikus, azonnali felület; hasznos, ha a mozgáseffektek kellemetlenek, vagy ha lassabb eszközön vagy, és jobb teljesítményt szeretnél
-
-#### Egyéni téma
-
-- **Gradiens színek** — három színt válassz az alkalmazás elsődleges színpalettájának felépítéséhez; ezek érintik az akcentus színeket, nav kereteket, gomb kiemeléseket és chip háttereket mindenhol
-- **Háttéreffektus** — válassz a sok animált háttér közül (aurora, matrix, particles és még sok más)
-- **Rétegzett effektek** — kombinálj több háttér-animációt egyedi, rétegzett megjelenésért
+Ha admin vagy support jogosultságod van, minden bejegyzés mellett megjelennek a létrehozás, szerkesztés és törlés gombok. A normál felhasználók csak olvashatják a hírfolyamot.
 
 ---
 
-## Tippek a legtöbb kihozásához a SMAASH-ból
+## Webáruház
 
-1. **Töltsd el pár percet a Settings-ben** — egy számodra tetszetős szín téma és háttéreffektus kiválasztása minden oldalt jobbá tesz
-2. **Kapcsold ki az animációkat, ha zavarnak** — az alkalmazás tökéletesen működik nélkülük; sokan inkább a letisztultabb, gyorsabb érzetet kedvelik
-3. **Rendszeresen ellenőrizd a News részt** — ott kerülnek közzétételre elsőként a fontos bejelentések az eseményekről és a játék frissítésekről
-4. **Szabadon használd a Profile Selector-t** — ha több karaktered van, a váltás gyors és az előrehaladásod minden karakteren külön-külön van nyomon követve
-5. **Könyvjelzőzd a kedvenc oldalakat** — a ranglista, a webstore és a hírek könnyen elérhetők közvetlenül is
+A webáruház a `/app/webstore` oldalon érhető el, és az aktív profilod érméiért megvásárolható tárgyakat mutatja. Minden tárgyártyán szerepel a neve, leírása, ára és egy színes ritkaságjelölő. A ritkaságszintek: Közönséges, Nem közönséges, Ritka, Epikus és Legendás — mindegyiknek megkülönböztető színe van, hogy egyetlen pillantásra felismerd őket.
+
+A szűrősávval ritkaság vagy kategória szerint szűkítheted a tárgyakat. A keresőmezővel névszerint kereshetsz.
+
+A már megvásárolt tárgyaknál "Megvan" jelölés látható vásárlás gomb helyett. Azok a tárgyak, amelyek többe kerülnek, mint az aktív profilod egyenlege, letiltott gombot mutatnak. Az áruházban megjelenített érme egyenleg az éppen aktív profilodhoz van kötve, nem a fiókodhoz összességében. Profilt váltva megváltozik az elérhető egyenleg.
 
 ---
 
-## Adminoknak
+## Beállítások
 
-### Admin Panel (`/app/admin`)
+A beállítások oldala a `/app/settings` oldalon érhető el, és az alkalmazás megjelenését és viselkedését szabályozza.
 
-Az admin panel teljes felhasználókezelési lehetőséget biztosít:
+### Témák
 
-- Az összes regisztrált felhasználó böngészése és keresése
-- Bármely felhasználó teljes profil adatainak, fiók állapotának és játékprofiljainak megtekintése
-- **Tiltás** alkalmazása — időtartam kiválasztása (preset vagy egyéni dátumtartomány) és opcionális indoklás
-- **Feloldás** bármikor
-- Felhasználó **előléptetése** Support vagy Admin szerepkörbe
-- Felhasználó **visszasorolása** alacsonyabb szerepkörbe
+18 előre beállított téma áll rendelkezésre. Mindegyik három pontos szín-alapú átmenetet állít be az alkalmazás hátterének és opcionálisan egy illeszkedő animált hátteret aktivál. A párosítások:
 
-### Debug Dashboard (`/app/debug`)
+| Téma | Animáció |
+|---|---|
+| Azure | nincs |
+| Slate | Vihar |
+| Emerald | Cseresznyevirág |
+| Amethyst | Lávlámpa |
+| Coral | nincs |
+| Sunset | Cseresznyevirág |
+| Ocean | Halastó |
+| Lavender | Sarki fény |
+| Midnight | Mélységes tér |
+| Fire | Lávlámpa |
+| Aurora | Sarki fény |
+| Neon Noir | Synthwave |
+| Rose Gold | Cseresznyevirág |
+| Monsoon | Tócsaripplák |
+| Nebula | Részecskehálózat |
+| Abyss | Biolumineszcencia |
+| Starmap | Csillagkép |
+| Void | Mélység |
 
-Átfogó belső eszközkészlet problémák diagnosztizálásához és platform adat kezeléséhez:
+Egy téma kiválasztása megváltoztatja a gradiens színeket és átváltja az animált hátteret a megfelelőre, hacsak nem állítottál be animáció felülbírálást.
 
-- **System** — futási állapot és diagnosztika
-- **Endpoints** — bármely API kérés kézi indítása és a válasz vizsgálata
-- **Cache** — a React Query cache valós idejű vizsgálata és invalidálása
-- **Game Data** — karakterek, pályák és tárgyak létrehozása, szerkesztése és törlése; felhasználók kezelése moderációs műveletekkel
-- **Visual** — layout fedvények, FPS számláló, elem inspector, CSS változó néző és más kapcsolók
-- **Emulation** — különböző eszközök és hálózati körülmények szimulálása teszteléshez
-- **Diagnostics** — akadálymentesítési kontraszt ellenőrző, render számok, z-index inspector
-- **Database** — az összes platform erőforrás böngészése és szerkesztése egyetlen adatböngésző felületen (felhasználók, profilok, tárgyak, karakterek, pályák, kategóriák, ritkaságok, vásárlások, szerepkörök, posztok, statisztikák)
+### Egyedi színek
 
+A témapreset-ek alatt három egyedi gradiens színt állíthatsz be egyéni színválasztókkal. A bal, középső és jobb szín egymásba olvad a háttéren. A módosítások azonnal életbe lépnek.
+
+### Animáció felülbírálás
+
+Az animáció felülbírálás lehetővé teszi a háttéranimáció megváltoztatását a témától függetlenül. A lehetőségek:
+
+- Hagyja meg a téma alapértelmezettjét.
+- Állítson be egy adott animációt, függetlenül az aktív témától.
+- Állítsa "nincs"-re a háttéranimáció letiltásához, miközben a téma színei megmaradnak.
+- Állítsa "egyedi"-re egy egyidejűleg több hatást kombináló rétegzett összeállítás futtatásához.
+
+### Effekt rétegek
+
+Az Effekt réteg párbeszédpanel lehetővé teszi több háttéranimáció egyidejű rétegezését. A 12 animáció mindegyike egyenként be- és kikapcsolható, és mindegyiknek saját aleffektusai vannak. Például a Halastó animációnál önállóan kapcsolható a halak, buborékok, hínár, fénytörés és fénysugarak megjelenítése. A Vihar animációnál külön-külön kapcsolható az eső, a villám, a felhők és a talajfény.
+
+### Animációk ki-be kapcsolása
+
+Globálisan ki- és bekapcsol minden mozgást. Kikapcsolt állapotban a háttéranimációk megállnak, az oldalátmenetek megszűnnek, és minden azonnal renderelődik. Ez segít alacsony teljesítményű eszközökön, vagy olyan felhasználóknál, akik a kevesebb mozgást részesítik előnyben.
+
+### Liquid Glass (Folyadékos üveg)
+
+A panelek és kártyák vizuális stílusát váltja egy homályos üveges kinézet (elmosott, félig átlátszó hátterek) és egy tömör háttérstílus között. A homályos üveghatás megfelelő megjelenítéséhez modern böngésző szükséges.
+
+### Sötét mód
+
+A szöveg és a felület színeit sötét palettára váltja. Ez a téma átmenettől függetlenül működik — bármely témát bármelyik módban használhatod.
+
+### Nyelv
+
+Angolra vagy magyarra vált. A módosítás azonnal érvényes az egész alkalmazásban, beleértve az összes feliratot, gombot, hibaüzenetet és navigációs elemet. A nyelv el van mentve a böngésződben, így csak egyszer kell beállítani.
+
+---
+
+## A fiókod
+
+A `/app/profile` oldal az, ahol a fiókod hitelesítő adatait kezelheted.
+
+Megváltoztathatod az e-mail címedet. Megváltoztathatod a jelszavadat, de ehhez szükséged van az aktuális biztonsági kulcsodra — a regisztrációkor kapottra (vagy a legutóbbi jelszóvisszaállítás utáni legfrissebbre). Jelszóváltoztatás után új biztonsági kulcsot kapsz.
+
+Regisztráció utáni első bejelentkezésnél egy figyelmeztető üzenet jelenik meg, amely emlékeztet a biztonsági kulcs mentésére. Ha megerősíted, hogy láttad, a figyelmeztetés többé nem jelenik meg.
+
+---
+
+## Navigáció
+
+Az összes oldal tetején lévő navigációs sáv hivatkozásokat tartalmaz az alkalmazás összes részéhez. Kis képernyőkön egy kompakt menübe csúszik össze, amelyet egy gomb megnyomásával nyithatsz meg.
+
+Az aktív profilod képe a jobb felső sarokban jelenik meg. Rákattintva megnyílik egy legördülő menü, amelyből a profiloldaladra, a beállításaidhoz és egy kijelentkezés gombhoz navigálhatsz.
+
+Admin fiókoknál az Admin Panel és Debug Panel hivatkozások is megjelennek a navigációs sávban.
+
+---
+
+## Admin Panel
+
+Az admin panel a `/app/admin` oldalon érhető el, és csak admin szerepű fiókokkal férhető hozzá.
+
+Megjeleníti az összes regisztrált felhasználó kereshető listáját. Egy felhasználóra kattintva megnyílik annak teljes profilja: e-mail, szerepkör, fiókállapot és összes játékprofilja. Innen kitilthatod a felhasználót előre beállított vagy egyedi időtartamra, feloldhatod a kitiltást, előléptetheted support vagy admin szerepkörre, vagy visszaminősítheted normál felhasználóvá.
+
+---
+
+## Debug Panel
+
+A debug panel a `/app/debug` oldalon érhető el, és csak admin fiókokkal férhető hozzá.
+
+Eszközöket biztosít a platform diagnosztizálásához és kezeléséhez: az élő React Query gyorsítótár vizsgálatát, API kérések manuális indítását, az összes adatbázis-rekord böngészését és szerkesztését (felhasználók, profilok, tárgyak, karakterek, kategóriák, ritkaságok, vásárlások, szerepkörök, bejegyzések, statisztikák), valamint különféle UI debug átfedések be- és kikapcsolását, mint elrendezési keretek, törésponti jelzők, FPS számláló, elem-inspektor és hálózati késleltetés-szimuláció.
+
+---
+
+## Kijelentkezés
+
+Kattints a profilképedre a jobb felső sarokban, majd válaszd a "Kijelentkezés" lehetőséget. A munkamenet azonnal véget ér, és visszakerülsz a bejelentkezési oldalra. Az összes alkalmazásállapot törlődik a memóriából.
