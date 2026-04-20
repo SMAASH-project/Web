@@ -154,8 +154,7 @@ export function useItems() {
       const combatCat = data.combatType
         ? allCategories.find((c) => c.name === data.combatType)
         : null;
-      if (data.combatType && !combatCat)
-        throw new Error(`Category "${data.combatType}" not found`);
+      if (data.combatType && !combatCat) throw new Error(`Category "${data.combatType}" not found`);
 
       const categoryIds = [characterCat.id, ...(combatCat ? [combatCat.id] : [])];
 
@@ -222,8 +221,7 @@ export function useItems() {
       const combatCat = data.combatType
         ? allCategories.find((c) => c.name === data.combatType)
         : null;
-      if (data.combatType && !combatCat)
-        throw new Error(`Category "${data.combatType}" not found`);
+      if (data.combatType && !combatCat) throw new Error(`Category "${data.combatType}" not found`);
 
       const categoryIds = [characterCat.id, ...(combatCat ? [combatCat.id] : [])];
 

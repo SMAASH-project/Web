@@ -45,7 +45,7 @@ function ResetSuccess({ newKey }: ResetSuccessProps) {
       <div className="flex flex-col gap-2">
         <p className="text-sm font-medium text-gray-900">{t("reset.newKeyLabel")}</p>
         <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
-          <code className="min-w-0 flex-1 break-all font-mono text-xs text-gray-800">{newKey}</code>
+          <code className="min-w-0 flex-1 font-mono text-xs break-all text-gray-800">{newKey}</code>
           <Button
             type="button"
             size="sm"
@@ -117,9 +117,7 @@ function ResetForm({ onSuccess }: ResetFormProps) {
 
   const errorMessage =
     validationError ||
-    (mutation.isError
-      ? extractErrorMessage(mutation.error as AxiosError, t("reset.failed"))
-      : "");
+    (mutation.isError ? extractErrorMessage(mutation.error as AxiosError, t("reset.failed")) : "");
 
   return (
     <motion.form
@@ -241,11 +239,7 @@ export function PasswordResetPage({ className, ...props }: React.ComponentProps<
         </CardHeader>
         <CardContent>
           <AnimatePresence mode="wait">
-            {newKey ? (
-              <ResetSuccess newKey={newKey} />
-            ) : (
-              <ResetForm onSuccess={setNewKey} />
-            )}
+            {newKey ? <ResetSuccess newKey={newKey} /> : <ResetForm onSuccess={setNewKey} />}
           </AnimatePresence>
         </CardContent>
       </Card>

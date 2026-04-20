@@ -98,7 +98,11 @@ export function EditItemDialog({ item, onUpdate, isLoading = false }: EditItemDi
 
   const handleRecrop = () => {
     if (!originalNewImageFile) return;
-    setCropFile(new File([originalNewImageFile], originalNewImageFile.name, { type: originalNewImageFile.type }));
+    setCropFile(
+      new File([originalNewImageFile], originalNewImageFile.name, {
+        type: originalNewImageFile.type,
+      }),
+    );
     setCropOpen(true);
   };
 
@@ -296,7 +300,7 @@ export function EditItemDialog({ item, onUpdate, isLoading = false }: EditItemDi
                         type="button"
                         onClick={handleRecrop}
                         title="Recrop"
-                        className="absolute bottom-1.5 right-1.5 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
+                        className="absolute right-1.5 bottom-1.5 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
                       >
                         <Crop className="h-3.5 w-3.5" />
                       </button>
