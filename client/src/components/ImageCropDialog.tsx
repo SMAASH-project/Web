@@ -192,31 +192,41 @@ export function ImageCropDialog({
   const applyScaleX = useCallback(
     (newSx: number) => {
       const sx = clamp(newSx, 1, 4);
+      const oldSx = scaleXRef.current;
       setScaleX(sx);
       const ns = natSizeRef.current;
       const bs = baseScaleRef.current;
       const z = zoomRef.current;
       const sy = scaleYRef.current;
       if (ns) {
-        setPan((p) => constrainPan(p.x, p.y, z, ns, bs, sx, sy));
+        const ratio = sx / oldSx;
+        setPan((p) => {
+          const cx = p.x * ratio + (CROP_W / 2) * (1 - ratio);
+          return constrainPan(cx, p.y, z, ns, bs, sx, sy);
+        });
       }
     },
-    [constrainPan],
+    [constrainPan, CROP_W],
   );
 
   const applyScaleY = useCallback(
     (newSy: number) => {
       const sy = clamp(newSy, 1, 4);
+      const oldSy = scaleYRef.current;
       setScaleY(sy);
       const ns = natSizeRef.current;
       const bs = baseScaleRef.current;
       const z = zoomRef.current;
       const sx = scaleXRef.current;
       if (ns) {
-        setPan((p) => constrainPan(p.x, p.y, z, ns, bs, sx, sy));
+        const ratio = sy / oldSy;
+        setPan((p) => {
+          const cy = p.y * ratio + (CROP_H / 2) * (1 - ratio);
+          return constrainPan(p.x, cy, z, ns, bs, sx, sy);
+        });
       }
     },
-    [constrainPan],
+    [constrainPan, CROP_H],
   );
 
   // Non-passive wheel listener

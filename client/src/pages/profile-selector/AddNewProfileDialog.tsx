@@ -240,25 +240,29 @@ export function AddNewProfileDialog({ open, onOpenChange }: AddNewProfileProps) 
                 />
                 {profilePicturePreview ? (
                   <div className="relative self-center">
-                    <div className="relative h-24 w-24 overflow-hidden rounded-full">
-                      <img
-                        src={profilePicturePreview}
-                        alt="profile preview"
-                        className="h-full w-full object-cover"
-                      />
+                    {/* Circle image — overflow-hidden only on the image wrapper, not on buttons */}
+                    <div className="relative h-24 w-24">
+                      <div className="h-24 w-24 overflow-hidden rounded-full">
+                        <img
+                          src={profilePicturePreview}
+                          alt="profile preview"
+                          className="h-full w-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => profilePictureInputRef.current?.click()}
+                          className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-0.5 rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100"
+                        >
+                          <Upload className="h-4 w-4 text-white" />
+                        </button>
+                      </div>
+                      {/* X button sits outside overflow-hidden so it's never clipped */}
                       <button
                         type="button"
                         onClick={clearProfilePicture}
-                        className="absolute top-0.5 right-0.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-red-500/90 text-white transition-colors hover:bg-red-600"
+                        className="absolute -top-1.5 -right-1.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white shadow transition-colors hover:bg-red-600"
                       >
                         <X className="h-3 w-3" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => profilePictureInputRef.current?.click()}
-                        className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-0.5 rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100"
-                      >
-                        <Upload className="h-4 w-4 text-white" />
                       </button>
                     </div>
                     {originalProfilePicture && (

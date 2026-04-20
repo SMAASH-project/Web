@@ -5,8 +5,6 @@ import { Separator } from "@/components/ui/separator";
 import { useSettings } from "@/pages/settings/SettingsContext";
 import { UpdateSheet } from "./UpdateSheet";
 import { useTranslation } from "react-i18next";
-import { useSecurityKey } from "@/context/SecurityKeyContext";
-import { AnimatePresence, motion } from "motion/react";
 import {
   ExternalLink,
   Coins,
@@ -17,8 +15,6 @@ import {
   TrendingUp,
   History,
   Crop,
-  ShieldAlert,
-  X,
 } from "lucide-react";
 import {
   cn,
@@ -35,47 +31,6 @@ import { useUploadProfilePictureMutation } from "@/hooks/useQueryHooks";
 import { ImageCropDialog } from "@/components/ImageCropDialog";
 
 // ─── First-login security key banner ─────────────────────────────────────────
-
-function FirstLoginBanner({ onOpenSheet }: { onOpenSheet: () => void }) {
-  const { t } = useTranslation("profile");
-  const { isFirstSession, markKeySeen } = useSecurityKey();
-
-  return (
-    <AnimatePresence>
-      {isFirstSession && (
-        <motion.div
-          key="first-login-banner"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 16 }}
-          transition={{ duration: 0.25 }}
-          className="fixed bottom-6 left-6 z-50 flex max-w-sm items-start gap-3 rounded-xl border border-yellow-400/40 bg-yellow-400/15 px-4 py-3 text-sm shadow-xl backdrop-blur-sm"
-        >
-          <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-yellow-400" />
-          <div className="flex flex-1 flex-col gap-1">
-            <p className="font-semibold text-yellow-300">{t("banner.title")}</p>
-            <p className="text-xs text-yellow-200/80">{t("banner.description")}</p>
-            <button
-              type="button"
-              onClick={onOpenSheet}
-              className="mt-1 w-fit cursor-pointer text-xs font-medium text-yellow-300 underline underline-offset-2 hover:text-yellow-100"
-            >
-              {t("banner.action")}
-            </button>
-          </div>
-          <button
-            type="button"
-            onClick={markKeySeen}
-            aria-label={t("banner.dismiss")}
-            className="mt-0.5 cursor-pointer rounded p-0.5 text-yellow-300 opacity-70 hover:opacity-100"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
 
 // ─── Stat card ────────────────────────────────────────────────────────────────
 
@@ -121,6 +76,7 @@ export function ProfilePageContent({ animReady = true }: { animReady?: boolean }
   const [originalFile, setOriginalFile] = useState<File | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const { t } = useTranslation("profile");
+
 
   const username = selectedProfile?.name ?? "—";
   const { settings } = useSettings();
@@ -207,7 +163,6 @@ export function ProfilePageContent({ animReady = true }: { animReady?: boolean }
 
   return (
     <>
-      <FirstLoginBanner onOpenSheet={() => setSheetOpen(true)} />
       <Card
         className={cn(
           "z-0 flex w-full max-w-6xl flex-col lg:flex-row",
