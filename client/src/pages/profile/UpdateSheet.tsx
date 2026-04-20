@@ -34,7 +34,6 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
-import { SecurityKeySection } from "./SecurityKeySection";
 import { PasswordChangeSection } from "./PasswordChangeSection";
 
 interface UpdateSheetProps {
@@ -208,15 +207,6 @@ export function UpdateSheet({ open: controlledOpen, onOpenChange }: UpdateSheetP
               />
               <p className={cn("text-xs", subtextColor)}>{t("sheet.emailHint")}</p>
             </div>
-
-            {/* Security Key */}
-            <SecurityKeySection
-              textColor={textColor}
-              textShadow={textShadow}
-              subtextColor={subtextColor}
-              useLiquidGlass={useLiquidGlass}
-              useDarkMode={useDarkMode}
-            />
 
             {/* Password Change */}
             <PasswordChangeSection

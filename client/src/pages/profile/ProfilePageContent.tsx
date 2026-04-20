@@ -45,11 +45,11 @@ function FirstLoginBanner({ onOpenSheet }: { onOpenSheet: () => void }) {
       {isFirstSession && (
         <motion.div
           key="first-login-banner"
-          initial={{ opacity: 0, y: -12 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -12 }}
+          exit={{ opacity: 0, y: 16 }}
           transition={{ duration: 0.25 }}
-          className="flex w-full max-w-6xl items-start gap-3 rounded-xl border border-yellow-400/40 bg-yellow-400/15 px-4 py-3 text-sm backdrop-blur-sm"
+          className="fixed bottom-6 left-6 z-50 flex max-w-sm items-start gap-3 rounded-xl border border-yellow-400/40 bg-yellow-400/15 px-4 py-3 text-sm shadow-xl backdrop-blur-sm"
         >
           <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-yellow-400" />
           <div className="flex flex-1 flex-col gap-1">
