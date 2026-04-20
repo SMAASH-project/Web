@@ -258,12 +258,3 @@ Nyisd meg a React Query DevTools-t (bal alsó gomb fejlesztői módban). A profi
 
 Válts ki egy sikeres műveletet (például profil névmentés) és ellenőrizd, hogy egy zöld "success" toast megjelenik és körülbelül 4 másodperc után automatikusan eltűnik. Válts ki egy hibát (küldj érvénytelen formot a szervernek) és ellenőrizd, hogy egy piros "error" toast megjelenik.
 
----
-
-## Új tesztek hozzáadása
-
-1. Hozz létre egy `.test.tsx` végű fájlt a tesztelt komponens mellé, vagy egy `__tests__/` könyvtárba mellette.
-2. Importálj a `@testing-library/react`-ból (`render`, `screen`, `fireEvent`) és a komponens moduljából.
-3. Mockold a modul szintű függőségeket a `vi.mock("elérési_út", factory)` segítségével a fájl tetején.
-4. Injektálj context provider-eket a renderelt komponens köré, amikor a komponens tőlük függ.
-5. Assertálj a `expect(...).toBeInTheDocument()` és más `@testing-library/jest-dom` matcherek segítségével. Ezek globálisan elérhetők a setup fájlon keresztül.
