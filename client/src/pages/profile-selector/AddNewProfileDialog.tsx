@@ -249,7 +249,7 @@ export function AddNewProfileDialog({ open, onOpenChange }: AddNewProfileProps) 
                       <button
                         type="button"
                         onClick={clearProfilePicture}
-                        className="absolute top-0.5 right-0.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
+                        className="absolute top-0.5 right-0.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-red-500/90 text-white transition-colors hover:bg-red-600"
                       >
                         <X className="h-3 w-3" />
                       </button>

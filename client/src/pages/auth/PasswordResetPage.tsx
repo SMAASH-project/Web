@@ -11,6 +11,7 @@ import { useSettings } from "@/pages/settings/SettingsContext";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
 import { extractErrorMessage } from "@/lib/utils/extractErrorMessage";
 import { useChangePasswordMutation } from "@/hooks/useQueryHooks";
+import { useSecurityKey } from "@/context/SecurityKeyContext";
 import { AnimatePresence, motion } from "motion/react";
 import { Copy, Check, KeyRound } from "lucide-react";
 import type { AxiosError } from "axios";
@@ -81,11 +82,12 @@ interface ResetFormProps {
 
 function ResetForm({ onSuccess }: ResetFormProps) {
   const { t } = useTranslation("auth");
-  const [userId, setUserId] = useState("");
+  const [email, setEmail] = useState("");
   const [securityKey, setSecurityKey] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [validationError, setValidationError] = useState("");
+  const { setSecurityKey: storeSecurityKey } = useSecurityKey();
 
   const mutation = useChangePasswordMutation();
 
@@ -105,10 +107,11 @@ function ResetForm({ onSuccess }: ResetFormProps) {
 
     try {
       const result = await mutation.mutateAsync({
-        id: Number(userId),
+        email,
         securityKey,
         newPassword,
       });
+      storeSecurityKey(result.new_key);
       onSuccess(result.new_key);
     } catch {
       // error displayed via mutation.isError below
@@ -130,20 +133,19 @@ function ResetForm({ onSuccess }: ResetFormProps) {
     >
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor="user-id" className="text-gray-900!">
-            {t("reset.userId")}
+          <FieldLabel htmlFor="reset-email" className="text-gray-900!">
+            {t("reset.email")}
           </FieldLabel>
           <Input
-            id="user-id"
-            type="number"
-            min={1}
-            placeholder="1"
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
+            id="reset-email"
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
             disabled={mutation.isPending}
           />
-          <FieldDescription>{t("reset.userIdHint")}</FieldDescription>
+          <FieldDescription>{t("reset.emailHint")}</FieldDescription>
         </Field>
 
         <Field>

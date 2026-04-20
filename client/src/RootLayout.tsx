@@ -4,6 +4,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { AuthProvider } from "./context/AuthProvider";
+import { SecurityKeyProvider } from "./context/SecurityKeyProvider";
 import { SettingsProvider } from "@/pages/settings/SettingsContext";
 import { NavbarProvider } from "./context/NavbarContext";
 import { ColorProvider } from "@/pages/settings/ColorProvider";
@@ -62,6 +63,7 @@ export function RootLayout() {
   return (
     <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
       <AuthProvider>
+        <SecurityKeyProvider>
         <SettingsProvider>
           <NavbarProvider>
             <ColorProvider>
@@ -92,6 +94,7 @@ export function RootLayout() {
             </ColorProvider>
           </NavbarProvider>
         </SettingsProvider>
+      </SecurityKeyProvider>
       </AuthProvider>
       {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </PersistQueryClientProvider>

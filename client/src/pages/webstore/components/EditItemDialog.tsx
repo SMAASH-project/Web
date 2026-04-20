@@ -281,7 +281,7 @@ export function EditItemDialog({ item, onUpdate, isLoading = false }: EditItemDi
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.97 }}
                     transition={{ duration: 0.2 }}
-                    className="relative h-32 w-full overflow-hidden rounded-lg"
+                    className="relative aspect-video w-full overflow-hidden rounded-lg"
                   >
                     <img
                       src={newImagePreview}
@@ -314,7 +314,7 @@ export function EditItemDialog({ item, onUpdate, isLoading = false }: EditItemDi
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.97 }}
                     transition={{ duration: 0.2 }}
-                    className="relative h-32 w-full overflow-hidden rounded-lg"
+                    className="relative aspect-video w-full overflow-hidden rounded-lg"
                   >
                     <img
                       src={`/api/characters/${item.id}/img`}

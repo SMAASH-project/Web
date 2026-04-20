@@ -52,13 +52,20 @@ export function useLoginMutation() {
   });
 }
 
+export interface SignupResponse {
+  id: number;
+  email: string;
+  security_key: string;
+}
+
 export function useSignupMutation() {
-  return useMutation<void, AxiosError, SignupPayload>({
+  return useMutation<SignupResponse, AxiosError, SignupPayload>({
     mutationFn: async (payload) => {
-      await apiClient.post("/auth/signup", {
+      const { data } = await apiClient.post<SignupResponse>("/auth/signup", {
         ...payload,
         role_id: 1,
       });
+      return data;
     },
   });
 }
@@ -83,7 +90,7 @@ export function useLogoutMutation() {
 }
 
 export interface ChangePasswordPayload {
-  id: number;
+  email: string;
   securityKey: string;
   newPassword: string;
 }
@@ -94,9 +101,9 @@ export interface ChangePasswordResponse {
 
 export function useChangePasswordMutation() {
   return useMutation<ChangePasswordResponse, AxiosError, ChangePasswordPayload>({
-    mutationFn: async ({ id, securityKey, newPassword }) => {
+    mutationFn: async ({ email, securityKey, newPassword }) => {
       const { data } = await apiClient.put<ChangePasswordResponse>("/auth/change-password", {
-        id,
+        email,
         security_key: securityKey,
         new_password: newPassword,
       });

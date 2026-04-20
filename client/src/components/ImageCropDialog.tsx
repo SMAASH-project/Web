@@ -1,13 +1,9 @@
 /**
  * ImageCropDialog
  *
- * A canvas-based image cropper rendered as a Radix Dialog portal so it always
- * sits at the top of the Radix dialog stack, properly owning the focus trap and
- * Escape key. The user can drag the image to reposition it and use the zoom
- * slider (or scroll wheel) to zoom in/out. The area outside the crop frame is
- * visible but dimmed via an SVG mask so the user can see what will be cut off.
- * Clicking "Apply" exports a cropped JPEG via the Canvas API and hands it back
- * via onApply.
+ * Canvas-based image cropper with zoom, pan, and independent H/V stretch.
+ * Rendered as a Radix Dialog portal so it always sits at the top of the
+ * Radix dialog stack, properly owning the focus trap and Escape key.
  *
  * Props:
  *   open        – controls visibility
@@ -22,7 +18,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
-import { Loader2, ZoomIn, ZoomOut, X } from "lucide-react";
+import { Loader2, ZoomIn, ZoomOut, X, ArrowLeftRight, ArrowUpDown } from "lucide-react";
 import { useSettings } from "@/pages/settings/SettingsContext";
 import {
   getButtonClasses,
@@ -32,7 +28,6 @@ import {
   getSubtextColor,
 } from "@/lib/utils";
 
-// Margin around the crop frame so the user can see what can still be panned to
 const MARGIN_X = 32;
 const MARGIN_Y = 24;
 
@@ -55,14 +50,10 @@ export function ImageCropDialog({
 }: ImageCropDialogProps) {
   const { settings } = useSettings();
 
-  // Crop frame dimensions — computed once on mount (viewport-responsive).
-  // Subtract margins so the full container comfortably fits on screen.
   const [CROP_W] = useState(() =>
     Math.min(Math.max(window.innerWidth - 80 - MARGIN_X * 2, 220), 480),
   );
   const CROP_H = Math.round(CROP_W / aspectRatio);
-
-  // Container includes the crop frame plus context margins on each side
   const CONTAINER_W = CROP_W + MARGIN_X * 2;
   const CONTAINER_H = CROP_H + MARGIN_Y * 2;
 
@@ -71,31 +62,43 @@ export function ImageCropDialog({
   const [natSize, setNatSize] = useState<{ w: number; h: number } | null>(null);
   const [baseScale, setBaseScale] = useState(1);
   const [zoom, setZoom] = useState(1);
+  const [scaleX, setScaleX] = useState(1);
+  const [scaleY, setScaleY] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isApplying, setIsApplying] = useState(false);
 
-  // ── refs ───────────────────────────────────────────────────────────────────
+  // ── refs (kept in sync so non-React handlers read latest values) ───────────
   const imgRef = useRef<HTMLImageElement>(null);
   const cropContainerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
   const lastPtr = useRef({ x: 0, y: 0 });
-  // Kept in sync each render so the non-React wheel handler reads latest values
   const natSizeRef = useRef(natSize);
   const baseScaleRef = useRef(baseScale);
   const zoomRef = useRef(zoom);
+  const scaleXRef = useRef(scaleX);
+  const scaleYRef = useRef(scaleY);
   natSizeRef.current = natSize;
   baseScaleRef.current = baseScale;
   zoomRef.current = zoom;
+  scaleXRef.current = scaleX;
+  scaleYRef.current = scaleY;
 
   // ── helpers ────────────────────────────────────────────────────────────────
 
   const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
-  // Pan bounds keep the image fully covering the crop frame (not the container)
   const constrainPan = useCallback(
-    (px: number, py: number, z: number, ns: { w: number; h: number }, bs: number) => {
-      const rw = ns.w * bs * z;
-      const rh = ns.h * bs * z;
+    (
+      px: number,
+      py: number,
+      z: number,
+      ns: { w: number; h: number },
+      bs: number,
+      sx: number,
+      sy: number,
+    ) => {
+      const rw = ns.w * bs * z * sx;
+      const rh = ns.h * bs * z * sy;
       return {
         x: clamp(px, CROP_W - rw, 0),
         y: clamp(py, CROP_H - rh, 0),
@@ -121,6 +124,8 @@ export function ImageCropDialog({
       setNatSize(null);
       setBaseScale(1);
       setZoom(1);
+      setScaleX(1);
+      setScaleY(1);
       setPan({ x: 0, y: 0 });
     }
   }, [open]);
@@ -135,14 +140,14 @@ export function ImageCropDialog({
     setNatSize(ns);
     setBaseScale(bs);
     setZoom(1);
-    // Centre the image within the crop frame
+    setScaleX(1);
+    setScaleY(1);
     setPan({ x: (CROP_W - rw) / 2, y: (CROP_H - rh) / 2 });
   };
 
   // ── drag interaction ───────────────────────────────────────────────────────
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    // Prevent text-selection drag from reaching elements behind the overlay
     e.preventDefault();
     e.currentTarget.setPointerCapture(e.pointerId);
     isDragging.current = true;
@@ -154,7 +159,7 @@ export function ImageCropDialog({
     const dx = e.clientX - lastPtr.current.x;
     const dy = e.clientY - lastPtr.current.y;
     lastPtr.current = { x: e.clientX, y: e.clientY };
-    setPan((p) => constrainPan(p.x + dx, p.y + dy, zoom, natSize, baseScale));
+    setPan((p) => constrainPan(p.x + dx, p.y + dy, zoom, natSize, baseScale, scaleX, scaleY));
   };
 
   const handlePointerUp = () => {
@@ -170,19 +175,51 @@ export function ImageCropDialog({
       setZoom(z);
       const ns = natSizeRef.current;
       const bs = baseScaleRef.current;
+      const sx = scaleXRef.current;
+      const sy = scaleYRef.current;
       if (ns) {
         const ratio = z / oldZ;
         setPan((p) => {
           const cx = p.x * ratio + (CROP_W / 2) * (1 - ratio);
           const cy = p.y * ratio + (CROP_H / 2) * (1 - ratio);
-          return constrainPan(cx, cy, z, ns, bs);
+          return constrainPan(cx, cy, z, ns, bs, sx, sy);
         });
       }
     },
     [constrainPan, CROP_W, CROP_H],
   );
 
-  // Non-passive wheel listener so we can call preventDefault()
+  const applyScaleX = useCallback(
+    (newSx: number) => {
+      const sx = clamp(newSx, 1, 4);
+      setScaleX(sx);
+      const ns = natSizeRef.current;
+      const bs = baseScaleRef.current;
+      const z = zoomRef.current;
+      const sy = scaleYRef.current;
+      if (ns) {
+        setPan((p) => constrainPan(p.x, p.y, z, ns, bs, sx, sy));
+      }
+    },
+    [constrainPan],
+  );
+
+  const applyScaleY = useCallback(
+    (newSy: number) => {
+      const sy = clamp(newSy, 1, 4);
+      setScaleY(sy);
+      const ns = natSizeRef.current;
+      const bs = baseScaleRef.current;
+      const z = zoomRef.current;
+      const sx = scaleXRef.current;
+      if (ns) {
+        setPan((p) => constrainPan(p.x, p.y, z, ns, bs, sx, sy));
+      }
+    },
+    [constrainPan],
+  );
+
+  // Non-passive wheel listener
   useEffect(() => {
     if (!open) return;
     const el = cropContainerRef.current;
@@ -195,48 +232,48 @@ export function ImageCropDialog({
       setZoom(newZoom);
       const ns = natSizeRef.current;
       const bs = baseScaleRef.current;
+      const sx = scaleXRef.current;
+      const sy = scaleYRef.current;
       if (ns) {
         const ratio = newZoom / oldZoom;
         setPan((p) => {
           const cx = p.x * ratio + (CROP_W / 2) * (1 - ratio);
           const cy = p.y * ratio + (CROP_H / 2) * (1 - ratio);
-          const rw = ns.w * bs * newZoom;
-          const rh = ns.h * bs * newZoom;
-          return {
-            x: clamp(cx, CROP_W - rw, 0),
-            y: clamp(cy, CROP_H - rh, 0),
-          };
+          return constrainPan(cx, cy, newZoom, ns, bs, sx, sy);
         });
       }
     };
     el.addEventListener("wheel", handler, { passive: false });
     return () => el.removeEventListener("wheel", handler);
-  }, [open, CROP_W, CROP_H]);
+  }, [open, CROP_W, CROP_H, constrainPan]);
 
-  // ── canvas export ──────────────────────────────────────────────────────────
+  // ── canvas export (destination-rect approach to preserve stretch) ──────────
 
   const handleApply = async () => {
     if (!natSize || !imgRef.current || !file) return;
     setIsApplying(true);
     try {
-      const rw = natSize.w * baseScale * zoom;
-      const rh = natSize.h * baseScale * zoom;
-
-      // Compute the source rectangle in natural-image coordinates
-      const srcX = Math.max(0, (-pan.x / rw) * natSize.w);
-      const srcY = Math.max(0, (-pan.y / rh) * natSize.h);
-      const srcW = Math.min(natSize.w - srcX, (CROP_W / rw) * natSize.w);
-      const srcH = Math.min(natSize.h - srcY, (CROP_H / rh) * natSize.h);
+      const renderW = natSize.w * baseScale * zoom * scaleX;
+      const renderH = natSize.h * baseScale * zoom * scaleY;
 
       const outW = circular ? 400 : 960;
       const outH = circular ? 400 : Math.round(960 / aspectRatio);
+      const scale = outW / CROP_W;
 
       const canvas = document.createElement("canvas");
       canvas.width = outW;
       canvas.height = outH;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
-      ctx.drawImage(imgRef.current, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
+
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, outW, outH);
+      ctx.drawImage(
+        imgRef.current,
+        0, 0, natSize.w, natSize.h,
+        pan.x * scale, pan.y * scale,
+        renderW * scale, renderH * scale,
+      );
 
       const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.92));
       if (!blob) return;
@@ -256,10 +293,9 @@ export function ImageCropDialog({
   const textColor = getTextColor(settings.useLiquidGlass, settings.useDarkMode);
   const subtextColor = getSubtextColor(settings.useLiquidGlass, settings.useDarkMode);
 
-  const renderW = natSize ? natSize.w * baseScale * zoom : 0;
-  const renderH = natSize ? natSize.h * baseScale * zoom : 0;
+  const renderW = natSize ? natSize.w * baseScale * zoom * scaleX : 0;
+  const renderH = natSize ? natSize.h * baseScale * zoom * scaleY : 0;
 
-  // Circle geometry (centred on the crop frame within the container)
   const circleR = Math.min(CROP_W, CROP_H) / 2;
   const circleCX = MARGIN_X + CROP_W / 2;
   const circleCY = MARGIN_Y + CROP_H / 2;
@@ -273,18 +309,10 @@ export function ImageCropDialog({
         if (!o) onCancel();
       }}
     >
-      {/*
-       * forceMount only on Portal so the portal target stays alive during the
-       * exit animation. Overlay and Content are conditionally rendered inside
-       * AnimatePresence — this ensures Radix's DismissableLayer (and its global
-       * event listeners) unmounts as soon as the dialog closes, preventing the
-       * page from freezing.
-       */}
       <DialogPrimitive.Portal forceMount>
         <AnimatePresence>
           {open && (
             <>
-              {/* Backdrop */}
               <DialogPrimitive.Overlay asChild>
                 <motion.div
                   key="icd-overlay"
@@ -296,7 +324,6 @@ export function ImageCropDialog({
                 />
               </DialogPrimitive.Overlay>
 
-              {/* Cropper content — Radix owns focus trap and Escape key */}
               <DialogPrimitive.Content
                 asChild
                 aria-label="Crop image"
@@ -311,7 +338,6 @@ export function ImageCropDialog({
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.18 }}
                 >
-                  {/* Card */}
                   <motion.div
                     className={`relative flex w-full flex-col gap-5 rounded-2xl p-6 ${dialogClass} ${textShadow}`}
                     style={{ maxWidth: CONTAINER_W + 48 }}
@@ -343,10 +369,8 @@ export function ImageCropDialog({
                         onPointerUp={handlePointerUp}
                         onPointerLeave={handlePointerUp}
                       >
-                        {/* Dark base visible in the margin area behind the image */}
                         <div className="absolute inset-0 bg-black/30" />
 
-                        {/* Image — offset by margins so pan=(0,0) aligns image to crop-frame top-left */}
                         {imageUrl && (
                           <img
                             ref={imgRef}
@@ -365,14 +389,12 @@ export function ImageCropDialog({
                           />
                         )}
 
-                        {/* Loading state */}
                         {imageUrl && !natSize && (
                           <div className="flex h-full w-full items-center justify-center bg-black/40">
                             <Loader2 className="h-6 w-6 animate-spin text-white/60" />
                           </div>
                         )}
 
-                        {/* SVG overlay: dims outside the crop frame, rule-of-thirds, border */}
                         {natSize && (
                           <svg
                             className="pointer-events-none absolute inset-0"
@@ -382,7 +404,6 @@ export function ImageCropDialog({
                           >
                             <defs>
                               <mask id="icd-dim-mask">
-                                {/* White = dim; black = clear (the crop frame) */}
                                 <rect width={CONTAINER_W} height={CONTAINER_H} fill="white" />
                                 {circular ? (
                                   <circle cx={circleCX} cy={circleCY} r={circleR} fill="black" />
@@ -398,7 +419,6 @@ export function ImageCropDialog({
                               </mask>
                             </defs>
 
-                            {/* Dimming layer outside crop frame */}
                             <rect
                               width={CONTAINER_W}
                               height={CONTAINER_H}
@@ -407,7 +427,6 @@ export function ImageCropDialog({
                               mask="url(#icd-dim-mask)"
                             />
 
-                            {/* Rule-of-thirds grid (rectangular mode only) */}
                             {!circular && (
                               <>
                                 <line
@@ -449,7 +468,6 @@ export function ImageCropDialog({
                               </>
                             )}
 
-                            {/* Crop frame border */}
                             {circular ? (
                               <circle
                                 cx={circleCX}
@@ -477,41 +495,84 @@ export function ImageCropDialog({
                         )}
                       </div>
 
-                      {/* Zoom control */}
+                      {/* Controls */}
                       <div
-                        className="flex w-full items-center gap-3"
+                        className="flex w-full flex-col gap-2.5"
                         style={{ maxWidth: CONTAINER_W }}
                       >
-                        <button
-                          type="button"
-                          onClick={() => applyZoom(zoom - 0.15)}
-                          className={`shrink-0 transition-opacity ${subtextColor} hover:opacity-100 disabled:opacity-30`}
-                          disabled={zoom <= 1}
-                        >
-                          <ZoomOut className="h-4 w-4" />
-                        </button>
-                        <input
-                          type="range"
-                          min={1}
-                          max={3}
-                          step={0.01}
-                          value={zoom}
-                          onChange={(e) => applyZoom(parseFloat(e.target.value))}
-                          disabled={!natSize}
-                          className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-white disabled:cursor-not-allowed disabled:opacity-40"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => applyZoom(zoom + 0.15)}
-                          className={`shrink-0 transition-opacity ${subtextColor} hover:opacity-100 disabled:opacity-30`}
-                          disabled={zoom >= 3}
-                        >
-                          <ZoomIn className="h-4 w-4" />
-                        </button>
+                        {/* Zoom */}
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => applyZoom(zoom - 0.15)}
+                            className={`shrink-0 transition-opacity ${subtextColor} hover:opacity-100 disabled:opacity-30`}
+                            disabled={zoom <= 1}
+                          >
+                            <ZoomOut className="h-4 w-4" />
+                          </button>
+                          <input
+                            type="range"
+                            min={1}
+                            max={3}
+                            step={0.01}
+                            value={zoom}
+                            onChange={(e) => applyZoom(parseFloat(e.target.value))}
+                            disabled={!natSize}
+                            className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-white disabled:cursor-not-allowed disabled:opacity-40"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => applyZoom(zoom + 0.15)}
+                            className={`shrink-0 transition-opacity ${subtextColor} hover:opacity-100 disabled:opacity-30`}
+                            disabled={zoom >= 3}
+                          >
+                            <ZoomIn className="h-4 w-4" />
+                          </button>
+                        </div>
+
+                        {/* H-Stretch */}
+                        <div className="flex items-center gap-3">
+                          <ArrowLeftRight
+                            className={`h-4 w-4 shrink-0 ${subtextColor} opacity-70`}
+                          />
+                          <input
+                            type="range"
+                            min={1}
+                            max={4}
+                            step={0.01}
+                            value={scaleX}
+                            onChange={(e) => applyScaleX(parseFloat(e.target.value))}
+                            disabled={!natSize}
+                            className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-white disabled:cursor-not-allowed disabled:opacity-40"
+                          />
+                          <span className={`w-8 shrink-0 text-right text-xs ${subtextColor} opacity-70`}>
+                            {scaleX.toFixed(2)}×
+                          </span>
+                        </div>
+
+                        {/* V-Stretch */}
+                        <div className="flex items-center gap-3">
+                          <ArrowUpDown
+                            className={`h-4 w-4 shrink-0 ${subtextColor} opacity-70`}
+                          />
+                          <input
+                            type="range"
+                            min={1}
+                            max={4}
+                            step={0.01}
+                            value={scaleY}
+                            onChange={(e) => applyScaleY(parseFloat(e.target.value))}
+                            disabled={!natSize}
+                            className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-white disabled:cursor-not-allowed disabled:opacity-40"
+                          />
+                          <span className={`w-8 shrink-0 text-right text-xs ${subtextColor} opacity-70`}>
+                            {scaleY.toFixed(2)}×
+                          </span>
+                        </div>
                       </div>
 
                       <p className={`text-xs ${subtextColor}`}>
-                        Drag to reposition · Scroll to zoom
+                        Drag to reposition · Scroll or slider to zoom
                       </p>
                     </div>
 

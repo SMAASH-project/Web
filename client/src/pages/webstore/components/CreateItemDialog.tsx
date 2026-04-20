@@ -264,7 +264,7 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.97 }}
                     transition={{ duration: 0.2 }}
-                    className="relative h-32 w-full overflow-hidden rounded-lg"
+                    className="relative aspect-video w-full overflow-hidden rounded-lg"
                   >
                     <img src={imagePreview} alt="preview" className="h-full w-full object-cover" />
                     <button

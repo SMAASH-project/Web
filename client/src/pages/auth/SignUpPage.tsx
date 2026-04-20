@@ -5,40 +5,115 @@ import { Input } from "@/components/ui/input";
 import { FormAlert } from "@/components/ui/form-alert";
 import { cn } from "@/lib/utils";
 import { Link, useNavigate } from "react-router-dom";
-import React from "react";
+import React, { useState } from "react";
 import { useSignupMutation } from "@/hooks/useQueryHooks";
 import { useGoogleReCaptcha, GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { useTranslation } from "react-i18next";
 import { useSettings } from "@/pages/settings/SettingsContext";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
 import { extractErrorMessage } from "@/lib/utils/extractErrorMessage";
+import { useSecurityKey } from "@/context/SecurityKeyContext";
+import { AnimatePresence, motion } from "motion/react";
+import { Copy, Check, Download, KeyRound } from "lucide-react";
 import type { AxiosError } from "axios";
 
-export function SignUpPage(props: React.ComponentProps<"div">) {
+// ─── Security Key Reveal (Step 2) ────────────────────────────────────────────
+
+interface SignupSuccessProps {
+  securityKey: string;
+}
+
+function SignupSuccess({ securityKey }: SignupSuccessProps) {
+  const { t } = useTranslation("auth");
+  const navigate = useNavigate();
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(securityKey);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownload = () => {
+    const blob = new Blob([securityKey], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "smaash-security-key.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
-    <GoogleReCaptchaProvider reCaptchaKey="6LfiUposAAAAAPLDMCXDkIBHkZ0JwtbQ-J5fbbdi">
-      <SignupFormInner {...props} />
-    </GoogleReCaptchaProvider>
+    <motion.div
+      key="success"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.2 }}
+      className="flex flex-col gap-4"
+    >
+      <FormAlert variant="success" message={t("signup.successDescription")} />
+
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-medium text-gray-900">{t("signup.securityKeyLabel")}</p>
+        <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+          <code className="min-w-0 flex-1 break-all font-mono text-xs text-gray-800">
+            {securityKey}
+          </code>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="h-7 shrink-0 px-2"
+            onClick={handleCopy}
+            aria-label={t("reset.copy")}
+          >
+            {copied ? (
+              <Check className="h-4 w-4 text-green-600" />
+            ) : (
+              <Copy className="h-4 w-4 text-gray-500" />
+            )}
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="h-7 shrink-0 px-2"
+            onClick={handleDownload}
+            aria-label={t("signup.download")}
+          >
+            <Download className="h-4 w-4 text-gray-500" />
+          </Button>
+        </div>
+        <FormAlert variant="info" message={t("signup.securityKeyWarning")} />
+      </div>
+
+      <Button type="button" className="w-full text-white" onClick={() => navigate("/app/login")}>
+        {t("signup.goToLogin")}
+      </Button>
+    </motion.div>
   );
 }
 
-function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
-  const captchaEnabled = true;
-  const [password, setPassword] = React.useState("");
-  const [confirmPassword, setConfirmPassword] = React.useState("");
-  const [email, setEmail] = React.useState("");
-  const [validationError, setValidationError] = React.useState("");
+// ─── Signup Form (Step 1) ─────────────────────────────────────────────────────
 
-  const navigate = useNavigate();
-  const signupMutation = useSignupMutation();
+interface SignupFormProps {
+  onSuccess: (key: string) => void;
+}
+
+function SignupForm({ onSuccess }: SignupFormProps) {
   const { t } = useTranslation("auth");
-  const { settings, updateSetting } = useSettings();
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [validationError, setValidationError] = useState("");
+
+  const signupMutation = useSignupMutation();
   const { executeRecaptcha } = useGoogleReCaptcha();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Clear any error from a previous attempt so the UI is fresh.
     signupMutation.reset();
     setValidationError("");
 
@@ -51,35 +126,122 @@ function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
       return;
     }
 
-    // Best-effort captcha: attempt to get a token but never hard-block on
-    // failure. The token is not sent to or verified by the backend, so a
-    // captcha execution failure should not prevent a legitimate user from
-    // registering (especially common on mobile where reCAPTCHA v3 can fail
-    // silently due to network restrictions or browser limitations).
-    let captchaToken: string | null = null;
-    if (captchaEnabled && executeRecaptcha) {
+    if (executeRecaptcha) {
       try {
-        captchaToken = await executeRecaptcha("signup");
+        await executeRecaptcha("signup");
       } catch {
-        // Silently ignore — registration proceeds without the token.
         console.warn("reCAPTCHA execution failed; continuing without token.");
       }
     }
 
     try {
-      await signupMutation.mutateAsync({ email, password });
-      navigate("/app/login");
+      const data = await signupMutation.mutateAsync({ email, password });
+      onSuccess(data.security_key);
     } catch {
       // error displayed via signupMutation.isError below
     }
   };
 
-  // Client-side validation errors take priority; fall back to server error
   const errorMessage =
     validationError ||
     (signupMutation.isError
       ? extractErrorMessage(signupMutation.error as AxiosError, t("signup.failed"))
       : "");
+
+  return (
+    <motion.form
+      key="form"
+      onSubmit={handleSubmit}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.2 }}
+    >
+      <FieldGroup>
+        <Field>
+          <FieldLabel htmlFor="email" className="text-gray-900!">
+            {t("signup.email")}
+          </FieldLabel>
+          <Input
+            id="email"
+            type="email"
+            placeholder="m@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={signupMutation.isPending}
+            required
+          />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="password" className="text-gray-900!">
+            {t("signup.password")}
+          </FieldLabel>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (validationError) setValidationError("");
+            }}
+            disabled={signupMutation.isPending}
+            required
+          />
+          <FieldDescription>{t("signup.passwordHint")}</FieldDescription>
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="confirm-password" className="text-gray-900!">
+            {t("signup.confirmPassword")}
+          </FieldLabel>
+          <Input
+            id="confirm-password"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              if (validationError) setValidationError("");
+            }}
+            disabled={signupMutation.isPending}
+            required
+          />
+          <FieldDescription>{t("signup.confirmPasswordHint")}</FieldDescription>
+        </Field>
+
+        {errorMessage && <FormAlert variant="error" message={errorMessage} />}
+
+        <Field>
+          <Button type="submit" className="text-white" disabled={signupMutation.isPending}>
+            {signupMutation.isPending ? t("signup.submitting") : t("signup.submit")}
+          </Button>
+          <FieldDescription className="px-6 text-center">
+            {t("signup.hasAccount")} <Link to="/app/login">{t("signup.signIn")}</Link>
+          </FieldDescription>
+        </Field>
+      </FieldGroup>
+    </motion.form>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+export function SignUpPage(props: React.ComponentProps<"div">) {
+  return (
+    <GoogleReCaptchaProvider reCaptchaKey="6LfiUposAAAAAPLDMCXDkIBHkZ0JwtbQ-J5fbbdi">
+      <SignupPageInner {...props} />
+    </GoogleReCaptchaProvider>
+  );
+}
+
+function SignupPageInner({ className, ...props }: React.ComponentProps<"div">) {
+  const { t } = useTranslation("auth");
+  const { settings, updateSetting } = useSettings();
+  const { setSecurityKey } = useSecurityKey();
+  const [revealedKey, setRevealedKey] = useState<string | null>(null);
+
+  const handleSuccess = (key: string) => {
+    setSecurityKey(key);
+    setRevealedKey(key);
+  };
 
   return (
     <div className={cn("relative z-10 w-full max-w-md px-4 sm:px-0", className)} {...props}>
@@ -91,73 +253,24 @@ function SignupFormInner({ className, ...props }: React.ComponentProps<"div">) {
       </div>
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>{t("signup.title")}</CardTitle>
-          <CardDescription>{t("signup.description")}</CardDescription>
+          <div className="flex items-center gap-2">
+            {revealedKey && <KeyRound className="h-5 w-5 text-gray-500" />}
+            <CardTitle>
+              {revealedKey ? t("signup.successTitle") : t("signup.title")}
+            </CardTitle>
+          </div>
+          <CardDescription>
+            {revealedKey ? "" : t("signup.description")}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit}>
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="email" className="text-gray-900!">
-                  {t("signup.email")}
-                </FieldLabel>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={signupMutation.isPending}
-                  required
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="password" className="text-gray-900!">
-                  {t("signup.password")}
-                </FieldLabel>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (validationError) setValidationError("");
-                  }}
-                  disabled={signupMutation.isPending}
-                  required
-                />
-                <FieldDescription>{t("signup.passwordHint")}</FieldDescription>
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="confirm-password" className="text-gray-900!">
-                  {t("signup.confirmPassword")}
-                </FieldLabel>
-                <Input
-                  id="confirm-password"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => {
-                    setConfirmPassword(e.target.value);
-                    if (validationError) setValidationError("");
-                  }}
-                  disabled={signupMutation.isPending}
-                  required
-                />
-                <FieldDescription>{t("signup.confirmPasswordHint")}</FieldDescription>
-              </Field>
-
-              {errorMessage && <FormAlert variant="error" message={errorMessage} />}
-
-              <Field>
-                <Button type="submit" className="text-white" disabled={signupMutation.isPending}>
-                  {signupMutation.isPending ? t("signup.submitting") : t("signup.submit")}
-                </Button>
-                <FieldDescription className="px-6 text-center">
-                  {t("signup.hasAccount")} <Link to="/app/login">{t("signup.signIn")}</Link>
-                </FieldDescription>
-              </Field>
-            </FieldGroup>
-          </form>
+          <AnimatePresence mode="wait">
+            {revealedKey ? (
+              <SignupSuccess key="success" securityKey={revealedKey} />
+            ) : (
+              <SignupForm key="form" onSuccess={handleSuccess} />
+            )}
+          </AnimatePresence>
         </CardContent>
       </Card>
     </div>

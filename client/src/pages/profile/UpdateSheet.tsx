@@ -16,7 +16,6 @@ import {
 import { useSettings } from "@/pages/settings/SettingsContext";
 import { useTranslation } from "react-i18next";
 import {
-  getBackgroundClasses,
   getButtonClasses,
   getInputClasses,
   getTextColor,
@@ -34,9 +33,16 @@ import {
 } from "@/hooks/useQueryHooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
-import { CheckCircle2, AlertCircle, Loader2, Lock } from "lucide-react";
+import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { SecurityKeySection } from "./SecurityKeySection";
+import { PasswordChangeSection } from "./PasswordChangeSection";
 
-export function UpdateSheet() {
+interface UpdateSheetProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export function UpdateSheet({ open: controlledOpen, onOpenChange }: UpdateSheetProps = {}) {
   const { settings } = useSettings();
   const { t } = useTranslation("profile");
   const navigate = useNavigate();
@@ -53,7 +59,12 @@ export function UpdateSheet() {
   // ─── Controlled field state (initialised from live data) ─────────────────
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = (val: boolean) => {
+    setInternalOpen(val);
+    onOpenChange?.(val);
+  };
 
   // Feedback state
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
@@ -133,8 +144,6 @@ export function UpdateSheet() {
   const textShadow = getTextShadow(useLiquidGlass, useDarkMode);
   const subtextColor = getSubtextColor(useLiquidGlass, useDarkMode);
 
-  const disabledInputClass = cn(inputClass, "opacity-50 cursor-not-allowed");
-
   const isSaving = saveStatus === "saving";
   const hasChanged =
     displayName.trim() !== (selectedProfile?.name ?? "") || email.trim() !== (whoAmI?.email ?? "");
@@ -200,57 +209,26 @@ export function UpdateSheet() {
               <p className={cn("text-xs", subtextColor)}>{t("sheet.emailHint")}</p>
             </div>
 
-            {/* Password — disabled, TODO wired when backend supports it */}
-            <div className="flex flex-col gap-2">
-              <Label
-                htmlFor="sheet-password"
-                className={cn(
-                  "flex items-center gap-1.5 text-sm font-medium",
-                  textColor,
-                  textShadow,
-                )}
-              >
-                <Lock size={13} />
-                {t("sheet.password")}
-              </Label>
-              {/*
-               * TODO: BACKEND — Password change is not supported by PUT /api/users/:id.
-               * The UserUpdateDTO explicitly excludes password ("You can't change the
-               * password here, that requires separate functionality" — users_controller.go).
-               *
-               * To enable this field:
-               *   1. Add POST /api/auth/change-password endpoint on the backend.
-               *   2. Body: { current_password: string, new_password: string }
-               *   3. Add useChangePasswordMutation to useAuthHooks.ts.
-               *   4. Replace the disabled input below with a real one.
-               *
-               * The existing /app/reset-password page handles the separate reset flow.
-               */}
-              <Input
-                id="sheet-password"
-                type="password"
-                className={disabledInputClass}
-                placeholder={t("sheet.passwordPlaceholder")}
-                disabled
-                readOnly
-              />
-              <p className={cn("text-xs", subtextColor)}>
-                {t("sheet.passwordHint")}{" "}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOpen(false);
-                    navigate("/app/reset-password");
-                  }}
-                  className={cn(
-                    "cursor-pointer underline underline-offset-2 transition-opacity hover:opacity-100",
-                    subtextColor,
-                  )}
-                >
-                  {t("sheet.passwordReset")}
-                </button>
-              </p>
-            </div>
+            {/* Security Key */}
+            <SecurityKeySection
+              textColor={textColor}
+              textShadow={textShadow}
+              subtextColor={subtextColor}
+              useLiquidGlass={useLiquidGlass}
+              useDarkMode={useDarkMode}
+            />
+
+            {/* Password Change */}
+            <PasswordChangeSection
+              textColor={textColor}
+              textShadow={textShadow}
+              subtextColor={subtextColor}
+              inputClass={inputClass}
+              useLiquidGlass={useLiquidGlass}
+              useDarkMode={useDarkMode}
+              navigate={navigate}
+              onSheetClose={() => setOpen(false)}
+            />
 
             {/* Error feedback */}
             {saveStatus === "error" && (
