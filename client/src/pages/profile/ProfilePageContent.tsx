@@ -14,6 +14,7 @@ import {
   Trophy,
   TrendingUp,
   History,
+  Crop,
 } from "lucide-react";
 import {
   cn,
@@ -28,6 +29,8 @@ import {
 import { useProfiles } from "@/pages/profile-selector/useProfiles";
 import { useUploadProfilePictureMutation } from "@/hooks/useQueryHooks";
 import { ImageCropDialog } from "@/components/ImageCropDialog";
+
+// ─── First-login security key banner ─────────────────────────────────────────
 
 // ─── Stat card ────────────────────────────────────────────────────────────────
 
@@ -70,6 +73,8 @@ export function ProfilePageContent({ animReady = true }: { animReady?: boolean }
   const [localPreview, setLocalPreview] = useState<string | null>(null);
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [cropOpen, setCropOpen] = useState(false);
+  const [originalFile, setOriginalFile] = useState<File | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const { t } = useTranslation("profile");
 
   const username = selectedProfile?.name ?? "—";
@@ -87,7 +92,14 @@ export function ProfilePageContent({ animReady = true }: { animReady?: boolean }
     const file = e.target.files?.[0];
     if (!file || !selectedProfile?.id) return;
     e.target.value = "";
+    setOriginalFile(file);
     setCropFile(file);
+    setCropOpen(true);
+  };
+
+  const handleRecrop = () => {
+    if (!originalFile) return;
+    setCropFile(new File([originalFile], originalFile.name, { type: originalFile.type }));
     setCropOpen(true);
   };
 
@@ -96,6 +108,7 @@ export function ProfilePageContent({ animReady = true }: { animReady?: boolean }
     if (!selectedProfile?.id) return;
     setCropOpen(false);
     setCropFile(null);
+    // Keep originalFile so the user can recrop later
     const blobUrl = URL.createObjectURL(croppedFile);
     setLocalPreview(blobUrl);
     try {
@@ -161,7 +174,7 @@ export function ProfilePageContent({ animReady = true }: { animReady?: boolean }
           className="flex flex-col items-center justify-center gap-5 lg:w-52 lg:shrink-0"
           style={sectionStyle(animReady, 0)}
         >
-          <div>
+          <div className="relative">
             <input type="file" ref={pfpinputRef} hidden accept="image/*" onChange={onFileChange} />
             <div onClick={() => pfpinputRef.current?.click()}>
               <Avatar
@@ -182,6 +195,16 @@ export function ProfilePageContent({ animReady = true }: { animReady?: boolean }
                 <AvatarFallback>{username.slice(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
             </div>
+            {originalFile && (
+              <button
+                type="button"
+                onClick={handleRecrop}
+                title="Recrop"
+                className="absolute right-0 bottom-0 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-black/70 text-white transition-colors hover:bg-black/90"
+              >
+                <Crop className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
 
           <div className="text-center">
@@ -198,7 +221,7 @@ export function ProfilePageContent({ animReady = true }: { animReady?: boolean }
             )}
           </div>
 
-          <UpdateSheet />
+          <UpdateSheet open={sheetOpen} onOpenChange={setSheetOpen} />
         </div>
 
         {/* Vertical divider (desktop) / horizontal (mobile) */}

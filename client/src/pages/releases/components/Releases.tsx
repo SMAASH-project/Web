@@ -10,6 +10,7 @@ import {
   getSubtextColor,
 } from "@/lib/utils";
 import { LoadPost } from "@/animations/LoadPost";
+import { motion } from "motion/react";
 import { DownloadReleaseButton } from "./DownloadReleaseButton";
 import type { Release } from "@/types/PageTypes";
 import { Package, Loader2 } from "lucide-react";
@@ -146,12 +147,20 @@ export function Releases({
             </Card>
           );
 
+          const animatedCard = settings.useAnimations ? (
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.99 }}>
+              {cardContent}
+            </motion.div>
+          ) : (
+            cardContent
+          );
+
           return settings.useAnimations ? (
             <LoadPost key={release.id} index={index}>
-              {cardContent}
+              {animatedCard}
             </LoadPost>
           ) : (
-            <div key={release.id}>{cardContent}</div>
+            <div key={release.id}>{animatedCard}</div>
           );
         })
       )}

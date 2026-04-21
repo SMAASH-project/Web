@@ -33,9 +33,9 @@ build-fullstack: build-client build
     cd ./client && npm install && npm run build
 
 @dev:
-    echo "Starting development environment"
-    wt new-tab -d . cmd /k go run -v cmd/api/main.go
-    cd client && npm install && npm run dev
+    echo "Starting development environment..."
+    {{ if os_family() == "windows" { 'start cmd /k just run' } else if os() == "macos" { 'osascript -e "tell application \\"Terminal\\" to do script \\"cd ' + justfile_directory() + ' && just run\\""' } else { 'nohup just run >/tmp/smaash-backend.log 2>&1 &' } }}
+    cd client && npm i && npm run dev
 
 # Auto-format frontend files checked by format:check
 @format-client:

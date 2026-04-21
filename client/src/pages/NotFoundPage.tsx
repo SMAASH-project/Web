@@ -12,6 +12,7 @@ import {
   sectionStyle,
 } from "@/lib/utils";
 import { CardAnimation } from "@/animations/CardAnimation";
+import { AnimatedPress } from "@/animations/AnimatedPress";
 import { Home } from "lucide-react";
 
 export function NotFoundPage() {
@@ -34,17 +35,27 @@ export function NotFoundPage() {
   const inner = (
     <div className="z-0 flex min-h-dvh w-full flex-col items-center justify-center gap-6 p-6">
       {/* Floating 404 */}
-      <motion.div
-        animate={{ y: [0, -10, 0] }}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        style={sectionStyle(ready, 0)}
-      >
-        <span
-          className={`text-[10rem] leading-none font-black tracking-tighter opacity-15 select-none ${textColor}`}
+      {useAnimations ? (
+        <motion.div
+          animate={{ y: [0, -10, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          style={sectionStyle(ready, 0)}
         >
-          404
-        </span>
-      </motion.div>
+          <span
+            className={`text-[10rem] leading-none font-black tracking-tighter opacity-15 select-none ${textColor}`}
+          >
+            404
+          </span>
+        </motion.div>
+      ) : (
+        <div style={sectionStyle(ready, 0)}>
+          <span
+            className={`text-[10rem] leading-none font-black tracking-tighter opacity-15 select-none ${textColor}`}
+          >
+            404
+          </span>
+        </div>
+      )}
 
       {/* Panel */}
       <div
@@ -56,13 +67,15 @@ export function NotFoundPage() {
         </h1>
         <p className={`max-w-xs text-sm ${subtextColor}`}>{t("notFound.description")}</p>
 
-        <button
-          onClick={() => navigate("/app")}
-          className={`mt-2 flex cursor-pointer items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition-all duration-150 ${buttonClass} ${textColor} ${textShadow}`}
-        >
-          <Home size={15} />
-          {t("notFound.back")}
-        </button>
+        <AnimatedPress>
+          <button
+            onClick={() => navigate("/app")}
+            className={`mt-2 flex cursor-pointer items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition-colors duration-150 ${buttonClass} ${textColor} ${textShadow}`}
+          >
+            <Home size={15} />
+            {t("notFound.back")}
+          </button>
+        </AnimatedPress>
       </div>
     </div>
   );
