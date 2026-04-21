@@ -12,6 +12,7 @@ import { useMediaQuery } from "./navLogic/useMediaQuery";
 import { useLogoutMutation } from "@/hooks/useQueryHooks";
 import { AuthContext } from "@/context/AuthContext";
 import { ShieldAlert, Bug } from "lucide-react";
+import { AnimatedPress } from "@/animations/AnimatedPress";
 import { useTranslation } from "react-i18next";
 import {
   getBackgroundClasses,
@@ -73,28 +74,32 @@ const Navbar = () => {
             {/* Left: admin / debug buttons */}
             <div className="flex shrink-0 items-center gap-2">
               {isAdmin && (
-                <Link
-                  to="/app/admin"
-                  className={`flex shrink-0 flex-col items-center gap-0.5 rounded-lg px-2 py-1 text-[10px] font-medium no-underline transition-all duration-200 ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "secondary")} ${textColor}`}
-                  title={t("account.adminPanel")}
-                >
-                  <ShieldAlert size={13} />
-                  <span className="hidden max-w-11 text-center leading-tight lg:block">
-                    {t("account.adminPanel")}
-                  </span>
-                </Link>
+                <AnimatedPress scale={1.05}>
+                  <Link
+                    to="/app/admin"
+                    className={`flex shrink-0 flex-col items-center gap-0.5 rounded-lg px-2 py-1 text-[10px] font-medium no-underline transition-colors duration-200 ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "secondary")} ${textColor}`}
+                    title={t("account.adminPanel")}
+                  >
+                    <ShieldAlert size={13} />
+                    <span className="hidden max-w-11 text-center leading-tight lg:block">
+                      {t("account.adminPanel")}
+                    </span>
+                  </Link>
+                </AnimatedPress>
               )}
               {(isAdmin || isSupport) && (
-                <Link
-                  to="/app/debug"
-                  className={`flex shrink-0 flex-col items-center gap-0.5 rounded-lg px-2 py-1 text-[10px] font-medium no-underline transition-all duration-200 ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "secondary")} ${textColor}`}
-                  title={t("account.debugPanel")}
-                >
-                  <Bug size={13} />
-                  <span className="hidden max-w-11 text-center leading-tight lg:block">
-                    {t("account.debugPanel")}
-                  </span>
-                </Link>
+                <AnimatedPress scale={1.05}>
+                  <Link
+                    to="/app/debug"
+                    className={`flex shrink-0 flex-col items-center gap-0.5 rounded-lg px-2 py-1 text-[10px] font-medium no-underline transition-colors duration-200 ${getButtonClasses(settings.useLiquidGlass, settings.useDarkMode, "secondary")} ${textColor}`}
+                    title={t("account.debugPanel")}
+                  >
+                    <Bug size={13} />
+                    <span className="hidden max-w-11 text-center leading-tight lg:block">
+                      {t("account.debugPanel")}
+                    </span>
+                  </Link>
+                </AnimatedPress>
               )}
             </div>
             {/* Center: main nav */}

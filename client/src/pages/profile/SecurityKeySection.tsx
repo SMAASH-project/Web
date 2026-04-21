@@ -63,7 +63,7 @@ export function SecurityKeySection({
       {securityKey ? (
         <>
           <div className={keyBoxClass}>
-            <code className={cn("min-w-0 flex-1 break-all font-mono text-xs", subtextColor)}>
+            <code className={cn("min-w-0 flex-1 font-mono text-xs break-all", subtextColor)}>
               {securityKey}
             </code>
             <Button

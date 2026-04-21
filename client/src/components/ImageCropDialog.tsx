@@ -280,9 +280,14 @@ export function ImageCropDialog({
       ctx.fillRect(0, 0, outW, outH);
       ctx.drawImage(
         imgRef.current,
-        0, 0, natSize.w, natSize.h,
-        pan.x * scale, pan.y * scale,
-        renderW * scale, renderH * scale,
+        0,
+        0,
+        natSize.w,
+        natSize.h,
+        pan.x * scale,
+        pan.y * scale,
+        renderW * scale,
+        renderH * scale,
       );
 
       const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.92));
@@ -555,16 +560,16 @@ export function ImageCropDialog({
                             disabled={!natSize}
                             className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-white disabled:cursor-not-allowed disabled:opacity-40"
                           />
-                          <span className={`w-8 shrink-0 text-right text-xs ${subtextColor} opacity-70`}>
+                          <span
+                            className={`w-8 shrink-0 text-right text-xs ${subtextColor} opacity-70`}
+                          >
                             {scaleX.toFixed(2)}×
                           </span>
                         </div>
 
                         {/* V-Stretch */}
                         <div className="flex items-center gap-3">
-                          <ArrowUpDown
-                            className={`h-4 w-4 shrink-0 ${subtextColor} opacity-70`}
-                          />
+                          <ArrowUpDown className={`h-4 w-4 shrink-0 ${subtextColor} opacity-70`} />
                           <input
                             type="range"
                             min={1}
@@ -575,7 +580,9 @@ export function ImageCropDialog({
                             disabled={!natSize}
                             className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-white disabled:cursor-not-allowed disabled:opacity-40"
                           />
-                          <span className={`w-8 shrink-0 text-right text-xs ${subtextColor} opacity-70`}>
+                          <span
+                            className={`w-8 shrink-0 text-right text-xs ${subtextColor} opacity-70`}
+                          >
                             {scaleY.toFixed(2)}×
                           </span>
                         </div>

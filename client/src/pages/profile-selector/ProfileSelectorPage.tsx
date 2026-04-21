@@ -12,6 +12,7 @@ import { AddNewProfileDialog } from "./AddNewProfileDialog";
 import { useProfiles } from "./useProfiles";
 import * as motion from "motion/react-client";
 import { useLogoutMutation } from "@/hooks/useQueryHooks";
+import { AnimatedPress } from "@/animations/AnimatedPress";
 import { AuthContext } from "@/context/AuthContext";
 
 const ProfileAvatar = memo(function ProfileAvatar({
@@ -93,12 +94,23 @@ export function ProfileSelectorPage() {
   const location = useLocation();
   const { userId, setIsLoggedIn, setUserId, setIsAdmin } = useContext(AuthContext);
   const logoutMutation = useLogoutMutation();
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    if (location.state?.change) return;
-    if (!userId) return;
+    if (location.state?.change) {
+      setChecking(false);
+      return;
+    }
+    if (!userId) {
+      setChecking(false);
+      return;
+    }
     const stored = localStorage.getItem(`selected_profile_${String(userId)}`);
-    if (stored) navigate(location.state?.from ?? "/app/releases", { replace: true });
+    if (stored) {
+      navigate(location.state?.from ?? "/app/releases", { replace: true });
+    } else {
+      setChecking(false);
+    }
   }, [userId, location.state, navigate]);
 
   const handleLogout = async () => {
@@ -130,14 +142,13 @@ export function ProfileSelectorPage() {
     [isManaging, removeProfile, selectProfile, navigate, location.state],
   );
 
-  const wrap = (content: React.ReactNode) =>
-    settings.useAnimations ? (
-      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-        {content}
-      </motion.div>
-    ) : (
-      <div>{content}</div>
+  if (checking) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-white" />
+      </div>
     );
+  }
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-5">
@@ -163,8 +174,8 @@ export function ProfileSelectorPage() {
                 onProfileClick={handleProfileClick}
               />
             ))}
-            {profileCount < 5 &&
-              wrap(
+            {profileCount < 5 && (
+              <AnimatedPress>
                 <div className="flex flex-col items-center gap-2">
                   <button
                     onClick={() => setShowAddProfile(true)}
@@ -177,20 +188,21 @@ export function ProfileSelectorPage() {
                   >
                     {t("selector.addNew")}
                   </span>
-                </div>,
-              )}
+                </div>
+              </AnimatedPress>
+            )}
           </div>
         </div>
         <div className="z-1 mb-4 flex gap-3">
-          {wrap(
+          <AnimatedPress>
             <Button
               onClick={() => setIsManaging((prev) => !prev)}
               className={`text-white ${getLiquidGlassClasses(settings.useLiquidGlass, settings.useDarkMode)} ${getLiquidGlassTextShadow(settings.useLiquidGlass, settings.useDarkMode)} cursor-pointer rounded-lg`}
             >
               {isManaging ? t("selector.done") : t("selector.manage")}
-            </Button>,
-          )}
-          {wrap(
+            </Button>
+          </AnimatedPress>
+          <AnimatedPress>
             <Button
               onClick={handleLogout}
               disabled={logoutMutation.isPending}
@@ -198,8 +210,8 @@ export function ProfileSelectorPage() {
             >
               <LogOut className="size-4" />
               {logoutMutation.isPending ? "..." : t("selector.logout")}
-            </Button>,
-          )}
+            </Button>
+          </AnimatedPress>
         </div>
       </div>
       <AddNewProfileDialog open={showAddProfile} onOpenChange={setShowAddProfile} />

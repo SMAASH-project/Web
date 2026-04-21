@@ -13,6 +13,7 @@ import { useSettings } from "@/pages/settings/SettingsContext";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
 import { extractErrorMessage } from "@/lib/utils/extractErrorMessage";
 import type { AxiosError } from "axios";
+import { AnimatedPress } from "@/animations/AnimatedPress";
 
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_SECONDS = 30;
@@ -155,15 +156,18 @@ export function LoginPage({ className, ...props }: React.ComponentProps<"div">) 
                 <FieldLabel htmlFor="email" className="text-gray-900!">
                   {t("login.email")}
                 </FieldLabel>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={isFormDisabled}
-                />
+                <AnimatedPress scale={1.02} tapScale={1} className="w-full">
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="m@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={isFormDisabled}
+                    className="hover:border-gray-400"
+                  />
+                </AnimatedPress>
               </Field>
               <Field>
                 <div className="flex items-center">
@@ -177,14 +181,17 @@ export function LoginPage({ className, ...props }: React.ComponentProps<"div">) 
                     {t("login.forgotPassword")}
                   </Link>
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  disabled={isFormDisabled}
-                />
+                <AnimatedPress scale={1.02} tapScale={1} className="w-full">
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={isFormDisabled}
+                    className="hover:border-gray-400"
+                  />
+                </AnimatedPress>
               </Field>
 
               {isLockedOut ? (
@@ -205,18 +212,20 @@ export function LoginPage({ className, ...props }: React.ComponentProps<"div">) 
               )}
 
               <Field>
-                <Button
-                  type="submit"
-                  id="login-button"
-                  className="text-white"
-                  disabled={isFormDisabled}
-                >
-                  {loginMutation.isPending
-                    ? t("login.submitting")
-                    : isLockedOut
-                      ? `Locked (${countdown}s)`
-                      : t("login.submit")}
-                </Button>
+                <AnimatedPress className="w-full">
+                  <Button
+                    type="submit"
+                    id="login-button"
+                    className="w-full text-white"
+                    disabled={isFormDisabled}
+                  >
+                    {loginMutation.isPending
+                      ? t("login.submitting")
+                      : isLockedOut
+                        ? `Locked (${countdown}s)`
+                        : t("login.submit")}
+                  </Button>
+                </AnimatedPress>
                 <FieldDescription className="text-center">
                   {t("login.noAccount")} <Link to="/app/signup">{t("login.signUp")}</Link>
                 </FieldDescription>

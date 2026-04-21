@@ -14,6 +14,7 @@ import { useChangePasswordMutation } from "@/hooks/useQueryHooks";
 import { useSecurityKey } from "@/context/SecurityKeyContext";
 import { AnimatePresence, motion } from "motion/react";
 import { Copy, Check, KeyRound } from "lucide-react";
+import { AnimatedPress } from "@/animations/AnimatedPress";
 import type { AxiosError } from "axios";
 
 // ─── Success state ─────────────────────────────────────────────────────────
@@ -24,6 +25,7 @@ interface ResetSuccessProps {
 
 function ResetSuccess({ newKey }: ResetSuccessProps) {
   const { t } = useTranslation("auth");
+  const { settings } = useSettings();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -32,15 +34,8 @@ function ResetSuccess({ newKey }: ResetSuccessProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  return (
-    <motion.div
-      key="success"
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.2 }}
-      className="flex flex-col gap-4"
-    >
+  const successContent = (
+    <>
       <FormAlert variant="success" message={t("reset.successDescription")} />
 
       <div className="flex flex-col gap-2">
@@ -65,12 +60,35 @@ function ResetSuccess({ newKey }: ResetSuccessProps) {
         <FormAlert variant="info" message={t("reset.newKeyWarning")} />
       </div>
 
-      <Link to="/app/login" className="block w-full">
-        <Button type="button" className="w-full text-white">
-          {t("reset.goToLogin")}
-        </Button>
-      </Link>
-    </motion.div>
+      <AnimatedPress>
+        <Link to="/app/login" className="block w-full">
+          <Button type="button" className="w-full text-white">
+            {t("reset.goToLogin")}
+          </Button>
+        </Link>
+      </AnimatedPress>
+    </>
+  );
+
+  if (settings.useAnimations) {
+    return (
+      <motion.div
+        key="success"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ duration: 0.2 }}
+        className="flex flex-col gap-4"
+      >
+        {successContent}
+      </motion.div>
+    );
+  }
+
+  return (
+    <div key="success" className="flex flex-col gap-4">
+      {successContent}
+    </div>
   );
 }
 
@@ -82,6 +100,7 @@ interface ResetFormProps {
 
 function ResetForm({ onSuccess }: ResetFormProps) {
   const { t } = useTranslation("auth");
+  const { settings } = useSettings();
   const [email, setEmail] = useState("");
   const [securityKey, setSecurityKey] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -122,20 +141,13 @@ function ResetForm({ onSuccess }: ResetFormProps) {
     validationError ||
     (mutation.isError ? extractErrorMessage(mutation.error as AxiosError, t("reset.failed")) : "");
 
-  return (
-    <motion.form
-      key="form"
-      onSubmit={handleSubmit}
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.2 }}
-    >
-      <FieldGroup>
-        <Field>
-          <FieldLabel htmlFor="reset-email" className="text-gray-900!">
-            {t("reset.email")}
-          </FieldLabel>
+  const formContent = (
+    <FieldGroup>
+      <Field>
+        <FieldLabel htmlFor="reset-email" className="text-gray-900!">
+          {t("reset.email")}
+        </FieldLabel>
+        <AnimatedPress scale={1.02} tapScale={1} className="w-full">
           <Input
             id="reset-email"
             type="email"
@@ -144,14 +156,17 @@ function ResetForm({ onSuccess }: ResetFormProps) {
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={mutation.isPending}
+            className="hover:border-gray-400"
           />
-          <FieldDescription>{t("reset.emailHint")}</FieldDescription>
-        </Field>
+        </AnimatedPress>
+        <FieldDescription>{t("reset.emailHint")}</FieldDescription>
+      </Field>
 
-        <Field>
-          <FieldLabel htmlFor="security-key" className="text-gray-900!">
-            {t("reset.securityKey")}
-          </FieldLabel>
+      <Field>
+        <FieldLabel htmlFor="security-key" className="text-gray-900!">
+          {t("reset.securityKey")}
+        </FieldLabel>
+        <AnimatedPress scale={1.02} tapScale={1} className="w-full">
           <Input
             id="security-key"
             type="text"
@@ -160,15 +175,17 @@ function ResetForm({ onSuccess }: ResetFormProps) {
             placeholder={t("reset.securityKeyPlaceholder")}
             required
             disabled={mutation.isPending}
-            className="font-mono text-xs"
+            className="font-mono text-xs hover:border-gray-400"
           />
-          <FieldDescription>{t("reset.securityKeyHint")}</FieldDescription>
-        </Field>
+        </AnimatedPress>
+        <FieldDescription>{t("reset.securityKeyHint")}</FieldDescription>
+      </Field>
 
-        <Field>
-          <FieldLabel htmlFor="new-password" className="text-gray-900!">
-            {t("reset.newPassword")}
-          </FieldLabel>
+      <Field>
+        <FieldLabel htmlFor="new-password" className="text-gray-900!">
+          {t("reset.newPassword")}
+        </FieldLabel>
+        <AnimatedPress scale={1.02} tapScale={1} className="w-full">
           <Input
             id="new-password"
             type="password"
@@ -179,13 +196,16 @@ function ResetForm({ onSuccess }: ResetFormProps) {
             }}
             required
             disabled={mutation.isPending}
+            className="hover:border-gray-400"
           />
-        </Field>
+        </AnimatedPress>
+      </Field>
 
-        <Field>
-          <FieldLabel htmlFor="confirm-password" className="text-gray-900!">
-            {t("reset.confirmPassword")}
-          </FieldLabel>
+      <Field>
+        <FieldLabel htmlFor="confirm-password" className="text-gray-900!">
+          {t("reset.confirmPassword")}
+        </FieldLabel>
+        <AnimatedPress scale={1.02} tapScale={1} className="w-full">
           <Input
             id="confirm-password"
             type="password"
@@ -196,21 +216,45 @@ function ResetForm({ onSuccess }: ResetFormProps) {
             }}
             required
             disabled={mutation.isPending}
+            className="hover:border-gray-400"
           />
-        </Field>
+        </AnimatedPress>
+      </Field>
 
-        {errorMessage && <FormAlert variant="error" message={errorMessage} />}
+      {errorMessage && <FormAlert variant="error" message={errorMessage} />}
 
-        <Field>
-          <Button type="submit" className="text-white" disabled={mutation.isPending}>
+      <Field>
+        <AnimatedPress className="w-full">
+          <Button type="submit" className="w-full text-white" disabled={mutation.isPending}>
             {mutation.isPending ? t("reset.submitting") : t("reset.submit")}
           </Button>
-          <FieldDescription className="text-center">
-            {t("reset.backToLogin")} <Link to="/app/login">{t("reset.logIn")}</Link>
-          </FieldDescription>
-        </Field>
-      </FieldGroup>
-    </motion.form>
+        </AnimatedPress>
+        <FieldDescription className="text-center">
+          {t("reset.backToLogin")} <Link to="/app/login">{t("reset.logIn")}</Link>
+        </FieldDescription>
+      </Field>
+    </FieldGroup>
+  );
+
+  if (settings.useAnimations) {
+    return (
+      <motion.form
+        key="form"
+        onSubmit={handleSubmit}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ duration: 0.2 }}
+      >
+        {formContent}
+      </motion.form>
+    );
+  }
+
+  return (
+    <form key="form" onSubmit={handleSubmit}>
+      {formContent}
+    </form>
   );
 }
 
@@ -240,9 +284,13 @@ export function PasswordResetPage({ className, ...props }: React.ComponentProps<
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <AnimatePresence mode="wait">
-            {newKey ? <ResetSuccess newKey={newKey} /> : <ResetForm onSuccess={setNewKey} />}
-          </AnimatePresence>
+          {settings.useAnimations ? (
+            <AnimatePresence mode="wait">
+              {newKey ? <ResetSuccess newKey={newKey} /> : <ResetForm onSuccess={setNewKey} />}
+            </AnimatePresence>
+          ) : (
+            <>{newKey ? <ResetSuccess newKey={newKey} /> : <ResetForm onSuccess={setNewKey} />}</>
+          )}
         </CardContent>
       </Card>
     </div>

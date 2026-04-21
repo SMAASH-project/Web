@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Swords } from "lucide-react";
+import { motion } from "motion/react";
 import { LoadPost } from "@/animations/LoadPost";
 
 interface CharacterCardProps {
@@ -21,10 +22,8 @@ export function CharacterCard({
 }: CharacterCardProps) {
   const [imgError, setImgError] = useState(false);
 
-  const card = (
-    <div
-      className={`flex flex-col overflow-hidden rounded-xl ${panelBg} transition-all duration-200 hover:scale-[1.02] hover:shadow-xl`}
-    >
+  const cardInner = (
+    <>
       <div className="relative aspect-square overflow-hidden bg-black/10">
         {!imgError ? (
           <img
@@ -45,8 +44,22 @@ export function CharacterCard({
           #{character.id}
         </span>
       </div>
-    </div>
+    </>
   );
 
-  return animate ? <LoadPost index={index}>{card}</LoadPost> : <div>{card}</div>;
+  if (animate) {
+    return (
+      <LoadPost index={index}>
+        <motion.div
+          className={`flex flex-col overflow-hidden rounded-xl ${panelBg}`}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.99 }}
+        >
+          {cardInner}
+        </motion.div>
+      </LoadPost>
+    );
+  }
+
+  return <div className={`flex flex-col overflow-hidden rounded-xl ${panelBg}`}>{cardInner}</div>;
 }

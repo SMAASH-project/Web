@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AnimatePresence, motion } from "motion/react";
+import { useSettings } from "@/pages/settings/SettingsContext";
 import { cn } from "@/lib/utils";
 import { Lock, ChevronDown, ChevronUp, Check, Copy, Download, AlertCircle } from "lucide-react";
 import { extractErrorMessage } from "@/lib/utils/extractErrorMessage";
@@ -34,6 +35,7 @@ export function PasswordChangeSection({
   onSheetClose,
 }: PasswordChangeSectionProps) {
   const { t } = useTranslation("profile");
+  const { settings } = useSettings();
   const { securityKey: ctxKey, setSecurityKey } = useSecurityKey();
   const { data: whoAmI } = useWhoAmIQuery();
 
@@ -53,7 +55,9 @@ export function PasswordChangeSection({
     setValidationError("");
 
     if (newPassword.length < 8) {
-      setValidationError(t("sheet.passwordNewPasswordShort") || "Password must be at least 8 characters.");
+      setValidationError(
+        t("sheet.passwordNewPasswordShort") || "Password must be at least 8 characters.",
+      );
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -136,41 +140,224 @@ export function PasswordChangeSection({
           <Lock size={13} />
           {t("sheet.password")}
         </span>
-        {expanded ? <ChevronUp size={14} className="opacity-60" /> : <ChevronDown size={14} className="opacity-60" />}
+        {expanded ? (
+          <ChevronUp size={14} className="opacity-60" />
+        ) : (
+          <ChevronDown size={14} className="opacity-60" />
+        )}
       </button>
 
-      <AnimatePresence initial={false}>
-        {expanded && (
-          <motion.div
-            key="pw-form"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
+      {settings.useAnimations ? (
+        <AnimatePresence initial={false}>
+          {expanded && (
+            <motion.div
+              key="pw-form"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="flex flex-col gap-3 pt-1">
+                {newKey ? (
+                  <div className={successBoxClass}>
+                    <p className="mb-2 text-green-600 dark:text-green-400">
+                      {t("sheet.passwordSuccess")}
+                    </p>
+                    <p className={cn("mb-1 text-xs font-medium", textColor)}>
+                      {t("sheet.securityKeyNewLabel")}
+                    </p>
+                    <div className={keyBoxClass}>
+                      <code
+                        className={cn("min-w-0 flex-1 font-mono text-xs break-all", subtextColor)}
+                      >
+                        {newKey}
+                      </code>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 shrink-0 px-2"
+                        onClick={handleCopyNewKey}
+                      >
+                        {copiedNewKey ? (
+                          <Check className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Copy className="h-4 w-4 opacity-60" />
+                        )}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 shrink-0 px-2"
+                        onClick={handleDownloadNewKey}
+                      >
+                        <Download className="h-4 w-4 opacity-60" />
+                      </Button>
+                    </div>
+                    <p className={cn("mt-1 text-xs", subtextColor)}>
+                      {t("sheet.securityKeyWarning")}
+                    </p>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-1.5">
+                      <Label
+                        htmlFor="pw-security-key"
+                        className={cn("text-xs font-medium", textColor)}
+                      >
+                        {t("sheet.passwordSecurityKey")}
+                      </Label>
+                      <Input
+                        id="pw-security-key"
+                        type="text"
+                        value={securityKeyInput}
+                        onChange={(e) => setSecurityKeyInput(e.target.value)}
+                        placeholder={t("sheet.passwordSecurityKeyPlaceholder")}
+                        className={cn(inputClass, "font-mono text-xs")}
+                        disabled={mutation.isPending}
+                        required
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <Label htmlFor="pw-new" className={cn("text-xs font-medium", textColor)}>
+                        {t("sheet.passwordNewPassword")}
+                      </Label>
+                      <Input
+                        id="pw-new"
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => {
+                          setNewPassword(e.target.value);
+                          if (validationError) setValidationError("");
+                        }}
+                        className={inputClass}
+                        disabled={mutation.isPending}
+                        required
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <Label htmlFor="pw-confirm" className={cn("text-xs font-medium", textColor)}>
+                        {t("sheet.passwordConfirmPassword")}
+                      </Label>
+                      <Input
+                        id="pw-confirm"
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => {
+                          setConfirmPassword(e.target.value);
+                          if (validationError) setValidationError("");
+                        }}
+                        className={inputClass}
+                        disabled={mutation.isPending}
+                        required
+                      />
+                    </div>
+
+                    {errorMessage && (
+                      <div
+                        className={cn(
+                          "flex items-start gap-2 rounded-xl border px-3 py-2 text-xs",
+                          useLiquidGlass
+                            ? useDarkMode
+                              ? "border-red-500/25 bg-red-500/15"
+                              : "border-red-500/20 bg-red-500/10"
+                            : useDarkMode
+                              ? "border-red-800 bg-red-950"
+                              : "border-red-200 bg-red-50",
+                        )}
+                      >
+                        <AlertCircle size={12} className="mt-0.5 shrink-0 text-red-400" />
+                        <span className="text-red-400">{errorMessage}</span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onSheetClose();
+                          navigate("/app/reset-password");
+                        }}
+                        className={cn(
+                          "cursor-pointer text-xs underline underline-offset-2 transition-opacity hover:opacity-100",
+                          subtextColor,
+                        )}
+                      >
+                        {t("sheet.passwordReset")}
+                      </button>
+                      <Button
+                        type="submit"
+                        size="sm"
+                        className="text-white"
+                        disabled={mutation.isPending}
+                      >
+                        {mutation.isPending
+                          ? t("sheet.passwordSubmitting")
+                          : t("sheet.passwordSubmit")}
+                      </Button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      ) : (
+        expanded && (
+          <div className="overflow-hidden">
             <div className="flex flex-col gap-3 pt-1">
               {newKey ? (
                 <div className={successBoxClass}>
-                  <p className="mb-2 text-green-600 dark:text-green-400">{t("sheet.passwordSuccess")}</p>
-                  <p className={cn("mb-1 text-xs font-medium", textColor)}>{t("sheet.securityKeyNewLabel")}</p>
+                  <p className="mb-2 text-green-600 dark:text-green-400">
+                    {t("sheet.passwordSuccess")}
+                  </p>
+                  <p className={cn("mb-1 text-xs font-medium", textColor)}>
+                    {t("sheet.securityKeyNewLabel")}
+                  </p>
                   <div className={keyBoxClass}>
-                    <code className={cn("min-w-0 flex-1 break-all font-mono text-xs", subtextColor)}>
+                    <code
+                      className={cn("min-w-0 flex-1 font-mono text-xs break-all", subtextColor)}
+                    >
                       {newKey}
                     </code>
-                    <Button type="button" size="sm" variant="ghost" className="h-7 shrink-0 px-2" onClick={handleCopyNewKey}>
-                      {copiedNewKey ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4 opacity-60" />}
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 shrink-0 px-2"
+                      onClick={handleCopyNewKey}
+                    >
+                      {copiedNewKey ? (
+                        <Check className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <Copy className="h-4 w-4 opacity-60" />
+                      )}
                     </Button>
-                    <Button type="button" size="sm" variant="ghost" className="h-7 shrink-0 px-2" onClick={handleDownloadNewKey}>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 shrink-0 px-2"
+                      onClick={handleDownloadNewKey}
+                    >
                       <Download className="h-4 w-4 opacity-60" />
                     </Button>
                   </div>
-                  <p className={cn("mt-1 text-xs", subtextColor)}>{t("sheet.securityKeyWarning")}</p>
+                  <p className={cn("mt-1 text-xs", subtextColor)}>
+                    {t("sheet.securityKeyWarning")}
+                  </p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="flex flex-col gap-3">
                   <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="pw-security-key" className={cn("text-xs font-medium", textColor)}>
+                    <Label
+                      htmlFor="pw-security-key"
+                      className={cn("text-xs font-medium", textColor)}
+                    >
                       {t("sheet.passwordSecurityKey")}
                     </Label>
                     <Input
@@ -184,7 +371,6 @@ export function PasswordChangeSection({
                       required
                     />
                   </div>
-
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor="pw-new" className={cn("text-xs font-medium", textColor)}>
                       {t("sheet.passwordNewPassword")}
@@ -193,13 +379,15 @@ export function PasswordChangeSection({
                       id="pw-new"
                       type="password"
                       value={newPassword}
-                      onChange={(e) => { setNewPassword(e.target.value); if (validationError) setValidationError(""); }}
+                      onChange={(e) => {
+                        setNewPassword(e.target.value);
+                        if (validationError) setValidationError("");
+                      }}
                       className={inputClass}
                       disabled={mutation.isPending}
                       required
                     />
                   </div>
-
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor="pw-confirm" className={cn("text-xs font-medium", textColor)}>
                       {t("sheet.passwordConfirmPassword")}
@@ -208,47 +396,65 @@ export function PasswordChangeSection({
                       id="pw-confirm"
                       type="password"
                       value={confirmPassword}
-                      onChange={(e) => { setConfirmPassword(e.target.value); if (validationError) setValidationError(""); }}
+                      onChange={(e) => {
+                        setConfirmPassword(e.target.value);
+                        if (validationError) setValidationError("");
+                      }}
                       className={inputClass}
                       disabled={mutation.isPending}
                       required
                     />
                   </div>
-
                   {errorMessage && (
-                    <div className={cn(
-                      "flex items-start gap-2 rounded-xl border px-3 py-2 text-xs",
-                      useLiquidGlass
-                        ? useDarkMode ? "border-red-500/25 bg-red-500/15" : "border-red-500/20 bg-red-500/10"
-                        : useDarkMode ? "border-red-800 bg-red-950" : "border-red-200 bg-red-50",
-                    )}>
+                    <div
+                      className={cn(
+                        "flex items-start gap-2 rounded-xl border px-3 py-2 text-xs",
+                        useLiquidGlass
+                          ? useDarkMode
+                            ? "border-red-500/25 bg-red-500/15"
+                            : "border-red-500/20 bg-red-500/10"
+                          : useDarkMode
+                            ? "border-red-800 bg-red-950"
+                            : "border-red-200 bg-red-50",
+                      )}
+                    >
                       <AlertCircle size={12} className="mt-0.5 shrink-0 text-red-400" />
                       <span className="text-red-400">{errorMessage}</span>
                     </div>
                   )}
-
                   <div className="flex items-center justify-between">
                     <button
                       type="button"
-                      onClick={() => { onSheetClose(); navigate("/app/reset-password"); }}
-                      className={cn("cursor-pointer text-xs underline underline-offset-2 transition-opacity hover:opacity-100", subtextColor)}
+                      onClick={() => {
+                        onSheetClose();
+                        navigate("/app/reset-password");
+                      }}
+                      className={cn(
+                        "cursor-pointer text-xs underline underline-offset-2 transition-opacity hover:opacity-100",
+                        subtextColor,
+                      )}
                     >
                       {t("sheet.passwordReset")}
                     </button>
-                    <Button type="submit" size="sm" className="text-white" disabled={mutation.isPending}>
-                      {mutation.isPending ? t("sheet.passwordSubmitting") : t("sheet.passwordSubmit")}
+                    <Button
+                      type="submit"
+                      size="sm"
+                      className="text-white"
+                      disabled={mutation.isPending}
+                    >
+                      {mutation.isPending
+                        ? t("sheet.passwordSubmitting")
+                        : t("sheet.passwordSubmit")}
                     </Button>
                   </div>
                 </form>
               )}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {!expanded && (
-        <p className={cn("text-xs", subtextColor)}>{t("sheet.passwordHint")}</p>
+          </div>
+        )
       )}
+
+      {!expanded && <p className={cn("text-xs", subtextColor)}>{t("sheet.passwordHint")}</p>}
     </div>
   );
 }

@@ -77,7 +77,6 @@ export function ProfilePageContent({ animReady = true }: { animReady?: boolean }
   const [sheetOpen, setSheetOpen] = useState(false);
   const { t } = useTranslation("profile");
 
-
   const username = selectedProfile?.name ?? "—";
   const { settings } = useSettings();
   const { useLiquidGlass, useDarkMode } = settings;

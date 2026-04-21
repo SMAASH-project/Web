@@ -15,6 +15,7 @@ import { extractErrorMessage } from "@/lib/utils/extractErrorMessage";
 import { useSecurityKey } from "@/context/SecurityKeyContext";
 import { AnimatePresence, motion } from "motion/react";
 import { Copy, Check, Download, KeyRound } from "lucide-react";
+import { AnimatedPress } from "@/animations/AnimatedPress";
 import type { AxiosError } from "axios";
 
 // ─── Security Key Reveal (Step 2) ────────────────────────────────────────────
@@ -25,6 +26,7 @@ interface SignupSuccessProps {
 
 function SignupSuccess({ securityKey }: SignupSuccessProps) {
   const { t } = useTranslation("auth");
+  const { settings } = useSettings();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
 
@@ -44,21 +46,14 @@ function SignupSuccess({ securityKey }: SignupSuccessProps) {
     URL.revokeObjectURL(url);
   };
 
-  return (
-    <motion.div
-      key="success"
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.2 }}
-      className="flex flex-col gap-4"
-    >
+  const successContent = (
+    <>
       <FormAlert variant="success" message={t("signup.successDescription")} />
 
       <div className="flex flex-col gap-2">
         <p className="text-sm font-medium text-gray-900">{t("signup.securityKeyLabel")}</p>
         <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
-          <code className="min-w-0 flex-1 break-all font-mono text-xs text-gray-800">
+          <code className="min-w-0 flex-1 font-mono text-xs break-all text-gray-800">
             {securityKey}
           </code>
           <Button
@@ -89,10 +84,33 @@ function SignupSuccess({ securityKey }: SignupSuccessProps) {
         <FormAlert variant="info" message={t("signup.securityKeyWarning")} />
       </div>
 
-      <Button type="button" className="w-full text-white" onClick={() => navigate("/app/login")}>
-        {t("signup.goToLogin")}
-      </Button>
-    </motion.div>
+      <AnimatedPress>
+        <Button type="button" className="w-full text-white" onClick={() => navigate("/app/login")}>
+          {t("signup.goToLogin")}
+        </Button>
+      </AnimatedPress>
+    </>
+  );
+
+  if (settings.useAnimations) {
+    return (
+      <motion.div
+        key="success"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ duration: 0.2 }}
+        className="flex flex-col gap-4"
+      >
+        {successContent}
+      </motion.div>
+    );
+  }
+
+  return (
+    <div key="success" className="flex flex-col gap-4">
+      {successContent}
+    </div>
   );
 }
 
@@ -104,6 +122,7 @@ interface SignupFormProps {
 
 function SignupForm({ onSuccess }: SignupFormProps) {
   const { t } = useTranslation("auth");
+  const { settings } = useSettings();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -148,20 +167,13 @@ function SignupForm({ onSuccess }: SignupFormProps) {
       ? extractErrorMessage(signupMutation.error as AxiosError, t("signup.failed"))
       : "");
 
-  return (
-    <motion.form
-      key="form"
-      onSubmit={handleSubmit}
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.2 }}
-    >
-      <FieldGroup>
-        <Field>
-          <FieldLabel htmlFor="email" className="text-gray-900!">
-            {t("signup.email")}
-          </FieldLabel>
+  const formContent = (
+    <FieldGroup>
+      <Field>
+        <FieldLabel htmlFor="email" className="text-gray-900!">
+          {t("signup.email")}
+        </FieldLabel>
+        <AnimatedPress scale={1.02} tapScale={1} className="w-full">
           <Input
             id="email"
             type="email"
@@ -170,12 +182,15 @@ function SignupForm({ onSuccess }: SignupFormProps) {
             onChange={(e) => setEmail(e.target.value)}
             disabled={signupMutation.isPending}
             required
+            className="hover:border-gray-400"
           />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="password" className="text-gray-900!">
-            {t("signup.password")}
-          </FieldLabel>
+        </AnimatedPress>
+      </Field>
+      <Field>
+        <FieldLabel htmlFor="password" className="text-gray-900!">
+          {t("signup.password")}
+        </FieldLabel>
+        <AnimatedPress scale={1.02} tapScale={1} className="w-full">
           <Input
             id="password"
             type="password"
@@ -186,13 +201,16 @@ function SignupForm({ onSuccess }: SignupFormProps) {
             }}
             disabled={signupMutation.isPending}
             required
+            className="hover:border-gray-400"
           />
-          <FieldDescription>{t("signup.passwordHint")}</FieldDescription>
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="confirm-password" className="text-gray-900!">
-            {t("signup.confirmPassword")}
-          </FieldLabel>
+        </AnimatedPress>
+        <FieldDescription>{t("signup.passwordHint")}</FieldDescription>
+      </Field>
+      <Field>
+        <FieldLabel htmlFor="confirm-password" className="text-gray-900!">
+          {t("signup.confirmPassword")}
+        </FieldLabel>
+        <AnimatedPress scale={1.02} tapScale={1} className="w-full">
           <Input
             id="confirm-password"
             type="password"
@@ -203,22 +221,46 @@ function SignupForm({ onSuccess }: SignupFormProps) {
             }}
             disabled={signupMutation.isPending}
             required
+            className="hover:border-gray-400"
           />
-          <FieldDescription>{t("signup.confirmPasswordHint")}</FieldDescription>
-        </Field>
+        </AnimatedPress>
+        <FieldDescription>{t("signup.confirmPasswordHint")}</FieldDescription>
+      </Field>
 
-        {errorMessage && <FormAlert variant="error" message={errorMessage} />}
+      {errorMessage && <FormAlert variant="error" message={errorMessage} />}
 
-        <Field>
-          <Button type="submit" className="text-white" disabled={signupMutation.isPending}>
+      <Field>
+        <AnimatedPress className="w-full">
+          <Button type="submit" className="w-full text-white" disabled={signupMutation.isPending}>
             {signupMutation.isPending ? t("signup.submitting") : t("signup.submit")}
           </Button>
-          <FieldDescription className="px-6 text-center">
-            {t("signup.hasAccount")} <Link to="/app/login">{t("signup.signIn")}</Link>
-          </FieldDescription>
-        </Field>
-      </FieldGroup>
-    </motion.form>
+        </AnimatedPress>
+        <FieldDescription className="px-6 text-center">
+          {t("signup.hasAccount")} <Link to="/app/login">{t("signup.signIn")}</Link>
+        </FieldDescription>
+      </Field>
+    </FieldGroup>
+  );
+
+  if (settings.useAnimations) {
+    return (
+      <motion.form
+        key="form"
+        onSubmit={handleSubmit}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ duration: 0.2 }}
+      >
+        {formContent}
+      </motion.form>
+    );
+  }
+
+  return (
+    <form key="form" onSubmit={handleSubmit}>
+      {formContent}
+    </form>
   );
 }
 
@@ -255,22 +297,28 @@ function SignupPageInner({ className, ...props }: React.ComponentProps<"div">) {
         <CardHeader>
           <div className="flex items-center gap-2">
             {revealedKey && <KeyRound className="h-5 w-5 text-gray-500" />}
-            <CardTitle>
-              {revealedKey ? t("signup.successTitle") : t("signup.title")}
-            </CardTitle>
+            <CardTitle>{revealedKey ? t("signup.successTitle") : t("signup.title")}</CardTitle>
           </div>
-          <CardDescription>
-            {revealedKey ? "" : t("signup.description")}
-          </CardDescription>
+          <CardDescription>{revealedKey ? "" : t("signup.description")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <AnimatePresence mode="wait">
-            {revealedKey ? (
-              <SignupSuccess key="success" securityKey={revealedKey} />
-            ) : (
-              <SignupForm key="form" onSuccess={handleSuccess} />
-            )}
-          </AnimatePresence>
+          {settings.useAnimations ? (
+            <AnimatePresence mode="wait">
+              {revealedKey ? (
+                <SignupSuccess key="success" securityKey={revealedKey} />
+              ) : (
+                <SignupForm key="form" onSuccess={handleSuccess} />
+              )}
+            </AnimatePresence>
+          ) : (
+            <>
+              {revealedKey ? (
+                <SignupSuccess key="success" securityKey={revealedKey} />
+              ) : (
+                <SignupForm key="form" onSuccess={handleSuccess} />
+              )}
+            </>
+          )}
         </CardContent>
       </Card>
     </div>
