@@ -386,23 +386,34 @@ export function ImageCropDialog({
                       >
                         <div className="absolute inset-0 bg-black/30" />
 
-                        {imageUrl && (
-                          <img
-                            ref={imgRef}
-                            src={imageUrl}
-                            onLoad={handleImageLoad}
-                            draggable={false}
-                            className="pointer-events-none absolute select-none"
-                            style={{
-                              left: MARGIN_X + pan.x,
-                              top: MARGIN_Y + pan.y,
-                              width: renderW || undefined,
-                              height: renderH || undefined,
-                              display: natSize ? "block" : "none",
-                            }}
-                            alt="crop"
-                          />
-                        )}
+                        {/* Crop-area clip window — only contents here are captured by the canvas */}
+                        <div
+                          className="absolute overflow-hidden"
+                          style={{
+                            left: MARGIN_X,
+                            top: MARGIN_Y,
+                            width: CROP_W,
+                            height: CROP_H,
+                          }}
+                        >
+                          {imageUrl && (
+                            <img
+                              ref={imgRef}
+                              src={imageUrl}
+                              onLoad={handleImageLoad}
+                              draggable={false}
+                              className="pointer-events-none absolute select-none"
+                              style={{
+                                left: pan.x,
+                                top: pan.y,
+                                width: renderW || undefined,
+                                height: renderH || undefined,
+                                display: natSize ? "block" : "none",
+                              }}
+                              alt="crop"
+                            />
+                          )}
+                        </div>
 
                         {imageUrl && !natSize && (
                           <div className="flex h-full w-full items-center justify-center bg-black/40">

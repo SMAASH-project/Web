@@ -23,7 +23,10 @@ interface ItemReadDTO {
   rarity: string;
   // Category names: "Character" + optionally "Melee" | "Ranged" (combatType)
   categories: string[];
-  img_uri: string;
+  images: {
+    full_img_uri: string;
+    cropped_img_uri: string;
+  };
 }
 
 // ─── Mapping helpers ──────────────────────────────────────────────────────────
@@ -45,7 +48,7 @@ function mapItemDTO(dto: ItemReadDTO): WebstoreItem {
     combatType,
     owned: false,
     createdAt: DateTime.now(),
-    imgUri: dto.img_uri,
+    imgUri: dto.images?.full_img_uri ?? "",
   };
 }
 
