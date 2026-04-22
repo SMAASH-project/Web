@@ -69,6 +69,7 @@ export function ImageCropDialog({
 
   // ── refs (kept in sync so non-React handlers read latest values) ───────────
   const imgRef = useRef<HTMLImageElement>(null);
+  const previewCanvasRef = useRef<HTMLCanvasElement>(null);
   const cropContainerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
   const lastPtr = useRef({ x: 0, y: 0 });
@@ -311,6 +312,20 @@ export function ImageCropDialog({
   const renderW = natSize ? natSize.w * baseScale * zoom * scaleX : 0;
   const renderH = natSize ? natSize.h * baseScale * zoom * scaleY : 0;
 
+  // ── canvas preview (pixel-accurate — same drawImage call as export) ─────────
+  useEffect(() => {
+    const canvas = previewCanvasRef.current;
+    const img = imgRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.clearRect(0, 0, CROP_W, CROP_H);
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, CROP_W, CROP_H);
+    if (!img || !natSize || renderW === 0 || renderH === 0) return;
+    ctx.drawImage(img, 0, 0, natSize.w, natSize.h, pan.x, pan.y, renderW, renderH);
+  }, [pan.x, pan.y, renderW, renderH, natSize, CROP_W, CROP_H]);
+
   const circleR = Math.min(CROP_W, CROP_H) / 2;
   const circleCX = MARGIN_X + CROP_W / 2;
   const circleCY = MARGIN_Y + CROP_H / 2;
@@ -386,34 +401,26 @@ export function ImageCropDialog({
                       >
                         <div className="absolute inset-0 bg-black/30" />
 
-                        {/* Crop-area clip window — only contents here are captured by the canvas */}
-                        <div
-                          className="absolute overflow-hidden"
-                          style={{
-                            left: MARGIN_X,
-                            top: MARGIN_Y,
-                            width: CROP_W,
-                            height: CROP_H,
-                          }}
-                        >
-                          {imageUrl && (
-                            <img
-                              ref={imgRef}
-                              src={imageUrl}
-                              onLoad={handleImageLoad}
-                              draggable={false}
-                              className="pointer-events-none absolute select-none"
-                              style={{
-                                left: pan.x,
-                                top: pan.y,
-                                width: renderW || undefined,
-                                height: renderH || undefined,
-                                display: natSize ? "block" : "none",
-                              }}
-                              alt="crop"
-                            />
-                          )}
-                        </div>
+                        {/* Hidden image element — source for canvas drawImage */}
+                        {imageUrl && (
+                          <img
+                            ref={imgRef}
+                            src={imageUrl}
+                            onLoad={handleImageLoad}
+                            draggable={false}
+                            style={{ display: "none" }}
+                            alt="crop-source"
+                          />
+                        )}
+
+                        {/* Preview canvas — pixel-accurate match to the export canvas */}
+                        <canvas
+                          ref={previewCanvasRef}
+                          width={CROP_W}
+                          height={CROP_H}
+                          className="absolute"
+                          style={{ left: MARGIN_X, top: MARGIN_Y }}
+                        />
 
                         {imageUrl && !natSize && (
                           <div className="flex h-full w-full items-center justify-center bg-black/40">

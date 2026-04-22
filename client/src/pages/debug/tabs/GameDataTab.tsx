@@ -18,7 +18,6 @@ import {
   ArrowUpCircle,
   ArrowDownCircle,
 } from "lucide-react";
-import { motion } from "motion/react";
 import {
   Dialog,
   DialogContent,
@@ -267,15 +266,13 @@ export function GameDataTab({
         {count !== undefined && <span className="ml-1 opacity-50">({count})</span>}
       </p>
       {onAdd && (
-        <motion.button
+        <button
           type="button"
           onClick={onAdd}
-          whileTap={{ scale: 0.95 }}
-          transition={{ duration: 0.1 }}
           className="flex items-center gap-1 rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] font-medium text-violet-300 transition-colors hover:bg-violet-500/30"
         >
           <Plus size={9} /> {t("gameData.add")}
-        </motion.button>
+        </button>
       )}
     </div>
   );
@@ -603,24 +600,20 @@ export function GameDataTab({
             </div>
           </div>
           <DialogFooter className={footerClass}>
-            <motion.button
+            <button
               type="button"
               onClick={closeDialog}
-              whileTap={{ scale: 0.97 }}
-              transition={{ duration: 0.1 }}
-              className={`rounded-lg border border-current/20 px-3 py-1.5 text-xs ${subtextColor} hover:border-current/40`}
+              className={`rounded-lg border border-current/20 px-3 py-1.5 text-xs transition-colors ${subtextColor} hover:border-current/40 hover:bg-current/5`}
             >
               {t("gameData.dialogCancel")}
-            </motion.button>
-            <motion.button
+            </button>
+            <button
               type="button"
               onClick={handleSubmit}
-              whileTap={{ scale: 0.97 }}
-              transition={{ duration: 0.1 }}
               className="rounded-lg bg-violet-500/20 px-3 py-1.5 text-xs font-medium text-violet-300 transition-colors hover:bg-violet-500/30"
             >
               {t("gameData.dialogSave")}
-            </motion.button>
+            </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -646,24 +639,20 @@ export function GameDataTab({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className={footerClass}>
-            <motion.button
+            <button
               type="button"
               onClick={() => setDeleteTarget(null)}
-              whileTap={{ scale: 0.97 }}
-              transition={{ duration: 0.1 }}
-              className={`rounded-lg border border-current/20 px-3 py-1.5 text-xs ${subtextColor} hover:border-current/40`}
+              className={`rounded-lg border border-current/20 px-3 py-1.5 text-xs transition-colors ${subtextColor} hover:border-current/40 hover:bg-current/5`}
             >
               {t("gameData.dialogCancel")}
-            </motion.button>
-            <motion.button
+            </button>
+            <button
               type="button"
               onClick={handleDelete}
-              whileTap={{ scale: 0.97 }}
-              transition={{ duration: 0.1 }}
               className="rounded-lg bg-red-500/20 px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/30"
             >
               {t("gameData.dialogDelete")}
-            </motion.button>
+            </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -775,23 +764,19 @@ export function GameDataTab({
           )}
 
           <DialogFooter className={footerClass}>
-            <motion.button
+            <button
               type="button"
               onClick={() => {
                 setUserActionTarget(null);
                 setUserAction(null);
               }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ duration: 0.1 }}
-              className={`rounded-lg border border-current/20 px-3 py-1.5 text-xs ${subtextColor} hover:border-current/40`}
+              className={`rounded-lg border border-current/20 px-3 py-1.5 text-xs transition-colors ${subtextColor} hover:border-current/40 hover:bg-current/5`}
             >
               {t("gameData.dialogCancel")}
-            </motion.button>
-            <motion.button
+            </button>
+            <button
               type="button"
               onClick={handleUserAction}
-              whileTap={{ scale: 0.97 }}
-              transition={{ duration: 0.1 }}
               className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
                 userAction === "ban"
                   ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
@@ -803,7 +788,7 @@ export function GameDataTab({
               }`}
             >
               {t("gameData.confirm")}
-            </motion.button>
+            </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
