@@ -369,50 +369,56 @@ export function PasswordChangeSection({
                     >
                       {t("sheet.passwordSecurityKey")}
                     </Label>
-                    <Input
-                      id="pw-security-key"
-                      type="text"
-                      value={securityKeyInput}
-                      onChange={(e) => setSecurityKeyInput(e.target.value)}
-                      placeholder={t("sheet.passwordSecurityKeyPlaceholder")}
-                      className={cn(inputClass, "font-mono text-xs")}
-                      disabled={mutation.isPending}
-                      required
-                    />
+                    <AnimatedPress scale={1.02} tapScale={1} className="w-full">
+                      <Input
+                        id="pw-security-key"
+                        type="text"
+                        value={securityKeyInput}
+                        onChange={(e) => setSecurityKeyInput(e.target.value)}
+                        placeholder={t("sheet.passwordSecurityKeyPlaceholder")}
+                        className={cn(inputClass, "font-mono text-xs")}
+                        disabled={mutation.isPending}
+                        required
+                      />
+                    </AnimatedPress>
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor="pw-new" className={cn("text-xs font-medium", textColor)}>
                       {t("sheet.passwordNewPassword")}
                     </Label>
-                    <Input
-                      id="pw-new"
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => {
-                        setNewPassword(e.target.value);
-                        if (validationError) setValidationError("");
-                      }}
-                      className={inputClass}
-                      disabled={mutation.isPending}
-                      required
-                    />
+                    <AnimatedPress scale={1.02} tapScale={1} className="w-full">
+                      <Input
+                        id="pw-new"
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => {
+                          setNewPassword(e.target.value);
+                          if (validationError) setValidationError("");
+                        }}
+                        className={inputClass}
+                        disabled={mutation.isPending}
+                        required
+                      />
+                    </AnimatedPress>
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor="pw-confirm" className={cn("text-xs font-medium", textColor)}>
                       {t("sheet.passwordConfirmPassword")}
                     </Label>
-                    <Input
-                      id="pw-confirm"
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(e) => {
-                        setConfirmPassword(e.target.value);
-                        if (validationError) setValidationError("");
-                      }}
-                      className={inputClass}
-                      disabled={mutation.isPending}
-                      required
-                    />
+                    <AnimatedPress scale={1.02} tapScale={1} className="w-full">
+                      <Input
+                        id="pw-confirm"
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => {
+                          setConfirmPassword(e.target.value);
+                          if (validationError) setValidationError("");
+                        }}
+                        className={inputClass}
+                        disabled={mutation.isPending}
+                        required
+                      />
+                    </AnimatedPress>
                   </div>
                   {errorMessage && (
                     <div
@@ -445,16 +451,18 @@ export function PasswordChangeSection({
                     >
                       {t("sheet.passwordReset")}
                     </button>
-                    <Button
-                      type="submit"
-                      size="sm"
-                      className="text-white"
-                      disabled={mutation.isPending}
-                    >
-                      {mutation.isPending
-                        ? t("sheet.passwordSubmitting")
-                        : t("sheet.passwordSubmit")}
-                    </Button>
+                    <AnimatedPress>
+                      <Button
+                        type="submit"
+                        size="sm"
+                        className="text-white"
+                        disabled={mutation.isPending}
+                      >
+                        {mutation.isPending
+                          ? t("sheet.passwordSubmitting")
+                          : t("sheet.passwordSubmit")}
+                      </Button>
+                    </AnimatedPress>
                   </div>
                 </form>
               )}

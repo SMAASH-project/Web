@@ -4,6 +4,7 @@ import { useSecurityKey } from "@/context/SecurityKeyContext";
 import { Button } from "@/components/ui/button";
 import { cn, getSubtextColor, getTextColor, getTextShadow } from "@/lib/utils";
 import { Copy, Check, Download, KeyRound, AlertTriangle } from "lucide-react";
+import { AnimatedPress } from "@/animations/AnimatedPress";
 
 interface SecurityKeySectionProps {
   textColor: string;
@@ -66,30 +67,34 @@ export function SecurityKeySection({
             <code className={cn("min-w-0 flex-1 font-mono text-xs break-all", subtextColor)}>
               {securityKey}
             </code>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              className="h-7 shrink-0 px-2"
-              onClick={handleCopy}
-              aria-label={t("sheet.securityKeyCopy")}
-            >
-              {copied ? (
-                <Check className="h-4 w-4 text-green-500" />
-              ) : (
-                <Copy className="h-4 w-4 opacity-60" />
-              )}
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              className="h-7 shrink-0 px-2"
-              onClick={handleDownload}
-              aria-label={t("sheet.securityKeyDownload")}
-            >
-              <Download className="h-4 w-4 opacity-60" />
-            </Button>
+            <AnimatedPress>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="h-7 shrink-0 px-2"
+                onClick={handleCopy}
+                aria-label={t("sheet.securityKeyCopy")}
+              >
+                {copied ? (
+                  <Check className="h-4 w-4 text-green-500" />
+                ) : (
+                  <Copy className="h-4 w-4 opacity-60" />
+                )}
+              </Button>
+            </AnimatedPress>
+            <AnimatedPress>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="h-7 shrink-0 px-2"
+                onClick={handleDownload}
+                aria-label={t("sheet.securityKeyDownload")}
+              >
+                <Download className="h-4 w-4 opacity-60" />
+              </Button>
+            </AnimatedPress>
           </div>
           <p className={cn("text-xs", subtextColor)}>{t("sheet.securityKeyDescription")}</p>
         </>
