@@ -20,6 +20,7 @@ import { useTranslation } from "react-i18next";
 import { ALL_ANIMATION_KEYS, ANIMATION_LABELS, type AnimationKey } from "@/lib/animationTypes";
 import { type AnimationOverride, type SettingsState } from "@/pages/settings/SettingsContext";
 import type { ColorContextType } from "@/pages/settings/ColorContext";
+import { AnimatedPress } from "@/animations/AnimatedPress";
 
 // ─── Memoised sub-components ──────────────────────────────────────────────────
 
@@ -85,31 +86,34 @@ const ThemeSection = memo(function ThemeSection({
       {/* Theme preset grid */}
       <div className="flex flex-wrap items-center justify-center gap-2">
         {THEMES.map((theme: Theme) => (
-          <Button
-            key={theme.name}
-            className={`cursor-pointer ${classes.btn} ${classes.shadow} ${
-              activeThemeName === theme.name ? classes.ring : ""
-            }`}
-            onClick={() => applyTheme(theme, context)}
-          >
-            {theme.name}
-          </Button>
+          <AnimatedPress key={theme.name}>
+            <Button
+              className={`cursor-pointer ${classes.btn} ${classes.shadow} ${
+                activeThemeName === theme.name ? classes.ring : ""
+              }`}
+              onClick={() => applyTheme(theme, context)}
+            >
+              {theme.name}
+            </Button>
+          </AnimatedPress>
         ))}
         {/* Custom saved theme button — only shown when one is saved */}
         {customTheme && (
-          <Button
-            className={`cursor-pointer ${classes.btn} ${classes.shadow} ${
-              isCustomThemeActive ? classes.ring : ""
-            }`}
-            onClick={() => {
-              context?.setColorLeft(customTheme.colorLeft);
-              context?.setColorMiddle(customTheme.colorMiddle);
-              context?.setColorRight(customTheme.colorRight);
-              context?.setAnimationKey(null);
-            }}
-          >
-            {t("effect.custom")}
-          </Button>
+          <AnimatedPress>
+            <Button
+              className={`cursor-pointer ${classes.btn} ${classes.shadow} ${
+                isCustomThemeActive ? classes.ring : ""
+              }`}
+              onClick={() => {
+                context?.setColorLeft(customTheme.colorLeft);
+                context?.setColorMiddle(customTheme.colorMiddle);
+                context?.setColorRight(customTheme.colorRight);
+                context?.setAnimationKey(null);
+              }}
+            >
+              {t("effect.custom")}
+            </Button>
+          </AnimatedPress>
         )}
       </div>
 
@@ -120,37 +124,44 @@ const ThemeSection = memo(function ThemeSection({
         </Label>
         <div className="flex flex-wrap justify-center gap-1.5">
           {/* Theme Default */}
-          <Button
-            className={`h-auto cursor-pointer px-2.5 py-1 text-xs ${classes.btnSm} ${classes.shadow} ${currentOverride === null ? classes.ring : ""}`}
-            onClick={() => setAnimOverride(null)}
-          >
-            {t("effect.default")}
-          </Button>
+          <AnimatedPress>
+            <Button
+              className={`h-auto cursor-pointer px-2.5 py-1 text-xs ${classes.btnSm} ${classes.shadow} ${currentOverride === null ? classes.ring : ""}`}
+              onClick={() => setAnimOverride(null)}
+            >
+              {t("effect.default")}
+            </Button>
+          </AnimatedPress>
           {/* None */}
-          <Button
-            className={`h-auto cursor-pointer px-2.5 py-1 text-xs ${classes.btnSm} ${classes.shadow} ${currentOverride === "none" ? classes.ring : ""}`}
-            onClick={() => setAnimOverride("none")}
-          >
-            {t("effect.none")}
-          </Button>
+          <AnimatedPress>
+            <Button
+              className={`h-auto cursor-pointer px-2.5 py-1 text-xs ${classes.btnSm} ${classes.shadow} ${currentOverride === "none" ? classes.ring : ""}`}
+              onClick={() => setAnimOverride("none")}
+            >
+              {t("effect.none")}
+            </Button>
+          </AnimatedPress>
           {/* Custom mix — only shown when an effectMix is saved */}
           {hasEffectMix && (
-            <Button
-              className={`h-auto cursor-pointer px-2.5 py-1 text-xs ${classes.btnSm} ${classes.shadow} ${currentOverride === "custom" ? classes.ring : ""}`}
-              onClick={() => setAnimOverride("custom")}
-            >
-              {t("effect.custom")}
-            </Button>
+            <AnimatedPress>
+              <Button
+                className={`h-auto cursor-pointer px-2.5 py-1 text-xs ${classes.btnSm} ${classes.shadow} ${currentOverride === "custom" ? classes.ring : ""}`}
+                onClick={() => setAnimOverride("custom")}
+              >
+                {t("effect.custom")}
+              </Button>
+            </AnimatedPress>
           )}
           {/* Each animation key */}
           {ALL_ANIMATION_KEYS.map((key: AnimationKey) => (
-            <Button
-              key={key}
-              className={`h-auto cursor-pointer px-2.5 py-1 text-xs ${classes.btnSm} ${classes.shadow} ${currentOverride === key ? classes.ring : ""}`}
-              onClick={() => setAnimOverride(key)}
-            >
-              {ANIMATION_LABELS[key]}
-            </Button>
+            <AnimatedPress key={key}>
+              <Button
+                className={`h-auto cursor-pointer px-2.5 py-1 text-xs ${classes.btnSm} ${classes.shadow} ${currentOverride === key ? classes.ring : ""}`}
+                onClick={() => setAnimOverride(key)}
+              >
+                {ANIMATION_LABELS[key]}
+              </Button>
+            </AnimatedPress>
           ))}
         </div>
       </div>
@@ -180,20 +191,24 @@ const LanguageSection = memo(function LanguageSection({
     <div className="flex flex-1 flex-col items-center justify-center gap-6">
       <Label className={`${classes.text} ${classes.shadow}`}>{t("language.title")}</Label>
       <div className="flex flex-wrap items-center justify-center gap-3">
-        <Button
-          className={`cursor-pointer ${classes.btn} ${classes.shadow} ${language === "en" ? classes.ring : ""}`}
-          onClick={setEn}
-        >
-          <img src={gbFlag} alt="GB" className="h-3.5 w-auto" />
-          {t("language.en")}
-        </Button>
-        <Button
-          className={`cursor-pointer ${classes.btn} ${classes.shadow} ${language === "hu" ? classes.ring : ""}`}
-          onClick={setHu}
-        >
-          <img src={huFlag} alt="HU" className="h-3.5 w-auto" />
-          {t("language.hu")}
-        </Button>
+        <AnimatedPress>
+          <Button
+            className={`cursor-pointer ${classes.btn} ${classes.shadow} ${language === "en" ? classes.ring : ""}`}
+            onClick={setEn}
+          >
+            <img src={gbFlag} alt="GB" className="h-3.5 w-auto" />
+            {t("language.en")}
+          </Button>
+        </AnimatedPress>
+        <AnimatedPress>
+          <Button
+            className={`cursor-pointer ${classes.btn} ${classes.shadow} ${language === "hu" ? classes.ring : ""}`}
+            onClick={setHu}
+          >
+            <img src={huFlag} alt="HU" className="h-3.5 w-auto" />
+            {t("language.hu")}
+          </Button>
+        </AnimatedPress>
       </div>
     </div>
   );

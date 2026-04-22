@@ -28,6 +28,7 @@ import {
   getBackgroundClasses,
 } from "@/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
+import { AnimatedPress } from "@/animations/AnimatedPress";
 import { ImageCropDialog } from "@/components/ImageCropDialog";
 import {
   RARITIES,
@@ -153,12 +154,14 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
           if (!v) reset();
         }}
       >
-        <DialogTrigger asChild>
-          <Button size="sm" className={`cursor-pointer gap-2 ${buttonClass} ${textShadow}`}>
-            <Plus className="h-4 w-4" />
-            <span className="text-sm font-medium">{t("create.triggerButton")}</span>
-          </Button>
-        </DialogTrigger>
+        <AnimatedPress>
+          <DialogTrigger asChild>
+            <Button size="sm" className={`cursor-pointer gap-2 ${buttonClass} ${textShadow}`}>
+              <Plus className="h-4 w-4" />
+              <span className="text-sm font-medium">{t("create.triggerButton")}</span>
+            </Button>
+          </DialogTrigger>
+        </AnimatedPress>
 
         <DialogContent
           className={`${dialogClass} ${textShadow}`}
@@ -308,25 +311,29 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
           </FieldGroup>
 
           <DialogFooter className={footerClass}>
-            <DialogClose asChild>
-              <Button variant="outline" className={`cursor-pointer ${buttonClass} ${textShadow}`}>
-                {t("create.cancel")}
+            <AnimatedPress>
+              <DialogClose asChild>
+                <Button variant="outline" className={`cursor-pointer ${buttonClass} ${textShadow}`}>
+                  {t("create.cancel")}
+                </Button>
+              </DialogClose>
+            </AnimatedPress>
+            <AnimatedPress>
+              <Button
+                onClick={handleSubmit}
+                disabled={!isFormValid || isLoading}
+                className={`cursor-pointer ${buttonClass} ${textShadow}`}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {t("create.creating")}
+                  </>
+                ) : (
+                  t("create.submit")
+                )}
               </Button>
-            </DialogClose>
-            <Button
-              onClick={handleSubmit}
-              disabled={!isFormValid || isLoading}
-              className={`cursor-pointer ${buttonClass} ${textShadow}`}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {t("create.creating")}
-                </>
-              ) : (
-                t("create.submit")
-              )}
-            </Button>
+            </AnimatedPress>
           </DialogFooter>
         </DialogContent>
       </Dialog>

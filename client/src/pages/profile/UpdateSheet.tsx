@@ -26,6 +26,7 @@ import {
 } from "@/lib/utils";
 import { AuthContext } from "@/context/AuthContext";
 import { useProfiles } from "@/pages/profile-selector/useProfiles";
+import { AnimatedPress } from "@/animations/AnimatedPress";
 import {
   useWhoAmIQuery,
   useUpdateUserEmailMutation,
@@ -150,11 +151,13 @@ export function UpdateSheet({ open: controlledOpen, onOpenChange }: UpdateSheetP
   return (
     <div className="z-101">
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <Button className={`cursor-pointer ${buttonClass} ${textShadow}`}>
-            {t("sheet.title")}
-          </Button>
-        </SheetTrigger>
+        <AnimatedPress>
+          <SheetTrigger asChild>
+            <Button className={`cursor-pointer ${buttonClass} ${textShadow}`}>
+              {t("sheet.title")}
+            </Button>
+          </SheetTrigger>
+        </AnimatedPress>
 
         <SheetContent className={cn(sheetBg, textColor, "flex flex-col gap-0")}>
           <SheetHeader className="px-6 pt-6 pb-4">
@@ -175,15 +178,17 @@ export function UpdateSheet({ open: controlledOpen, onOpenChange }: UpdateSheetP
               >
                 {t("sheet.displayName")}
               </Label>
-              <Input
-                id="sheet-displayname"
-                className={cn("cursor-text", inputClass)}
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                maxLength={20}
-                disabled={isSaving}
-                placeholder={t("sheet.displayNamePlaceholder")}
-              />
+              <AnimatedPress scale={1.02} tapScale={1} className="w-full">
+                <Input
+                  id="sheet-displayname"
+                  className={cn("cursor-text", inputClass)}
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  maxLength={20}
+                  disabled={isSaving}
+                  placeholder={t("sheet.displayNamePlaceholder")}
+                />
+              </AnimatedPress>
               <p className={cn("text-xs", subtextColor)}>{t("sheet.displayNameHint")}</p>
             </div>
 
@@ -195,16 +200,18 @@ export function UpdateSheet({ open: controlledOpen, onOpenChange }: UpdateSheetP
               >
                 {t("sheet.email")}
               </Label>
-              <Input
-                id="sheet-email"
-                type="email"
-                className={cn("cursor-text", inputClass)}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                maxLength={30}
-                disabled={isSaving}
-                placeholder={t("sheet.emailPlaceholder")}
-              />
+              <AnimatedPress scale={1.02} tapScale={1} className="w-full">
+                <Input
+                  id="sheet-email"
+                  type="email"
+                  className={cn("cursor-text", inputClass)}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  maxLength={30}
+                  disabled={isSaving}
+                  placeholder={t("sheet.emailPlaceholder")}
+                />
+              </AnimatedPress>
               <p className={cn("text-xs", subtextColor)}>{t("sheet.emailHint")}</p>
             </div>
 
@@ -260,31 +267,35 @@ export function UpdateSheet({ open: controlledOpen, onOpenChange }: UpdateSheetP
           </div>
 
           <SheetFooter className="flex flex-row justify-end gap-2 px-6 py-4">
-            <SheetClose asChild>
-              <Button variant="outline" className={cn(buttonClass, textColor)} disabled={isSaving}>
-                {t("sheet.cancel")}
+            <AnimatedPress>
+              <SheetClose asChild>
+                <Button variant="outline" className={cn(buttonClass, textColor)} disabled={isSaving}>
+                  {t("sheet.cancel")}
+                </Button>
+              </SheetClose>
+            </AnimatedPress>
+            <AnimatedPress>
+              <Button
+                onClick={handleSave}
+                disabled={!hasChanged || isSaving}
+                className={cn(
+                  "transition-all duration-200",
+                  hasChanged && !isSaving
+                    ? buttonClass
+                    : cn(buttonClass, "cursor-not-allowed opacity-40"),
+                  textColor,
+                )}
+              >
+                {isSaving ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 size={14} className="animate-spin" />
+                    {t("sheet.saving")}
+                  </span>
+                ) : (
+                  t("sheet.save")
+                )}
               </Button>
-            </SheetClose>
-            <Button
-              onClick={handleSave}
-              disabled={!hasChanged || isSaving}
-              className={cn(
-                "transition-all duration-200",
-                hasChanged && !isSaving
-                  ? buttonClass
-                  : cn(buttonClass, "cursor-not-allowed opacity-40"),
-                textColor,
-              )}
-            >
-              {isSaving ? (
-                <span className="flex items-center gap-2">
-                  <Loader2 size={14} className="animate-spin" />
-                  {t("sheet.saving")}
-                </span>
-              ) : (
-                t("sheet.save")
-              )}
-            </Button>
+            </AnimatedPress>
           </SheetFooter>
         </SheetContent>
       </Sheet>

@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useSettings } from "@/pages/settings/SettingsContext";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { getTextColor, getTextShadow, getButtonClasses } from "@/lib/utils";
+import { AnimatedPress } from "@/animations/AnimatedPress";
 import { EffectMixDialog } from "./EffectMixDialog";
 
 export const ThemePicker = memo(function ThemePicker() {
@@ -85,12 +86,14 @@ export const ThemePicker = memo(function ThemePicker() {
         onChange={setPendingColorRight}
         value={displayColorRight}
       />
-      <Button
-        className={`cursor-pointer ${buttonClass} ${textShadow}`}
-        onClick={handleApplyChanges}
-      >
-        {t("applyChanges")}
-      </Button>
+      <AnimatedPress>
+        <Button
+          className={`cursor-pointer ${buttonClass} ${textShadow}`}
+          onClick={handleApplyChanges}
+        >
+          {t("applyChanges")}
+        </Button>
+      </AnimatedPress>
       <EffectMixDialog />
     </div>
   );
