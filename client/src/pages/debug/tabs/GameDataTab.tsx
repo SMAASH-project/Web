@@ -44,6 +44,7 @@ import {
   useDemoteUserMutation,
 } from "@/hooks/useAdmin";
 import { toast } from "@/lib/toast";
+import { AnimatedPress } from "@/animations/AnimatedPress";
 
 // ─── Rarity colours ────────────────────────────────────────────────────────────
 
@@ -266,13 +267,15 @@ export function GameDataTab({
         {count !== undefined && <span className="ml-1 opacity-50">({count})</span>}
       </p>
       {onAdd && (
-        <button
-          type="button"
-          onClick={onAdd}
-          className="flex items-center gap-1 rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] font-medium text-violet-300 transition-colors hover:bg-violet-500/30"
-        >
-          <Plus size={9} /> {t("gameData.add")}
-        </button>
+        <AnimatedPress>
+          <button
+            type="button"
+            onClick={onAdd}
+            className="flex items-center gap-1 rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] font-medium text-violet-300 transition-colors hover:bg-violet-500/30"
+          >
+            <Plus size={9} /> {t("gameData.add")}
+          </button>
+        </AnimatedPress>
       )}
     </div>
   );
@@ -600,20 +603,24 @@ export function GameDataTab({
             </div>
           </div>
           <DialogFooter className={footerClass}>
-            <button
-              type="button"
-              onClick={closeDialog}
-              className={`rounded-lg border border-current/20 px-3 py-1.5 text-xs ${subtextColor} hover:border-current/40`}
-            >
-              {t("gameData.dialogCancel")}
-            </button>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="rounded-lg bg-violet-500/20 px-3 py-1.5 text-xs font-medium text-violet-300 transition-colors hover:bg-violet-500/30"
-            >
-              {t("gameData.dialogSave")}
-            </button>
+            <AnimatedPress>
+              <button
+                type="button"
+                onClick={closeDialog}
+                className={`rounded-lg border border-current/20 px-3 py-1.5 text-xs transition-colors ${subtextColor} hover:border-current/40 hover:bg-current/5`}
+              >
+                {t("gameData.dialogCancel")}
+              </button>
+            </AnimatedPress>
+            <AnimatedPress>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="rounded-lg bg-violet-500/20 px-3 py-1.5 text-xs font-medium text-violet-300 transition-colors hover:bg-violet-500/30"
+              >
+                {t("gameData.dialogSave")}
+              </button>
+            </AnimatedPress>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -639,20 +646,24 @@ export function GameDataTab({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className={footerClass}>
-            <button
-              type="button"
-              onClick={() => setDeleteTarget(null)}
-              className={`rounded-lg border border-current/20 px-3 py-1.5 text-xs ${subtextColor} hover:border-current/40`}
-            >
-              {t("gameData.dialogCancel")}
-            </button>
-            <button
-              type="button"
-              onClick={handleDelete}
-              className="rounded-lg bg-red-500/20 px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/30"
-            >
-              {t("gameData.dialogDelete")}
-            </button>
+            <AnimatedPress>
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className={`rounded-lg border border-current/20 px-3 py-1.5 text-xs transition-colors ${subtextColor} hover:border-current/40 hover:bg-current/5`}
+              >
+                {t("gameData.dialogCancel")}
+              </button>
+            </AnimatedPress>
+            <AnimatedPress>
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="rounded-lg bg-red-500/20 px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/30"
+              >
+                {t("gameData.dialogDelete")}
+              </button>
+            </AnimatedPress>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -764,31 +775,35 @@ export function GameDataTab({
           )}
 
           <DialogFooter className={footerClass}>
-            <button
-              type="button"
-              onClick={() => {
-                setUserActionTarget(null);
-                setUserAction(null);
-              }}
-              className={`rounded-lg border border-current/20 px-3 py-1.5 text-xs ${subtextColor} hover:border-current/40`}
-            >
-              {t("gameData.dialogCancel")}
-            </button>
-            <button
-              type="button"
-              onClick={handleUserAction}
-              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                userAction === "ban"
-                  ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
-                  : userAction === "unban"
-                    ? "bg-green-500/20 text-green-400 hover:bg-green-500/30"
-                    : userAction === "promote"
-                      ? "bg-violet-500/20 text-violet-300 hover:bg-violet-500/30"
-                      : "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
-              }`}
-            >
-              {t("gameData.confirm")}
-            </button>
+            <AnimatedPress>
+              <button
+                type="button"
+                onClick={() => {
+                  setUserActionTarget(null);
+                  setUserAction(null);
+                }}
+                className={`rounded-lg border border-current/20 px-3 py-1.5 text-xs transition-colors ${subtextColor} hover:border-current/40 hover:bg-current/5`}
+              >
+                {t("gameData.dialogCancel")}
+              </button>
+            </AnimatedPress>
+            <AnimatedPress>
+              <button
+                type="button"
+                onClick={handleUserAction}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                  userAction === "ban"
+                    ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                    : userAction === "unban"
+                      ? "bg-green-500/20 text-green-400 hover:bg-green-500/30"
+                      : userAction === "promote"
+                        ? "bg-violet-500/20 text-violet-300 hover:bg-violet-500/30"
+                        : "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
+                }`}
+              >
+                {t("gameData.confirm")}
+              </button>
+            </AnimatedPress>
           </DialogFooter>
         </DialogContent>
       </Dialog>

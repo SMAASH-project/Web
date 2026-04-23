@@ -29,6 +29,7 @@ import {
 import { useProfiles } from "@/pages/profile-selector/useProfiles";
 import { useUploadProfilePictureMutation } from "@/hooks/useQueryHooks";
 import { ImageCropDialog } from "@/components/ImageCropDialog";
+import { AnimatedPress } from "@/animations/AnimatedPress";
 
 // ─── First-login security key banner ─────────────────────────────────────────
 
@@ -221,7 +222,9 @@ export function ProfilePageContent({ animReady = true }: { animReady?: boolean }
             )}
           </div>
 
-          <UpdateSheet open={sheetOpen} onOpenChange={setSheetOpen} />
+          <AnimatedPress>
+            <UpdateSheet open={sheetOpen} onOpenChange={setSheetOpen} />
+          </AnimatedPress>
         </div>
 
         {/* Vertical divider (desktop) / horizontal (mobile) */}
@@ -265,21 +268,6 @@ export function ProfilePageContent({ animReady = true }: { animReady?: boolean }
             />
           </div>
 
-          {/*
-           * TODO: BACKEND — The following stats require a match history endpoint.
-           * The Match, MatchParticipation, and Character models exist in the backend
-           * but there is no controller or API route for them.
-           *
-           * Needed: GET /api/profiles/:id/matches
-           * Returns: array of { match_id, level_name, result, character_name,
-           *          started_at, ended_at, network_status }
-           *
-           * Once the endpoint exists:
-           *   1. Add useProfileMatchesQuery(profileId) to useProfileHooks.ts
-           *   2. Derive wins, losses, win rate, and total matches from the response
-           *   3. Replace the dimmed placeholder cards below with real values
-           *   4. Populate the Match History section on the right
-           */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <StatCard
               icon={<Trophy size={11} />}
@@ -333,11 +321,6 @@ export function ProfilePageContent({ animReady = true }: { animReady?: boolean }
             {t("page.matchHistory")}
           </p>
 
-          {/*
-           * TODO: BACKEND — Match history requires GET /api/profiles/:id/matches
-           * See the TODO comment in the Stats section above for the full spec.
-           * Replace the empty state below with a mapped list of match rows.
-           */}
           <div
             className={cn(
               "flex flex-1 flex-col items-center justify-center gap-3 rounded-xl py-10",

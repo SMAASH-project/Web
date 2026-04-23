@@ -28,6 +28,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { getButtonClasses, getDialogClasses, getTextColor, getTextShadow } from "@/lib/utils";
+import { AnimatedPress } from "@/animations/AnimatedPress";
 import { useSettings } from "@/pages/settings/SettingsContext";
 
 export function EffectMixDialog() {
@@ -117,11 +118,13 @@ export function EffectMixDialog() {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button className={`cursor-pointer ${buttonClass} ${textShadow}`}>
-          {t("mixEffects.triggerButton")}
-        </Button>
-      </DialogTrigger>
+      <AnimatedPress>
+        <DialogTrigger asChild>
+          <Button className={`cursor-pointer ${buttonClass} ${textShadow}`}>
+            {t("mixEffects.triggerButton")}
+          </Button>
+        </DialogTrigger>
+      </AnimatedPress>
       <DialogContent className={`sm:max-w-3xl ${dialogClass} ${textColor}`}>
         <DialogHeader>
           <DialogTitle className={textColor}>{t("mixEffects.title")}</DialogTitle>
@@ -205,16 +208,20 @@ export function EffectMixDialog() {
         </div>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            className={`cursor-pointer ${buttonClass}`}
-            onClick={handleClear}
-          >
-            {t("mixEffects.clear")}
-          </Button>
-          <Button className={`cursor-pointer ${buttonClass}`} onClick={handleApply}>
-            {t("mixEffects.apply")}
-          </Button>
+          <AnimatedPress>
+            <Button
+              variant="outline"
+              className={`cursor-pointer ${buttonClass}`}
+              onClick={handleClear}
+            >
+              {t("mixEffects.clear")}
+            </Button>
+          </AnimatedPress>
+          <AnimatedPress>
+            <Button className={`cursor-pointer ${buttonClass}`} onClick={handleApply}>
+              {t("mixEffects.apply")}
+            </Button>
+          </AnimatedPress>
         </DialogFooter>
       </DialogContent>
     </Dialog>

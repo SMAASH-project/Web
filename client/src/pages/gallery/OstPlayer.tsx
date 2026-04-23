@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { Music2, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
+import { Music2, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Download } from "lucide-react";
 import { OST_TRACKS } from "./ostTracks";
 
 function formatTime(sec: number): string {
@@ -244,6 +244,16 @@ export function OstPlayer({
               className={currentIdx === OST_TRACKS.length - 1 ? "opacity-30" : textColor}
             />
           </button>
+          {track && (
+            <a
+              href={track.src}
+              download={`${track.title}.mp3`}
+              className={`${controlBtn} ${subtextColor}`}
+              title={t("download")}
+            >
+              <Download size={18} />
+            </a>
+          )}
         </div>
 
         {/* Volume */}
@@ -306,6 +316,23 @@ export function OstPlayer({
               {tr.durationLabel && (
                 <span className={`shrink-0 text-xs ${subtextColor}`}>{tr.durationLabel}</span>
               )}
+              <a
+                href={tr.src}
+                download={`${tr.title}.mp3`}
+                onClick={(e) => e.stopPropagation()}
+                className={`shrink-0 rounded-full p-1.5 transition-colors ${
+                  useLiquidGlass
+                    ? useDarkMode
+                      ? "hover:bg-white/15 text-white/50 hover:text-white/80"
+                      : "hover:bg-black/10 text-black/40 hover:text-black/70"
+                    : useDarkMode
+                      ? "hover:bg-gray-700 text-gray-500 hover:text-gray-300"
+                      : "hover:bg-gray-100 text-gray-400 hover:text-gray-600"
+                }`}
+                title={`Download ${tr.title}`}
+              >
+                <Download size={13} />
+              </a>
             </button>
           ))}
         </div>

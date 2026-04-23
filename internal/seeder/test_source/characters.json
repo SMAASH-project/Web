@@ -6,7 +6,7 @@
     "Price": 0,
     "Implemented": true,
     "ImgURI": "/characters/samurai.png",
-    "Categories": ["Melee"]
+    "Categories": ["Character", "Melee"]
   },
   {
     "Name": "Slime",
@@ -15,10 +15,7 @@
     "Price": 0,
     "Implemented": true,
     "ImgURI": "/characters/slime.png",
-    "Categories": [
-      "Character",
-      "Ranged"
-    ]
+    "Categories": ["Character", "Ranged"]
   },
   {
     "Name": "Knight",
@@ -27,10 +24,7 @@
     "Price": 50,
     "Implemented": false,
     "ImgURI": "/characters/knight.png",
-    "Categories": [
-      "Character",
-      "Melee"
-    ]
+    "Categories": ["Character", "Melee"]
   },
   {
     "Name": "Bandit",
@@ -39,9 +33,6 @@
     "Price": 100,
     "Implemented": false,
     "ImgURI": "/characters/bandit.png",
-    "Categories": [
-      "Character",
-      "Melee"
-    ]
+    "Categories": ["Character", "Melee"]
   }
 ]
