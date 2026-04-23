@@ -1,241 +1,301 @@
-# SMAASH — User Guide
+# SMAASH Web Client — User Guide
 
-> Welcome! This guide walks you through everything the SMAASH platform has to offer: from setting up your profile to customizing your experience, buying items, climbing the leaderboard, and more. Read it all or jump to whatever you need.
+## What This Application Is
 
----
-
-## Getting Started
-
-### Creating an Account
-
-1. Open the app and click **Sign Up**
-2. Enter your email address and choose a password
-3. Log in with those credentials
-4. You will land on the News or Releases page — explore from there
-
-### Returning Player
-
-Just log in. Your selected profile, theme preferences, and most settings are saved automatically in your browser, so everything will look exactly how you left it.
+SMAASH is a web companion platform for a game. It gives you access to game downloads, a browsable gallery of playable characters and the game's original soundtrack, a global leaderboard, a news feed, and an in-game item store. All features are available at paths under `/app/` in your browser. The application supports English and Hungarian and saves your display preferences across sessions.
 
 ---
 
-## Navigation
+## Signing Up
 
-The top navigation bar is your main hub. Here is what each section contains and why you would visit it:
+Go to `/app/signup`. Enter an email address, choose a password, and complete the reCAPTCHA challenge that appears in the form. The reCAPTCHA is required before the form can be submitted and protects the registration endpoint from automated bots.
 
-| Section | What is inside | Why you would go there |
-|---|---|---|
-| **Releases** | Game version history and release notes | Downloading the latest version or checking what changed |
-| **News** | Community posts and announcements | Staying up to date with game updates and events |
-| **Webstore** | Items, cosmetics, and the battle pass | Spending coins on things for your profile |
-| **Leaderboard** | Global rankings by category | Seeing where you and other players stand |
-| **Gallery** | Character showcase and the official OST | Browsing game art and listening to the soundtrack |
-| **Profile** | Your account details and stats | Changing your name, email, or checking your progress |
-| **Settings** | Theme, language, and animation options | Making the app feel comfortable and personal |
+After a successful signup the server issues a **security key**. This key is displayed exactly once, immediately after registration completes. Copy it and store it somewhere safe — a password manager, a printed note, or a secure document. This key is the only way to reset your password if you forget it. There is no email-based account recovery. If the key is lost, the password cannot be changed through any user-facing mechanism.
 
-**Admins** also see shortcuts to the **Admin Panel** and the **Debug Dashboard** in the navigation bar.
+Your display name is not configured at signup. It is set when you create your first game profile.
 
 ---
 
-## Your Profile
+## Logging In
 
-### Selecting a Game Character
+Go to `/app/login`. Enter your registered email and password, then press the login button. On a successful login the application redirects you to `/app/releases` automatically. If you were previously trying to reach a specific page, you are redirected back there instead.
 
-When you first log in, you will be asked to pick an active game profile from the **Profile Selector**. This is the character that represents you in-game. Your coin balance, purchases, and stats are all tied to this active profile.
+If you enter credentials that do not match, the server returns a generic "invalid credentials" error without specifying whether the email or the password was wrong.
 
-**To switch profiles:**
-1. Open the **Profile** section from the navigation bar
-2. Click on a different character
-3. The app saves your choice immediately
+After **four consecutive failed attempts**, the login form locks for 30 seconds. During the lockout the input fields and submit button are both disabled. A countdown displayed inside the button label shows the remaining wait time. After the lockout expires, the form re-enables automatically.
 
-### Editing Your Account
-
-From the **Profile** page you can:
-
-- **Change your display name** — this is how other players see you in rankings and matches
-- **Update your email address** — used for account recovery
-- **View your stats** — wins, matches played, and more (full match history is coming)
+If the account you log in with is banned, an error message appears indicating whether the ban is temporary (with the expiry shown) or permanent.
 
 ---
 
-## The Webstore
+## Resetting Your Password
 
-### Browsing Items
+Go to `/app/reset-password`. You need your registered email address and the security key that was issued to you at signup (or the most recently issued key, if you have reset before). Enter both and submit.
 
-Items are organized by multiple criteria, and you can filter and search to narrow things down:
-
-- **Type** — Character or Skin
-- **Combat style** — Melee or Ranged (applies to characters)
-- **Rarity** — from Common to Legendary
-- **Search bar** — find anything by name instantly
-
-### Buying an Item
-
-1. Browse to the item you want
-2. Click **Purchase**
-3. Coins are deducted from your active profile's balance
-4. The item appears in your inventory right away
-
-**Your coin balance is tied to your active profile.** If you switch profiles, your available coins will be different. Make sure you have the right profile selected before purchasing.
+On success:
+- Your password is changed.
+- The server issues a **new security key**. Save it immediately — the old key is immediately invalidated.
+- Your current session is ended. You are required to log back in with the new password.
 
 ---
 
-## News & Announcements
+## Profiles
 
-The **News** section is where the team posts:
+A SMAASH account can hold multiple game profiles. Each profile is an independent slot with its own display name, coin balance, profile picture, and purchase history. After logging in you land on the profile selector at `/app/profile-selector` to choose which profile to use for the session.
 
-- Game balance changes and patch notes
-- Upcoming event announcements
-- Community spotlights
-- General platform updates
+### Creating a Profile
 
-You can search posts by keyword or browse the full feed chronologically. If you are an admin, you can also create and edit news articles directly from this page.
+Press the add button on the profile selector. Enter a display name. Names longer than 20 characters are automatically trimmed to 20 at the input level. You can optionally upload a profile picture at this step.
+
+Accepted image formats: **JPEG, PNG, WebP, and GIF**. The file must be **5 MB or smaller**. If the picture upload fails after the profile is created, the profile still exists without a picture — you can upload one later from the profile page.
+
+A name suggestion is offered automatically when the creation dialog opens, generated by combining a random adjective prefix with a nature or animal-sound suffix (e.g. "Cosmic Thunder").
+
+### Switching Profiles
+
+Click any profile card on the profile selector screen. The application saves your selection and uses that profile's coin balance, purchase history, and display name for all features until you select a different profile.
+
+### Editing a Profile
+
+Navigate to `/app/profile` and click the edit button. A side panel opens where you can change the display name and upload a new profile picture. The name field enforces the 20-character maximum. The picture upload enforces the same format and size limits as profile creation.
+
+After a successful picture upload, the new image appears immediately without a page refresh. This is achieved by appending a `?v=<timestamp>` cache-busting parameter to the image URL, forcing the browser to fetch the updated picture instead of serving the cached one.
+
+### Deleting a Profile
+
+On the profile page, selecting delete removes the profile from the list immediately — the interface updates before the server confirms the deletion. If the server rejects the deletion, the profile reappears automatically.
 
 ---
 
 ## Releases
 
-**Releases** lists every available version of the game client.
-
-**What you can do here:**
-
-- Browse the full version history
-- Filter downloads by your platform
-- Read the release notes for each version before downloading
-
-**The download button is greyed out when** the version is not yet available for your platform, or when no download link has been configured for it yet.
-
----
-
-## Leaderboard
-
-The leaderboard has a tab selector at the top. Each tab focuses on a different category of achievement.
-
-### All Tab
-
-A quick overview of every category at once:
-
-- **Stat bar** — four highlighted chips showing the current #1 in each category: top winner, most active player, hottest level, best-selling item
-- **Four panels** — top 5 entries per category, displayed side by side
-
-### Category Tabs (Wins / Active / Levels / Items)
-
-Selecting a category tab gives you the full deep-dive view:
-
-1. **Podium** — the top 3 displayed on a classic gold, silver, and bronze podium. First place stands tallest in the center; second place is to the left, third to the right
-2. **Runners-up** — fourth and fifth place listed just below the podium, if they exist
-3. **Full rankings** — a scrollable list of every entry with their original rank number preserved. Use the **search bar** to find a specific player, level, or item by name without scrolling
-
-Leaderboard data updates periodically as the server processes match results. If numbers look stale, wait a moment and refresh.
+The releases page at `/app/releases` lists available game client downloads. Use the platform selector at the top to filter by operating system — Windows, macOS, or Linux. Use the search bar to find a specific version by name or tag. Each release entry shows the version title, description, and a download button. The list loads additional entries as you scroll down.
 
 ---
 
 ## Gallery
 
-The Gallery page has two sections accessible via the tab buttons at the top:
+The gallery at `/app/gallery` contains two tabs, switched with the buttons at the top of the page.
 
-- **Characters** — A grid of all game characters. Each card shows the character's portrait and name
-- **OST** — The full official soundtrack. Pick a track, adjust the volume, and use the scrubber to navigate within a track. The track list on the right lets you jump directly to any song
+### Characters Tab
 
----
+Shows every playable character in the game. Each card displays the character's artwork and name. No progression or in-game unlocking is required to view them here.
 
-## Customizing Your Experience
+### OST Tab
 
-### Settings Overview
+A full audio player for the game's original soundtrack. The left side shows the track list; the right side shows the currently playing track with playback controls.
 
-Everything in **Settings** is saved to your current browser. If you switch devices, you will need to set your preferences again.
-
-#### Language
-
-Switch between **English** and **Hungarian**. The change takes effect immediately across the whole app.
-
-#### Visual Style
-
-- **Dark Mode** — darker backgrounds with light text; easier on the eyes in low-light environments
-- **Light Mode** — bright backgrounds with high contrast; better for well-lit rooms
-- **Liquid Glass** — a glassmorphism style with frosted-glass blur effects on panels and cards; requires a modern browser to render well
-
-#### Animations
-
-- **Enable animations** — smooth entrances, transitions, and background effects
-- **Disable animations** — static, instant interface; useful if motion effects cause discomfort, or if you are on a slower device and want better performance
-
-#### Custom Theme
-
-- **Gradient colors** — pick three colors to build the app's primary color palette; these affect accent colors, nav borders, button highlights, and chip backgrounds everywhere
-- **Background effect** — choose one of many animated backgrounds (aurora, matrix, particles, and more)
-- **Layer effects** — combine multiple background animations for a unique layered look
+Controls available:
+- **Play / Pause** — start or stop playback.
+- **Track selection** — click any track in the list to start playing it immediately.
+- **Progress scrubber** — drag the timeline bar to jump to any point in the current track.
+- **Volume slider** — adjust playback volume.
+- **Mute toggle** — click the speaker icon to mute and unmute without losing your volume setting.
 
 ---
 
-## Troubleshooting
+## Leaderboard
 
-### I got logged out
-
-Sessions expire after a period of inactivity. Log back in — your data, profile, and purchases are all stored server-side and are completely safe.
-
-### Numbers on the leaderboard look old
-
-Leaderboard stats are calculated on the server periodically, not in real time. Try:
-1. Refreshing the page (`Ctrl + R` or `Cmd + R`)
-2. Waiting a moment and refreshing again
-3. If the issue persists, contact support
-
-### I am looking at the wrong profile's coins
-
-Each game character has its own separate coin balance. Make sure you have selected the correct profile in the **Profile Selector**. The active profile is shown in the navigation bar.
-
-### Something failed and I do not know why
-
-1. Refresh the page — most transient issues clear up immediately
-2. Check your internet connection
-3. Log out and back in
-4. If it keeps happening, contact support and describe what you were doing when it failed
+The leaderboard at `/app/leaderboard` shows global player rankings. Tabs at the top switch between ranking categories. The top three players in each category are shown on a podium — first place in the center at the highest elevation, second to the left, third to the right. Below the podium, the full ranked list is searchable by player name.
 
 ---
 
-## Tips for Getting the Most out of SMAASH
+## News
 
-1. **Spend a few minutes in Settings** — picking a color theme and background effect that you like makes every page feel better
-2. **Turn off animations if they bother you** — the app works perfectly without them; some people prefer the cleaner, faster feel
-3. **Check News regularly** — important announcements about events and game updates are posted there first
-4. **Use the Profile Selector freely** — if you have multiple characters, switching between them is fast and your progress on each is kept separately
-5. **Bookmark your favorite pages** — the leaderboard, webstore, and news pages are quick to navigate to directly
+The news page at `/app/news` contains announcements, patch notes, and community updates from the team. Posts are organized into categories:
 
----
+- **Major update** — significant new features or content releases.
+- **Minor update** — smaller additions and changes.
+- **Patch** — bug fixes and performance improvements.
+- **Unrelated news** — community events and other information.
 
-## For Admins
+Use the category filter on the side of the page to narrow the feed. The search bar finds posts by keyword across titles and content. The list loads more entries as you scroll down.
 
-### Admin Panel (`/app/admin`)
-
-The admin panel gives you full user management capability:
-
-- Browse and search all registered users
-- View any user's full profile details, account status, and game profiles
-- **Ban** a user — choose a duration (preset or custom date range) and an optional reason
-- **Unban** a user at any time
-- **Promote** a user to Support or Admin role
-- **Demote** a user back to a lower role
-
-### Debug Dashboard (`/app/debug`)
-
-A comprehensive internal toolbox for diagnosing issues and managing platform data:
-
-- **System** — runtime state and diagnostics
-- **Endpoints** — manually fire any API request and inspect the response
-- **Cache** — inspect and invalidate the React Query cache in real time
-- **Game Data** — create, edit, and delete characters, levels, and items; manage users with moderation actions
-- **Visual** — toggle layout overlays, FPS counter, element inspector, CSS variable viewer, and more
-- **Emulation** — simulate different devices and network conditions for testing
-- **Diagnostics** — accessibility contrast checker, render counts, z-index inspector
-- **Database** — browse and edit all platform resources (users, profiles, items, characters, levels, categories, rarities, purchases, roles, posts, stats) from a single data browser interface
-
-Some database operations may not be available yet if the backend endpoint has not been implemented — these are marked in the interface.
+Accounts with the **admin or support role** see create, edit, and delete controls next to each post. Regular user accounts see the feed in read-only mode.
 
 ---
 
-## Need Help?
+## Webstore
 
-- **Something is not working?** Try refreshing the page first — it clears the majority of transient issues. If that does not help, contact your admin or support team.
-- **Found a bug or have feedback?** Report it to support or the admin team, ideally with a short description of what you did and what happened.
-- **Performance issues?** Try disabling animations in Settings. This significantly reduces CPU and GPU usage, especially on mobile devices and older hardware.
+The webstore at `/app/webstore` shows items purchasable with the coins belonging to your currently active profile.
+
+Each item card shows:
+- Name and description
+- Price in coins
+- A colored **rarity label** (color-coded so you can recognize tiers at a glance):
+
+| Rarity | Label Color |
+|---|---|
+| Common | Gray |
+| Uncommon | Green |
+| Rare | Blue |
+| Epic | Purple |
+| Legendary | Gold |
+
+### Filtering and Searching
+
+Use the filter bar to narrow items by **rarity** or **category**. Use the search box to find an item by name.
+
+### Purchasing
+
+Click the purchase button on an item card. The transaction deducts coins from your active profile's balance.
+
+Items you **already own** show an "Owned" indicator instead of a purchase button. Items that cost more coins than your active profile holds show a disabled purchase button. The coin balance displayed is tied to your currently active profile — switching profiles changes the available balance and the ownership indicators.
+
+---
+
+## Settings
+
+The settings page at `/app/settings` controls how the application looks and behaves. All settings are saved in your browser and persist across sessions.
+
+### Themes
+
+There are 18 preset themes. Each sets a three-point color gradient across the background and optionally activates a matching animated background:
+
+| Theme | Animation |
+|---|---|
+| Azure | — |
+| Slate | Storm |
+| Emerald | Sakura |
+| Amethyst | Lava Lamp |
+| Coral | — |
+| Sunset | Sakura |
+| Ocean | Fishtank |
+| Lavender | Aurora |
+| Midnight | Deep Space |
+| Fire | Lava Lamp |
+| Aurora | Aurora |
+| Neon Noir | Synthwave |
+| Rose Gold | Sakura |
+| Monsoon | Puddle Ripples |
+| Nebula | Particle Web |
+| Abyss | Bioluminescence |
+| Starmap | Constellation |
+| Void | Void |
+
+Selecting a theme changes the gradient colors and switches the animated background to match, unless you have set an animation override.
+
+### Custom Colors
+
+Below the theme presets, three color pickers let you set the left, middle, and right gradient stops independently. Changes take effect immediately without requiring a theme selection.
+
+### Animation Override
+
+The animation override decouples the background animation from the theme. Options:
+
+- **Theme default** — the animation follows the selected theme.
+- **A specific animation** — one of the 12 animations plays regardless of the theme.
+- **None** — the background animation is disabled; the gradient colors still display.
+- **Custom (Effect Mix)** — multiple animations run simultaneously as independent layers.
+
+### Effect Mix
+
+The Effect Mix dialog (available when the override is set to Custom) lets you layer multiple background animations at the same time. Each of the 12 animations can be individually enabled or disabled. Each animation also exposes its own set of toggleable sub-effects:
+
+| Animation | Sub-effects |
+|---|---|
+| Fishtank | Fish, Bubbles, Seaweed, Caustics, Light shafts |
+| Deep Space | (full effect) |
+| Aurora | (full effect) |
+| Lava Lamp | (full effect) |
+| Synthwave | (full effect) |
+| Sakura | (full effect) |
+| Storm | Rain, Lightning, Clouds, Ground shimmer |
+| Particle Web | (full effect) |
+| Puddle Ripples | (full effect) |
+| Bioluminescence | (full effect) |
+| Constellation | (full effect) |
+| Void | (full effect) |
+
+Only enabled animations with at least one enabled sub-effect are rendered.
+
+### Animations Toggle
+
+Turns all motion on or off globally. When disabled:
+- Background animations freeze in place (they do not disappear, but stop moving).
+- Page transition effects are skipped — content appears instantly.
+- All `motion/react` component animations are suppressed.
+
+This is useful on low-powered devices or for users who prefer reduced motion.
+
+### Liquid Glass
+
+Switches the visual style of panels and cards between a **frosted-glass** look (blurred, semi-transparent backgrounds using `backdrop-blur`) and a **solid background** style. The frosted glass effect requires a browser that supports `backdrop-filter`. Enabling this also forces all text to white regardless of the Dark Mode setting.
+
+### Dark Mode
+
+Switches the surface and text colors to a dark palette. Dark Mode operates independently of the theme gradient — any theme can be used in either light or dark mode. When Liquid Glass is also enabled, Dark Mode adjusts the opacity and blur values of the glass surfaces.
+
+### Language
+
+Switches between English and Hungarian. The change takes effect immediately across the entire application — all labels, buttons, navigation items, error messages, and page content switch at once. The language choice is saved in your browser.
+
+---
+
+## Your Account
+
+The profile page at `/app/profile` is where you manage your account credentials and game profiles.
+
+### Changing Your Email
+
+Enter a new email address in the email section and confirm. The change takes effect immediately; the navbar reflects the new email on the next page load.
+
+### Changing Your Password
+
+Password changes require your current security key — the one issued to you at signup or the most recent one issued after a password reset. Enter your key and new password, then submit. On success you receive a new security key. Save it; the previous key is immediately invalidated.
+
+### Security Key Banner
+
+A banner appears the first time you visit the profile page after signing up to remind you to save your security key. Once you confirm you have seen it, the banner does not appear again in any future session.
+
+---
+
+## Navigation
+
+The navigation bar at the top of every page links to all sections of the application. On small screens it collapses into a compact menu opened by a button. The navbar hides automatically when you scroll down past the top of the page and reappears when you scroll up.
+
+Your active profile's picture appears in the top-right corner. Clicking it opens a dropdown with links to your profile page, your settings, and a logout button.
+
+Admin accounts also see links to the **Admin Panel** and **Debug Dashboard** in the navigation bar.
+
+---
+
+## Admin Panel
+
+The admin panel at `/app/admin` is accessible only to accounts with the **admin role**.
+
+It shows a searchable list of all registered users. Selecting a user opens their full record: email address, account role, ban status (with expiry if applicable), and all their game profiles.
+
+From the user detail view you can:
+
+- **Ban** — disable the account for a preset or custom duration. Preset options: 1 day, 1 week, 1 month, permanent. A permanent ban is set as a very long expiry on the backend. Custom banning lets you pick any end date.
+- **Unban** — remove an active ban and immediately restore access.
+- **Promote** — elevate the account to the support or admin role.
+- **Demote** — return the account to the base user role.
+
+---
+
+## Debug Dashboard
+
+The debug dashboard at `/app/debug` is accessible only to **admin accounts**.
+
+It is organized into tabs:
+
+- **Stats** — live data from the stats API: top purchased items, top players by coin balance and match count, top played levels, and leaderboard rankings.
+- **Characters** — browse, create, rename, and delete game characters.
+- **Levels** — browse, create, rename, and delete game levels.
+- **Profiles** — browse all player profiles (up to 200), edit display names and coin balances, delete profiles.
+- **Purchases** — browse all purchase records, create new purchase records, edit or delete existing ones.
+- **Roles** — browse, create, rename, and delete user roles.
+- **Categories** — browse, create, rename, and delete item categories.
+- **Rarities** — browse, create, rename, and delete item rarity tiers.
+- **Posts** — browse news posts (id and timestamps); create or update posts.
+- **Users** — update a user's email address; delete a user account (cascades to all their profiles and purchases).
+
+The debug dashboard also provides UI debug overlays (available in the development build only): layout borders, breakpoint badge, FPS counter, scroll position indicator, click target checker, Z-index inspector, and element inspector. These are toggled in the Debug Settings section of the dashboard.
+
+---
+
+## Logging Out
+
+Click your profile picture in the top-right corner, then select "Log out" from the dropdown. Your session ends immediately, all application state is cleared from memory, and you are returned to the login page.

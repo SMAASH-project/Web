@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { StyledSelect } from "@/components/ui/styled-select";
 import { useSettings } from "@/pages/settings/SettingsContext";
-import { SquarePen, Loader2, Upload, X, ImageOff } from "lucide-react";
+import { SquarePen, Loader2, Upload, X, ImageOff, Crop } from "lucide-react";
 import {
   getButtonClasses,
   getInputClasses,
@@ -71,6 +71,7 @@ export function EditItemDialog({ item, onUpdate, isLoading = false }: EditItemDi
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [cropOpen, setCropOpen] = useState(false);
+  const [originalNewImageFile, setOriginalNewImageFile] = useState<File | null>(null);
 
   const buttonClass = getButtonClasses(settings.useLiquidGlass, settings.useDarkMode);
   const inputClass = getInputClasses(settings.useLiquidGlass, settings.useDarkMode);
@@ -89,10 +90,20 @@ export function EditItemDialog({ item, onUpdate, isLoading = false }: EditItemDi
     const file = e.target.files?.[0];
     if (!file) return;
     if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) return;
+    setOriginalNewImageFile(file);
     setCropFile(file);
     setCropOpen(true);
-    // Reset so the same file can be re-selected after cancel
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleRecrop = () => {
+    if (!originalNewImageFile) return;
+    setCropFile(
+      new File([originalNewImageFile], originalNewImageFile.name, {
+        type: originalNewImageFile.type,
+      }),
+    );
+    setCropOpen(true);
   };
 
   const handleCropApply = (croppedFile: File) => {
@@ -110,6 +121,7 @@ export function EditItemDialog({ item, onUpdate, isLoading = false }: EditItemDi
 
   const clearNewImage = () => {
     setNewImageFile(null);
+    setOriginalNewImageFile(null);
     if (newImagePreview) {
       URL.revokeObjectURL(newImagePreview);
       setNewImagePreview(null);
@@ -262,14 +274,14 @@ export function EditItemDialog({ item, onUpdate, isLoading = false }: EditItemDi
               />
               <AnimatePresence mode="wait">
                 {newImagePreview ? (
-                  /* New file chosen — show preview with clear button */
+                  /* New file chosen — show preview with clear and recrop buttons */
                   <motion.div
                     key="new-preview"
                     initial={{ opacity: 0, scale: 0.97 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.97 }}
                     transition={{ duration: 0.2 }}
-                    className="relative h-32 w-full overflow-hidden rounded-lg"
+                    className="relative aspect-video w-full overflow-hidden rounded-lg"
                   >
                     <img
                       src={newImagePreview}
@@ -283,6 +295,16 @@ export function EditItemDialog({ item, onUpdate, isLoading = false }: EditItemDi
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
+                    {originalNewImageFile && (
+                      <button
+                        type="button"
+                        onClick={handleRecrop}
+                        title="Recrop"
+                        className="absolute right-1.5 bottom-1.5 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
+                      >
+                        <Crop className="h-3.5 w-3.5" />
+                      </button>
+                    )}
                   </motion.div>
                 ) : showCurrentImage ? (
                   /* Existing server image — show it with a replace button */
@@ -292,7 +314,7 @@ export function EditItemDialog({ item, onUpdate, isLoading = false }: EditItemDi
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.97 }}
                     transition={{ duration: 0.2 }}
-                    className="relative h-32 w-full overflow-hidden rounded-lg"
+                    className="relative aspect-video w-full overflow-hidden rounded-lg"
                   >
                     <img
                       src={`/api/characters/${item.id}/img`}

@@ -28,7 +28,7 @@ import {
   getButtonClasses,
 } from "@/lib/utils";
 import { ImageCropDialog } from "@/components/ImageCropDialog";
-import { Upload, X } from "lucide-react";
+import { Upload, X, Crop } from "lucide-react";
 
 interface AddNewProfileProps {
   open: boolean;
@@ -79,6 +79,7 @@ export function AddNewProfileDialog({ open, onOpenChange }: AddNewProfileProps) 
 
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState<string | null>(null);
+  const [originalProfilePicture, setOriginalProfilePicture] = useState<File | null>(null);
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [cropOpen, setCropOpen] = useState(false);
   const profilePictureInputRef = useRef<HTMLInputElement>(null);
@@ -86,9 +87,20 @@ export function AddNewProfileDialog({ open, onOpenChange }: AddNewProfileProps) 
   const handleProfilePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setOriginalProfilePicture(file);
     setCropFile(file);
     setCropOpen(true);
     if (profilePictureInputRef.current) profilePictureInputRef.current.value = "";
+  };
+
+  const handleRecrop = () => {
+    if (!originalProfilePicture) return;
+    setCropFile(
+      new File([originalProfilePicture], originalProfilePicture.name, {
+        type: originalProfilePicture.type,
+      }),
+    );
+    setCropOpen(true);
   };
 
   const handleCropApply = (croppedFile: File) => {
@@ -106,6 +118,7 @@ export function AddNewProfileDialog({ open, onOpenChange }: AddNewProfileProps) 
 
   const clearProfilePicture = () => {
     setProfilePicture(null);
+    setOriginalProfilePicture(null);
     if (profilePicturePreview) {
       URL.revokeObjectURL(profilePicturePreview);
       setProfilePicturePreview(null);
@@ -226,26 +239,42 @@ export function AddNewProfileDialog({ open, onOpenChange }: AddNewProfileProps) 
                   onChange={handleProfilePictureChange}
                 />
                 {profilePicturePreview ? (
-                  <div className="relative h-24 w-24 self-center overflow-hidden rounded-full">
-                    <img
-                      src={profilePicturePreview}
-                      alt="profile preview"
-                      className="h-full w-full object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={clearProfilePicture}
-                      className="absolute top-0.5 right-0.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => profilePictureInputRef.current?.click()}
-                      className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-0.5 rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100"
-                    >
-                      <Upload className="h-4 w-4 text-white" />
-                    </button>
+                  <div className="relative self-center">
+                    {/* Circle image — overflow-hidden only on the image wrapper, not on buttons */}
+                    <div className="relative h-24 w-24">
+                      <div className="h-24 w-24 overflow-hidden rounded-full">
+                        <img
+                          src={profilePicturePreview}
+                          alt="profile preview"
+                          className="h-full w-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => profilePictureInputRef.current?.click()}
+                          className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-0.5 rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100"
+                        >
+                          <Upload className="h-4 w-4 text-white" />
+                        </button>
+                      </div>
+                      {/* X button sits outside overflow-hidden so it's never clipped */}
+                      <button
+                        type="button"
+                        onClick={clearProfilePicture}
+                        className="absolute -top-1.5 -right-1.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white shadow transition-colors hover:bg-red-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                    {originalProfilePicture && (
+                      <button
+                        type="button"
+                        onClick={handleRecrop}
+                        title="Recrop"
+                        className="absolute right-0 bottom-0 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-black/70 text-white transition-colors hover:bg-black/90"
+                      >
+                        <Crop className="h-3.5 w-3.5" />
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <button

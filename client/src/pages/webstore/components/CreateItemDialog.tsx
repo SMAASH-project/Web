@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { StyledSelect } from "@/components/ui/styled-select";
 import { useSettings } from "@/pages/settings/SettingsContext";
-import { Plus, Loader2, Upload, X, ImageOff } from "lucide-react";
+import { Plus, Loader2, Upload, X, ImageOff, Crop } from "lucide-react";
 import {
   getButtonClasses,
   getInputClasses,
@@ -28,6 +28,7 @@ import {
   getBackgroundClasses,
 } from "@/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
+import { AnimatedPress } from "@/animations/AnimatedPress";
 import { ImageCropDialog } from "@/components/ImageCropDialog";
 import {
   RARITIES,
@@ -63,6 +64,7 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [cropOpen, setCropOpen] = useState(false);
+  const [originalImageFile, setOriginalImageFile] = useState<File | null>(null);
 
   const { t } = useTranslation("webstore");
   const buttonClass = getButtonClasses(settings.useLiquidGlass, settings.useDarkMode);
@@ -78,10 +80,18 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
     const file = e.target.files?.[0];
     if (!file) return;
     if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) return;
+    setOriginalImageFile(file);
     setCropFile(file);
     setCropOpen(true);
-    // Reset so the same file can be re-selected after cancel
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleRecrop = () => {
+    if (!originalImageFile) return;
+    setCropFile(
+      new File([originalImageFile], originalImageFile.name, { type: originalImageFile.type }),
+    );
+    setCropOpen(true);
   };
 
   const handleCropApply = (croppedFile: File) => {
@@ -99,6 +109,7 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
 
   const clearImage = () => {
     setImageFile(null);
+    setOriginalImageFile(null);
     if (imagePreview) {
       URL.revokeObjectURL(imagePreview);
       setImagePreview(null);
@@ -143,12 +154,14 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
           if (!v) reset();
         }}
       >
-        <DialogTrigger asChild>
-          <Button size="sm" className={`cursor-pointer gap-2 ${buttonClass} ${textShadow}`}>
-            <Plus className="h-4 w-4" />
-            <span className="text-sm font-medium">{t("create.triggerButton")}</span>
-          </Button>
-        </DialogTrigger>
+        <AnimatedPress>
+          <DialogTrigger asChild>
+            <Button size="sm" className={`cursor-pointer gap-2 ${buttonClass} ${textShadow}`}>
+              <Plus className="h-4 w-4" />
+              <span className="text-sm font-medium">{t("create.triggerButton")}</span>
+            </Button>
+          </DialogTrigger>
+        </AnimatedPress>
 
         <DialogContent
           className={`${dialogClass} ${textShadow}`}
@@ -254,7 +267,7 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.97 }}
                     transition={{ duration: 0.2 }}
-                    className="relative h-32 w-full overflow-hidden rounded-lg"
+                    className="relative aspect-video w-full overflow-hidden rounded-lg"
                   >
                     <img src={imagePreview} alt="preview" className="h-full w-full object-cover" />
                     <button
@@ -264,6 +277,16 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
+                    {originalImageFile && (
+                      <button
+                        type="button"
+                        onClick={handleRecrop}
+                        title="Recrop"
+                        className="absolute right-1.5 bottom-1.5 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
+                      >
+                        <Crop className="h-3.5 w-3.5" />
+                      </button>
+                    )}
                   </motion.div>
                 ) : (
                   <motion.button
@@ -288,25 +311,29 @@ export function CreateItemDialog({ onCreate, isLoading = false }: CreateItemDial
           </FieldGroup>
 
           <DialogFooter className={footerClass}>
-            <DialogClose asChild>
-              <Button variant="outline" className={`cursor-pointer ${buttonClass} ${textShadow}`}>
-                {t("create.cancel")}
+            <AnimatedPress>
+              <DialogClose asChild>
+                <Button variant="outline" className={`cursor-pointer ${buttonClass} ${textShadow}`}>
+                  {t("create.cancel")}
+                </Button>
+              </DialogClose>
+            </AnimatedPress>
+            <AnimatedPress>
+              <Button
+                onClick={handleSubmit}
+                disabled={!isFormValid || isLoading}
+                className={`cursor-pointer ${buttonClass} ${textShadow}`}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {t("create.creating")}
+                  </>
+                ) : (
+                  t("create.submit")
+                )}
               </Button>
-            </DialogClose>
-            <Button
-              onClick={handleSubmit}
-              disabled={!isFormValid || isLoading}
-              className={`cursor-pointer ${buttonClass} ${textShadow}`}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {t("create.creating")}
-                </>
-              ) : (
-                t("create.submit")
-              )}
-            </Button>
+            </AnimatedPress>
           </DialogFooter>
         </DialogContent>
       </Dialog>

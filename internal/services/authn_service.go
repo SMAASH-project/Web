@@ -16,7 +16,7 @@ import (
 type Authentication interface {
 	SignUp(context.Context, *models.User) (*string, error)
 	Login(context.Context, *models.User) (*string, *models.User, error)
-	ChangePassword(context.Context, uint, string, string) (*string, error)
+	ChangePassword(context.Context, string, string, string) (*string, error)
 }
 
 type AuthenticationService struct {
@@ -101,8 +101,8 @@ func (a AuthenticationService) Login(c context.Context, u *models.User) (*string
 	return &tokenString, &user, nil
 }
 
-func (a AuthenticationService) ChangePassword(c context.Context, userID uint, newPass string, securityKey string) (*string, error) {
-	user, err := a.userRepo.ReadByID(c, userID)
+func (a AuthenticationService) ChangePassword(c context.Context, email string, newPass string, securityKey string) (*string, error) {
+	user, err := a.userRepo.ReadByEmail(c, email)
 	if err != nil {
 		return nil, err
 	}

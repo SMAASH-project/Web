@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 	dtos "smaash-web/internal/DTOs"
-	"smaash-web/internal/middlewares"
 	"smaash-web/internal/repository"
 	"smaash-web/internal/services"
 
@@ -148,7 +147,7 @@ func (a AuthnController) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	newKey, err := a.authService.ChangePassword(c.Request.Context(), body.ID, body.NewPassword, body.SecurityKey)
+	newKey, err := a.authService.ChangePassword(c.Request.Context(), body.Email, body.NewPassword, body.SecurityKey)
 	if err != nil {
 		if errors.Is(err, services.ErrSecurityKeyInvalid) {
 			c.JSON(http.StatusUnauthorized, dtos.NewErrResp(err.Error(), path))
@@ -172,5 +171,5 @@ func (a AuthnController) MountRoutes(apiGroup *gin.RouterGroup) {
 	auth.POST("/signup", a.SignUp)
 	auth.POST("/login", a.Login)
 	auth.POST("/logout", a.Logout)
-	auth.PUT("/change-password", middlewares.Authorize(middlewares.ANY), a.ChangePassword)
+	auth.PUT("/change-password", a.ChangePassword)
 }
