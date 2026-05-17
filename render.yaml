@@ -19,7 +19,7 @@ services:
       - key: DB_URL
         value: /var/data/test.db
       - key: UPLOAD_DIR
-        value: /var/data/pfps
+        value: /var/data/uploads
       - key: SEED_DATA_URI
         value: ./internal/seeder/test_source
   - type: web
