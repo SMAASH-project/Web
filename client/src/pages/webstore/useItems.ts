@@ -100,7 +100,7 @@ export function useItems() {
   // Build a set of owned character IDs
   const ownedIds = useMemo(() => new Set(ownedCharacters.map((c) => c.id)), [ownedCharacters]);
 
-  console.log("fetched items: ", fetchedItems)
+  console.log("fetched items: ", fetchedItems);
 
   // Merge ownership into items
   const allItems = useMemo(

@@ -269,7 +269,11 @@ export function UpdateSheet({ open: controlledOpen, onOpenChange }: UpdateSheetP
           <SheetFooter className="flex flex-row justify-end gap-2 px-6 py-4">
             <AnimatedPress>
               <SheetClose asChild>
-                <Button variant="outline" className={cn(buttonClass, textColor)} disabled={isSaving}>
+                <Button
+                  variant="outline"
+                  className={cn(buttonClass, textColor)}
+                  disabled={isSaving}
+                >
                   {t("sheet.cancel")}
                 </Button>
               </SheetClose>

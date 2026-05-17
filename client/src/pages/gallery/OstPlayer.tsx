@@ -1,6 +1,17 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, use } from "react";
 import { useTranslation } from "react-i18next";
-import { Music2, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Download } from "lucide-react";
+import {
+  Music2,
+  Play,
+  Pause,
+  SkipBack,
+  SkipForward,
+  Volume2,
+  VolumeX,
+  Download,
+  Repeat,
+  Repeat1,
+} from "lucide-react";
 import { OST_TRACKS } from "./ostTracks";
 
 function formatTime(sec: number): string {
@@ -36,6 +47,7 @@ export function OstPlayer({
   const [volume, setVolume] = useState(0.8);
   const [muted, setMuted] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [loop, setLoop] = useState(false);
 
   const track = OST_TRACKS[currentIdx] ?? null;
 
@@ -47,7 +59,10 @@ export function OstPlayer({
     };
     const onDur = () => setDuration(audio.duration || 0);
     const onEnd = () => {
-      if (currentIdx < OST_TRACKS.length - 1) {
+      if (loop) {
+        audio.currentTime = 0;
+        audio.play();
+      } else if (currentIdx < OST_TRACKS.length - 1) {
         setCurrentIdx((i) => i + 1);
       } else {
         setIsPlaying(false);
@@ -62,7 +77,7 @@ export function OstPlayer({
       audio.removeEventListener("durationchange", onDur);
       audio.removeEventListener("ended", onEnd);
     };
-  }, [currentIdx, isDragging]);
+  }, [currentIdx, isDragging, loop]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -84,10 +99,15 @@ export function OstPlayer({
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = muted ? 0 : volume;
+      audioRef.current.loop = loop;
     }
-  }, [volume, muted]);
+  }, [volume, muted, loop]);
 
   const togglePlay = useCallback(() => setIsPlaying((p) => !p), []);
+
+  const toggleLoop = useCallback(() => {
+    setLoop((l) => !l);
+  }, []);
 
   const prev = useCallback(() => {
     setCurrentIdx((i) => Math.max(0, i - 1));
@@ -224,36 +244,49 @@ export function OstPlayer({
         </div>
 
         {/* Controls */}
-        <div className="flex items-center justify-center gap-2">
-          <button className={controlBtn} onClick={prev} disabled={currentIdx === 0}>
-            <SkipBack size={18} className={currentIdx === 0 ? "opacity-30" : textColor} />
-          </button>
-          <button
-            className="cursor-pointer rounded-full bg-amber-500 p-3 text-black shadow-md transition-colors hover:bg-amber-400"
-            onClick={togglePlay}
-          >
-            {isPlaying ? <Pause size={20} /> : <Play size={20} />}
-          </button>
-          <button
-            className={controlBtn}
-            onClick={next}
-            disabled={currentIdx === OST_TRACKS.length - 1}
-          >
-            <SkipForward
-              size={18}
-              className={currentIdx === OST_TRACKS.length - 1 ? "opacity-30" : textColor}
-            />
-          </button>
-          {track && (
-            <a
-              href={track.src}
-              download={`${track.title}.mp3`}
-              className={`${controlBtn} ${subtextColor}`}
-              title={t("download")}
+        <div className="flex items-center justify-center gap-12">
+          <span className="flex flex-row items-center gap-4">
+            <button className={controlBtn} onClick={toggleLoop}>
+              {loop ? (
+                <Repeat1 size={18} className={textColor} />
+              ) : (
+                <Repeat size={18} className={subtextColor} />
+              )}
+            </button>
+          </span>
+          <span className="flex flex-row items-center gap-4">
+            <button className={controlBtn} onClick={prev} disabled={currentIdx === 0}>
+              <SkipBack size={18} className={currentIdx === 0 ? "opacity-30" : textColor} />
+            </button>
+            <button
+              className="cursor-pointer rounded-full bg-amber-500 p-3 text-black shadow-md transition-colors hover:bg-amber-400"
+              onClick={togglePlay}
             >
-              <Download size={18} />
-            </a>
-          )}
+              {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+            </button>
+            <button
+              className={controlBtn}
+              onClick={next}
+              disabled={currentIdx === OST_TRACKS.length - 1}
+            >
+              <SkipForward
+                size={18}
+                className={currentIdx === OST_TRACKS.length - 1 ? "opacity-30" : textColor}
+              />
+            </button>
+          </span>
+          <span className="items-right flex flex-row gap-4">
+            {track && (
+              <a
+                href={track.src}
+                download={`${track.title}.mp3`}
+                className={`${controlBtn} ${subtextColor}`}
+                title={t("download")}
+              >
+                <Download size={18} />
+              </a>
+            )}
+          </span>
         </div>
 
         {/* Volume */}
@@ -323,11 +356,11 @@ export function OstPlayer({
                 className={`shrink-0 rounded-full p-1.5 transition-colors ${
                   useLiquidGlass
                     ? useDarkMode
-                      ? "hover:bg-white/15 text-white/50 hover:text-white/80"
-                      : "hover:bg-black/10 text-black/40 hover:text-black/70"
+                      ? "text-white/50 hover:bg-white/15 hover:text-white/80"
+                      : "text-black/40 hover:bg-black/10 hover:text-black/70"
                     : useDarkMode
-                      ? "hover:bg-gray-700 text-gray-500 hover:text-gray-300"
-                      : "hover:bg-gray-100 text-gray-400 hover:text-gray-600"
+                      ? "text-gray-500 hover:bg-gray-700 hover:text-gray-300"
+                      : "text-gray-400 hover:bg-gray-100 hover:text-gray-600"
                 }`}
                 title={`Download ${tr.title}`}
               >
