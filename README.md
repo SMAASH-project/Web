@@ -227,7 +227,4 @@ The repo utilizes a GitHub action for a CI pipeline. On every push or pull reque
 
 To build the project, run `just build-fullstack` to build both the frontend and the backend. The result is the contents of the build folder, which contains the binary executalbe of the app, and in the client folder, the static assets it serves.
 
-> [!NOTE]
-> Explicit cross compilation is not yet supported, it is on our agenda.
-
-Deploy the contents of the build folder by any means you like
+The website is deployed on [render.com](render.com), a free web hosting service. You can find the url of the deplozed website under the deployments tab. The process of deployment is fully automated and happens every time a commit is pushed to the deployment branch.
