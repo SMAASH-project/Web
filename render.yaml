@@ -2,7 +2,7 @@ services:
   - type: web
     name: smaash-web
     runtime: go
-    branch: test
+    branch: main
     rootDir: .
     region: frankfurt
     plan: starter
