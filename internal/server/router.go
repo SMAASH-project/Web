@@ -1,7 +1,6 @@
 package server
 
 import (
-	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -37,12 +36,12 @@ func (s *Server) MountRoutes() *Server {
 		allowedOrigins[i] = strings.TrimSpace(allowedOrigins[i])
 	}
 
-	requestLogger := slog.New(slog.NewJSONHandler(io.MultiWriter(&lumberjack.Logger{
+	requestLogger := slog.New(slog.NewJSONHandler(&lumberjack.Logger{
 		Filename:   "./logs/gin.log",
 		MaxSize:    100,
 		MaxAge:     30,
 		MaxBackups: 5,
-	}, os.Stdout), nil))
+	}, nil))
 
 	r := gin.Default()
 	r.Use(middlewares.Logger(requestLogger))
