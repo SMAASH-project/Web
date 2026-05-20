@@ -5,6 +5,7 @@
 
 This here repository contains the web app that goes along with the Unity game for our professional exam, written in Go with a TypeScript React frontend.
 
+
 ## Getting Started
 
 This section details how to get the source of project on your local machine to develop or test. For notes on how to deploy, see the [deployment](#deployment) section of this document.
