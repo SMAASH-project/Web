@@ -1,5 +1,6 @@
 # Project smaash-web
 
+
 <img src="client/src/assets/SlimeArt.png" width=256 align="left">
 
 This here repository contains the web app that goes along with the Unity game for our professional exam, written in Go with a TypeScript React frontend.
