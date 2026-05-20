@@ -29,7 +29,7 @@
     "RarityID": 3,
     "Price": 50,
     "Implemented": false,
-    "ImgURI": "./assets/characters/HeroKnight.jpg",
+    "ImgURI": "./assets/characters/HeroKnight.png",
     "Categories": [
       "Character",
       "Melee"
@@ -41,7 +41,7 @@
     "RarityID": 4,
     "Price": 100,
     "Implemented": false,
-    "ImgURI": "./assets/characters/LightBandit.jpg",
+    "ImgURI": "./assets/characters/LightBandit.png",
     "Categories": [
       "Character",
       "Melee"
