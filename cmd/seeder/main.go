@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"os"
 	"smaash-web/internal/seeder"
 	"time"
@@ -21,6 +22,7 @@ func main() {
 	}
 
 	db_url := os.Getenv("DB_URL")
+	log.Println("db_url: ", db_url)
 	if db_url == "" {
 		db_url = "test.db"
 	}

@@ -2,20 +2,24 @@ services:
   - type: web
     name: smaash-web
     runtime: go
-    branch: test
+    branch: main
     rootDir: .
     region: frankfurt
-    plan: free
+    plan: starter
     autoDeployTrigger: commit
     buildCommand: cd client && npm ci && npm run build && cd .. && mkdir -p build && go build -o ./build/main ./cmd/api/main.go && go build -o ./build/seeder ./cmd/seeder/main.go
     startCommand: ./build/seeder && ./build/main
+    disk:
+      name: smaash-data-disk
+      mountPath: /var/data
+      sizeGB: 5
     envVars:
       - key: SECRET_KEY
         generateValue: true
       - key: DB_URL
-        value: test.db
+        value: /var/data/test.db
       - key: UPLOAD_DIR
-        value: ./uploads/pfps
+        value: /var/data/uploads
       - key: SEED_DATA_URI
         value: ./internal/seeder/test_source
   - type: web

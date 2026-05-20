@@ -5,8 +5,11 @@
     "RarityID": 1,
     "Price": 0,
     "Implemented": true,
-    "ImgURI": "/characters/samurai.png",
-    "Categories": ["Character", "Melee"]
+    "ImgURI": "./assets/characters/Samurai.png",
+    "Categories": [
+      "Character",
+      "Melee"
+    ]
   },
   {
     "Name": "Slime",
@@ -14,8 +17,11 @@
     "RarityID": 1,
     "Price": 0,
     "Implemented": true,
-    "ImgURI": "/characters/slime.png",
-    "Categories": ["Character", "Ranged"]
+    "ImgURI": "./assets/characters/SlimeArtTransparent.png",
+    "Categories": [
+      "Character",
+      "Ranged"
+    ]
   },
   {
     "Name": "Knight",
@@ -23,8 +29,11 @@
     "RarityID": 3,
     "Price": 50,
     "Implemented": false,
-    "ImgURI": "/characters/knight.png",
-    "Categories": ["Character", "Melee"]
+    "ImgURI": "./assets/characters/HeroKnight.png",
+    "Categories": [
+      "Character",
+      "Melee"
+    ]
   },
   {
     "Name": "Bandit",
@@ -32,7 +41,10 @@
     "RarityID": 4,
     "Price": 100,
     "Implemented": false,
-    "ImgURI": "/characters/bandit.png",
-    "Categories": ["Character", "Melee"]
+    "ImgURI": "./assets/characters/LightBandit.png",
+    "Categories": [
+      "Character",
+      "Melee"
+    ]
   }
 ]

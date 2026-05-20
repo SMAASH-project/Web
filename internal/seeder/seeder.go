@@ -67,7 +67,7 @@ func (sm *SeederManager) Seed() {
 	if os.Getenv("SQLITE_MODE") == "memory" {
 		sm.db_url = "file::memory:?cache=shared"
 	}
-	if os.Getenv(sm.db_url) == "" {
+	if sm.db_url == "" {
 		sm.db_url = "test.db"
 	}
 	conn, err := gorm.Open(sqlite.Open(sm.db_url), &gorm.Config{Logger: sm.logger, TranslateError: true})
