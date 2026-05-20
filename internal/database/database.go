@@ -1,7 +1,6 @@
 package database
 
 import (
-	"io"
 	"log"
 	"os"
 	"smaash-web/internal/models"
@@ -22,12 +21,12 @@ func NewGormDBConn() *gorm.DB {
 	}
 
 	logger := logger.New(
-		log.New(io.MultiWriter(&lumberjack.Logger{
+		log.New(&lumberjack.Logger{
 			Filename:   "./logs/gorm.log",
 			MaxSize:    100,
 			MaxAge:     30,
 			MaxBackups: 10,
-		}, os.Stdout), "/r/n", log.LstdFlags),
+		}, "/r/n", log.LstdFlags),
 		logger.Config{
 			LogLevel: logger.Info,
 		},
